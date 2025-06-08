@@ -1,0 +1,34 @@
+Combat:
+    [√] Animations
+    [√] Combat type
+    [√] Play Combat
+    [√] Sequence
+    [√] Cooldown
+    [√] Resetting
+    [√] Activating
+
+    [√] Hit detection
+    [√] Track enemies
+    [√] CombatHitDetection
+
+    [√] Turn to
+    [√] LockedInAnimation
+    [√] Knock up
+    [√] Air starter
+    [√] Animation into air (for both user and target)
+    [ ] Knock down
+
+    [ ] Effects
+
+
+
+
+
+
+
+
+
+- cooldown after full combo or stack time ends
+
+
+- there should a be a time to stack max shoould add up to 1 second plusss 
