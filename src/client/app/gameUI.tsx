@@ -1,5 +1,6 @@
 import React, { ReactElement, useEffect, useMemo, useState } from "@rbxts/react";
 import DefaultUIProperties from "./css/defaults/ui";
+import HudPage from "./pages/hudPage";
 
 
 
@@ -11,6 +12,7 @@ export default () => {
 	return (
 		<frame key="GameUI" {...DefaultUIProperties}>
 			{/* <ShopPage /> */}
+			<HudPage />
 		</frame>
 	);
 };

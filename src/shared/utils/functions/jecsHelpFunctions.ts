@@ -1,4 +1,4 @@
-import { Entity, pair, w, Wildcard, World } from "@rbxts/jecs";
+import { Entity, Pair, pair, w, Wildcard, World } from "@rbxts/jecs";
 import * as components from "shared/utils/jecs/jecsComponents";
 import { AlignPosition, CountDown, DestroyAfterCounting, Float, MoveTo, world, ZeroOutVelocity } from "../jecs/jecsComponents";
 import Object, { deepCopy } from "@rbxts/object-utils";
@@ -12,7 +12,10 @@ import { Janitor } from "@rbxts/janitor";
 
 
 const messaging = game.GetService("TestService" as never) as {Message(...message: string[]): void};
-export type ComponentDataFromEntity<E> = E extends Entity<infer T> ? T : never;
+export type ComponentValue<C> =
+    C extends Entity<infer T> ? T :
+    C extends Pair<infer _, infer O> ? O :
+    never;
 export type AllComponentNames = { [K in keyof typeof components]: (typeof components)[K] extends Entity<any> ? K : never }[keyof typeof components];
 export type MappedComponents = { [K in AllComponentNames]: (typeof components)[K] };
 
@@ -271,6 +274,23 @@ export const printTS = (line:number, ...message:unknown[]) => {
     print(...fullName);
 }
 
+// prints the message
+export const warnTS = (line:number, ...message:unknown[]) => {
+    const fullName = [...message] as never[]
+    const scriptPath = getCallerSourceFromTraceback()
+    const sourceScript = scriptPath && getInstanceByName(scriptPath)
+
+    // if debug is disabled then return
+    if (!sourceScript) {
+        warn(`Script not found for line ${line}: ${scriptPath}`);
+        return
+    }
+
+    // prints the message
+    fullName.push( `   -   TypeScript(File) ${sourceScript.Name}:${line}` as never);
+    warn(...fullName);
+}
+
 
 // Fetch local player context
 export interface LocalPlayerContext {
@@ -307,7 +327,7 @@ export function getLocalPlayerContext(player: Player): LocalPlayerContext | unde
 // default props
 export const jecsDefaultProps = {
     
-} satisfies { [componentName in AllComponentNames]?: ComponentDataFromEntity<MappedComponents[componentName]> };
+} satisfies { [componentName in AllComponentNames]?: ComponentValue<MappedComponents[componentName]> };
 type DefaultProps = typeof jecsDefaultProps
 type DefaultPropKeys = keyof DefaultProps;
 // type Switched = ReturnType<<componentName extends AllComponentNames>()=>({[k in MappedComponents[componentName]]:componentName})>;
@@ -315,6 +335,17 @@ type DefaultPropKeys = keyof DefaultProps;
 
 
 // 1) Two-arg only for defaulted components
+export function addComponent<P extends undefined>(
+    entity: Entity,
+    component: Entity<P>,
+): void;
+
+export function addComponent<P, O>(
+    entity: Entity,
+    component: Pair<P, O>,
+    value: P
+): void;
+
 export function addComponent<N extends DefaultPropKeys, D extends MappedComponents[N]>(
     entity: Entity,
     component: D
@@ -324,34 +355,34 @@ export function addComponent<N extends DefaultPropKeys, D extends MappedComponen
   export function addComponent<N extends Exclude<AllComponentNames, DefaultPropKeys>, D extends MappedComponents[N]>(
     entity: Entity,
     component: D,
-    value: ComponentDataFromEntity<D>
+    value: ComponentValue<D>
   ): void
   
   // 3) Three-arg override for defaulted components
-  export function addComponent<N extends DefaultPropKeys, D extends MappedComponents[N]>(
+  export function addComponent<N extends DefaultPropKeys, D extends Entity>(
     entity: Entity,
     component: D,
-    value: ComponentDataFromEntity<D>
+    value: ComponentValue<D>
   ): void
   
   // implementation
   export function addComponent<N extends AllComponentNames, D extends MappedComponents[N]>(
     entity: Entity,
     component: D,
-    value?: ComponentDataFromEntity<D>
+    value?: ComponentValue<D>
   ): void {
     // Determine the component data to use
-    const defaultTable = jecsDefaultProps[MappedComponentsSwitched[component] as DefaultPropKeys] as ComponentDataFromEntity<MappedComponents[N]> | undefined;
+    const defaultTable = jecsDefaultProps[MappedComponentsSwitched[component] as DefaultPropKeys] as ComponentValue<MappedComponents[N]> | undefined;
     const clonedTable = typeIs(defaultTable, "table") && deepCopy(defaultTable);
-    const componentInfo = (value !== undefined ? value : (clonedTable || (jecsDefaultProps[MappedComponentsSwitched[component] as DefaultPropKeys]))) as ComponentDataFromEntity<MappedComponents[N]>;
+    const componentInfo = (value !== undefined ? value : (clonedTable || (jecsDefaultProps[MappedComponentsSwitched[component] as DefaultPropKeys]))) as ComponentValue<MappedComponents[N]>;
 
     // Add the component to the entity
-    world.set(entity, component, componentInfo);
+    world.set(entity, component, componentInfo as never);
 }
 
 
 // removes component
-export function removeComponent<N extends AllComponentNames, C extends MappedComponents[N]>(
+export function removeComponent<N extends AllComponentNames, C extends (MappedComponents[N] | Pair)>(
     entity: Entity,
     ...components: C[]
 ): void {

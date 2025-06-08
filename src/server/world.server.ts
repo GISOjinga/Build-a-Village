@@ -16,6 +16,7 @@ import { Phases, systemQueue } from "shared/utils/jecs/jecsComponents";
 import replicateToClient from "./systems/componentReplication/replicateToClient";
 import watchRoutes from "shared/systems/hooks/watchRoutes";
 import append from "shared/systems/hooks/append";
+import platform from "./systems/builds/platform";
 
 
 // hotReloader.scan(script.Parent!, (context) => { }, (context) => { });
@@ -49,6 +50,9 @@ setupMatter([
     // body
     { system: disableAutoRotate },
     { system: updateBody },
+
+    // builds
+    { system: platform },
 
     // commands
     { system: commanderServer },

@@ -21,7 +21,7 @@ export const switchBodyCollisions = (bodyEntity: Entity, collideWithPlayers: boo
         if (collideWithPlayers) {
             removeComponent(bodyEntity, NoBodyCollisions)
         } else {
-            addComponent(bodyEntity, NoBodyCollisions, true)
+            addComponent(bodyEntity, NoBodyCollisions)
         }
     }
 }

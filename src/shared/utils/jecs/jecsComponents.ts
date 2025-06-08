@@ -19,7 +19,7 @@ export const world = new World()
 export const systemQueue = new Scheduler(world)
 export const hotReloader = new HotReloader()
 world.set(Name, Name, "Name")
-const component = <T = true>(name: string, defaultValue?: T) => {
+const component = <T = undefined>(name: string, defaultValue?: T) => {
     const theComponent = world.component<T>()
 
     // Create a new component with the given name
@@ -47,6 +47,8 @@ export const Debug = component<{ name: string, debug: boolean }>("Debug")
 export const TargetEntity = component<Entity>("TargetEntity");
 export const ReplicatedComponent = component<Entity>("ReplicatedComponent");
 export const TargetReplication = component<{ [key in typeof componentsToReplicate[keyof typeof componentsToReplicate]]?: (Player[]) }>("TargetReplication"); // allows you to specify what players see what components (if it doesnt exist sends to all players)
+export const Platform = component<PlatformExample>("Platform");
+export const PlatformOccupied = component<Entity>("PlatformOccupied");
 
 // a hook to watch for a route to be called
 export const RouteEntities = new Map<packet<ByteNetType<unknown>>, Entity>()
@@ -55,11 +57,11 @@ export const RouteEntities = new Map<packet<ByteNetType<unknown>>, Entity>()
 
 // setting name
 export const Settings = component("Settings")
-const createSetting = <T = true>(name: string, defaultValue?: T) => {
+const createSetting = <T = undefined>(name: string, defaultValue?: T) => {
     const theComponent = component<T>(name, defaultValue)
 
     // Create a new component with the given name
-    world.set(theComponent, Settings, true)
+    world.set(theComponent, Settings, undefined)
 
     // returns it
     return theComponent

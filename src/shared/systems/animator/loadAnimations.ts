@@ -1,4 +1,5 @@
 import { Entity, World } from "@rbxts/jecs";
+import { addComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -44,7 +45,7 @@ export default (world: World) => {
                     task.wait(.01)
                     loadedAnimation.Stop()
                     totalToLoad--
-                    if (totalToLoad <= 0) world.set(entity, LoadedAnimations, true)
+                    if (totalToLoad <= 0) addComponent(entity, LoadedAnimations)
                 })
 
                 // saves the animation
@@ -57,7 +58,7 @@ export default (world: World) => {
         })
 
         // saves it to the entity
-        world.set(entity, LoadingAnimations, true)
+        addComponent(entity, LoadingAnimations)
         savedAnimationTracks.set(animator, animations)
     }
 }

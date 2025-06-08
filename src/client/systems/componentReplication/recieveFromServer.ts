@@ -17,7 +17,7 @@ import { createDebugger } from "shared/utils/functions/matterFunctions" // Utili
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
-import { ComponentDataFromEntity, createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions"
+import { ComponentValue, createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"

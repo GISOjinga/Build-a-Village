@@ -91,7 +91,6 @@ export function NewElasticButton(props: Partial<WritableInstanceProperties<Image
 
                 InputEnded: props.tween.onlyHover ? undefined : (_, input) => {
                     if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch) {
-                        motionSize.set(expandedSize)
                         motionSize.tween(realSize, tweenInfo)
                         // props.events?.activated?.()
                     }

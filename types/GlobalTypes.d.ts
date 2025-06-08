@@ -118,31 +118,5 @@ type IpConfigResponse = {
     zip_code: string;
 }
 
-//* mission rank names
-type MissionRanks = "D" | "A" | "C" | "B" | "S" | "SS"
-
-//* leveling ranks
-type LevelingRanks = "E" | "D" | "C" | "B" | "A" | "S"
-
-//* leveling data
-type LevelingData = {
-    rank: LevelingRanks,
-    points: number,
-}
-
-//* leader board ranks
-type LeaderBoardRanks = "D" | "A" | "C" | "B" | "S" | "SS" | "SSS" | "Z"
-
-//* ranked mode types
-type RankedModesType = "TwoVTwo" | "OneVOne"
-
-//* leader board data
-type LeaderBoardData = {
-    name: string,
-    rank: LeaderBoardRanks,
-    games: number,
-    wins: number,
-    losses: number,
-    streak: number,
-    points: number,
-}
+//* different fence names
+type FenceNames = keyof Omit<PlatformExample["Fences"], keyof Model>

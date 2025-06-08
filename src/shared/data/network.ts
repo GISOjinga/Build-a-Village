@@ -4,7 +4,7 @@ import { EventLike } from "@rbxts/planck/out/types";
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
-import { AllComponentNames, ComponentDataFromEntity, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
+import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
 
@@ -38,6 +38,15 @@ const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
 
     return {
+        // teleport to your village
+        teleportToVillage: definePacket({
+            value: ByteNet.nothing
+        }),
+
+        // teleport to buy or sell
+        teleportToShop: definePacket({
+            value: ByteNet.string as ByteNetType<"Buy" | "Sell">
+        }),
 
         // route to get replicated components
         getReplicatedComponents: definePacket({ value: ByteNet.nothing }),
@@ -57,7 +66,7 @@ const packets = defineNamespace("gameEvents", () => {
             }),
         } satisfies { [k in keyof typeof componentsToReplicate]: packet<struct<{
             serverEntity: ByteNetType<Entity>,
-            data: optional<MapTableToByteNet<ComponentDataFromEntity<MappedComponents[k]>>>
+            data: optional<MapTableToByteNet<ComponentValue<MappedComponents[k]>>>
         }>> },
 
         // for replicating player state

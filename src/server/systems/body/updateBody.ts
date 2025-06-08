@@ -1,5 +1,5 @@
 import ByteNet from "@rbxts/bytenet-fixed";
-import { Entity, World } from "@rbxts/jecs";
+import { Entity, pair, World } from "@rbxts/jecs";
 import { useMemo } from "@rbxts/react";
 import { Debris, Players, Workspace } from "@rbxts/services";
 import { routes } from "shared/data/network";
@@ -7,7 +7,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getCharacterParts } from "shared/utils/functions/characterFunctions";
 import { addComponent, getEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed, Platform } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { createInitialPlayerState } from "shared/utils/PlayerState";
 
@@ -119,6 +119,29 @@ export default (world: World) => {
             if (child.IsA("BasePart")) child.CollisionGroup = "Characters";
         });
     }
+
+
+    // use route watching for village teleport
+    useRoute(routes.teleportToVillage, (_, player) => {
+        const entity = getEntity.fromInstance(player);
+        const body = entity && world.get(entity, Body);
+        const platformEntity = entity && world.get(entity, pair(TargetEntity, Platform));
+        const platform = platformEntity && world.get(platformEntity, Platform);
+
+        // if platform and body then teleports the players rootpart to the platform spawn
+        if (platform && body) body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
+    })
+
+    // use route watching for shop teleport
+    useRoute(routes.teleportToShop, (shopName, player) => {
+        const entity = getEntity.fromInstance(player);
+        const body = entity && world.get(entity, Body);
+        const shopSpawn = paths.Map.Shops[shopName].SpawnLocation
+
+        // if platform and body then teleports the players rootpart to the platform spawn
+        if (body) body.rootPart.CFrame = shopSpawn.CFrame
+    })
+
 
     // Anti-flinging (currently commented out)
     // for (const [entity, { rootPart, humanoid, model }] of world.query(Body)) {
