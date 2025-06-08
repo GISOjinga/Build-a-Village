@@ -8,4 +8,4 @@ const defaultData = {
 
 
 export default defaultData
-export type PlayerData = typeof defaultData // s
+export type PlayerData = typeof defaultData
