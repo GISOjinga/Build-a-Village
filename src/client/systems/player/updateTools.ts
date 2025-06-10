@@ -130,8 +130,10 @@ export default (world: World) => {
     }
 
     // if r is being held down then increase r by 1
-    if (UserInputService.IsKeyDown(Enum.KeyCode.R) && fakeModel) {
-        rotatedY = ((rotatedY + 1) > 360) ? 0 : rotatedY + 1;
+    for (const [input] of useEvent(UserInputService.InputBegan)) {
+        if (input.KeyCode === Enum.KeyCode.R && fakeModel) {
+            rotatedY = ((rotatedY + 1) > 360) ? 0 : rotatedY + 90;
+        }
     }
 
     // if fake model exists and a valid platform/tool are present
