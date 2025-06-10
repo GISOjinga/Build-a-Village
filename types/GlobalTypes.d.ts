@@ -115,8 +115,58 @@ type IpConfigResponse = {
     region_code: string;
     region_name: string;
     time_zone: string;
-    zip_code: string;
+zip_code: string;
 }
 
 //* different fence names
 type FenceNames = keyof Omit<PlatformExample["Fences"], keyof Model>
+
+//* game ui
+type GameUI = Assets["UI"]["GameUI"]
+
+//* villager box info
+type VillagerInfo = {
+    Name: VillagerNames;
+    Description: string;
+    Image: string;
+    Price: number;
+    Robux: number;
+    Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+    Tier: number;
+    InStock: number;
+}
+
+//* villager progress
+type VillagerProgress = {
+    Progression: {
+        Time: {
+            RequiredTimePerResource: number;
+            StartTime: number;
+        }
+        Resources: {
+            Amount:number;
+        }
+    };
+    Building: {
+        StartTime: number;
+        EndTime: number;
+    };
+}
+
+//* villager data
+type VillagerData = { Name: VillagerNames, UniqueId: number, RelativeLocation: CFrame | undefined, Progress: VillagerProgress }
+
+//* villager model
+type VillagerModel = Assets["Villagers"]["VillagerExample"];
+
+//* tool type
+type ToolType = "Villager" | "Commodity";
+
+//* tool info
+type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {ItemName: VillagerNames, ToolType: A} : { ItemName: ItemName, ToolType: A }>
+
+//* villager names
+type VillagerNames = keyof Omit<Omit<Assets["Villagers"], keyof Folder>, "VillagerExample">;
+
+//* item name
+type ItemName = VillagerNames | "Bread";

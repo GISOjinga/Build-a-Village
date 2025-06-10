@@ -1,9 +1,10 @@
 import { Workspace } from "@rbxts/services"
+import paths from "../paths"
 
 // variables
-const map = Workspace.FindFirstChild("Map")
-const characters = Workspace.FindFirstChild("Characters")
-const players = characters?.FindFirstChild("Players")
+const map = paths.Map
+const characters = paths.Characters
+const players = characters.Players
 
 // includes instances
 export function rayParamsInclude(included: Instance[]) {

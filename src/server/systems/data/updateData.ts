@@ -22,8 +22,9 @@ const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>,
 export default (world: World) => {
 
     // listens to updates
-    for (const [updateEntity, newData] of world.query(UpdateData)) {
-        const bodyEntity = newData.bodyEntity;
+    for (const [updateEntity, update] of world.query(UpdateData)) {
+        const bodyEntity = update.bodyEntity;
+        const updateFunction = update.updateFunction;
         const hasEntity = world.contains(bodyEntity);
         const [body, oldData] = hasEntity ? world.get(bodyEntity, Body, Data) : [];
 
@@ -33,19 +34,27 @@ export default (world: World) => {
         if (body && oldData) {
             const { model } = body;
             const player = Players.GetPlayerFromCharacter(model);
+            const updatedData = updateFunction(oldData);
+            const changedIndexes = new Array<keyof PlayerData>();
 
             // Update the Data component.
-            world.set(bodyEntity, Data, { data: { ...oldData.data, ...newData.data } });
+            world.set(bodyEntity, Data, updatedData);
 
             // Execute update functions if a key has changed.
+            for (const [key, newValue] of pairs(updatedData)) {
+                const oldValue = oldData[key]
+                if ((typeIs(newValue, "table") && typeIs(oldValue, "table") && !deepEquals(newValue, oldValue)) || oldValue !== newValue) changedIndexes.push(key)
+            }
+
+            // If no keys changed, skip further processing.
             funcToCallOnUpdate.forEach((func, key) => {
-                if (newData.data[key]) {
-                    func(model as Character<R15>, newData.data, oldData.data);
+                if (changedIndexes.includes(key)) {
+                    func(model as Character<R15>, updatedData, oldData);
                 }
             });
 
             // Save updated data on player.
-            if (player) setPlayerData(player, { ...oldData.data, ...newData.data });
+            if (player) setPlayerData(player, updatedData);
         }
     }
 
@@ -55,14 +64,14 @@ export default (world: World) => {
         if (player) {
             const playerData = getPlayerData(player);
             if (playerData) {
-                world.set(bodyEntity, Data, { data: playerData });
-                world.set(world.entity(), UpdateData, { data: playerData, bodyEntity });
+                world.set(bodyEntity, Data, playerData);
+                world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity });
             } else {
                 warn(`No player data found for ${player.Name}`);
             }
         } else {
-            world.set(bodyEntity, Data, { data: deepCopy(defaultData) });
-            world.set(world.entity(), UpdateData, { data: defaultData, bodyEntity });
+            world.set(bodyEntity, Data, deepCopy(defaultData));
+            world.set(world.entity(), UpdateData, { updateFunction: () => defaultData, bodyEntity });
         }
     }
 };

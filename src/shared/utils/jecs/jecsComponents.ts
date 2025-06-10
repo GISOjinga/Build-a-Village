@@ -8,9 +8,9 @@ import { Janitor } from "@rbxts/janitor";
 import { Phase, Scheduler } from "@rbxts/planck";
 import { HotReloader } from "@rbxts/hot-reloader";
 import { ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
-import { producer } from "../producers";
 import { ByteNetType, packet } from "@rbxts/bytenet-fixed";
 import { PlayerState as PlayerStateType } from "../PlayerState";
+import pageStates, { PageStates } from "../Animations/pageStates";
 
 
 
@@ -86,10 +86,10 @@ export const Removed = <T>(comp: Entity<T>) => { removedQuery.add(comp); return 
 
 /************************ Player ************************/
 // Player data
-export const Data = component<{ data: PlayerData }>("Data");
+export const Data = component<PlayerData>("Data");
 
 // update data
-export const UpdateData = component<{ data: Partial<PlayerData>, bodyEntity: Entity }>("UpdateData");
+export const UpdateData = component<{ updateFunction: (oldData: PlayerData) => PlayerData, bodyEntity: Entity }>("UpdateData");
 
 // Player states
 export const PlayerState = component<PlayerStateType>("PlayerState");
@@ -99,6 +99,18 @@ export const Player = component<Player>("Player");
 
 // is alive
 export const Alive = component("Alive");
+
+/*************** Villagers ***************/
+
+// use to contain the active villagers entity
+export const ActiveVillagers = component<Array<{ uniqueId: number, entity: Entity }>>("ActiveVillagers");
+
+// villager
+export const Villager = component<{
+    villagerData: VillagerData,
+    villagerModel: VillagerModel,
+    playerEntity: Entity,
+}>("Villager");
 
 /*************** Physics ***************/
 
@@ -167,6 +179,7 @@ export const Body = component<{
     rootPart: BasePart,
     animator: Animator
     rootAttachment: Attachment
+    platform: PlatformExample | undefined,
 }>("Body");
 
 // body hidden
@@ -201,7 +214,7 @@ export const LoadingAnimations = component("LoadingAnimations");
 export const LoadedAnimations = component("LoadedAnimations");
 
 // producer
-export const ClientUiProducer = component<typeof producer>("ClientUiProducer", producer);
+export const ClientUiStates = component<PageStates>("ClientUiProducer", pageStates);
 
 /******************* counting *******************/
 

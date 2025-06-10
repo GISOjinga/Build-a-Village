@@ -9,6 +9,9 @@ import { PlayerState } from "../PlayerState";
 import { createDebugger } from "./matterFunctions";
 import { getInstanceByName } from "./instanceFunctions";
 import { Janitor } from "@rbxts/janitor";
+import { PlayerData } from "shared/data/defaultData";
+import paths from "../paths";
+import villagersProgressData from "shared/data/villagersProgressData";
 
 
 const messaging = game.GetService("TestService" as never) as {Message(...message: string[]): void};
@@ -89,7 +92,70 @@ export const setEntity = {
     },
 }
 
+function getUntakenNumber(villagersData: VillagerData[]): number {
+    let number = 0
+
+    // loop through the villagers progress and find the first number that is not taken
+    while (true) {
+        if (!villagersData.find((v) => v.UniqueId === number)) {
+            break;
+        } else {
+            number++;
+        }
+    }
+
+    return number
+}
+
 export const createEntity = {
+    // creates a villager
+    villagerNpc: (playerEntity:Entity, villagerData:VillagerData, platform:PlatformExample) => {
+        const name = villagerData.Name
+        const villagerModel = paths.Assets.Villagers[name].Clone() as VillagerModel
+        const villagerEntity = world.entity()
+
+        // sets the vilalgers unique id
+        villagerModel.SetAttribute("UniqueId", villagerData.UniqueId)
+        villagerModel.PivotTo(platform.Floor.CFrame.mul(villagerData.RelativeLocation || new CFrame(0, 0, 0)))
+        villagerModel.Parent = platform.Villagers
+
+        // sets the villager
+        addComponent(villagerEntity, components.Villager, {
+            villagerModel,
+            villagerData,
+            playerEntity,
+        })
+
+        // returns it
+        return villagerEntity
+    },
+
+    // to adds a villager tool to your inventory
+    inventoryVillager: (bodyEntity: Entity, villagerName: VillagerNames) => {
+        createEntity.updateData(bodyEntity, (oldData: PlayerData) => {
+            // if the villager already exists then return
+            oldData.Villagers.push({
+                Name: villagerName,
+                RelativeLocation: undefined, // villager is not placed yet
+                UniqueId: getUntakenNumber(oldData.Villagers), // gets the unique id from the villagersProgressData
+                Progress: deepCopy(villagersProgressData.get(villagerName)!),
+            })
+
+            // returns the updated data
+            return oldData;
+        })
+    },
+
+    // to update data
+    updateData: (bodyEntity: Entity, updateFunction: (oldData: PlayerData) => PlayerData) => {
+        const updateEntity = world.entity()
+
+        // sets the update data
+        world.set(updateEntity, components.UpdateData, { updateFunction, bodyEntity })
+
+        // returns it
+        return updateEntity
+    },
     
     // append
     append: (callback:Callback) => {
@@ -231,7 +297,7 @@ const getCallerSourceFromTraceback = () => {
 	// The third line typically contains the caller information
 	const callerLine = lines[2] || ""
 	const [source] = callerLine.match("([^:]+):")
-	return (source as string) || "unknown"
+	return ((source && (RunService.IsRunning() ? source : string.match(source as string, '%[string%s+"(.-)"%]')[0])) as string) || "unknown"
 }
 
 
@@ -279,7 +345,7 @@ export const warnTS = (line:number, ...message:unknown[]) => {
     const fullName = [...message] as never[]
     const scriptPath = getCallerSourceFromTraceback()
     const sourceScript = scriptPath && getInstanceByName(scriptPath)
-
+    
     // if debug is disabled then return
     if (!sourceScript) {
         warn(`Script not found for line ${line}: ${scriptPath}`);

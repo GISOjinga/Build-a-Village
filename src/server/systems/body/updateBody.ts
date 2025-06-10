@@ -34,6 +34,7 @@ export default (world: World) => {
                     rootPart,
                     animator,
                     rootAttachment,
+                    platform: undefined,
                 });
                 world.set(entity, PlayerState, createInitialPlayerState());
 

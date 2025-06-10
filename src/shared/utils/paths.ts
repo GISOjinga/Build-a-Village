@@ -4,4 +4,5 @@ export default {
     Characters: Workspace.WaitForChild("Characters") as Characters,
     Assets: ReplicatedStorage.WaitForChild("Assets") as Assets,
     Map: Workspace.WaitForChild("GameMap") as GameMap,
+    TestPlacementFolder: Workspace.WaitForChild("TestPlacementFolder") as Folder,
 }

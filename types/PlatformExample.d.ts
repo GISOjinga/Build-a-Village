@@ -1,16 +1,6 @@
-type PlatformExample = Model & {
-	NameSign: Model & {
-		Container: Part & {
-			SurfaceGui: SurfaceGui & {
-				Title: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				PlayerName: TextLabel & {
-					UIStroke: UIStroke;
-				};
-			};
-		};
-	};
+type PlatformExample = Folder & {
+	Villagers: Folder;
+	Earth: Model;
 	Fences: Model & {
 		["Evil Wall"]: Model;
 		["Castle Wall"]: Model;
@@ -19,7 +9,7 @@ type PlatformExample = Model & {
 		["Log Wall"]: Model;
 		["Ironwood Fence"]: Model;
 	};
-	Floor: Model;
+	Floor: Part;
 	BuySign: Model & {
 		Container: Part & {
 			SurfaceGui: SurfaceGui & {
@@ -38,5 +28,17 @@ type PlatformExample = Model & {
 	SpawnLocation: SpawnLocation & {
 		Texture: Texture;
 		t: Texture;
+	};
+	NameSign: Model & {
+		Container: Part & {
+			SurfaceGui: SurfaceGui & {
+				Title: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				PlayerName: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+		};
 	};
 }

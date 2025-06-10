@@ -17,6 +17,10 @@ import replicateToClient from "./systems/componentReplication/replicateToClient"
 import watchRoutes from "shared/systems/hooks/watchRoutes";
 import append from "shared/systems/hooks/append";
 import platform from "./systems/builds/platform";
+import villagersShop from "./systems/villagers/villagersShop";
+import updateTools from "./systems/player/updateTools";
+import progressVillagers from "./systems/villagers/progressVillagers";
+import placeVillagers from "./systems/villagers/placeVillagers";
 
 
 // hotReloader.scan(script.Parent!, (context) => { }, (context) => { });
@@ -64,6 +68,12 @@ setupMatter([
     { system: loadCharacter },
     { system: loadPlayerData },
     { system: savePlayerData },
+    { system: updateTools },
+
+    // villagers
+    { system: villagersShop },
+    { system: progressVillagers },
+    { system: placeVillagers }, // tag added
 ], { // tag added
     // "TouchToAddSkin": touchToAddSkinTag,
     // "TouchToAddPower": touchToAddPowerTag,

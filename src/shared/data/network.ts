@@ -1,4 +1,4 @@
-import ByteNet, { defineNamespace, definePacket, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
+import ByteNet, { defineNamespace, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
 import { Entity } from "@rbxts/jecs";
 import { EventLike } from "@rbxts/planck/out/types";
 import { RunService } from "@rbxts/services";
@@ -17,11 +17,24 @@ type ByteNetType<T> = {
 
 
 type MapTableToByteNet<T> =
+    // 1) Already a ByteNetType
+    T extends ByteNetType<any> ? T :
+    // 2) Roblox Instance -> path
     T extends Instance ? ByteNetType<{ __ByteNetInstancePath: string }> :
-    T extends Array<any> ? ByteNetType<MapTableToByteNet<T[keyof T]>> : (
-        T extends object ? struct<{ [newKey in keyof T]: MapTableToByteNet<T[newKey]> }> :
-        ByteNetType<T>
-    );
+    // 3) Primitive Vector3
+    T extends Vector3 ? ByteNetType<Vector3> :
+    // 4) Arrays
+    T extends Array<infer U> ? ByteNetType<MapTableToByteNet<U>> :
+    // 5) Maps
+    T extends Map<any, infer V> ? ByteNetType<MapTableToByteNet<V>> :
+    // 6) Plain objects (exclude functions)
+    T extends object
+    ? (T extends Function
+        ? ByteNetType<T>                                     // functions get wrapped
+        : struct<{ [K in keyof T]: MapTableToByteNet<T[K]> }>) // objects -> struct
+    :
+    // 7) Fallback
+    ByteNetType<T>;
 
 
 // function to give a jecs component struct
@@ -32,12 +45,45 @@ function componentStruct<T extends ByteNetType<unknown>>(data: T) {
     })
 }
 
+// for ui
+const definePacket = <T extends ByteNetType<any>>(packetProps: {
+    value: T;
+    reliabilityType?: "reliable" | "unreliable";
+}) => {
+    return RunService.IsRunning() ? ByteNet.definePacket(packetProps) : (() => ({
+        ["listen"]: () => { },
+        ["sendTo"]: () => { },
+        ["send"]: () => { },
+        ["sendToAll"]: () => { },
+        ["sendToAllExcept"]: () => { },
+        ["sendToList"]: () => { },
+        ["wait"]: () => { },
+    })) as unknown as packet<T>;
+}
 
 // Define namespace and packets
 const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
 
     return {
+        // place villager
+        placeVillager: definePacket({
+            value: ByteNet.cframe,
+        }),
+
+        // request to buy villager
+        buyVillager: definePacket({
+            value: struct({
+                villagerIndex: ByteNet.int16,
+                currency: ByteNet.string as ByteNetType<"Coins" | "Robux">,
+            }),
+        }),
+
+        // update shop villagers
+        updateVillagersShop: definePacket({
+            value: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
+        }),
+
         // teleport to your village
         teleportToVillage: definePacket({
             value: ByteNet.nothing
@@ -62,6 +108,7 @@ const packets = defineNamespace("gameEvents", () => {
                     rootPart: byteNetEntityInstance,
                     animator: byteNetEntityInstance,
                     rootAttachment: byteNetEntityInstance,
+                    platform: optional(byteNetEntityInstance),
                 })),
             }),
         } satisfies { [k in keyof typeof componentsToReplicate]: packet<struct<{

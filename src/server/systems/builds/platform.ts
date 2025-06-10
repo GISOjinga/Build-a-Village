@@ -55,7 +55,7 @@ export default (world: World) => {
         const platformEntity = world.get(playerEntity, pair(TargetEntity, Platform))
 
         // if platform entity exists then the occupied and tags
-        if (platformEntity) {
+        if (platformEntity !== undefined) {
             removeComponent(platformEntity, PlatformOccupied)
             removeComponent(platformEntity, pair(TargetEntity, Player))
             removeComponent(playerEntity, pair(TargetEntity, Platform))
@@ -76,7 +76,7 @@ export default (world: World) => {
     // for all players added chooses an un occupied platform
     for (const [_, playerEntity, player] of world.query(TargetEntity, Added(Player))) {
         const body = world.get(playerEntity, Body)
-        const data = world.get(playerEntity, Data)?.data
+        const data = world.get(playerEntity, Data)
         const platformsSorted: [Entity, PlatformExample][] = []
 
         if (body && data) {
@@ -94,6 +94,7 @@ export default (world: World) => {
                 claimPlatform(platformEntity, playerEntity, body, platform)
                 toggleFenceVisibility(platform.Fences[data.Fence], true)
                 setUpSignGuiContainers(platform, player.Name)
+                addComponent(playerEntity, Body, { ...body, platform: platform })
             } else {
                 warnTS($line, "No platforms available for player: " + player.Name)
             }
@@ -108,7 +109,7 @@ export default (world: World) => {
 
             // sets up the components
             addComponent(platformEntity, Platform, platform)
-            addComponent(platformEntity, ModelDebugger, platform)
+            addComponent(platformEntity, ModelDebugger, platform.Floor)
             platform.SetAttribute("ServerId", platformEntity)
 
             // hides the fences
