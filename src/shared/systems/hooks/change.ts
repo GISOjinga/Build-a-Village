@@ -59,7 +59,7 @@ export default {
                     // applies the added component to the entity && updates the previous value
                     world.set(entityAdded, TargetEntity, entity)
                     world.set(entityAdded, Added(comp), value)
-                    if (value === undefined) createChangeSave(world, entity, comp, undefined, value)
+                    createChangeSave(world, entity, comp, undefined, value)
                     previousValue.set(pairing, value) // takes a second for the value to show up
 
                     // when it comes back full circle: Removed added entity so it doesn't show twice

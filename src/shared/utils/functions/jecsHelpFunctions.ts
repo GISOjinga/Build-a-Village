@@ -14,7 +14,6 @@ import paths from "../paths";
 import villagersProgressData from "shared/data/villagersProgressData";
 
 
-const messaging = game.GetService("TestService" as never) as {Message(...message: string[]): void};
 export type ComponentValue<C> =
     C extends Entity<infer T> ? T :
     C extends Pair<infer _, infer O> ? O :
