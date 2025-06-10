@@ -9,7 +9,7 @@ interface Storage {
 export function useEffect(
     effect: (() => void) | (() => (() => boolean)),
     dependencies: unknown[],
-    discriminator: unknown,
+    discriminator: unknown = debug.traceback(),
 ): void {
     const storage = useHookState<Storage>(discriminator, (state) => {
         const value = state.cleanup?.()

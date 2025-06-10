@@ -25,7 +25,7 @@ function cleanup(storage: ThrottleStorage): boolean {
  */
 export function useThrottle(
 	seconds: number,
-	discriminator?: unknown,
+	discriminator: unknown = debug.traceback(),,
 ): boolean {
 	const storage = useHookState<ThrottleStorage>(discriminator, cleanup);
 

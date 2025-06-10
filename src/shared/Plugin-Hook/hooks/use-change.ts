@@ -6,8 +6,8 @@ interface storage {
 }
 
 
-export function useChange(dependencies: readonly unknown[], discriminator?: unknown): boolean {
-    const storage = useHookState<storage>(discriminator); 
+export function useChange(dependencies: readonly unknown[], discriminator: unknown = debug.traceback(),): boolean {
+    const storage = useHookState<storage>(discriminator);
     const previous = storage.dependencies;
     storage.dependencies = dependencies;
     return !equals(previous, dependencies);

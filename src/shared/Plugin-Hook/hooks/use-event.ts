@@ -70,7 +70,7 @@ function cleanup<T extends Array<unknown>>(storage: EventStorage<T>): boolean {
  */
 export function useEvent<T extends Array<unknown>>(
 	event: EventLike<T>,
-	discriminator?: unknown,
+	discriminator: unknown = debug.traceback(),,
 ): IterableFunction<T> {
 
 	const storage = useHookState<EventStorage<T>>(discriminator, cleanup);

@@ -6,7 +6,7 @@ interface Storage {
     instance?: Instance;
 }
 
-export function useInstance<T extends Instance>(creator: () => T, dependencies: unknown[], discriminator?: unknown): T {
+export function useInstance<T extends Instance>(creator: () => T, dependencies: unknown[], discriminator: unknown = debug.traceback(),): T {
     const storage = useHookState<Storage>(discriminator, (state) => {
         if (state.instance) {
             state.instance.Destroy();

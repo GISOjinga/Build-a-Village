@@ -9,7 +9,7 @@ interface Storage<T> {
 export function useAsync<T>(
     callback: () => Promise<T>,
     dependencies: unknown[],
-    discriminator?: unknown
+    discriminator: unknown = debug.traceback(),
 ): [Promise.Status, T | undefined] {
 
     const storage = useHookState<Storage<T>>(discriminator, (state) => {

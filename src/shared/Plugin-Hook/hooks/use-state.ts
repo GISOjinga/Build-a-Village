@@ -4,7 +4,7 @@ interface Storage<T extends unknown> {
 	value?: [T];
 }
 
-export function useState<T extends unknown>(value: T | (() => T), discriminator?: unknown) {
+export function useState<T extends unknown>(value: T | (() => T), discriminator: unknown = debug.traceback(),) {
 	const storage = useHookState<Storage<T>>(discriminator);
 
 	if (storage.value === undefined) {
