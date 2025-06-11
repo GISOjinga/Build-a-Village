@@ -8,7 +8,7 @@ interface Storage<T extends unknown> {
 export function useMemo<T extends unknown>(
     callback: () => T,
     dependencies: readonly unknown[],
-    discriminator: unknown = debug.traceback(),,
+    discriminator: unknown = debug.traceback(),
 ): T {
     const storage = useHookState<Storage<T>>(discriminator);
     if (useChange(dependencies, storage)) {
