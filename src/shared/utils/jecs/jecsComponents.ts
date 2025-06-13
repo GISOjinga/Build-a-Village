@@ -36,7 +36,6 @@ export type JecsTagged<T extends Instance> = (isTagged: boolean, instance: T, wo
 
 
 // unorginized components
-export const Append = component<Callback>("Append");
 export const Route = component("Route");
 export const ModelDebugger = component<Model | BasePart>("ModelDebugger");
 export const Destroyed = component("Destroyed");

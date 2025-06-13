@@ -26,6 +26,7 @@ import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { getInstanceByName } from "shared/utils/functions/instanceFunctions"
 import { deepCopy } from "@rbxts/object-utils"
+import { appendJecs } from "shared/systems/hooks/append"
 
 // find ins
 
@@ -126,7 +127,7 @@ export default {
                     }
                 } else {
                     if (debugEnabled) warn(`Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
-                    createEntity.append(() => replicate({ serverEntity, data: newData }))
+                    appendJecs(() => replicate({ serverEntity, data: newData }))
                 }
             }
 

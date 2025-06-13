@@ -11,12 +11,13 @@ export const isVillagersOverlapping = (models: Model[], villager: VillagerModel,
 
     for (const model of models) {
         const hitBox = model.FindFirstChild("HitBox") as BasePart | undefined;
+        const position = model.GetPivot().Position;
 
         // Skip comparing the villager to itself
         if (model === villager) continue
 
         // Get other model's pivot and center
-        if (hitBox && region.CastPart(hitBox)) return true;
+        if (hitBox && (position === villagerPivot.Position || region.CastPart(hitBox))) return true;
     }
 
     // No overlaps

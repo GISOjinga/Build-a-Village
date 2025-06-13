@@ -2,18 +2,25 @@ import { Delete, Entity, Name, OnAdd, OnRemove, OnChange, Pair, pair, Wildcard, 
 import { Phase, Scheduler } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { useMemo, useState } from "shared/Plugin-Hook"
-import { Added, addedQuery, Append, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+
+const waitingList = new Array<Callback>()
+const appendList = new Array<Callback>()
 
 
+// adds it to a waiting list then when the cycle finaly sees it then calls it as a group with the others appends
+export const appendJecs = (callback: Callback) => waitingList.push(callback)
 
 // for change
 export default {
     phase: Phases.AppendHook,
     system: (world) => {
-        // when appends are removed
-        for (const [appendedEntity, callback] of world.query(Append)) {
-            world.delete(appendedEntity)
-            callback()
-        }
+        // call all append group waiting since last cycle
+        appendList.forEach((callback) => callback())
+        appendList.clear()
+
+        // pushes a group for next cycle (because a appen can happen last second and get removed last second before being cycled through)
+        waitingList.forEach((callback) => appendList.push(callback))
+        waitingList.clear()
     }
 } as SystemTable<[World]>

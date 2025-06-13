@@ -4,7 +4,8 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { $line } from "rbxts-transformer-inline"
 import { useMemo, useState } from "shared/Plugin-Hook"
 import { printTS } from "shared/utils/functions/jecsHelpFunctions"
-import { Added, addedQuery, Append, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { appendJecs } from "./append"
 
 
 // components
@@ -22,16 +23,15 @@ for (const [comp, name] of world.query(Name)) {
 // function to create a change save
 function createChangeSave(world: World, target: Entity, comp: Entity, oldValue?: unknown, newValue?: unknown) {
     // appends the entity into the world
-    world.set(world.entity(), Append, () => {
+    appendJecs(() => {
         const entityChanged = world.entity()
-        const appendEntity2 = world.entity()
 
         // applies the changed component to the entity
         world.set(entityChanged, TargetEntity, target)
         world.set(entityChanged, Changed(comp), { old: oldValue, new: newValue })
 
         // when it comes back full circle: Removed changed entity so it doesn't show twice
-        world.set(appendEntity2, Append, () => world.delete(entityChanged))
+        appendJecs(() => world.delete(entityChanged))
     })
 }
 
@@ -51,7 +51,7 @@ export default {
                 const pairing = pair(entity, comp)
 
                 // appends the entity into the world
-                world.set(world.entity(), Append, () => {
+                appendJecs(() => {
                     const entityAdded = world.entity()
                     const value = world.get(entity, comp)
                     const appendEntity2 = world.entity()
@@ -63,7 +63,7 @@ export default {
                     previousValue.set(pairing, value) // takes a second for the value to show up
 
                     // when it comes back full circle: Removed added entity so it doesn't show twice
-                    world.set(appendEntity2, Append, () => world.delete(entityAdded))
+                    appendJecs(() => world.delete(entityAdded))
                 })
             })
         })
@@ -92,7 +92,7 @@ export default {
                 previousValue.delete(pairing)
 
                 // appends the entity into the world
-                world.set(world.entity(), Append, () => {
+                appendJecs(() => {
                     const entityRemoved = world.entity()
                     const appendEntity2 = world.entity()
 
@@ -102,13 +102,12 @@ export default {
                     createChangeSave(world, entity, comp, oldValue)
 
                     // when it comes back full circle: Removed removed entity so it doesn't show twice
-                    world.set(appendEntity2, Append, () => world.delete(entityRemoved))
+                    appendJecs(() => world.delete(entityRemoved))
                 })
             })
         })
 
         // clears removed added and changed
-        // print(removedQuery.size(), addedQuery.size(), changedQuery.size())
         removedQuery.clear()
         addedQuery.clear()
         changedQuery.clear()

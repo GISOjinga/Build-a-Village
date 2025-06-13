@@ -155,11 +155,6 @@ export const createEntity = {
         // returns it
         return updateEntity
     },
-    
-    // append
-    append: (callback:Callback) => {
-        world.set(world.entity(), components.Append, callback)
-    },
 
     // creates a countDown entity given an entity link and a component
     countDown: (entityLink: Entity, component: MappedComponents[AllComponentNames], duration:number) => {

@@ -89,6 +89,7 @@ export default {
 
         // loops through each component that needs replication
         for (const [componentName, component] of pairs(componentsToReplicate)) {
+
             // for each entity whose component just changed
             for (const [_, serverEntity, changed] of world.query(TargetEntity, Changed(component as Entity))) {
                 const route = routes[componentName]

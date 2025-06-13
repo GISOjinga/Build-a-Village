@@ -7,11 +7,11 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { RunService } from "@rbxts/services"
 import { routes } from "shared/data/network"
 import { useMemo, useState } from "shared/Plugin-Hook"
-import { Added, addedQuery, Append, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { appendJecs } from "./append"
 
 
 export const routesData = new Map<packet<ByteNetType<unknown>>, (unknown[])[]>()
-
 
 // for change
 export default {
@@ -25,6 +25,7 @@ export default {
         trash.LinkToInstance(script, true)
         trash.Add(() => connectedRoutes.forEach((routeCallback) => routeCallback()))
 
+
         // loops through all the routes to listen to them
         for (const [_, route] of Object.entries(routes)) {
             const dataCalled = [] as (unknown[])[]
@@ -33,12 +34,12 @@ export default {
             routesData.set(route as never, dataCalled)
 
             // listens to it
-            route.listen((routeData, player) => {
-                world.set(world.entity(), Append, () => {
+            connectedRoutes.push(route.listen((routeData, player) => {
+                appendJecs(() => {
                     dataCalled.push([routeData, player])
-                    world.set(world.entity(), Append, () => dataCalled.shift())
+                    appendJecs(() => dataCalled.shift())
                 })
-            })
+            }))
         }
     }
 } as SystemTable<[World]>

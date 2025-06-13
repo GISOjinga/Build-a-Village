@@ -20,6 +20,7 @@ const camera = Workspace.Camera
 const mouse = player.GetMouse()
 const registeredTools = new Map<Tool, ToolInfo>()
 const trash = new Janitor();
+let goalCFrame: CFrame | undefined;
 let highlight: Highlight | undefined;
 let fakeModel: VillagerModel | undefined;
 let rotatedY = 0
@@ -64,8 +65,8 @@ export default (world: World) => {
                 // when the tool is activated
                 trash.Add(tool.Activated.Connect(() => {
                     printJecs($line, "Activated", registeredTools)
-                    if (fakeModel) {
-                        routes.placeVillager.send(fakeModel.GetPivot())
+                    if (fakeModel && goalCFrame) {
+                        routes.placeVillager.send(goalCFrame)
                     };
                 }))
             }
@@ -113,6 +114,7 @@ export default (world: World) => {
                 rotatedY = 0;
                 fakeModel = trash.Add(paths.Assets.Villagers[ItemName].Clone()) as VillagerModel;
                 fakeModel.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart")) descendant.CollisionGroup = "NoCollision"; });
+                fakeModel.PivotTo(body.rootPart.CFrame);
                 fakeModel.Parent = paths.TestPlacementFolder
 
                 // sets up highlight
@@ -132,7 +134,7 @@ export default (world: World) => {
     // if r is being held down then increase r by 1
     for (const [input] of useEvent(UserInputService.InputBegan)) {
         if (input.KeyCode === Enum.KeyCode.R && fakeModel) {
-            rotatedY = ((rotatedY + 1) > 360) ? 0 : rotatedY + 90;
+            rotatedY = ((rotatedY + 90) >= 360) ? 0 : rotatedY + 90;
         }
     }
 
@@ -173,7 +175,8 @@ export default (world: World) => {
                 ).mul(CFrame.Angles(0, math.rad(rotatedY), 0));
 
                 // move the model
-                fakeModel.PivotTo(finalCFrame);
+                fakeModel.PivotTo(fakeModel.GetPivot().Lerp(finalCFrame, .2));
+                goalCFrame = finalCFrame
                 highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
             } else {
                 highlightTween(false);
