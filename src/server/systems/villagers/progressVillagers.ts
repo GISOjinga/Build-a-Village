@@ -60,6 +60,7 @@ export default (world: World) => {
 
                     // updates the villager entity
                     addComponent(villagerEntity, Villager, villagerData);
+                    removeComponent(villagerEntity, MaxedOut);
                 }
             }
         })
@@ -93,9 +94,14 @@ export default (world: World) => {
 
     // takes the villager through its transitions
     if (useThrottle(.25)) {
-        for (const [villagerEntity, { villagerData, villagerModel }] of world.query(Villager).without(MaxedOut)) {
+        for (const [villagerEntity, villagerComp] of world.query(Villager).without(MaxedOut)) {
+            const { villagerData, villagerModel } = villagerComp;
             const buildingTimes = villagerData.Progress.Building
             const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
+            const totalResourcesSoFar = villagerData.Progress.Progression.Resources.Amount || 0;
+
+            // toggles the interaction visiblity
+            villagerModel.Station.Interaction.Collect.ProximityPrompt.Enabled = totalResourcesSoFar > 0;
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
@@ -146,13 +152,17 @@ export default (world: World) => {
                         toggleTransparency(descendant, (tonumber(child.Name) || 1) <= progression.Resources.Amount);
                     })
                 })
+
+                // updates the component
+                addComponent(villagerEntity, Villager, villagerComp);
             }
         }
     }
 
 
     // if a player has a produce all component then take their villagers and set their resources amount to the max
-    for (const [villagerEntity, { villagerData, villagerModel }] of world.query(Villager, ProduceAll).without(MaxedOut)) {
+    for (const [villagerEntity, villagerComp] of world.query(Villager, ProduceAll).without(MaxedOut)) {
+        const { villagerData, villagerModel } = villagerComp;
         const buildingTimes = villagerData.Progress.Building
         const progression = villagerData.Progress.Progression
         const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
@@ -164,6 +174,7 @@ export default (world: World) => {
         progression.Resources.Amount = maxResources;
 
         // removes its self
+        addComponent(villagerEntity, Villager, villagerComp);
         removeComponent(villagerEntity, ProduceAll);
     }
 

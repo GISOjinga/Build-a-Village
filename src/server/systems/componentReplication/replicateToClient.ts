@@ -18,7 +18,7 @@ import { createDebugger } from "shared/utils/functions/matterFunctions" // Utili
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEvent } from "shared/Plugin-Hook"
-import { createEntity } from "shared/utils/functions/jecsHelpFunctions"
+import { createEntity, printTS } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -97,7 +97,7 @@ export default {
                 const players = (targetReplication && targetReplication[component]) || Players.GetPlayers()
 
                 // if the component exists in targetReplication and the table is empty then replicate to no players
-                if (targetReplication && targetReplication[component]?.isEmpty()) continue
+                if (targetReplication && (!targetReplication[component] || targetReplication[component].isEmpty())) continue
 
                 // if the component is not a table then replicate to all players
                 if (!route) {

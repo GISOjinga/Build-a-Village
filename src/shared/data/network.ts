@@ -9,7 +9,7 @@ import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
 
 
-const byteNetEntityInstance = ByteNet.unknown as ByteNetType<{ __ByteNetInstancePath: string }>
+const byteNetEntityInstance = ByteNet.unknown as ByteNetType<Instance>
 type packet<T extends ByteNetType<any>> = ReturnType<typeof ByteNet.definePacket<T>>
 type ByteNetType<T> = {
     value: T;
@@ -19,8 +19,10 @@ type ByteNetType<T> = {
 type MapTableToByteNet<T> =
     // 1) Already a ByteNetType
     T extends ByteNetType<any> ? T :
+    // entity
+    T extends Entity ? ByteNetType<Entity> :
     // 2) Roblox Instance -> path
-    T extends Instance ? ByteNetType<{ __ByteNetInstancePath: string }> :
+    T extends Instance ? ByteNetType<T> :
     // 3) Primitive Vector3
     T extends Vector3 ? ByteNetType<Vector3> :
     // 4) Arrays
@@ -102,13 +104,42 @@ const packets = defineNamespace("gameEvents", () => {
         ...{
             Body: definePacket({
                 value: componentStruct(struct({
-                    model: byteNetEntityInstance,
-                    head: byteNetEntityInstance,
-                    humanoid: byteNetEntityInstance,
-                    rootPart: byteNetEntityInstance,
-                    animator: byteNetEntityInstance,
-                    rootAttachment: byteNetEntityInstance,
-                    platform: optional(byteNetEntityInstance),
+                    model: byteNetEntityInstance as ByteNetType<Model>,
+                    head: byteNetEntityInstance as ByteNetType<BasePart>,
+                    humanoid: byteNetEntityInstance as ByteNetType<Humanoid>,
+                    rootPart: byteNetEntityInstance as ByteNetType<BasePart>,
+                    animator: byteNetEntityInstance as ByteNetType<Animator>,
+                    rootAttachment: byteNetEntityInstance as ByteNetType<Attachment>,
+                    platform: optional(byteNetEntityInstance as ByteNetType<PlatformExample>),
+                })),
+            }),
+
+            // for replicating villager
+            Villager: definePacket({
+                value: componentStruct(struct({
+                    villagerModel: byteNetEntityInstance as ByteNetType<VillagerModel>,
+                    playerEntity: ByteNet.unknown as ByteNetType<Entity>,
+                    villagerData: struct({
+                        UniqueId: ByteNet.uint32,
+                        Name: ByteNet.string as ByteNetType<VillagerNames>,
+                        RelativeLocation: optional(ByteNet.cframe),
+                        Progress: struct({
+                            Produce: ByteNet.string as ByteNetType<ProduceNames>,
+                            Progression: struct({
+                                Time: struct({
+                                    RequiredTimePerResource: ByteNet.uint16,
+                                    StartTime: ByteNet.uint16,
+                                }),
+                                Resources: struct({
+                                    Amount: ByteNet.uint8,
+                                }),
+                            }),
+                            Building: struct({
+                                StartTime: ByteNet.uint16,
+                                EndTime: ByteNet.uint16,
+                            }),
+                        }),
+                    }),
                 })),
             }),
         } satisfies { [k in keyof typeof componentsToReplicate]: packet<struct<{

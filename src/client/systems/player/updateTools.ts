@@ -96,12 +96,12 @@ export default (world: World) => {
 
     // if there is a equipped tool and its registered then
     if (body && useChange([equippedTool, equippedTool && registeredTools.has(equippedTool)])) {
-        printJecs($line, registeredTools);
 
         // destroys old model
         fakeModel?.Destroy();
 
         // sets up new model
+        printJecs($line, "Equipped tool", equippedTool, "with registered tools", registeredTools);
         if (equippedTool && registeredTools.has(equippedTool)) {
             const { ToolType, ItemName } = registeredTools.get(equippedTool)!;
             printJecs($line, "Equipped tool", ItemName, "of type", ToolType);
@@ -179,7 +179,7 @@ export default (world: World) => {
                 goalCFrame = finalCFrame
                 highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
             } else {
-                highlightTween(false);
+                highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
             }
         }
     }

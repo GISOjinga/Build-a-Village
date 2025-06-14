@@ -109,6 +109,7 @@ function getUntakenNumber(villagersData: VillagerData[]): number {
 export const createEntity = {
     // creates a villager
     villagerNpc: (playerEntity:Entity, villagerData:VillagerData, platform:PlatformExample) => {
+        const player = world.get(playerEntity, components.Player)
         const name = villagerData.Name
         const villagerModel = paths.Assets.Villagers[name].Clone() as VillagerModel
         const villagerEntity = world.entity()
@@ -124,6 +125,9 @@ export const createEntity = {
             villagerData,
             playerEntity,
         })
+
+        // if player then adds it to target for replication 
+        if (player) setEntity.addTargetForReplication(villagerEntity, player, components.Villager)
 
         // returns it
         return villagerEntity

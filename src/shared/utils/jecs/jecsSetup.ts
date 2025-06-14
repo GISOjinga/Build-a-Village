@@ -151,7 +151,9 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
     hotReload(systems)
 
     // runs each start up
-    startUpsOrdered.forEach((phase) => systemQueue.run(phase))
+    startUpsOrdered.forEach((phase) => {
+        systems.forEach((system) => { if (system.phase === phase) systemQueue.run(system.system) })
+    })
 
     // return the debugger
     return debug

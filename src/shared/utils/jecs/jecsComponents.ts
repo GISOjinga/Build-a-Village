@@ -7,7 +7,7 @@ import { boolean } from "@rbxts/squash";
 import { Janitor } from "@rbxts/janitor";
 import { Phase, Scheduler } from "@rbxts/planck";
 import { HotReloader } from "@rbxts/hot-reloader";
-import { ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
+import { ReplicatedStorage, RunService, ServerScriptService, Workspace } from "@rbxts/services";
 import { ByteNetType, packet } from "@rbxts/bytenet-fixed";
 import { PlayerState as PlayerStateType } from "../PlayerState";
 import pageStates, { PageStates } from "../Animations/pageStates";
@@ -100,6 +100,9 @@ export const Player = component<Player>("Player");
 export const Alive = component("Alive");
 
 /*************** Villagers ***************/
+
+// the hover box attachment
+export const HoverBoxAttachment = component<Attachment>("HoverBoxAttachment", new Instance("Attachment", Workspace.Terrain));
 
 // use to contain the active villagers entity
 export const ActiveVillagers = component<Array<{ uniqueId: number, entity: Entity }>>("ActiveVillagers");
@@ -256,7 +259,7 @@ export const IncreaseParticlesSize = component<{
 }>("IncreaseParticleSize");
 
 
-export const componentsToReplicate = { Body };
+export const componentsToReplicate = { Body, Villager };
 
 // list of phases in order
 const phaseNamesWithOrder = [

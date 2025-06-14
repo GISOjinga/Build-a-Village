@@ -26,6 +26,8 @@ import pagePaths from "shared/utils/Animations/pagePaths";
 import updateTools from "./systems/player/updateTools";
 import DialogueSellUI from "./app/DialogueSellUI";
 import HoverBoxUI from "./app/HoverBoxUI";
+import { HoverBoxAttachment, world } from "shared/utils/jecs/jecsComponents";
+import hoverBoxUpdate from "./systems/ui/hoverBoxUpdate";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
@@ -39,10 +41,12 @@ GameUI(pagePaths(gameUI))
 
 // sets up dialogue sell
 dialogueSellUI.Parent = playerGui
+dialogueSellUI.Adornee = paths.Map.Shops.WaitForChild("Sell").WaitForChild("TalkBox") as BasePart
 DialogueSellUI(dialogueSellUI)
 
 // sets up hover box
 hoverBoxUI.Parent = playerGui
+hoverBoxUI.Adornee = world.get(HoverBoxAttachment, HoverBoxAttachment)!
 HoverBoxUI(hoverBoxUI)
 
 
@@ -89,6 +93,9 @@ const debug = setupMatter([
 
     // player
     { system: updateTools },
+
+    // ui
+    { system: hoverBoxUpdate },
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,

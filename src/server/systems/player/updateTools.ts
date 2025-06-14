@@ -17,7 +17,7 @@ export default (world: World) => {
         const player = data && world.get(bodyEntity, Player)
         const backpack = player && player.FindFirstChild("Backpack");
 
-        print(dataChange, bodyEntity)
+        // if the player has a backpack and data is available then
         if (backpack && data && ((!dataChange.old || (!deepEquals(data.Villagers, dataChange.old?.Villagers || []) || !deepEquals(data.Produce, dataChange.old?.Produce || []))))) {
             const body = data && world.get(bodyEntity, Body);
             const alltools = backpack && body && [...backpack.GetChildren(), ...body.model.GetChildren()].filter((v) => v.IsA("Tool")).filterUndefined();
@@ -27,7 +27,6 @@ export default (world: World) => {
                 alltools.forEach((tool) => tool.Destroy());
 
                 // adds all the villager tools
-                // print(data.Villagers)
                 data.Villagers.forEach((villagerData) => {
                     if (villagerData.RelativeLocation) return; // skip if the villager is placed
                     const villagerName = villagerData.Name
