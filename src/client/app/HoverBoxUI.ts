@@ -2,29 +2,18 @@ import { Janitor } from "@rbxts/janitor";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import HudPage from "./pages/HudButtonPage";
 import { ReplicatedStorage } from "@rbxts/services";
-import OpenPage from "./pages/OpenPage";
-import VillagersPage from "./pages/VillagersPage";
-import GiftPage from "./pages/GiftPage";
-import WallPage from "./pages/WallPage";
-import RobuxStorePage from "./pages/RobuxStorePage";
-import IntroTextPage from "./pages/IntroTextPage";
+import HoverBoxPage from "./pages/HoverBoxPage";
 
 
 
-export default (pagePaths: PagePaths) => {
+export default (hoverBoxUI: HoverBoxUI) => {
 	const trash = new Janitor();
 	const pages = [
-		HudPage,
-		OpenPage,
-		VillagersPage,
-		GiftPage,
-		WallPage,
-		RobuxStorePage,
-		IntroTextPage,
+		HoverBoxPage,
 	]
 
 	// renders the hud page
-	pages.forEach((page) => trash.Add(page(pagePaths)));
+	pages.forEach((page) => trash.Add(page(hoverBoxUI)));
 
 	// when trash gets cleaned up
 	trash.Add(() => {

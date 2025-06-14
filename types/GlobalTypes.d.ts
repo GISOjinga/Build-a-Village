@@ -124,6 +124,12 @@ type FenceNames = keyof Omit<PlatformExample["Fences"], keyof Model>
 //* game ui
 type GameUI = Assets["UI"]["GameUI"]
 
+//* DialogueSell
+type DialogueSellUI = Assets["UI"]["DialogueSell"]
+
+//* hover Box UI
+type HoverBoxUI = Assets["UI"]["HoverBox"]
+
 //* villager box info
 type VillagerInfo = {
     Name: VillagerNames;
@@ -134,6 +140,24 @@ type VillagerInfo = {
     Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
     Tier: number;
     InStock: number;
+}
+
+//* limited time shop
+type LimitedPrice = ({Robux:number, Amount:number})
+type LimitedTimePack = {
+    Pack1: LimitedPrice,
+    Pack3: LimitedPrice,
+    Pack10: LimitedPrice,
+}
+
+//* wall info
+type WallInfo = {
+    Name: WallNames;
+    Description: string;
+    Image: string;
+    Price: number;
+    CashMultiplier: number;
+    Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 }
 
 //* villager progress
@@ -167,6 +191,9 @@ type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {Item
 
 //* villager names
 type VillagerNames = keyof Omit<Omit<Assets["Villagers"], keyof Folder>, "VillagerExample">;
+
+//* wall names
+type WallNames = "Stone Wall" | "Wooden Wall" | "Metal Wall" | "Brick Wall" | "Glass Wall";
 
 //* item name
 type ItemName = VillagerNames | "Bread";

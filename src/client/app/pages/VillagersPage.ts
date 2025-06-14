@@ -7,6 +7,7 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
+import useEffect from "../hooks/useEffect";
 
 
 const formatDuration = (totalSeconds: number) => {
@@ -40,24 +41,15 @@ const formatDuration = (totalSeconds: number) => {
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
     const sizeOffset = UDim2.fromScale(1.05, 1.05);
-    const villagersContent = pagePaths.VillagersPage.Content;
-    const buyButton = villagersContent.BUY;
+    const villagersContent = pagePaths.VillagersPage.ScrollingFrame;
+    const buyButton = villagersContent.Buy;
     const buyButtonGoalSize = buyButton.Size
-    const exampleBox = villagersContent.Example
+    const exampleBox = villagersContent.Sample
     const buyButtonTweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
 
     // sets the buy button size to be invisible
     buyButton.Size = UDim2.fromScale(0, 0);
     buyButton.Visible = true;
-
-    // binds an action animation to buy
-    trash.Add(UIUtilities.ButtonAction({
-        Button: pagePaths.VillagersPage.Close,
-        ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.VillagersPage.Close.Size, sizeOffset),
-        DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.VillagersPage.Close.Size, sizeOffset),
-    }, () => {
-        pageStates.openPage("None")
-    }))
 
     // when restock is pressed
     trash.Add(UIUtilities.ButtonAction({
@@ -69,10 +61,9 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // loads in each box
-    trash.Add(effect(() => {
+    trash.Add(useEffect((newTrash) => {
         const villagersShop = pageStates.villagersShop();
         const buyButtonFocus = pageStates.buyButtonFocus();
-        const newTrash = new Janitor();
 
         // cleans up the old ones
         villagersContent.GetChildren().forEach((child) => {
@@ -89,10 +80,10 @@ export default (pagePaths: PagePaths) => {
             villagerBox.Name = villagerInfo.Name;
             villagerBox.LayoutOrder = (index + 1) * 2;
             villagerBox.Price.Text = `$${villagerInfo.Price}`;
-            villagerBox.StockCount.Text = `x${villagerInfo.InStock} stock`
+            villagerBox.Stock.Text = `x${villagerInfo.InStock} stock`
             villagerBox.VillagerName.Text = villagerInfo.Name;
-            villagerBox.item.Image = villagerInfo.Image;
-            // villagerBox.rarity.Image = villagerInfo.RarityImage;
+            // villagerBox.VillagerViewPort.Image = villagerInfo.Image;
+            // villagerBox.RarityCommon.Image = villagerInfo.RarityImage;
             villagerBox.Tier.Text = `Tier ${villagerInfo.Tier}`;
             villagerBox.Parent = villagersContent;
 
@@ -108,43 +99,55 @@ export default (pagePaths: PagePaths) => {
                 })
             }))
         })
-
-        return () => newTrash.Destroy();
     }))
 
 
     // updates the buy button visibility
-    trash.Add(effect(() => {
+    trash.Add(useEffect((newTrash) => {
         const buyButtonFocus = pageStates.buyButtonFocus();
-        const newTrash = new Janitor();
+        const tween = newTrash.Add(TweenService.Create(buyButton, buyButtonTweenInfo, {
+            BorderSizePixel: buyButtonFocus.visible ? 4 : 0,
+            Size: buyButtonFocus.visible ? buyButtonGoalSize : UDim2.fromScale(0, -0.01),
+        }))
+
+        // tweens the shadow holder
+        buyButton.shadowHolder.Visible = buyButtonFocus.visible;
+
+        // toggles all ui strokes
+        buyButton.GetDescendants().forEach((descendant) => {
+            if (descendant.IsA("UIStroke")) {
+                const originalThickness = descendant.GetAttribute<number>("OriginalThickness") || descendant.Thickness;
+
+                // sets the original thickness
+                descendant.SetAttribute("OriginalThickness", originalThickness);
+                trash.Add(TweenService.Create(descendant, buyButtonTweenInfo, {
+                    Thickness: buyButtonFocus.visible ? originalThickness : 0,
+                })).Play();
+            }
+        })
 
         // updates the visibility of the buy button
         buyButton.LayoutOrder = (((buyButtonFocus.selectedVillagerIndex ?? -1) + 1) * 2) + 1;
         buyButton.Size = buyButtonFocus.visible ? UDim2.fromScale(0, 0) : buyButtonGoalSize;
-        newTrash.Add(TweenService.Create(buyButton, buyButtonTweenInfo, {
-            Size: buyButtonFocus.visible ? buyButtonGoalSize : UDim2.fromScale(0, 0),
-        })).Play();
-
-        return () => newTrash.Destroy();
+        tween.Play();
     }))
 
     // when ever the robux or buy coins get pressed
-    trash.Add(effect(() => {
+    trash.Add(useEffect((newTrash) => {
         const buyButtonFocus = pageStates.buyButtonFocus();
         const villagersShop = pageStates.villagersShop();
         const villagerInfo = villagersShop[buyButtonFocus.selectedVillagerIndex];
-        const newTrash = new Janitor();
 
         // updates the villager info box
         if (villagerInfo) {
-            buyButton.BasicBuy.Cost.Text = `$${villagerInfo.Price}`;
-            buyButton.RobuxBuy.Cost.Text = tostring(villagerInfo.Robux);
+            buyButton.Nomral.Text = `$${villagerInfo.Price}`;
+            buyButton.Robux.Text = tostring(villagerInfo.Robux);
 
             // when buying with coins
             newTrash.Add(UIUtilities.ButtonAction({
-                Button: buyButton.BasicBuy,
-                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.BasicBuy.Size, sizeOffset),
-                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.BasicBuy.Size, sizeOffset),
+                Button: buyButton.Nomral,
+                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.Nomral.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.Nomral.Size, sizeOffset),
             }, () => {
                 routes.buyVillager.send({
                     villagerIndex: buyButtonFocus.selectedVillagerIndex,
@@ -154,9 +157,9 @@ export default (pagePaths: PagePaths) => {
 
             // when buying with robux
             newTrash.Add(UIUtilities.ButtonAction({
-                Button: buyButton.RobuxBuy,
-                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.RobuxBuy.Size, sizeOffset),
-                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.RobuxBuy.Size, sizeOffset),
+                Button: buyButton.Robux,
+                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.Robux.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.Robux.Size, sizeOffset),
             }, () => {
                 routes.buyVillager.send({
                     villagerIndex: buyButtonFocus.selectedVillagerIndex,
@@ -164,12 +167,10 @@ export default (pagePaths: PagePaths) => {
                 })
             }))
         }
-
-        return () => newTrash.Destroy();
     }))
 
     // any time totalTimeForNewVillager changes, we update the time
-    trash.Add(effect(() => {
+    trash.Add(useEffect(() => {
         const totalTimeForNewVillager = pageStates.totalTimeForNewVillager();
         const formattedTime = formatDuration(totalTimeForNewVillager);
 

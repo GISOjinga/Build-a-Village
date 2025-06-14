@@ -49,7 +49,7 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
     }, () => {
-        pageStates.openPage("Robux");
+        pageStates.openPage("RobuxStore");
     }))
 
     return trash

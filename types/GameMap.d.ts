@@ -5,7 +5,6 @@ type GameMap = Folder & {
 			Model: Model;
 		};
 		Sell: Model & {
-			SpawnLocation: SpawnLocation;
 			Noob: Model & {
 				["Left Leg"]: Part;
 				Humanoid: Humanoid;
@@ -45,7 +44,8 @@ type GameMap = Folder & {
 				};
 				["Body Colors"]: BodyColors;
 			};
-			Model: Model;
+			SpawnLocation: SpawnLocation;
+			TalkBox: Part;
 		};
 		Buy: Model & {
 			SpawnLocation: SpawnLocation;
@@ -92,20 +92,9 @@ type GameMap = Folder & {
 		};
 	};
 	Floor: Part;
-	Platforms: Model & {
-		Platform3: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+	Platforms: Folder & {
+		Platform3: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -114,7 +103,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -133,21 +123,22 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
-		Platform6: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+		Platform6: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -156,7 +147,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -175,21 +167,22 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
-		Platform5: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+		Platform5: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -198,7 +191,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -217,21 +211,22 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
-		Platform4: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+		Platform4: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -240,7 +235,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -259,21 +255,22 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
-		Platform1: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+		Platform1: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -282,7 +279,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -301,21 +299,22 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
-		Platform2: Model & {
-			NameSign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
+		Platform2: Folder & {
+			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
 				["Castle Wall"]: Model;
@@ -324,7 +323,8 @@ type GameMap = Folder & {
 				["Log Wall"]: Model;
 				["Ironwood Fence"]: Model;
 			};
-			Floor: Model;
+			Floor: Part;
+			Villagers: Folder;
 			BuySign: Model & {
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
@@ -343,6 +343,18 @@ type GameMap = Folder & {
 			SpawnLocation: SpawnLocation & {
 				Texture: Texture;
 				t: Texture;
+			};
+			NameSign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
 			};
 		};
 	};

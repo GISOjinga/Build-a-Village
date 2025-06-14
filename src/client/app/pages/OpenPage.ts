@@ -10,7 +10,23 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
-    const sizeOffset = UDim2.fromScale(1.05, 1.05);
+    const sizeOffset = UDim2.fromScale(1.1, 1.1);
+
+    // loops through all the page paths
+    for (const [_, page] of pairs(pagePaths)) {
+        const closeButton = page.FindFirstChild<GuiButton>("Close")
+
+        // binds an action animation to close the page
+        if (closeButton) {
+            trash.Add(UIUtilities.ButtonAction({
+                Button: closeButton,
+                ExpandedSize: UIUtilities.MultiplyUdim2(closeButton.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(closeButton.Size, sizeOffset),
+            }, () => {
+                pageStates.openPage("None")
+            }))
+        }
+    }
 
 
     // binds an action animation to buy
@@ -18,7 +34,9 @@ export default (pagePaths: PagePaths) => {
         const openPage = pageStates.openPage()
 
         pagePaths.VillagersPage.Visible = openPage === "Buy"
-        pagePaths.RobuxStore.Visible = openPage === "Robux"
+        pagePaths.RobuxStore.Visible = openPage === "RobuxStore"
+        pagePaths.GiftPage.Visible = openPage === "Gift"
+        pagePaths.WallPage.Visible = openPage === "Wall"
     }))
 
     return trash

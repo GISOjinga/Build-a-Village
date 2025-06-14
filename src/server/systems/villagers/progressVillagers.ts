@@ -1,7 +1,7 @@
 import { World } from "@rbxts/jecs";
 import { useThrottle } from "shared/Plugin-Hook";
-import { addComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { Added, MaxedOut, ModelDebugger, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { addComponent, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { ActiveVillagers, Added, MaxedOut, ModelDebugger, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
 
@@ -125,5 +125,36 @@ export default (world: World) => {
                 })
             }
         }
+    }
+
+
+    // if a player has a produce all component then take their villagers and set their resources amount to the max
+    for (const [villagerEntity, { villagerData, villagerModel }] of world.query(Villager, ProduceAll).without(MaxedOut)) {
+        const buildingTimes = villagerData.Progress.Building
+        const progression = villagerData.Progress.Progression
+        const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
+
+        // sets to fully built
+        buildingTimes.EndTime = os.time()
+
+        // sets the max resources
+        progression.Resources.Amount = maxResources;
+
+        // removes its self
+        removeComponent(villagerEntity, ProduceAll);
+    }
+
+    // when ever player has produce all
+    for (const [playerEntity, villagers] of world.query(ActiveVillagers, ProduceAll)) {
+        villagers.forEach(({ entity }) => {
+            // if villager entity exists then
+            if (world.contains(entity)) {
+                // adds produce all to villager
+                addComponent(entity, ProduceAll);
+            }
+        })
+
+        // removes produce all from player
+        removeComponent(playerEntity, ProduceAll);
     }
 }

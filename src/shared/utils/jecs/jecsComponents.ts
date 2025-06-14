@@ -111,6 +111,9 @@ export const Villager = component<{
     playerEntity: Entity,
 }>("Villager");
 
+// to produce all
+export const ProduceAll = component("ProduceAll");
+
 /*************** Physics ***************/
 
 // body turner rotating

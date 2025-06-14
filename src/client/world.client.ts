@@ -24,14 +24,26 @@ import paths from "shared/utils/paths";
 import GameUI from "client/app/GameUI";
 import pagePaths from "shared/utils/Animations/pagePaths";
 import updateTools from "./systems/player/updateTools";
+import DialogueSellUI from "./app/DialogueSellUI";
+import HoverBoxUI from "./app/HoverBoxUI";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
+const dialogueSellUI = paths.Assets.UI.DialogueSell.Clone()
+const hoverBoxUI = paths.Assets.UI.HoverBox.Clone()
 const gameUI = paths.Assets.UI.GameUI.Clone()
 
 // set up the UI
 gameUI.Parent = playerGui
 GameUI(pagePaths(gameUI))
+
+// sets up dialogue sell
+dialogueSellUI.Parent = playerGui
+DialogueSellUI(dialogueSellUI)
+
+// sets up hover box
+hoverBoxUI.Parent = playerGui
+HoverBoxUI(hoverBoxUI)
 
 
 
