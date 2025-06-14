@@ -17,7 +17,8 @@ export default (world: World) => {
         const player = data && world.get(bodyEntity, Player)
         const backpack = player && player.FindFirstChild("Backpack");
 
-        if (backpack && data && !deepEquals(data.Villagers, dataChange.old || {})) {
+        print(dataChange, bodyEntity)
+        if (backpack && data && ((!dataChange.old || (!deepEquals(data.Villagers, dataChange.old?.Villagers || []) || !deepEquals(data.Produce, dataChange.old?.Produce || []))))) {
             const body = data && world.get(bodyEntity, Body);
             const alltools = backpack && body && [...backpack.GetChildren(), ...body.model.GetChildren()].filter((v) => v.IsA("Tool")).filterUndefined();
 
@@ -26,9 +27,10 @@ export default (world: World) => {
                 alltools.forEach((tool) => tool.Destroy());
 
                 // adds all the villager tools
-                for (const [index, villagersData] of pairs(data.Villagers)) {
-                    if (villagersData.RelativeLocation) continue; // skip if the villager is placed
-                    const villagerName = villagersData.Name
+                // print(data.Villagers)
+                data.Villagers.forEach((villagerData) => {
+                    if (villagerData.RelativeLocation) return; // skip if the villager is placed
+                    const villagerName = villagerData.Name
                     const tool = new Instance("Tool");
 
                     // set up and parenting
@@ -36,14 +38,32 @@ export default (world: World) => {
                     tool.Name = villagerName;
                     tool.SetAttribute("ItemType", "Villager");
                     tool.SetAttribute("ItemName", villagerName);
-                    tool.SetAttribute("UniqueId", villagersData.UniqueId);
+                    tool.SetAttribute("UniqueId", villagerData.UniqueId);
                     tool.Parent = backpack
 
                     // when the tool is activated
                     tool.Activated.Connect(() => {
                         // printTS($line, "Activated")
                     })
-                }
+                })
+
+                // for all produce
+                data.Produce.forEach((produceData) => {
+                    const produceName = produceData.Name;
+                    const tool = new Instance("Tool");
+
+                    // set up and parenting
+                    tool.RequiresHandle = false
+                    tool.Name = `${produceName} (${produceData.Amount})`;
+                    tool.SetAttribute("ItemType", "Commodity");
+                    tool.SetAttribute("ItemName", produceName);
+                    tool.Parent = backpack
+
+                    // when the tool is activated
+                    tool.Activated.Connect(() => {
+                        // printTS($line, "Activated")
+                    })
+                })
             }
         }
     }

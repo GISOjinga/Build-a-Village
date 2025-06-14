@@ -3,6 +3,7 @@ type ProgressMap = ReturnType<<A extends VillagerNames>() => Map<A, VillagerProg
 
 export default new Map<VillagerNames, VillagerProgress>([
     ["Blacksmith", {
+        Produce: "Bread",
         Progression: {
             Time: {
                 RequiredTimePerResource: 3,
@@ -18,6 +19,7 @@ export default new Map<VillagerNames, VillagerProgress>([
         },
     }],
     ["Farmer", {
+        Produce: "Sword",
         Progression: {
             Time: {
                 RequiredTimePerResource: 20,

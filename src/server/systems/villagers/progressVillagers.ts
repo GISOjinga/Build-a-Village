@@ -1,7 +1,8 @@
 import { World } from "@rbxts/jecs";
+import { $line } from "rbxts-transformer-inline";
 import { useThrottle } from "shared/Plugin-Hook";
-import { addComponent, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { ActiveVillagers, Added, MaxedOut, ModelDebugger, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { addComponent, createEntity, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { ActiveVillagers, Added, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
 
@@ -27,7 +28,8 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 
 export default (world: World) => {
     // when villager is added but not fully built then
-    for (const [_, villagerEntity, { villagerData, villagerModel }] of world.query(TargetEntity, Added(Villager))) {
+    for (const [_, villagerEntity, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Added(Villager))) {
+        const player = world.get(playerEntity, Player)
         const buildingTimes = villagerData.Progress.Building
         const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
         const hitBox = new Instance("Part")
@@ -40,6 +42,27 @@ export default (world: World) => {
         hitBox.CFrame = villagerModel.GetPivot();
         hitBox.Name = "HitBox";
         hitBox.Parent = villagerModel;
+
+        // when proximity prompt is called
+        villagerModel.Station.Interaction.Collect.ProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
+            const villagerData = world.contains(villagerEntity) && world.get(villagerEntity, Villager)
+            if (playerWhoTriggered === player && villagerData) {
+                const totalResources = villagerData.villagerData.Progress.Progression.Resources.Amount || 0
+
+                // if villager has resources then updates the villlager data with the resources of 0 and gives the total away with inventoryProduce
+                if (totalResources > 0) {
+                    printTS($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
+                    // gives the produce to the player
+                    createEntity.inventoryProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
+
+                    // sets the resources to 0
+                    villagerData.villagerData.Progress.Progression.Resources.Amount = 0;
+
+                    // updates the villager entity
+                    addComponent(villagerEntity, Villager, villagerData);
+                }
+            }
+        })
 
         // adds model debugger
         addComponent(villagerEntity, ModelDebugger, villagerModel)

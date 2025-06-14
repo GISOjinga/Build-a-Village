@@ -162,6 +162,7 @@ type WallInfo = {
 
 //* villager progress
 type VillagerProgress = {
+    Produce: ProduceNames,
     Progression: {
         Time: {
             RequiredTimePerResource: number;
@@ -177,8 +178,19 @@ type VillagerProgress = {
     };
 }
 
-//* villager data
-type VillagerData = { Name: VillagerNames, UniqueId: number, RelativeLocation: CFrame | undefined, Progress: VillagerProgress }
+//* villager datapr
+type VillagerData = {
+    Name: VillagerNames,
+    UniqueId: number,
+    RelativeLocation: CFrame | undefined,
+    Progress: VillagerProgress
+}
+
+//* produce
+type ProduceData = {
+    Name: ProduceNames,
+    Amount: number,
+}
 
 //* villager model
 type VillagerModel = Assets["Villagers"]["VillagerExample"];
@@ -192,8 +204,11 @@ type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {Item
 //* villager names
 type VillagerNames = keyof Omit<Omit<Assets["Villagers"], keyof Folder>, "VillagerExample">;
 
+//* produce names
+type ProduceNames = "Bread" | "Sword"
+
 //* wall names
 type WallNames = "Stone Wall" | "Wooden Wall" | "Metal Wall" | "Brick Wall" | "Glass Wall";
 
 //* item name
-type ItemName = VillagerNames | "Bread";
+type ItemName = VillagerNames | ProduceNames;

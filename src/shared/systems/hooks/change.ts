@@ -4,8 +4,9 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { $line } from "rbxts-transformer-inline"
 import { useMemo, useState } from "shared/Plugin-Hook"
 import { printTS } from "shared/utils/functions/jecsHelpFunctions"
-import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
+import { Added, addedQuery, Changed, changedQuery, Data, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
 import { appendJecs } from "./append"
+import { deepCopy } from "@rbxts/object-utils"
 
 
 // components
@@ -49,18 +50,18 @@ export default {
         addedQuery.forEach((comp) => {
             world.set(comp, OnAdd, (entity) => {
                 const pairing = pair(entity, comp)
+                const value = world.get(entity, comp)
+                const entityAdded = world.entity()
 
-                // appends the entity into the world
+                // sets the value
+                previousValue.set(pairing, typeIs(value, "table") ? deepCopy(value) : value)
+
+                // append
                 appendJecs(() => {
-                    const entityAdded = world.entity()
-                    const value = world.get(entity, comp)
-                    const appendEntity2 = world.entity()
-
                     // applies the added component to the entity && updates the previous value
                     world.set(entityAdded, TargetEntity, entity)
                     world.set(entityAdded, Added(comp), value)
                     createChangeSave(world, entity, comp, undefined, value)
-                    previousValue.set(pairing, value) // takes a second for the value to show up
 
                     // when it comes back full circle: Removed added entity so it doesn't show twice
                     appendJecs(() => world.delete(entityAdded))
@@ -75,7 +76,7 @@ export default {
                 const oldValue = previousValue.get(pairing)
 
                 // sets the new value
-                previousValue.set(pairing, newValue)
+                previousValue.set(pairing, typeIs(newValue, "table") ? deepCopy(newValue) : newValue)
 
                 // calls it
                 createChangeSave(world, entity, comp, oldValue, newValue)
@@ -94,7 +95,6 @@ export default {
                 // appends the entity into the world
                 appendJecs(() => {
                     const entityRemoved = world.entity()
-                    const appendEntity2 = world.entity()
 
                     // applies the removed component to the entity
                     world.set(entityRemoved, Removed(comp), oldValue)

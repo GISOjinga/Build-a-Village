@@ -141,7 +141,7 @@ export default (pagePaths: PagePaths) => {
         // updates the villager info box
         if (villagerInfo) {
             buyButton.Nomral.Text = `$${villagerInfo.Price}`;
-            buyButton.Robux.Text = tostring(villagerInfo.Robux);
+            buyButton.Robux.Text = `${villagerInfo.Robux}`;
 
             // when buying with coins
             newTrash.Add(UIUtilities.ButtonAction({

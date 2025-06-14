@@ -76,7 +76,7 @@ const _addedComponent = component<Entity>("Added")
 const _removedComponent = component<Entity>("Removed")
 
 // for changes
-type Changed<T> = { old?: T, new?: T }
+type Changed<T> = { readonly old?: T, readonly new?: T }
 export const [changedQuery, addedQuery, removedQuery] = [new Set<Entity>(), new Set<Entity>(), new Set<Entity>()]
 export const Changed = <T>(comp: Entity<T>) => { changedQuery.add(comp); Added(comp); Removed(comp); return pair<Changed<T>, T>(_changedComponent as unknown as Entity<Changed<T>>, comp as unknown as Entity<T>) }
 export const Added = <T>(comp: Entity<T>) => { addedQuery.add(comp); return pair<T, undefined>(_addedComponent as unknown as Entity<T>, comp as unknown as Entity<undefined>) }

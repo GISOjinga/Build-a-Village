@@ -145,6 +145,22 @@ export const createEntity = {
         })
     },
 
+    // to adds a villager tool to your inventory
+    inventoryProduce: (bodyEntity: Entity, produceName: ProduceNames, amount:number = 1) => {
+        createEntity.updateData(bodyEntity, (oldData: PlayerData) => {
+            const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName) || oldData.Produce.size()
+
+            // sets the new amount
+            oldData.Produce[produceIndex] = {
+                Name: produceName,
+                Amount: (oldData.Produce[produceIndex]?.Amount || 0) + amount, // if it exists then increase the amount
+            }
+
+            // returns the updated data
+            return oldData;
+        })
+    },
+
     // to update data
     updateData: (bodyEntity: Entity, updateFunction: (oldData: PlayerData) => PlayerData) => {
         const updateEntity = world.entity()

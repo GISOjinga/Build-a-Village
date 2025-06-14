@@ -648,6 +648,12 @@ type Assets = Folder & {
 	Villagers: Folder & {
 		Blacksmith: Model & {
 			Station: Model & {
+				Interaction: Model & {
+					Collect: Part & {
+						ProximityPrompt: ProximityPrompt;
+						WeldConstraint: WeldConstraint;
+					};
+				};
 				Particles: Model & {
 					ImpactBlacksmith: Part & {
 						Attachment: Attachment & {
@@ -784,55 +790,9 @@ type Assets = Folder & {
 			};
 		};
 		VillagerExample: Model & {
-			Station: Model & {
-				Particles: Model & {
-					ImpactBlacksmith: Part & {
-						Attachment: Attachment & {
-							Spark3: ParticleEmitter;
-							Spark1: ParticleEmitter;
-							Spark2: ParticleEmitter;
-						};
-					};
-				};
-				Parts: Model & {
-					StationParts: Model & {
-						Rack: Model & {
-							Part3: Part;
-							Part2: Part;
-							Part1: Part;
-							Part5: Part;
-							Part6: Part;
-							Part7: Part;
-							Part8: Part;
-							Part4: Part;
-						};
-						Anvil: Model & {
-							Part3: Part;
-							Part1: Part;
-							Part5: Part;
-							Part6: Part;
-							Part8: Part;
-							Part4: Part;
-							Part2: Part;
-							Part11: Part;
-							Part13: Part;
-							Part7: Part;
-							Part12: Part;
-							Part10: Part;
-							Part9: Part;
-						};
-					};
-					ProgressFull: Model;
-					InProgress: Model & {
-						["1"]: Model;
-					};
-					Resources: Model & {
-						["1"]: Model;
-						["4"]: Model;
-						["3"]: Model;
-						["2"]: Model;
-					};
-				};
+			Accessories: Model & {
+				Pot: Model;
+				Hat: Model;
 			};
 			Npc: Model & {
 				["Left Leg"]: Part;
@@ -840,6 +800,7 @@ type Assets = Folder & {
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
+					Part: Weld;
 					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
 					face: Decal;
@@ -867,23 +828,80 @@ type Assets = Folder & {
 				};
 				["Right Arm"]: Part & {
 					RightShoulderAttachment: Attachment;
+					Part: Weld;
 				};
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
 				};
-				["Body Colors"]: BodyColors;
-			};
-			Accessories: Model & {
-				Googles: Model & {
-					Center: Part & {
-						Head: Weld;
+				Animate: Script & {
+					idle: StringValue & {
+						Animation2: Animation & {
+							Weight: NumberValue;
+						};
+						Animation1: Animation & {
+							Weight: NumberValue;
+						};
+					};
+					climb: StringValue & {
+						ClimbAnim: Animation;
+					};
+					sit: StringValue & {
+						SitAnim: Animation;
+					};
+					run: StringValue & {
+						RunAnim: Animation;
+					};
+					ScaleDampeningPercent: NumberValue;
+					jump: StringValue & {
+						JumpAnim: Animation;
+					};
+					fall: StringValue & {
+						FallAnim: Animation;
+					};
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
+					};
+					walk: StringValue & {
+						WalkAnim: Animation;
 					};
 				};
-				Malet: Model & {
-					Part: Part;
-					Center: Part & {
+				["Body Colors"]: BodyColors;
+			};
+			Station: Model & {
+				Interaction: Model & {
+					Collect: Part & {
+						ProximityPrompt: ProximityPrompt;
+						WeldConstraint: WeldConstraint;
+					};
+				};
+				Particles: Model & {
+					Part: Part & {
+						Water: ParticleEmitter;
 						Part: Weld;
-						["Right Arm"]: Weld;
+					};
+				};
+				Parts: Model & {
+					ProgressFull: Model & {
+						["1"]: Model;
+					};
+					Resources: Model & {
+						["1"]: Model;
+					};
+					InProgress: Model & {
+						["1"]: Model;
+						["4"]: Model;
+						["3"]: Model;
+						["2"]: Model;
+					};
+					StationParts: Model & {
+						PlotOfGrass: Model & {
+							Part3: Part;
+							Part2: Part;
+							Center: Part;
+							Part1: Part;
+							Part4: Part;
+						};
+						Container: Model;
 					};
 				};
 			};
@@ -967,6 +985,12 @@ type Assets = Folder & {
 				["Body Colors"]: BodyColors;
 			};
 			Station: Model & {
+				Interaction: Model & {
+					Collect: Part & {
+						ProximityPrompt: ProximityPrompt;
+						WeldConstraint: WeldConstraint;
+					};
+				};
 				Particles: Model & {
 					Part: Part & {
 						Water: ParticleEmitter;
