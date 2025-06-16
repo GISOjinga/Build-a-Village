@@ -8,6 +8,7 @@ import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { routes } from "shared/data/network";
 import Net from "@rbxts/yetanothernet";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import { setEntity } from "shared/utils/functions/jecsHelpFunctions";
 
 // function to call when data changes
 const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>, newData: Partial<PlayerData>, oldData: PlayerData) => void>([
@@ -65,6 +66,7 @@ export default (world: World) => {
             const playerData = getPlayerData(player);
             if (playerData) {
                 world.set(bodyEntity, Data, playerData);
+                setEntity.addTargetForReplication(bodyEntity, player, Data);
                 world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity });
             } else {
                 warn(`No player data found for ${player.Name}`);

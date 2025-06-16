@@ -99,6 +99,9 @@ export const Player = component<Player>("Player");
 // is alive
 export const Alive = component("Alive");
 
+// to gift to
+export const GiftTo = component<Player>("GiftTo");
+
 /*************** Villagers ***************/
 
 // the hover box attachment
@@ -259,7 +262,7 @@ export const IncreaseParticlesSize = component<{
 }>("IncreaseParticleSize");
 
 
-export const componentsToReplicate = { Body, Villager };
+export const componentsToReplicate = { Body, Villager, Data };
 
 // list of phases in order
 const phaseNamesWithOrder = [

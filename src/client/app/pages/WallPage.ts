@@ -40,7 +40,7 @@ export default (pagePaths: PagePaths) => {
         wallsShop.forEach((wallInfo, index) => {
             const wallBox = sample.Clone();
             const sizeOffset = UDim2.fromScale(1.01, 1.01);
-            const buyButton = wallBox.buyButton;
+            const buyButton = wallBox.buy;
 
             // set up
             sample.Visible = false

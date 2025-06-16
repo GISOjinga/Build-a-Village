@@ -85,7 +85,7 @@ export default {
         useRoute(routes.getReplicatedComponents, (_, player) => replicateAllToPlayer(world, player))
 
         // when ever player gets added
-        for (const [player] of useEvent(Players.PlayerAdded)) replicateAllToPlayer(world, player)
+        useRoute(routes.jecsSetup, (_, player) => replicateAllToPlayer(world, player))
 
         // loops through each component that needs replication
         for (const [componentName, component] of pairs(componentsToReplicate)) {

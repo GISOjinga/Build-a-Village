@@ -52,5 +52,10 @@ export default (pagePaths: PagePaths) => {
         pageStates.openPage("RobuxStore");
     }))
 
+    // updates your coins
+    trash.Add(effect(() => {
+        pagePaths.Page.Playercash.Text = `$${pageStates.coins()}`;
+    }));
+
     return trash
 }

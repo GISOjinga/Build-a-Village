@@ -24,11 +24,11 @@ export = (gameUI: GameUI) => {
             ...oldVillagersShop, {
                 Name: "Blacksmith",
                 Price: 100,
-                Robux: 10,
                 InStock: 10,
                 Image: "rbxassetid://112646206830150",
                 Description: "A friendly villager.",
                 Rarity: "Common",
+                ProductId: 3308078109, // Example product ID for in-game purchases
                 Tier: 1,
             }, {
                 Name: "Blacksmith",
@@ -38,6 +38,7 @@ export = (gameUI: GameUI) => {
                 Image: "rbxassetid://112646206830150",
                 Description: "A friendly villager.",
                 Rarity: "Common",
+                ProductId: 3308077941, // Example product ID for in-game purchases
                 Tier: 1,
             }
         ]

@@ -136,10 +136,10 @@ type VillagerInfo = {
     Description: string;
     Image: string;
     Price: number;
-    Robux: number;
     Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
     Tier: number;
     InStock: number;
+    ProductId: number; // optional product ID for in-game purchases
 }
 
 //* limited time shop

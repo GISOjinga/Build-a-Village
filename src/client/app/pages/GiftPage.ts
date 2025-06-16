@@ -1,6 +1,6 @@
 import { effect } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
-import { Players, TweenService } from "@rbxts/services";
+import { MarketplaceService, Players, TweenService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
@@ -22,6 +22,7 @@ export default (pagePaths: PagePaths) => {
 
 
     // loads in each box
+    sample.Visible = false;
     trash.Add(useEffect((newTrash) => {
         giftPage.Visible = pageStates.openPage() === "Gift";
     }))
@@ -32,7 +33,7 @@ export default (pagePaths: PagePaths) => {
 
         // clears all the samples that are already there and visible
         scrollingFrame.GetChildren().forEach((child) => {
-            if (child.IsA("Frame") && child.Visible && child !== sample) child.Destroy()
+            if (child.IsA("ImageButton") && child.Visible && child !== sample) child.Destroy()
         });
 
         // loops through players makes a sample for each one
@@ -46,6 +47,25 @@ export default (pagePaths: PagePaths) => {
             // sets the name
             playerSample.SampleName.Text = player.Name;
             playerSample.SampleName.TextLabel.Text = player.Name;
+
+            // when clicked
+            trash.Add(UIUtilities.ButtonAction({
+                Button: playerSample,
+                ExpandedSize: UIUtilities.MultiplyUdim2(playerSample.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(playerSample.Size, sizeOffset),
+            }, () => {
+                const productToGift = pageStates.productToGift()
+
+                // closes the gift page
+                pageStates.openPage("None")
+
+                // if produict to gift then
+                if (productToGift) {
+                    routes.giftTo.send(player)
+                    MarketplaceService.PromptProductPurchase(player, productToGift);
+                    return;
+                }
+            }))
         });
     }
 

@@ -148,12 +148,18 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
 
     // steps it
     systemQueue.addPlugin(new PlankJabbyPlugin()).addPlugin(new PlanckHooksPlugin())
+    startUpsOrdered.forEach((phase) => {
+        systems.forEach((system) => {
+            if (system.phase === phase) {
+                systemQueue.addSystem(system.system, system.phase || phase)
+                systemQueue.run(system.system)
+            }
+        })
+    })
     hotReload(systems)
 
-    // runs each start up
-    startUpsOrdered.forEach((phase) => {
-        systems.forEach((system) => { if (system.phase === phase) systemQueue.run(system.system) })
-    })
+
+    if (RunService.IsClient()) routes.jecsSetup.send()
 
     // return the debugger
     return debug

@@ -10,6 +10,7 @@ import paths from "shared/utils/paths";
 // loads the character
 export default (world: World) => {
     Players.GetPlayers().forEach(player => {
+        if (!player.GetAttribute("JecsLoaded")) return;
         if (!player.GetAttribute("characterSpawnedTag")) {
 
             // sets loaded to true

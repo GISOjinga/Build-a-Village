@@ -25,10 +25,8 @@ type MapTableToByteNet<T> =
     T extends Instance ? ByteNetType<T> :
     // 3) Primitive Vector3
     T extends Vector3 ? ByteNetType<Vector3> :
-    // 4) Arrays
-    T extends Array<infer U> ? ByteNetType<MapTableToByteNet<U>> :
     // 5) Maps
-    T extends Map<any, infer V> ? ByteNetType<MapTableToByteNet<V>> :
+    T extends Map<infer G, infer V> ? ByteNetType<Map<G, MapTableToByteNet<V>>> :
     // 6) Plain objects (exclude functions)
     T extends object
     ? (T extends Function
@@ -68,6 +66,19 @@ const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
 
     return {
+        // notification
+        notify: definePacket({
+            value: struct({
+                text: ByteNet.string,
+                duration: ByteNet.uint8,
+            }),
+        }),
+
+        // to gift your next robux purchace to a player
+        giftTo: definePacket({
+            value: ByteNet.inst as ByteNetType<Player>,
+        }),
+
         // place villager
         placeVillager: definePacket({
             value: ByteNet.cframe,
@@ -83,7 +94,10 @@ const packets = defineNamespace("gameEvents", () => {
 
         // update shop villagers
         updateVillagersShop: definePacket({
-            value: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
+            value: struct({
+                TimeTillRestock: ByteNet.uint32,
+                Villagers: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
+            }),
         }),
 
         // teleport to your village
@@ -99,6 +113,7 @@ const packets = defineNamespace("gameEvents", () => {
         // route to get replicated components
         getReplicatedComponents: definePacket({ value: ByteNet.nothing }),
         deleteReplicatedEntity: definePacket({ value: ByteNet.unknown as ByteNetType<Entity> }),
+        jecsSetup: definePacket({ value: ByteNet.nothing }),
 
         // for replicating components
         ...{
@@ -142,10 +157,46 @@ const packets = defineNamespace("gameEvents", () => {
                     }),
                 })),
             }),
-        } satisfies { [k in keyof typeof componentsToReplicate]: packet<struct<{
-            serverEntity: ByteNetType<Entity>,
-            data: optional<MapTableToByteNet<ComponentValue<MappedComponents[k]>>>
-        }>> },
+
+            // data
+            Data: definePacket({
+                value: componentStruct(struct({
+                    Version: ByteNet.string,
+                    Coins: ByteNet.uint32,
+                    Fence: ByteNet.string as ByteNetType<FenceNames>,
+                    Villagers: array(ByteNet.struct({
+                        Name: ByteNet.string as ByteNetType<VillagerNames>,
+                        UniqueId: ByteNet.uint32,
+                        RelativeLocation: optional(ByteNet.cframe),
+                        Progress: struct({
+                            Produce: ByteNet.string as ByteNetType<ProduceNames>,
+                            Progression: struct({
+                                Time: struct({
+                                    RequiredTimePerResource: ByteNet.uint16,
+                                    StartTime: ByteNet.uint16,
+                                }),
+                                Resources: struct({
+                                    Amount: ByteNet.uint8,
+                                }),
+                            }),
+                            Building: struct({
+                                StartTime: ByteNet.uint16,
+                                EndTime: ByteNet.uint16,
+                            }),
+                        }),
+                    })),
+                    Produce: array(struct({
+                        Name: ByteNet.string as ByteNetType<ProduceNames>,
+                        Amount: ByteNet.uint8 as ByteNetType<number>,
+                    })),
+                })),
+            }),
+        } satisfies {
+            [k in keyof typeof componentsToReplicate]: packet<struct<{
+                serverEntity: ByteNetType<Entity>,
+                data: optional<MapTableToByteNet<ComponentValue<MappedComponents[k]>>>
+            }>>
+        },
 
         // for replicating player state
         replicatePlayerState: definePacket({

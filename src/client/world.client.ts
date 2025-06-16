@@ -28,6 +28,8 @@ import DialogueSellUI from "./app/DialogueSellUI";
 import HoverBoxUI from "./app/HoverBoxUI";
 import { HoverBoxAttachment, world } from "shared/utils/jecs/jecsComponents";
 import hoverBoxUpdate from "./systems/ui/hoverBoxUpdate";
+import playerDataUpdate from "./systems/ui/playerDataUpdate";
+import shopDataUpdate from "./systems/ui/shopDataUpdate";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
@@ -96,6 +98,8 @@ const debug = setupMatter([
 
     // ui
     { system: hoverBoxUpdate },
+    { system: playerDataUpdate },
+    { system: shopDataUpdate },
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,

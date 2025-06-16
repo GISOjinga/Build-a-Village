@@ -1,6 +1,6 @@
 import { effect } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
-import { TweenService } from "@rbxts/services";
+import { MarketplaceService, Players, TweenService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
@@ -48,6 +48,7 @@ export default (pagePaths: PagePaths) => {
     const buyButtonTweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
 
     // sets the buy button size to be invisible
+    exampleBox.Visible = false;
     buyButton.Size = UDim2.fromScale(0, 0);
     buyButton.Visible = true;
 
@@ -57,7 +58,7 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.VillagersPage.ReStock.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.VillagersPage.ReStock.Size, sizeOffset),
     }, () => {
-
+        MarketplaceService.PromptProductPurchase(Players.LocalPlayer, 3308848691)
     }))
 
     // loads in each box
@@ -111,7 +112,10 @@ export default (pagePaths: PagePaths) => {
         }))
 
         // tweens the shadow holder
-        buyButton.shadowHolder.Visible = buyButtonFocus.visible;
+        newTrash.Add(TweenService.Create(buyButton.bg, buyButtonTweenInfo, {
+            ImageTransparency: buyButtonFocus.visible ? 0 : 1,
+        })).Play();
+        // buyButton.shadowHolder.Visible = buyButtonFocus.visible;
 
         // toggles all ui strokes
         buyButton.GetDescendants().forEach((descendant) => {
@@ -137,17 +141,19 @@ export default (pagePaths: PagePaths) => {
         const buyButtonFocus = pageStates.buyButtonFocus();
         const villagersShop = pageStates.villagersShop();
         const villagerInfo = villagersShop[buyButtonFocus.selectedVillagerIndex];
+        const [passed, productInfo] = pcall(() => MarketplaceService.GetProductInfo(villagerInfo.ProductId, Enum.InfoType.Product));
 
         // updates the villager info box
         if (villagerInfo) {
-            buyButton.Nomral.Text = `$${villagerInfo.Price}`;
-            buyButton.Robux.Text = `${villagerInfo.Robux}`;
+            buyButton.Normal.Visible = villagerInfo.InStock > 0 ? true : false;
+            buyButton.Normal.Text = `$${villagerInfo.Price}`;
+            buyButton.Robux.Text = `${passed ? productInfo.PriceInRobux : 0}`;
 
             // when buying with coins
             newTrash.Add(UIUtilities.ButtonAction({
-                Button: buyButton.Nomral,
-                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.Nomral.Size, sizeOffset),
-                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.Nomral.Size, sizeOffset),
+                Button: buyButton.Normal,
+                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.Normal.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.Normal.Size, sizeOffset),
             }, () => {
                 routes.buyVillager.send({
                     villagerIndex: buyButtonFocus.selectedVillagerIndex,
@@ -166,20 +172,30 @@ export default (pagePaths: PagePaths) => {
                     currency: "Robux",
                 })
             }))
+
+            // request to buy
+            newTrash.Add(UIUtilities.ButtonAction({
+                Button: buyButton.Gift,
+                ExpandedSize: UIUtilities.MultiplyUdim2(buyButton.Gift.Size, sizeOffset),
+                DeExpandedSize: UIUtilities.DivideUdim2(buyButton.Gift.Size, sizeOffset),
+            }, () => {
+                pageStates.productToGift(villagerInfo.ProductId);
+                pageStates.openPage("Gift");
+            }))
         }
     }))
 
     // any time totalTimeForNewVillager changes, we update the time
-    trash.Add(useEffect(() => {
-        const totalTimeForNewVillager = pageStates.totalTimeForNewVillager();
-        const formattedTime = formatDuration(totalTimeForNewVillager);
+    trash.Add(task.spawn(() => {
+        while (true) {
+            const totalTimeForNewVillager = pageStates.totalTimeForNewVillager();
+            const formattedTime = formatDuration(totalTimeForNewVillager);
 
-        // updates the countdown text in a formated way
-        pagePaths.VillagersPage.Countdown.Text = `New Villagers in ${formattedTime}`;
+            // updates the countdown text in a formated way
+            pagePaths.VillagersPage.Countdown.Text = `New Villagers in ${formattedTime}`;
+            task.wait(1)
+        }
     }))
-
-    // when ever the villagers get updated by the route then
-    trash.Add(routes.updateVillagersShop.listen(pageStates.villagersShop))
 
     return trash
 }

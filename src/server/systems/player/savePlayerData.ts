@@ -19,6 +19,7 @@ export default (world: World) => {
         // if (playerData) task.spawn(() => dataStore.SetAsync(`${player.UserId}`, playerData))
     }
     Players.GetPlayers().forEach(player => {
+        if (!player.GetAttribute("JecsLoaded")) return;
         if (!player.GetAttribute("DataLoaded")) {
             // sets it as loaded
             player.SetAttribute("DataLoaded", true)

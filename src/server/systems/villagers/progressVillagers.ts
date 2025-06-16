@@ -1,7 +1,7 @@
 import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
 import { useThrottle } from "shared/Plugin-Hook";
-import { addComponent, createEntity, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, createEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { ActiveVillagers, Added, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
@@ -51,7 +51,7 @@ export default (world: World) => {
 
                 // if villager has resources then updates the villlager data with the resources of 0 and gives the total away with inventoryProduce
                 if (totalResources > 0) {
-                    printTS($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
+                    printJecs($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
                     // gives the produce to the player
                     createEntity.inventoryProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
 

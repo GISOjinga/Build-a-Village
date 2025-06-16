@@ -20,6 +20,10 @@ export default (pagePaths: PagePaths) => {
     const sizeOffset = UDim2.fromScale(1.2, 1.2);
     const introTextPage = pagePaths.IntroTextPage;
 
+    // when ever notify is called
+    introTextPage.Visible = true
+    trash.Add(routes.notify.listen(pageStates.introText))
+
     // loads in each box
     trash.Add(useEffect((newTrash) => {
         const introText = pageStates.introText();

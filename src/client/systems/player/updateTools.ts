@@ -38,7 +38,79 @@ const highlightTween = (passed: boolean) => {
     }
 }
 
+/**
+ * Snaps a CFrame to the nearest grid unit relative to a given origin CFrame.
+ * The object's rotation is preserved, and the pivot point is snapped to the grid.
+ *
+ * @param originCFrame - The CFrame defining the grid's origin and orientation.
+ * @param objectCFrame - The object's CFrame to be snapped.
+ * @param gridSize - Size of one grid unit (default: 1)
+ * @returns A new CFrame snapped to the grid, preserving rotation.
+ */
+export function getSnappedGridCFrame(originCFrame: CFrame, objectCFrame: CFrame, gridSize = 1): CFrame {
+    // Convert object's world position into the local space of the grid
+    const localPos = originCFrame.PointToObjectSpace(objectCFrame.Position);
 
+    // Snap the local coordinates to the nearest grid step
+    const snappedLocalX = math.floor((localPos.X / gridSize) + 0.5) * gridSize;
+    const snappedLocalY = math.floor((localPos.Y / gridSize) + 0.5) * gridSize;
+    const snappedLocalZ = math.floor((localPos.Z / gridSize) + 0.5) * gridSize;
+
+    const snappedLocalPos = new Vector3(snappedLocalX, snappedLocalY, snappedLocalZ);
+
+    // Convert the snapped position back into world space
+    const snappedWorldPos = originCFrame.PointToWorldSpace(snappedLocalPos);
+
+    // Extract rotation from the original object's CFrame
+    const [_, __, ___, R00, R01, R02, R10, R11, R12, R20, R21, R22] = objectCFrame.GetComponents();
+
+    // Return a new CFrame with snapped position and original rotation
+    return new CFrame(
+        snappedWorldPos.X, snappedWorldPos.Y, snappedWorldPos.Z,
+        R00, R01, R02,
+        R10, R11, R12,
+        R20, R21, R22
+    );
+}
+
+/**
+ * Clamps a CFrame (with size) to stay fully within a rotated bounding box.
+ *
+ * @param objectCFrame - The object's CFrame.
+ * @param objectSize - The object's full size (from GetExtentsSize()).
+ * @param boundsCFrame - The center CFrame of the bounding region.
+ * @param boundsSize - The bounds' full size (e.g. platform size).
+ * @returns A new CFrame with the object's position clamped, preserving rotation.
+ */
+export function clampCFrameToBounds(
+    objectCFrame: CFrame,
+    objectSize: Vector3,
+    boundsCFrame: CFrame,
+    boundsSize: Vector3
+): CFrame {
+    // Convert object's position into bounds' local space
+    const localPos = boundsCFrame.PointToObjectSpace(objectCFrame.Position);
+
+    // Rotate the object's size into bounds-local space to get actual footprint
+    const objectRight = objectCFrame.RightVector.Abs().mul(objectSize.X);
+    const objectUp = objectCFrame.UpVector.Abs().mul(objectSize.Y);
+    const objectLook = objectCFrame.LookVector.Abs().mul(objectSize.Z);
+    const rotatedSize = objectRight.add(objectUp).add(objectLook);
+    const objectHalf = rotatedSize.div(2);
+    const boundsHalf = boundsSize.div(2);
+
+    // Clamp local position so the object stays fully within the bounds
+    const clampedX = math.clamp(localPos.X, -boundsHalf.X + objectHalf.X, boundsHalf.X - objectHalf.X);
+    const clampedY = math.clamp(localPos.Y, -boundsHalf.Y + objectHalf.Y, boundsHalf.Y - objectHalf.Y);
+    const clampedZ = math.clamp(localPos.Z, -boundsHalf.Z + objectHalf.Z, boundsHalf.Z - objectHalf.Z);
+
+    const clampedLocalPos = new Vector3(clampedX, clampedY, clampedZ);
+    const clampedWorldPos = boundsCFrame.PointToWorldSpace(clampedLocalPos);
+
+    // Reconstruct CFrame with original rotation but clamped position
+    const [_, __, ___, R00, R01, R02, R10, R11, R12, R20, R21, R22] = objectCFrame.GetComponents();
+    return new CFrame(clampedWorldPos.X, clampedWorldPos.Y, clampedWorldPos.Z, R00, R01, R02, R10, R11, R12, R20, R21, R22);
+}
 
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player);
@@ -108,6 +180,7 @@ export default (world: World) => {
 
             // if the tool is a villager then
             if (ToolType === "Villager") {
+                const hitBox = new Instance("Part")
 
                 // sets up fake model
                 printJecs($line, "Creating fake model for Villager", ItemName);
@@ -127,6 +200,15 @@ export default (world: World) => {
                 highlight.FillTransparency = .5
                 highlight.OutlineTransparency = 0;
                 highlight.Parent = fakeModel;
+
+                // set up part
+                hitBox.Transparency = 1;
+                hitBox.Anchored = true;
+                hitBox.CanCollide = false
+                hitBox.Size = fakeModel.GetExtentsSize();
+                hitBox.CFrame = fakeModel.GetPivot();
+                hitBox.Name = "HitBox";
+                hitBox.Parent = fakeModel;
             }
         }
     }
@@ -140,8 +222,8 @@ export default (world: World) => {
 
     // if fake model exists and a valid platform/tool are present
     if (useThrottle(.01) && fakeModel && highlight && platform && platformFloor && equippedTool && registeredTools.has(equippedTool)) {
-        const modelHalfExtents = fakeModel.GetExtentsSize().mul(0.5);
-        const platformHalfExtents = platformFloor.Size.mul(0.5);
+        const fullModelSize = fakeModel.GetExtentsSize();
+        const modelHalfExtents = fullModelSize.mul(0.5);
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
 
@@ -155,28 +237,18 @@ export default (world: World) => {
             if (hitResults.hit && hitResults.normal === Vector3.yAxis) {
                 // convert world hit pos into platform-local space
                 const localHitPos = platformFloor.CFrame.PointToObjectSpace(hitResults.position);
-                const clampedX = math.clamp(
-                    localHitPos.X,
-                    -platformHalfExtents.X + modelHalfExtents.X,
-                    platformHalfExtents.X - modelHalfExtents.X
-                );
-                const clampedZ = math.clamp(
-                    localHitPos.Z,
-                    -platformHalfExtents.Z + modelHalfExtents.Z,
-                    platformHalfExtents.Z - modelHalfExtents.Z
-                );
-                const clampedLocalPos = new Vector3(clampedX, localHitPos.Y, clampedZ);
-                const worldPos = platformFloor.CFrame.PointToWorldSpace(clampedLocalPos);
-                const goalPos = new Vector3(math.floor(worldPos.X), math.max(worldPos.Y, platformFloor.Position.Y), math.floor(worldPos.Z));
-                const finalCFrame = CFrame.lookAlong(
+                const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
+                const goalPos = new Vector3(worldPos.X, math.max(worldPos.Y, platformFloor.Position.Y), worldPos.Z);
+                const finalCFrame = clampCFrameToBounds(CFrame.lookAlong(
                     goalPos.add(Vector3.yAxis.mul(modelHalfExtents.Y - .25)),
                     platformDirection,
                     Vector3.yAxis
-                ).mul(CFrame.Angles(0, math.rad(rotatedY), 0));
+                ).mul(CFrame.Angles(0, math.rad(rotatedY), 0)), fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
+                const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
 
                 // move the model
-                fakeModel.PivotTo(fakeModel.GetPivot().Lerp(finalCFrame, .2));
-                goalCFrame = finalCFrame
+                fakeModel.PivotTo(fakeModel.GetPivot().Lerp(realCFrame, .2));
+                goalCFrame = realCFrame
                 highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
             } else {
                 highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
