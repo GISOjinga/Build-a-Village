@@ -2,7 +2,7 @@ import { Atom, atom } from "@rbxts/charm";
 
 
 const pageStates = {
-    openPage: atom("None") as Atom<"Wall" | "Gift" | "Buy" | "RobuxStore" | "None">,
+    openPage: atom("None") as Atom<"Wall" | "Gift" | "Buy" | "RobuxStore" | "Sell" | "None">,
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
     wallsShop: atom(new Array<WallInfo>()),

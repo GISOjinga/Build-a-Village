@@ -130,7 +130,10 @@ export default (world: World) => {
         const platform = platformEntity && world.get(platformEntity, Platform);
 
         // if platform and body then teleports the players rootpart to the platform spawn
-        if (platform && body) body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
+        if (platform && body) {
+            routes.toggleSellMenuOpen.sendTo(false, player); // close sell menu if open
+            body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
+        }
     })
 
     // use route watching for shop teleport
@@ -140,7 +143,10 @@ export default (world: World) => {
         const shopSpawn = paths.Map.Shops[shopName].SpawnLocation
 
         // if platform and body then teleports the players rootpart to the platform spawn
-        if (body) body.rootPart.CFrame = shopSpawn.CFrame
+        if (body) {
+            body.rootPart.CFrame = shopSpawn.CFrame
+            if (shopName === "Sell") routes.toggleSellMenuOpen.sendTo(true, player); // close sell menu if open
+        }
     })
 
 

@@ -21,12 +21,6 @@ export default (pagePaths: PagePaths) => {
     const scrollingFrame = wallPage.ScrollingFrame;
     const sample = scrollingFrame.Sample;
 
-
-    // loads in each box
-    trash.Add(useEffect((newTrash) => {
-        wallPage.Visible = pageStates.openPage() === "Wall";
-    }))
-
     // when ever the walls update
     trash.Add(useEffect((newTrash) => {
         const wallsShop = pageStates.wallsShop();

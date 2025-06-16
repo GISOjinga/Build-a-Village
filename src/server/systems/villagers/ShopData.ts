@@ -20,4 +20,10 @@ export default {
             ProductId: 3308078109,
         }
     ] satisfies Array<VillagerInfo> as Array<VillagerInfo>,
+    SellPrice: {
+        Farmer: 50,
+        Blacksmith: 100,
+        Bread: 25,
+        Sword: 50,
+    } satisfies { [key in (VillagerNames | ProduceNames)]: number } as { [key in (VillagerNames | ProduceNames)]: number },
 }

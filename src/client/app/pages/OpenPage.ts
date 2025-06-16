@@ -4,6 +4,8 @@ import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
+import useEffect from "../hooks/useEffect";
+import { TweenService } from "@rbxts/services";
 
 
 
@@ -11,6 +13,19 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
     const sizeOffset = UDim2.fromScale(1.1, 1.1);
+    let [robuxStoreDirection, wallDirection] = [1, 1]
+    const originalPositions = {
+        Gift: pagePaths.GiftPage.Position,
+        Wall: pagePaths.WallPage.Position,
+        Buy: pagePaths.VillagersPage.Position,
+        RobuxStore: pagePaths.RobuxStore.Position,
+    }
+    const pageNameToInstance = {
+        Gift: pagePaths.GiftPage,
+        Wall: pagePaths.WallPage,
+        Buy: pagePaths.VillagersPage,
+        RobuxStore: pagePaths.RobuxStore,
+    }
 
     // loops through all the page paths
     for (const [_, page] of pairs(pagePaths)) {
@@ -28,15 +43,30 @@ export default (pagePaths: PagePaths) => {
         }
     }
 
-
-    // binds an action animation to buy
-    trash.Add(effect(() => {
+    trash.Add(useEffect((newTrash) => {
         const openPage = pageStates.openPage()
 
-        pagePaths.VillagersPage.Visible = openPage === "Buy"
-        pagePaths.RobuxStore.Visible = openPage === "RobuxStore"
-        pagePaths.GiftPage.Visible = openPage === "Gift"
-        pagePaths.WallPage.Visible = openPage === "Wall"
+        // if the page is not open then return
+        robuxStoreDirection = openPage === "RobuxStore" ? robuxStoreDirection * -1 : robuxStoreDirection;
+        wallDirection = openPage === "Wall" ? wallDirection * -1 : wallDirection;
+
+        // loops through all of them to tween each
+        for (const [pageName, page] of pairs(pageNameToInstance)) {
+            const originalPagePosition = originalPositions[pageName];
+            const closePosition = pageName === "Gift" ? UDim2.fromScale(originalPositions.Gift.X.Scale, 2)
+                : pageName === "Buy" ? UDim2.fromScale(originalPositions.Buy.X.Scale, -2)
+                    : pageName === "RobuxStore" ? UDim2.fromScale(-2 * robuxStoreDirection, originalPositions.RobuxStore.Y.Scale)
+                        : pageName === "Wall" ? UDim2.fromScale(-2 * wallDirection, originalPositions.Wall.Y.Scale)
+                            : UDim2.fromScale(.5, -2);
+
+            // sets the position of the page
+            page.Visible = true;
+
+            // creates a tween to move the page to its position
+            newTrash.Add(TweenService.Create(page, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+                Position: openPage === pageName ? originalPagePosition : closePosition
+            })).Play();
+        }
     }))
 
     return trash

@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { routes } from "shared/data/network";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
 import ShopData from "./ShopData";
-import { Added, Data, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, Data, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
@@ -167,6 +167,107 @@ export default (world: World) => {
             removeComponent(playerEntity, GiftTo);
         }
     }
+
+    // when ever the option confirmation setting is called
+    useRoute(routes.confirmSellOptions, (option, player) => {
+        const playerEntity = getEntity.fromInstance(player);
+        const body = playerEntity && world.get(playerEntity, Body);
+        const data = playerEntity && world.get(playerEntity, Data);
+
+        // if data then
+        if (playerEntity && body && data) {
+            if (option === "Option1") {
+                // sells all your items in your inventory
+                createEntity.updateData(playerEntity, (oldData) => {
+                    const totalItemsWithNames = new Map<(VillagerNames | ProduceNames), number>();
+
+                    // loops through your villagers tallys them up
+                    oldData.Villagers.forEach((villagerData) => {
+                        if (villagerData.RelativeLocation) return; // skip if the villager is placed
+                        const villagerName = villagerData.Name;
+                        const currentAmount = totalItemsWithNames.get(villagerName) || 0;
+                        totalItemsWithNames.set(villagerName, currentAmount + 1);
+                    });
+
+                    // loops through your produce tallys them up
+                    oldData.Produce.forEach((produceData) => {
+                        const produceName = produceData.Name;
+                        const currentAmount = totalItemsWithNames.get(produceName) || 0;
+                        totalItemsWithNames.set(produceName, currentAmount + produceData.Amount);
+                    });
+
+                    // removes the villagers that arent spawned
+                    oldData.Villagers = oldData.Villagers.filter((villagerData) => villagerData.RelativeLocation ? true : false);
+                    oldData.Produce.clear();
+
+                    // adds up your coins
+                    totalItemsWithNames.forEach((amount, name) => {
+                        oldData.Coins += amount * ShopData.SellPrice[name];
+                    });
+
+                    printTS($line, player.Name + " sold all items for", oldData.Coins, "Coins");
+
+                    if (totalItemsWithNames.size() < 1) routes.notify.sendTo({
+                        text: "You’re not holding anything to sell.",
+                        duration: 5,
+                    }, player);
+
+                    return oldData;
+                });
+            } else if (option === "Option2") { // just sells the equipped tool
+                const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
+
+                // if the tool is a villager then sells it
+                if (tool) {
+                    const itemName = tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
+                    const uniqueId = tool.GetAttribute("UniqueId") as number;
+                    const villagerInfo = uniqueId !== undefined ? data.Villagers.find((v) => v.UniqueId === uniqueId) : undefined;
+                    const produceInfo = data.Produce.find((p) => p.Name === itemName);
+
+                    // removes the item from the data
+                    createEntity.updateData(playerEntity, (oldData) => {
+                        // if the villager info is found then remove it
+                        if (villagerInfo) {
+                            printTS($line, player.Name + " sold villager", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
+                            oldData.Villagers = oldData.Villagers.filter((v) => v.UniqueId !== uniqueId);
+                            oldData.Coins += ShopData.SellPrice[itemName] || 0; // adds the coins from the villager
+                        } else if (produceInfo) { // if the produce info is found then remove it
+                            printTS($line, player.Name + " sold produce", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
+                            oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
+                            oldData.Coins += ShopData.SellPrice[itemName] || 0; // adds the coins from the produce
+                        }
+
+                        return oldData
+                    })
+                } else {
+                    routes.notify.sendTo({
+                        text: "You’re not holding anything to sell.",
+                        duration: 5,
+                    }, player);
+                }
+            } else if (option === "Option3") { // tells you with routes.notify how much this tool your holding cost
+                const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
+                const itemName = tool && tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
+                const isVillager = tool && tool.GetAttribute("UniqueId") as boolean;
+
+                // if the tool is a villager then tells you how much it costs
+                if (tool && itemName) {
+                    const totalItemCount = isVillager ? 1 : data.Produce.find((p) => p.Name === itemName)?.Amount || 1;
+                    routes.notify.sendTo({
+                        text: `That would sell for ${(ShopData.SellPrice[itemName] || 0) * totalItemCount} Coins`,
+                        duration: 5,
+                    }, player);
+                } else {
+                    routes.notify.sendTo({
+                        text: "You’re not holding anything to sell.",
+                        duration: 5,
+                    }, player);
+                }
+            } else if (option === "Option4") { // closes sell menu
+                routes.toggleSellMenuOpen.sendTo(false, player);
+            }
+        }
+    })
 
     // when ever a request is made to buy a villager
     useRoute(routes.buyVillager, ({ villagerIndex, currency }, player) => {

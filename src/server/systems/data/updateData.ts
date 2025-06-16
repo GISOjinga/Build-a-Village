@@ -35,7 +35,7 @@ export default (world: World) => {
         if (body && oldData) {
             const { model } = body;
             const player = Players.GetPlayerFromCharacter(model);
-            const updatedData = updateFunction(oldData);
+            const updatedData = { ...updateFunction(oldData) };
             const changedIndexes = new Array<keyof PlayerData>();
 
             // Update the Data component.

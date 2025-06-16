@@ -141,13 +141,17 @@ export default (pagePaths: PagePaths) => {
         const buyButtonFocus = pageStates.buyButtonFocus();
         const villagersShop = pageStates.villagersShop();
         const villagerInfo = villagersShop[buyButtonFocus.selectedVillagerIndex];
-        const [passed, productInfo] = pcall(() => MarketplaceService.GetProductInfo(villagerInfo.ProductId, Enum.InfoType.Product));
 
         // updates the villager info box
         if (villagerInfo) {
+            trash.Add(task.spawn(() => {
+                const [passed, productInfo] = pcall(() => MarketplaceService.GetProductInfo(villagerInfo.ProductId, Enum.InfoType.Product));
+                buyButton.Robux.Text = `${passed ? productInfo.PriceInRobux : 0}`;
+                if (!passed) printTS($line, "Failed to get product info for villager", villagerInfo.Name, ":", productInfo);
+            }))
+
             buyButton.Normal.Visible = villagerInfo.InStock > 0 ? true : false;
             buyButton.Normal.Text = `$${villagerInfo.Price}`;
-            buyButton.Robux.Text = `${passed ? productInfo.PriceInRobux : 0}`;
 
             // when buying with coins
             newTrash.Add(UIUtilities.ButtonAction({

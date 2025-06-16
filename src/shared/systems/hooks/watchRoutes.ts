@@ -27,7 +27,7 @@ export default {
 
 
         // loops through all the routes to listen to them
-        for (const [_, route] of Object.entries(routes)) {
+        for (const [name, route] of Object.entries(routes)) {
             const dataCalled = [] as (unknown[])[]
 
             // if route data doesnt have the route then adds it

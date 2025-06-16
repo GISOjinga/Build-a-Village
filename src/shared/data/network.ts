@@ -66,6 +66,16 @@ const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
 
     return {
+        // closes out the sell menu
+        toggleSellMenuOpen: definePacket({
+            value: ByteNet.bool
+        }),
+
+        // sell options
+        confirmSellOptions: definePacket({
+            value: ByteNet.string as ByteNetType<"Option1" | "Option2" | "Option3" | "Option4">,
+        }),
+
         // notification
         notify: definePacket({
             value: struct({

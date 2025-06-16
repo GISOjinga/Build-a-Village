@@ -23,9 +23,6 @@ export default (pagePaths: PagePaths) => {
 
     // loads in each box
     sample.Visible = false;
-    trash.Add(useEffect((newTrash) => {
-        giftPage.Visible = pageStates.openPage() === "Gift";
-    }))
 
     // load players
     const loadPlayers = () => {

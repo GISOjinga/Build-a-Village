@@ -27,11 +27,26 @@ export default (sellPage: DialogueSellUI) => {
                 trash.Add(UIUtilities.ButtonAction({
                     Button: hoverButton,
                 }, () => {
-                    printTS($line, "pressed sell option", option);
+                    routes.confirmSellOptions.send(option as "Option1")
                 }));
             }
         }
     })
+
+    // when the route to toggle sell menu is called then
+    trash.Add(routes.toggleSellMenuOpen.listen((open: boolean) => {
+        printTS($line, "Toggling sell menu", open)
+        pageStates.openPage(open ? "Sell" : "None");
+    }))
+
+    // listens to changes to sell menu open
+    trash.Add(useEffect((newTrash) => {
+        const sellMenuOpen = pageStates.openPage();
+
+        newTrash.Add(TweenService.Create(sellPage.Frame, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+            Size: sellMenuOpen === "Sell" ? UDim2.fromScale(1, 1) : UDim2.fromScale(0, 0),
+        })).Play()
+    }))
 
     return trash
 }
