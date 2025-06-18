@@ -272,6 +272,7 @@ const phaseNamesWithOrder = [
     "PostStartup",
 
     // initial
+    "DebuggerHook",
     "ChangeHook",
     "AppendHook",
     "First",

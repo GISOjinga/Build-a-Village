@@ -13,7 +13,7 @@
 import { Entity, World } from "@rbxts/jecs" // Matter framework functions and types.
 import { $line } from "rbxts-transformer-inline" // Inline transformer for debug line numbers.
 import { componentsToReplicate, Phases } from "shared/utils/jecs/jecsComponents" // Matter components.
-import { createDebugger } from "shared/utils/functions/matterFunctions" // Utility to create a debugger.
+
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
@@ -92,15 +92,13 @@ function checkData(data?: unknown) {
     }
 }
 
-
-
 /*****************************************************************************************
  * Damage Status Effects System Entry Point.
  *****************************************************************************************/
 export default {
     phase: Phases.First,
     system: (world) => {
-        const debugEnabled = createDebugger(script.Name);
+
 
         // when the deleteReplicatedEntity is called
         useRoute(routes.deleteReplicatedEntity, (serverEntity) => {
@@ -128,7 +126,7 @@ export default {
                         world.set(clientEntity, component, newData as never)
                     }
                 } else {
-                    if (debugEnabled) warn(`Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
+                    warn(`Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
                     appendJecs(() => replicate({ serverEntity, data: newData }))
                 }
             }

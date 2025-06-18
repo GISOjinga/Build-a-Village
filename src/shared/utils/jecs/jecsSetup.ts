@@ -11,7 +11,7 @@ import PlankJabbyPlugin from "@rbxts/planck-jabby";
 import { PlanckHooksPlugin } from "shared/Plugin-Hook";
 import { Phase } from "@rbxts/planck";
 import { getInstanceByName } from "../functions/instanceFunctions";
-import { createDebugger } from "../functions/matterFunctions";
+import { createDebugger } from "../functions/jecsHelpFunctions";
 
 
 
@@ -48,9 +48,6 @@ function transformPath(inputPath: string) {
 function hotReload(systems: Array<SystemTable<[World]>>) {
     systems.forEach(systemStruct => {
         let systemMod = getInstanceByName(debug.info(systemStruct.system, "s")[0])
-
-        // if the script exists
-        if (systemMod) createDebugger(systemMod.Name)
 
         // if system mod descendant of players
         if (systemMod) {
@@ -148,6 +145,13 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
 
     // steps it
     systemQueue.addPlugin(new PlankJabbyPlugin()).addPlugin(new PlanckHooksPlugin())
+    // loops through all the start up systems and creates a debugger for them
+    systems.forEach((systemStruct) => {
+        let systemMod = getInstanceByName(debug.info(systemStruct.system, "s")[0])
+        if (systemMod) createDebugger(false, systemMod.Name)
+    })
+
+    // adds the systems for initial start up
     startUpsOrdered.forEach((phase) => {
         systems.forEach((system) => {
             if (system.phase === phase) {
@@ -156,6 +160,8 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
             }
         })
     })
+
+    // adds the rest of the systems
     hotReload(systems)
 
 

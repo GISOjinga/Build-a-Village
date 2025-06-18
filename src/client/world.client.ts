@@ -30,6 +30,7 @@ import { HoverBoxAttachment, world } from "shared/utils/jecs/jecsComponents";
 import hoverBoxUpdate from "./systems/ui/hoverBoxUpdate";
 import playerDataUpdate from "./systems/ui/playerDataUpdate";
 import shopDataUpdate from "./systems/ui/shopDataUpdate";
+import debuggerHook from "shared/systems/hooks/debuggerHook";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
@@ -73,6 +74,7 @@ const debug = setupMatter([
     { system: updateMovers },
 
     // hooks
+    debuggerHook,
     recieveFromServer,
     change,
     watchRoutes,

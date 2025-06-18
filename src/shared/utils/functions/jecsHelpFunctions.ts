@@ -1,4 +1,4 @@
-import { Entity, Pair, pair, w, Wildcard, World } from "@rbxts/jecs";
+import { Entity, Name, Pair, pair, w, Wildcard, World } from "@rbxts/jecs";
 import * as components from "shared/utils/jecs/jecsComponents";
 import { AlignPosition, CountDown, DestroyAfterCounting, Float, MoveTo, world, ZeroOutVelocity } from "../jecs/jecsComponents";
 import Object, { deepCopy } from "@rbxts/object-utils";
@@ -6,7 +6,6 @@ import { Players, RunService, Workspace } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { PlayerState as PlayerStateComponent } from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "../PlayerState";
-import { createDebugger } from "./matterFunctions";
 import { getInstanceByName } from "./instanceFunctions";
 import { Janitor } from "@rbxts/janitor";
 import { PlayerData } from "shared/data/defaultData";
@@ -323,23 +322,68 @@ const getCallerSourceFromTraceback = () => {
 
 
 
+const jecsPrintRecord = new Map<string, (any[])[]>();
+const printDebugRegistry = new Map<string, Entity>()
+export const createDebugger = (initial: boolean = false, _systemName?:string) => {
+    const scriptPath = getCallerSourceFromTraceback()
+    const sourceScript = scriptPath && getInstanceByName(scriptPath)
+    const systemName = _systemName || sourceScript && sourceScript.Name || "UnknownSystem";
+    const debugEntity = printDebugRegistry.get(systemName)
+    const debugInfo = debugEntity && world.get(debugEntity, components.Debug)
+    const jecsMaping = jecsPrintRecord.get(systemName) || new Array();
+
+    // if the debug entity already exists, return the current state
+    if (!printDebugRegistry.has(systemName)) {
+        const debugEntity = world.entity()
+
+        world.set(debugEntity, components.Debug, { name: systemName, debug: initial !== undefined ? initial : false })
+        world.set(debugEntity, Name, systemName)
+        printDebugRegistry.set(systemName, debugEntity)
+    } else if (debugInfo?.debug === true && jecsMaping.size() > 0) {
+
+        // if jecsMaping is greater than 0 then print 
+        print(`Previous Jecs Calls (${jecsMaping.size()}) On ${systemName}:`);
+        for (const [index, previousCall] of pairs(jecsMaping)) {
+            print(...[...previousCall, ` (Previous Call #${index})`] as unknown[]);
+        }
+
+        // clears the record
+        jecsPrintRecord.set(systemName, []);
+    }
+
+    // returns the current state of the print debug for the system
+    return debugInfo?.debug || false
+}
+
 // for printing
 export const printJecs = (line:number, ...message:unknown[]) => {
     const fullName = [...message] as string[]
     const scriptPath = getCallerSourceFromTraceback()
     const sourceScript = scriptPath && getInstanceByName(scriptPath)
-    const debugEnabled = sourceScript && createDebugger(sourceScript.Name)
+    const debugEnabled = sourceScript && createDebugger()
+    const systemName = sourceScript && sourceScript.Name || "UnknownSystem";
+    const firstMessage = sourceScript && `   -   TypeScript(Jecs) ${systemName}:${line}`
+    const jecsMaping = jecsPrintRecord.get(systemName)|| new Array();
 
     // if debug is disabled then return
     if (!sourceScript) {
         warn(`Script not found for line ${line}: ${scriptPath}`);
         return
     } else if (debugEnabled === false) {
+
+        // sets it
+        jecsMaping.unshift([...message, firstMessage])
+        if (jecsMaping.size() > 200) {
+            for (let i = 199; i < jecsMaping.size()-1; i++) {
+                jecsMaping.pop()
+            }
+        }
+        jecsPrintRecord.set(systemName, jecsMaping);
         return
     }
 
     // prints the message
-    fullName.push(`   -   TypeScript(Jecs) ${sourceScript.Name}:${line}` as never);
+    fullName.push(firstMessage as never);
     print(...fullName);
 }
 

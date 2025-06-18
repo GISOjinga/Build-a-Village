@@ -14,7 +14,7 @@ import { Entity, OnRemove, World } from "@rbxts/jecs" // Matter framework functi
 import { useMemo } from "@rbxts/react" // React hooks for state management.
 import { $line } from "rbxts-transformer-inline" // Inline transformer for debug line numbers.
 import { Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetReplication } from "shared/utils/jecs/jecsComponents" // Matter components.
-import { createDebugger } from "shared/utils/functions/matterFunctions" // Utility to create a debugger.
+
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEvent } from "shared/Plugin-Hook"
@@ -79,7 +79,7 @@ function serializeForReplication(data: unknown): unknown {
 export default {
     phase: Phases.First,
     system: (world) => {
-        const debugEnabled = createDebugger(script.Name);
+
 
         // when ever getReplicatedComponents is called
         useRoute(routes.getReplicatedComponents, (_, player) => replicateAllToPlayer(world, player))

@@ -21,10 +21,9 @@ import villagersShop from "./systems/villagers/villagersShop";
 import updateTools from "./systems/player/updateTools";
 import progressVillagers from "./systems/villagers/progressVillagers";
 import placeVillagers from "./systems/villagers/placeVillagers";
+import debuggerHook from "shared/systems/hooks/debuggerHook";
 
 
-// hotReloader.scan(script.Parent!, (context) => { }, (context) => { });
-import("@rbxts/jabby")
 
 // sets up matter
 setupMatter([
@@ -44,6 +43,7 @@ setupMatter([
     { system: updateMovers },
 
     // hooks
+    debuggerHook,
     replicateToClient,
     change,
     watchRoutes,

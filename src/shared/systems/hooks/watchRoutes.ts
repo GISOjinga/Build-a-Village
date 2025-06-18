@@ -13,6 +13,7 @@ import { appendJecs } from "./append"
 
 export const routesData = new Map<packet<ByteNetType<unknown>>, (unknown[])[]>()
 
+
 // for change
 export default {
     phase: Phases.PreStartup,
@@ -25,21 +26,20 @@ export default {
         trash.LinkToInstance(script, true)
         trash.Add(() => connectedRoutes.forEach((routeCallback) => routeCallback()))
 
-
         // loops through all the routes to listen to them
-        for (const [name, route] of Object.entries(routes)) {
+        for (const [_, route] of Object.entries(routes)) {
             const dataCalled = [] as (unknown[])[]
 
             // if route data doesnt have the route then adds it
             routesData.set(route as never, dataCalled)
 
             // listens to it
-            connectedRoutes.push(route.listen((routeData, player) => {
+            route.listen((routeData, player) => {
                 appendJecs(() => {
                     dataCalled.push([routeData, player])
                     appendJecs(() => dataCalled.shift())
                 })
-            }))
+            })
         }
     }
 } as SystemTable<[World]>
