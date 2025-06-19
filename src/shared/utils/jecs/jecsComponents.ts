@@ -55,14 +55,16 @@ export const RouteEntities = new Map<packet<ByteNetType<unknown>>, Entity>()
 /*************** game settinngs ***************/
 
 // setting name
-export const Settings = component("Settings")
-const createSetting = <T = undefined>(name: string, defaultValue?: T) => {
+export const Settings = component<true>("Settings")
+export let SettingsComponents = {} as { [key in string]: Entity<unknown> }
+const createSetting = <T = true>(name: string, defaultValue?: T) => {
     const theComponent = component<T>(name, defaultValue)
 
     // Create a new component with the given name
-    world.set(theComponent, Settings, undefined)
+    world.set(theComponent, Settings, true)
 
     // returns it
+    SettingsComponents[name] = theComponent as Entity<T>
     return theComponent
 };
 
@@ -88,7 +90,7 @@ export const Removed = <T>(comp: Entity<T>) => { removedQuery.add(comp); return 
 export const Data = component<PlayerData>("Data");
 
 // update data
-export const UpdateData = component<{ updateFunction: (oldData: PlayerData) => PlayerData, bodyEntity: Entity }>("UpdateData");
+export const UpdateData = component<{ updateFunction: (oldData: PlayerData) => PlayerData, bodyEntity: Entity, updateAll?: true }>("UpdateData");
 
 // Player states
 export const PlayerState = component<PlayerStateType>("PlayerState");

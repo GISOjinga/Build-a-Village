@@ -1,14 +1,11 @@
 import { equals } from "@rbxts/phantom/src/Array";
 import { useHookState } from "../topo";
-
-interface storage {
-    dependencies?: readonly unknown[];
-}
+import { deepEquals } from "@rbxts/object-utils";
 
 
+const discriminators: Map<unknown, readonly unknown[]> = new Map();
 export function useChange(dependencies: readonly unknown[], discriminator: unknown = debug.traceback(),): boolean {
-    const storage = useHookState<storage>(discriminator);
-    const previous = storage.dependencies;
-    storage.dependencies = dependencies;
-    return !equals(previous, dependencies);
+    const previous = discriminators.get(discriminator);
+    discriminators.set(discriminator, dependencies);
+    return !previous || !deepEquals(previous, dependencies);
 }

@@ -1,9 +1,11 @@
 import { Entity, World } from "@rbxts/jecs";
+import { ContentProvider } from "@rbxts/services";
 import { addComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
+task.spawn(() => ContentProvider.PreloadAsync(paths.Assets.Animations.GetDescendants().filter(asset => asset.IsA("Animation"))))
 
 // list of all animations
 export const savedAnimationTracks = new WeakMap<Animator, Map<string, AnimationTrack>>()
@@ -35,18 +37,18 @@ export default (world: World) => {
                 const loadedAnimation = animator.LoadAnimation(asset)
 
                 // plays the animation
-                task.defer(() => {
-                    while (animator.GetPlayingAnimationTracks().size() > 200) {
-                        for (const track of animator.GetPlayingAnimationTracks()) { if (track.Length > 0 || track.TimePosition > 0) track.Stop() }
-                        task.wait(.01)
-                    }
+                // task.defer(() => {
+                //     while (animator.GetPlayingAnimationTracks().size() > 200) {
+                //         for (const track of animator.GetPlayingAnimationTracks()) { if (track.Length > 0 || track.TimePosition > 0) track.Stop() }
+                //         task.wait(.01)
+                //     }
 
-                    loadedAnimation.Play()
-                    task.wait(.01)
-                    loadedAnimation.Stop()
-                    totalToLoad--
-                    if (totalToLoad <= 0) addComponent(entity, LoadedAnimations)
-                })
+                //     loadedAnimation.Play()
+                //     task.wait(.01)
+                //     loadedAnimation.Stop()
+                //     totalToLoad--
+                //     if (totalToLoad <= 0) world.set(entity, LoadedAnimations, true)
+                // })
 
                 // saves the animation
                 totalToLoad++
@@ -58,7 +60,7 @@ export default (world: World) => {
         })
 
         // saves it to the entity
-        addComponent(entity, LoadingAnimations)
+        addComponent(entity, LoadedAnimations)
         savedAnimationTracks.set(animator, animations)
     }
 }

@@ -11,7 +11,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { setEntity } from "shared/utils/functions/jecsHelpFunctions";
 
 // function to call when data changes
-const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>, newData: Partial<PlayerData>, oldData: PlayerData) => void>([
+const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>, newData: Partial<PlayerData>, oldData: PlayerData, entity: Entity) => void>([
     // sends leveling data
     // ["LevelingData", (character, newData, oldData) => {
     //     const player = Players.GetPlayerFromCharacter(character);
@@ -35,7 +35,7 @@ export default (world: World) => {
         if (body && oldData) {
             const { model } = body;
             const player = Players.GetPlayerFromCharacter(model);
-            const updatedData = { ...updateFunction(oldData) };
+            const updatedData = updateFunction(oldData);
             const changedIndexes = new Array<keyof PlayerData>();
 
             // Update the Data component.
@@ -49,8 +49,8 @@ export default (world: World) => {
 
             // If no keys changed, skip further processing.
             funcToCallOnUpdate.forEach((func, key) => {
-                if (changedIndexes.includes(key)) {
-                    func(model as Character<R15>, updatedData, oldData);
+                if (update.updateAll || changedIndexes.includes(key)) {
+                    func(model as Character<R15>, updatedData, oldData, bodyEntity);
                 }
             });
 
@@ -66,14 +66,13 @@ export default (world: World) => {
             const playerData = getPlayerData(player);
             if (playerData) {
                 world.set(bodyEntity, Data, playerData);
-                setEntity.addTargetForReplication(bodyEntity, player, Data);
-                world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity });
+                world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity, updateAll: true });
             } else {
                 warn(`No player data found for ${player.Name}`);
             }
         } else {
             world.set(bodyEntity, Data, deepCopy(defaultData));
-            world.set(world.entity(), UpdateData, { updateFunction: () => defaultData, bodyEntity });
+            world.set(world.entity(), UpdateData, { updateFunction: () => defaultData, bodyEntity, updateAll: true });
         }
     }
 };
