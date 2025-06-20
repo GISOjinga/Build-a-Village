@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
 import { useThrottle } from "shared/Plugin-Hook";
 import { addComponent, createEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { ActiveVillagers, Added, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
 
@@ -30,9 +30,12 @@ export default (world: World) => {
     // when villager is added but not fully built then
     for (const [_, villagerEntity, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Added(Villager))) {
         const player = world.get(playerEntity, Player)
+        const body = world.get(playerEntity, Body);
         const buildingTimes = villagerData.Progress.Building
         const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
         const hitBox = new Instance("Part")
+        const proximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+        const requiredResource = villagerData.Progress.Required
 
         // set up part
         hitBox.Transparency = 1;
@@ -44,23 +47,65 @@ export default (world: World) => {
         hitBox.Parent = villagerModel;
 
         // when proximity prompt is called
-        villagerModel.Station.Interaction.Collect.ProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
+        proximityPrompt.Triggered.Connect((playerWhoTriggered) => {
             const villagerData = world.contains(villagerEntity) && world.get(villagerEntity, Villager)
+
             if (playerWhoTriggered === player && villagerData) {
-                const totalResources = villagerData.villagerData.Progress.Progression.Resources.Amount || 0
+                if (proximityPrompt.ActionText === "Collect All") {
+                    const totalResources = villagerData.villagerData.Progress.Progression.Resources.Amount || 0
 
-                // if villager has resources then updates the villlager data with the resources of 0 and gives the total away with inventoryProduce
-                if (totalResources > 0) {
-                    printJecs($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
-                    // gives the produce to the player
-                    createEntity.inventoryProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
+                    // if villager has resources then updates the villlager data with the resources of 0 and gives the total away with inventoryProduce
+                    if (totalResources > 0) {
+                        printJecs($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
+                        // gives the produce to the player
+                        createEntity.inventoryProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
 
-                    // sets the resources to 0
-                    villagerData.villagerData.Progress.Progression.Resources.Amount = 0;
+                        // sets the resources to 0
+                        villagerData.villagerData.Progress.Progression.Resources.Amount = 0;
 
-                    // updates the villager entity
-                    addComponent(villagerEntity, Villager, villagerData);
-                    removeComponent(villagerEntity, MaxedOut);
+                        // updates the villager entity
+                        addComponent(villagerEntity, Villager, villagerData);
+                        removeComponent(villagerEntity, MaxedOut);
+                    }
+                } else if (body && requiredResource && requiredResource.Amount < requiredResource.Max && proximityPrompt.ActionText === `Requires ${requiredResource.Produce}`) {
+                    const toolInHand = body.model.FindFirstChildOfClass("Tool")
+                    const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
+                    const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
+                    const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
+
+                    // if tool an
+                    if (toolType === "Commodity" && toolName === requiredResource.Produce) {
+                        // updates the players data
+                        createEntity.updateData(playerEntity, (oldData) => {
+                            const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
+                            const produce = oldData.Produce[produceIndex];
+                            const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);
+
+                            // takes away the produce from the player
+                            produce.Amount -= amountToTakeAway;
+
+                            // updates the villager
+                            addComponent(villagerEntity, Villager, {
+                                villagerData: {
+                                    ...villagerData.villagerData,
+                                    Progress: {
+                                        ...villagerData.villagerData.Progress,
+                                        Required: {
+                                            ...requiredResource,
+                                            Amount: requiredResource.Amount + amountToTakeAway
+                                        }
+                                    }
+                                },
+                                villagerModel,
+                                playerEntity
+                            })
+
+                            // if its 0 then removes it
+                            if (produce.Amount <= 0) oldData.Produce.remove(produceIndex);
+
+                            return oldData
+                        })
+                    }
                 }
             }
         })
@@ -93,15 +138,18 @@ export default (world: World) => {
     }
 
     // takes the villager through its transitions
-    if (useThrottle(.25)) {
+    if (useThrottle(.1)) {
         for (const [villagerEntity, villagerComp] of world.query(Villager).without(MaxedOut)) {
             const { villagerData, villagerModel } = villagerComp;
+            const requiredResource = villagerData.Progress.Required
             const buildingTimes = villagerData.Progress.Building
             const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
             const totalResourcesSoFar = villagerData.Progress.Progression.Resources.Amount || 0;
+            const proximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
 
             // toggles the interaction visiblity
-            villagerModel.Station.Interaction.Collect.ProximityPrompt.Enabled = totalResourcesSoFar > 0;
+            proximityPrompt.ActionText = (totalResourcesSoFar > 0 || !requiredResource) ? "Collect All" : (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "Collect";
+            proximityPrompt.Enabled = (totalResourcesSoFar > 0 || (requiredResource && requiredResource.Amount < requiredResource.Max)) ? true : false;
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
@@ -111,7 +159,7 @@ export default (world: World) => {
                 const hasMaxedResources = progression.Resources.Amount >= maxResources;
                 const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
                 const inProgressPercentile = totalTimeSinceLastResource / progression.Time.RequiredTimePerResource
-                const hasMetRequiredTime = totalTimeSinceLastResource >= progression.Time.RequiredTimePerResource;
+                const hasMetRequiredTime = totalTimeSinceLastResource >= progression.Time.RequiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
                 const currentInProgressPhase = math.max(1, maxInProgressPhases * inProgressPercentile);
 
                 // if has maxed resources then     
@@ -140,8 +188,14 @@ export default (world: World) => {
                         // increments the resources
                         progression.Resources.Amount += 1;
 
+                        // takes away from required
+                        if (requiredResource) requiredResource.Amount -= 1
+
                         // updates the start time
                         progression.Time.StartTime = os.time();
+                    } else if (requiredResource && requiredResource.Amount <= 0) {
+                        // if has not met required time and has no resources then
+                        progression.Time.StartTime = os.time(); // resets the start time
                     }
                 }
 

@@ -70,6 +70,11 @@ const packets = defineNamespace("gameEvents", () => {
         RelativeLocation: optional(ByteNet.cframe),
         Progress: struct({
             Produce: ByteNet.string as ByteNetType<ProduceNames>,
+            Required: optional(struct({
+                Produce: ByteNet.string as ByteNetType<ProduceNames>,
+                Amount: ByteNet.uint16,
+                Max: ByteNet.uint16,
+            })),
             Progression: struct({
                 Time: struct({
                     RequiredTimePerResource: ByteNet.uint16,
@@ -84,7 +89,8 @@ const packets = defineNamespace("gameEvents", () => {
                 EndTime: ByteNet.uint32,
             }),
         }),
-    })
+    }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
+
     return {
         // closes out the sell menu
         toggleSellMenuOpen: definePacket({

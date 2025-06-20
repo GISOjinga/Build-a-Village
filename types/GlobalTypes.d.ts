@@ -131,12 +131,13 @@ type DialogueSellUI = Assets["UI"]["DialogueSell"]
 type HoverBoxUI = Assets["UI"]["HoverBox"]
 
 //* villager box info
+type VillagerRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary"
 type VillagerInfo = {
     Name: VillagerNames;
     Description: string;
     Image: string;
     Price: number;
-    Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+    Rarity: VillagerRarity;
     Tier: number;
     InStock: number;
     ProductId: number; // optional product ID for in-game purchases
@@ -163,6 +164,11 @@ type WallInfo = {
 //* villager progress
 type VillagerProgress = {
     Produce: ProduceNames,
+    Required: {
+        Produce: ProduceNames,
+        Amount: number,
+        Max: number,
+    } | undefined,
     Progression: {
         Time: {
             RequiredTimePerResource: number;

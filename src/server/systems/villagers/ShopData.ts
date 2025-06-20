@@ -1,29 +1,29 @@
+import paths from "shared/utils/paths"
+
+const villagersData = [] as Array<VillagerInfo>
+
+// This is a placeholder for the villagers data.
+paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
+    villagersData.push({
+        Name: villager.Name as VillagerNames,
+        Price: villager.GetAttribute<number>("Price") || 0,
+        InStock: 0,
+        Image: villager.GetAttribute<string>("Image") || "",
+        Description: villager.GetAttribute<string>("Description") || "",
+        Rarity: villager.GetAttribute<VillagerRarity>("Rarity") || "Common",
+        Tier: villager.GetAttribute<number>("Tier") || 1,
+        ProductId: villager.GetAttribute<number>("ProductId") || 0,
+    })
+})
+
+// sorts them by price
+villagersData.sort((a, b) => a.Price < b.Price)
 export default {
-    Villagers: [
-        {
-            Name: "Farmer",
-            Price: 100,
-            InStock: 0,
-            Image: "rbxassetid://112646206830150",
-            Description: "A friendly villager.",
-            Rarity: "Common",
-            Tier: 1,
-            ProductId: 3308077941, // Example product ID for in-game purchases
-        }, {
-            Name: "Blacksmith",
-            Price: 200,
-            InStock: 0,
-            Image: "rbxassetid://112646206830150",
-            Description: "A friendly villager.",
-            Rarity: "Common",
-            Tier: 1,
-            ProductId: 3308078109,
-        }
-    ] satisfies Array<VillagerInfo> as Array<VillagerInfo>,
+    Villagers: villagersData satisfies Array<VillagerInfo> as Array<VillagerInfo>,
     SellPrice: {
         Farmer: 50,
         Blacksmith: 100,
         Bread: 25,
         Sword: 50,
-    } satisfies { [key in (VillagerNames | ProduceNames)]: number } as { [key in (VillagerNames | ProduceNames)]: number },
+    } satisfies { [key in (VillagerNames | ProduceNames)]: number },
 }
