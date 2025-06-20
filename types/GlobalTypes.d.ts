@@ -196,7 +196,7 @@ type ProduceData = {
 type VillagerModel = Assets["Villagers"]["VillagerExample"];
 
 //* tool type
-type ToolType = "Villager" | "Commodity";
+type ToolType = "Villager" | "Commodity" | "DigTool";
 
 //* tool info
 type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {ItemName: VillagerNames, ToolType: A} : { ItemName: ItemName, ToolType: A }>

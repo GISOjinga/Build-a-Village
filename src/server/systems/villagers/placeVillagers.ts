@@ -1,12 +1,13 @@
 import { World } from "@rbxts/jecs";
 import { routes } from "shared/data/network";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { addComponent, createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";
 import { ActiveVillagers, Body, Changed, Data, Player, Removed, TargetEntity, Villager, world } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { deepCopy } from "@rbxts/object-utils";
 import villagersProgressData from "shared/data/villagersProgressData";
+import { $line } from "rbxts-transformer-inline";
 
 
 
@@ -41,6 +42,33 @@ export default (world: World) => {
                 villagerData.Progress.Progression.Time.StartTime = os.time();
                 villagerData.Progress.Building.StartTime = os.time();
                 villagerData.Progress.Building.EndTime = os.time() + 5;
+                return oldData
+            })
+        }
+    })
+
+    // when requesting to dig villager it will remove the relative cframe by updating the data
+    useRoute(routes.digVillager, (villagerEntity, player) => {
+        const playerEntity = getEntity.fromInstance(player);
+        const villager = world.get(villagerEntity, Villager);
+        const uniqueId = villager?.villagerData.UniqueId
+
+        // prints the villager and player trying to dig
+        printJecs($line, `${player.Name} is trying to dig villager: `, villagerEntity, "\nPlayer Entity: " + playerEntity, "\nUniqueId: " + uniqueId);
+
+        // if entity exists and tool exists then
+        if (playerEntity !== undefined && playerEntity === villager?.playerEntity && uniqueId !== undefined) {
+            printJecs($line, "Digging Villager", villagerEntity, playerEntity, uniqueId);
+
+            // removes the tool and adds you to the plot of land
+            createEntity.updateData(playerEntity, (oldData) => {
+                const indexOfVillager = oldData.Villagers.findIndex((v) => v.UniqueId === uniqueId);
+                const villagerData = oldData.Villagers[indexOfVillager];
+
+                // sets up the vilalger to be ready to load in
+                villagerData.RelativeLocation = undefined;
+                world.delete(villagerEntity); // deletes the villager entity
+                printJecs($line, "Removed Relative Location from: ", villagerData);
                 return oldData
             })
         }

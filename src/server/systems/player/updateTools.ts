@@ -1,7 +1,7 @@
 import { World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
 import { $line } from "rbxts-transformer-inline";
-import { printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Body, Changed, Data, Player, TargetEntity } from "shared/utils/jecs/jecsComponents";
 
 
@@ -23,8 +23,18 @@ export default (world: World) => {
             const alltools = backpack && body && [...backpack.GetChildren(), ...body.model.GetChildren()].filter((v) => v.IsA("Tool")).filterUndefined();
 
             if (alltools) {
+                const digTool = new Instance("Tool");
+
                 // deletes all tools
                 alltools.forEach((tool) => tool.Destroy());
+
+                // sets up the dig tool
+                printJecs($line, "Adding Dig Tool to Backpack");
+                digTool.Name = "Dig Tool";
+                digTool.SetAttribute("ItemType", "DigTool");
+                digTool.SetAttribute("ItemName", "DigTool");
+                digTool.RequiresHandle = false;
+                digTool.Parent = backpack;
 
                 // adds all the villager tools
                 data.Villagers.forEach((villagerData) => {

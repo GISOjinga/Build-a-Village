@@ -64,7 +64,27 @@ const definePacket = <T extends ByteNetType<any>>(packetProps: {
 // Define namespace and packets
 const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
-
+    const villagerStruct = ByteNet.struct({
+        Name: ByteNet.string as ByteNetType<VillagerNames>,
+        UniqueId: ByteNet.uint32,
+        RelativeLocation: optional(ByteNet.cframe),
+        Progress: struct({
+            Produce: ByteNet.string as ByteNetType<ProduceNames>,
+            Progression: struct({
+                Time: struct({
+                    RequiredTimePerResource: ByteNet.uint16,
+                    StartTime: ByteNet.uint32,
+                }),
+                Resources: struct({
+                    Amount: ByteNet.uint8,
+                }),
+            }),
+            Building: struct({
+                StartTime: ByteNet.uint32,
+                EndTime: ByteNet.uint32,
+            }),
+        }),
+    })
     return {
         // closes out the sell menu
         toggleSellMenuOpen: definePacket({
@@ -92,6 +112,11 @@ const packets = defineNamespace("gameEvents", () => {
         // place villager
         placeVillager: definePacket({
             value: ByteNet.cframe,
+        }),
+
+        // dig villager
+        digVillager: definePacket({
+            value: ByteNet.unknown as ByteNetType<Entity>,
         }),
 
         // request to buy villager
@@ -144,27 +169,7 @@ const packets = defineNamespace("gameEvents", () => {
                 value: componentStruct(struct({
                     villagerModel: byteNetEntityInstance as ByteNetType<VillagerModel>,
                     playerEntity: ByteNet.unknown as ByteNetType<Entity>,
-                    villagerData: struct({
-                        UniqueId: ByteNet.uint32,
-                        Name: ByteNet.string as ByteNetType<VillagerNames>,
-                        RelativeLocation: optional(ByteNet.cframe),
-                        Progress: struct({
-                            Produce: ByteNet.string as ByteNetType<ProduceNames>,
-                            Progression: struct({
-                                Time: struct({
-                                    RequiredTimePerResource: ByteNet.uint16,
-                                    StartTime: ByteNet.uint16,
-                                }),
-                                Resources: struct({
-                                    Amount: ByteNet.uint8,
-                                }),
-                            }),
-                            Building: struct({
-                                StartTime: ByteNet.uint16,
-                                EndTime: ByteNet.uint16,
-                            }),
-                        }),
-                    }),
+                    villagerData: villagerStruct,
                 })),
             }),
 
@@ -174,32 +179,16 @@ const packets = defineNamespace("gameEvents", () => {
                     Version: ByteNet.string,
                     Coins: ByteNet.uint32,
                     Fence: ByteNet.string as ByteNetType<FenceNames>,
-                    Villagers: array(ByteNet.struct({
-                        Name: ByteNet.string as ByteNetType<VillagerNames>,
-                        UniqueId: ByteNet.uint32,
-                        RelativeLocation: optional(ByteNet.cframe),
-                        Progress: struct({
-                            Produce: ByteNet.string as ByteNetType<ProduceNames>,
-                            Progression: struct({
-                                Time: struct({
-                                    RequiredTimePerResource: ByteNet.uint16,
-                                    StartTime: ByteNet.uint16,
-                                }),
-                                Resources: struct({
-                                    Amount: ByteNet.uint8,
-                                }),
-                            }),
-                            Building: struct({
-                                StartTime: ByteNet.uint16,
-                                EndTime: ByteNet.uint16,
-                            }),
-                        }),
-                    })),
+                    Villagers: array(villagerStruct),
                     Produce: array(struct({
                         Name: ByteNet.string as ByteNetType<ProduceNames>,
                         Amount: ByteNet.uint8 as ByteNetType<number>,
                     })),
                 })),
+            }),
+
+            ModelDebugger: definePacket({
+                value: componentStruct(byteNetEntityInstance as ByteNetType<Model | BasePart>),
             }),
         } satisfies {
             [k in keyof typeof componentsToReplicate]: packet<struct<{

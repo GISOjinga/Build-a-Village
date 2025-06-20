@@ -17,18 +17,18 @@ import { componentsToReplicate, Phases } from "shared/utils/jecs/jecsComponents"
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
-import { ComponentValue, createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions"
+import { ComponentValue, createEntity, getEntity, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
 import { routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
-import { getInstanceByName } from "shared/utils/functions/instanceFunctions"
 import { deepCopy } from "@rbxts/object-utils"
 import { appendJecs } from "shared/systems/hooks/append"
+import { getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions"
 
-// find ins
+
 
 // checks data for __ByteNetInstancePath to make sure it has all the instances replicated
 function checkData(data?: unknown) {
@@ -37,7 +37,7 @@ function checkData(data?: unknown) {
         // if data is a table then check each value
         if (typeIs(value, "table")) {
             if ("__ByteNetInstancePath" in value) {
-                const instance = getInstanceByName(value.__ByteNetInstancePath as string)
+                const instance = getInstanceByUniqueIdPath(value.__ByteNetInstancePath as string[])
 
                 if (!instance) {
                     return [false, path]
@@ -68,7 +68,7 @@ function checkData(data?: unknown) {
     // if data is a table and has __ByteNetInstancePath then return true
     if (typeIs(data, "table")) {
         if ("__ByteNetInstancePath" in data) {
-            const instance = getInstanceByName(data["__ByteNetInstancePath" as never] as string)
+            const instance = getInstanceByUniqueIdPath(data.__ByteNetInstancePath as string[])
 
             // if instance is not in the world then return false
             if (!instance) {
@@ -126,7 +126,7 @@ export default {
                         world.set(clientEntity, component, newData as never)
                     }
                 } else {
-                    warn(`Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
+                    warnJecs($line, `Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
                     appendJecs(() => replicate({ serverEntity, data: newData }))
                 }
             }

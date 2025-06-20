@@ -119,6 +119,7 @@ export const createEntity = {
         villagerModel.Parent = platform.Villagers
 
         // sets the villager
+        addComponent(villagerEntity, components.ModelDebugger, villagerModel)
         addComponent(villagerEntity, components.Villager, {
             villagerModel,
             villagerData,

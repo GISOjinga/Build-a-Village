@@ -11,6 +11,7 @@ type GameMap = Folder & {
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
+					Attachment: Attachment;
 					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
 					face: Decal;
@@ -55,6 +56,7 @@ type GameMap = Folder & {
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
+					Attachment: Attachment;
 					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
 					face: Decal;

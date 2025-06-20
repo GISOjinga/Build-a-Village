@@ -28,6 +28,27 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
 
 
+// sets up a instance with a unique id path
+const registeredInstance = new WeakMap<Instance, { instance: Instance }>();
+
+export function setInstanceWithUniqueId(instance: Instance | undefined, uniqueIdPath: string[] = []): (string[]) | undefined {
+    if (instance === game) return uniqueIdPath
+    if (instance === undefined) error(instance + "Doesn't exist"); // If the instance is undefined, return undefined
+    const uniqueId = instance.GetAttribute<string>("__UniqueInstanceId");
+
+    // if it already has a unique id then uses it
+    if (uniqueId !== undefined) {
+        uniqueIdPath.unshift(uniqueId);
+        return setInstanceWithUniqueId(instance.Parent as Instance, uniqueIdPath); // Recursively set for parent instances
+    } else {
+        const newUniqueId = { instance: instance };
+        uniqueIdPath.unshift(tostring(newUniqueId));
+        registeredInstance.set(instance, newUniqueId);
+        instance.SetAttribute("__UniqueInstanceId", tostring(newUniqueId));
+        return setInstanceWithUniqueId(instance.Parent as Instance, uniqueIdPath); // Recursively set for parent instances
+    }
+}
+
 // to replicate to a certian player
 function replicateAllToPlayer(world: World, player: Player) {
     // loops through each
@@ -55,7 +76,9 @@ function replicateAllToPlayer(world: World, player: Player) {
 function serializeForReplication(data: unknown): unknown {
     // 1) If it's an Instance, replace with its FullName path
     if (typeIs(data, "Instance")) {
-        return { __ByteNetInstancePath: (data as Instance).GetFullName() } as never
+        return {
+            __ByteNetInstancePath: setInstanceWithUniqueId(data as Instance),
+        } as never
     }
 
     // 2) If it's a table, recurse into each key/value

@@ -6,6 +6,7 @@ const pagePaths = (page: GameUI) => {
         GiftPage: page.GiftList,
         WallPage: page.Wall,
         IntroTextPage: page.Introtext,
+        PlacementPage: page.PlaceFrame,
         Page: page,
     };
 }

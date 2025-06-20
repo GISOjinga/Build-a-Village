@@ -8,6 +8,7 @@ import GiftPage from "./pages/GiftPage";
 import WallPage from "./pages/WallPage";
 import RobuxStorePage from "./pages/RobuxStorePage";
 import IntroTextPage from "./pages/IntroTextPage";
+import PlacementPage from "./pages/PlacementPage";
 
 
 
@@ -21,6 +22,7 @@ export default (pagePaths: PagePaths) => {
 		WallPage,
 		RobuxStorePage,
 		IntroTextPage,
+		PlacementPage,
 	]
 
 	// renders the hud page

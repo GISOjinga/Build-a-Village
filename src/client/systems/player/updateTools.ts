@@ -1,15 +1,16 @@
 import { Janitor } from "@rbxts/janitor";
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
 import { Players, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { useChange, useEffect, useEvent, useMemo, useState, useThrottle } from "shared/Plugin-Hook";
+import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast, rayParamsInclude } from "shared/utils/functions/rayFunctions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";
-import { Body, Changed, Data, Player, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { Body, Changed, Data, Player, ReplicatedComponent, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -20,20 +21,24 @@ const camera = Workspace.Camera
 const mouse = player.GetMouse()
 const registeredTools = new Map<Tool, ToolInfo>()
 const trash = new Janitor();
+let villagerServerEntityToDig: Entity | undefined;
 let goalCFrame: CFrame | undefined;
 let highlight: Highlight | undefined;
 let fakeModel: VillagerModel | undefined;
 let rotatedY = 0
 
 // sets up trash
-trash.LinkToInstances(script)
+trash.LinkToInstance(script, false)
+
 
 // function to tween highligh color
-const highlightTween = (passed: boolean) => {
+const highlightTween = (passed: boolean | undefined) => {
     if (highlight) {
         trash.Add(TweenService.Create(highlight, new TweenInfo(.3, Enum.EasingStyle.Cubic), {
-            FillColor: passed ? new Color3(0, 1, 0.22) : new Color3(1, 0, 0),
-            OutlineColor: passed ? new Color3(0, 0.5, 0) : new Color3(0.5, 0, 0),
+            FillColor: passed === true ? new Color3(0, 1, 0.22) : new Color3(1, 0, 0),
+            OutlineColor: passed === true ? new Color3(0, 0.5, 0) : new Color3(0.5, 0, 0),
+            FillTransparency: passed === undefined ? 1 : 0.5,
+            OutlineTransparency: passed === undefined ? 1 : 0.5,
         })).Play();
     }
 }
@@ -116,15 +121,27 @@ export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player);
     const platform = body && body.platform;
     const platformFloor = platform?.FindFirstChild("Floor") as BasePart | undefined;
+    const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
     const backpack = player.FindFirstChild("Backpack");
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
+
+    // for palcing villagers
+    if (pageStates.placeVillager() && fakeModel && goalCFrame && !UserInputService.KeyboardEnabled) {
+        printJecs($line, "Placing villager at", goalCFrame);
+        pageStates.placeVillager(false)
+        routes.placeVillager.send(goalCFrame)
+    } else if (pageStates.digVillager() && villagerServerEntityToDig) {
+        printJecs($line, "Digging villager at", goalCFrame);
+        pageStates.digVillager(false);
+        routes.digVillager.send(villagerServerEntityToDig);
+    }
 
     // when a tool is added to backpack that isnt registered then backpack
     if (backpack) {
         const loadTool = (tool: Tool) => {
             printJecs($line, "Loading tool", tool, registeredTools);
             if (tool.IsA("Tool") && !registeredTools.has(tool)) {
-                const toolType = tool.GetAttribute<"Villager">("ItemType")!;
+                const toolType = tool.GetAttribute<"Villager" | "DigTool">("ItemType")!;
                 const itemName = tool.GetAttribute<ItemName>("ItemName")!;
 
                 // when the tool is added to the world
@@ -136,10 +153,15 @@ export default (world: World) => {
 
                 // when the tool is activated
                 trash.Add(tool.Activated.Connect(() => {
-                    printJecs($line, "Activated", registeredTools)
-                    if (fakeModel && goalCFrame) {
+                    if (!UserInputService.KeyboardEnabled) return
+                    printJecs($line, "Activated", registeredTools, toolType)
+                    if (toolType === "Villager" && fakeModel && goalCFrame) {
+                        printJecs($line, "Placing villager at", goalCFrame);
                         routes.placeVillager.send(goalCFrame)
-                    };
+                    } else if (toolType === "DigTool" && villagerServerEntityToDig) {
+                        printJecs($line, "Digging villager at", goalCFrame);
+                        routes.digVillager.send(villagerServerEntityToDig);
+                    }
                 }))
             }
         }
@@ -171,12 +193,34 @@ export default (world: World) => {
 
         // destroys old model
         fakeModel?.Destroy();
+        highlight?.Destroy();
+        fakeModel = undefined;
+        highlight = undefined;
+        villagerServerEntityToDig = undefined;
+        pageStates.placementOffset(0);
+        pageStates.placeVillager(false);
+        pageStates.digVillager(false);
+        pageStates.openPage("None");
 
         // sets up new model
         printJecs($line, "Equipped tool", equippedTool, "with registered tools", registeredTools);
         if (equippedTool && registeredTools.has(equippedTool)) {
             const { ToolType, ItemName } = registeredTools.get(equippedTool)!;
             printJecs($line, "Equipped tool", ItemName, "of type", ToolType);
+
+            // function to make a highlight
+            function makeHighlight(parent: Instance) {
+                // sets up highlight
+                highlight = trash.Add(new Instance("Highlight"));
+                highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
+                highlight.Name = "Highlight";
+                highlight.Adornee = parent;
+                highlight.FillColor = new Color3(0, 1, 0.22);
+                highlight.OutlineColor = new Color3(0, 0.5, 0);
+                highlight.FillTransparency = .5
+                highlight.OutlineTransparency = 0;
+                highlight.Parent = parent;
+            }
 
             // if the tool is a villager then
             if (ToolType === "Villager") {
@@ -191,15 +235,7 @@ export default (world: World) => {
                 fakeModel.Parent = paths.TestPlacementFolder
 
                 // sets up highlight
-                highlight = trash.Add(new Instance("Highlight"));
-                highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
-                highlight.Name = "Highlight";
-                highlight.Adornee = fakeModel;
-                highlight.FillColor = new Color3(0, 1, 0.22);
-                highlight.OutlineColor = new Color3(0, 0.5, 0);
-                highlight.FillTransparency = .5
-                highlight.OutlineTransparency = 0;
-                highlight.Parent = fakeModel;
+                makeHighlight(fakeModel)
 
                 // set up part
                 hitBox.Transparency = 1;
@@ -209,6 +245,10 @@ export default (world: World) => {
                 hitBox.CFrame = fakeModel.GetPivot();
                 hitBox.Name = "HitBox";
                 hitBox.Parent = fakeModel;
+            } else if (ToolType === "DigTool") {
+                printJecs($line, "Creating highlight for DigTool", ItemName);
+                // sets up highlight
+                makeHighlight(Workspace.Camera)
             }
         }
     }
@@ -226,14 +266,18 @@ export default (world: World) => {
         const modelHalfExtents = fullModelSize.mul(0.5);
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
+        const offsetDirection = platformFloor.CFrame.RightVector.mul(pageStates.placementOffset() * -1)
 
         if (ToolType === "Villager") {
             const hitResults = Tracer
-                .ray(camera.CFrame.Position, mouse.Hit.LookVector, 1000)
+                .ray(camera.CFrame.Position.add(offsetDirection), !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 1000)
                 .useRaycastParams(rayParamsInclude([platformFloor]))
                 .run();
-            printJecs($line, "Hit results", hitResults);
 
+            // open the placement page
+            if (!UserInputService.KeyboardEnabled && pageStates.openPage() !== "Placement") pageStates.openPage("Placement");
+
+            // if the hit results are valid and the hit normal is upwards then
             if (hitResults.hit && hitResults.normal === Vector3.yAxis) {
                 // convert world hit pos into platform-local space
                 const localHitPos = platformFloor.CFrame.PointToObjectSpace(hitResults.position);
@@ -253,6 +297,25 @@ export default (world: World) => {
             } else {
                 highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
             }
+        }
+    } else if (equippedTool?.GetAttribute("ItemType") === "DigTool" && platform && villagers && highlight) {
+        const villagerPartResults = Tracer.ray(camera.CFrame.Position, mouse.Hit.Position).useRaycastParams(rayParamsInclude([platform.Villagers])).run()
+        const villagerPartHovered = villagers && villagerPartResults?.hit?.IsDescendantOf(villagers) && villagerPartResults.hit
+        const villagerModel = villagerPartHovered && villagers?.GetChildren().find((child) => villagerPartHovered.IsDescendantOf(child));
+        const villagerEntity = villagerModel && getEntity.fromInstance(villagerModel);
+        const villagerServerEntity = villagerEntity && world.get(villagerEntity, ReplicatedComponent);
+
+        // open the placement page
+        if (!UserInputService.KeyboardEnabled && pageStates.openPage() !== "Dig") pageStates.openPage("Dig");
+
+        // if villager model then
+        if (villagerModel && villagerServerEntity) {
+            villagerServerEntityToDig = villagerServerEntity;
+            highlight.Adornee = villagerModel;
+            highlightTween(false);
+        } else {
+            villagerServerEntityToDig = UserInputService.KeyboardEnabled ? undefined : villagerServerEntityToDig;
+            highlightTween(undefined);
         }
     }
 }

@@ -109,6 +109,9 @@ export const GiftTo = component<Player>("GiftTo");
 // the hover box attachment
 export const HoverBoxAttachment = component<Attachment>("HoverBoxAttachment", new Instance("Attachment", Workspace.Terrain));
 
+// npc dialogue attachment
+export const NpcDialogueAttachment = component<Attachment>("NpcDialogueAttachment", new Instance("Attachment", Workspace.Terrain));
+
 // use to contain the active villagers entity
 export const ActiveVillagers = component<Array<{ uniqueId: number, entity: Entity }>>("ActiveVillagers");
 
@@ -264,7 +267,7 @@ export const IncreaseParticlesSize = component<{
 }>("IncreaseParticleSize");
 
 
-export const componentsToReplicate = { Body, Villager, Data };
+export const componentsToReplicate = { Body, Villager, Data, ModelDebugger };
 
 // list of phases in order
 const phaseNamesWithOrder = [
