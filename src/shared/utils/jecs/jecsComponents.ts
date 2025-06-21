@@ -11,7 +11,6 @@ import { ReplicatedStorage, RunService, ServerScriptService, Workspace } from "@
 import { ByteNetType, packet } from "@rbxts/bytenet-fixed";
 import { PlayerState as PlayerStateType } from "../PlayerState";
 import pageStates, { PageStates } from "../Animations/pageStates";
-import { addComponent } from "../functions/jecsHelpFunctions";
 
 
 
@@ -62,7 +61,7 @@ const createSetting = <T = true>(name: string, defaultValue?: T) => {
     const theComponent = component<T>(name, defaultValue)
 
     // Create a new component with the given name
-    addComponent(theComponent, Settings)
+    world.set(theComponent, Settings, undefined)
 
     // returns it
     SettingsComponents[name] = theComponent as Entity<T>
