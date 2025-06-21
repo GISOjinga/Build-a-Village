@@ -18,7 +18,7 @@ import { Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetRep
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEvent } from "shared/Plugin-Hook"
-import { createEntity, printTS, warnTS } from "shared/utils/functions/jecsHelpFunctions"
+import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -26,6 +26,7 @@ import { routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
+import { appendJecs } from "shared/systems/hooks/append"
 
 
 // sets up a instance with a unique id path
@@ -123,21 +124,20 @@ export default {
                 if (!route) {
                     error(`Missing route for component replication: ${componentName}`)
                 } else {
-                    // Wrap in Promise.try for robust error handling
-                    Promise.try(() => {
-                        // Use our serializer for ANY data shape
-                        const payload = serializeForReplication(changed.new)
-
-                        // send the serialized payload to all target players
-                        route.sendToList({ serverEntity, data: payload as never }, players)
-                    }).catch((err) => {
-                        warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
-                    })
-
-                    // ensure delete events are propagated
-                    world.set(serverEntity, OnRemove, () => {
+                    if (!world.contains(serverEntity)) {
                         routes.deleteReplicatedEntity.sendToAll(serverEntity)
-                    })
+                    } else {
+                        // Wrap in Promise.try for robust error handling
+                        Promise.try(() => {
+                            // Use our serializer for ANY data shape
+                            const payload = serializeForReplication(changed.new)
+
+                            // send the serialized payload to all target players
+                            route.sendToList({ serverEntity, data: payload as never }, players)
+                        }).catch((err) => {
+                            warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
+                        })
+                    }
                 }
             }
         }

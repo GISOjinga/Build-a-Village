@@ -17,7 +17,7 @@ import { componentsToReplicate, Phases } from "shared/utils/jecs/jecsComponents"
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
-import { ComponentValue, createEntity, getEntity, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
+import { ComponentValue, createEntity, getEntity, printJecs, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -105,7 +105,10 @@ export default {
             const clientEntity = getEntity.replicatedFromServerEntity(serverEntity)
 
             // if client entity then remove
-            if (clientEntity) world.delete(clientEntity)
+            if (clientEntity) {
+                printJecs($line, "Removing replicated entity:", clientEntity, "from server entity:", serverEntity)
+                world.delete(clientEntity)
+            }
         })
 
         // loops through each
@@ -121,6 +124,7 @@ export default {
 
                     // if client entity and not newData then delete entity
                     if (!newData) {
+                        printJecs($line, `Removing replicated component ${componentName} for entity: ${serverEntity} as data is undefined.`)
                         world.remove(clientEntity, component)
                     } else {
                         world.set(clientEntity, component, newData as never)

@@ -11,6 +11,7 @@ import { ReplicatedStorage, RunService, ServerScriptService, Workspace } from "@
 import { ByteNetType, packet } from "@rbxts/bytenet-fixed";
 import { PlayerState as PlayerStateType } from "../PlayerState";
 import pageStates, { PageStates } from "../Animations/pageStates";
+import { addComponent } from "../functions/jecsHelpFunctions";
 
 
 
@@ -55,13 +56,13 @@ export const RouteEntities = new Map<packet<ByteNetType<unknown>>, Entity>()
 /*************** game settinngs ***************/
 
 // setting name
-export const Settings = component<true>("Settings")
+export const Settings = component("Settings")
 export let SettingsComponents = {} as { [key in string]: Entity<unknown> }
 const createSetting = <T = true>(name: string, defaultValue?: T) => {
     const theComponent = component<T>(name, defaultValue)
 
     // Create a new component with the given name
-    world.set(theComponent, Settings, true)
+    addComponent(theComponent, Settings)
 
     // returns it
     SettingsComponents[name] = theComponent as Entity<T>

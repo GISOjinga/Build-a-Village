@@ -40,7 +40,7 @@ type MapTableToByteNet<T> =
 // function to give a jecs component struct
 function componentStruct<T extends ByteNetType<unknown>>(data: T) {
     return struct({
-        serverEntity: ByteNet.uint32 as ByteNetType<Entity>,
+        serverEntity: ByteNet.unknown as ByteNetType<Entity>,
         data: optional(data),
     })
 }
