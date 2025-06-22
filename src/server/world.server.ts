@@ -23,6 +23,7 @@ import placeVillagers from "./systems/villagers/placeVillagers";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
 import updateTools from "./systems/villagers/updateTools";
 import updateWalls from "./systems/walls/updateWalls";
+import robuxStore from "./systems/robuxStore/robuxStore";
 
 
 
@@ -70,6 +71,9 @@ setupMatter([
     { system: loadPlayerData },
     { system: savePlayerData },
     { system: updateTools },
+
+    // robux store
+    { system: robuxStore },
 
     // villagers
     { system: villagersShop },

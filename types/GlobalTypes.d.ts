@@ -147,11 +147,17 @@ type VillagerInfo = {
 }
 
 //* limited time shop
-type LimitedPrice = ({Robux:number, Amount:number})
-type LimitedTimePack = {
+type LimitedPrice = ({Amount:number, ProductId:0})
+type LimitedTimePrices = {
     Pack1: LimitedPrice,
     Pack3: LimitedPrice,
     Pack10: LimitedPrice,
+}
+type LimitedTimePack = {
+    Name: string,
+    TimeEnds: number,
+    Pack: LimitedTimePrices,
+    Villagers:[VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames]
 }
 
 //* wall info
