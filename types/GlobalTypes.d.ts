@@ -134,7 +134,7 @@ type HoverBoxUI = Assets["UI"]["HoverBox"]
 type NpcDialogues = Assets["UI"]["NpcDialogues"]
 
 //* villager box info
-type VillagerRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary"
+type VillagerRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic"
 type VillagerInfo = {
     Name: VillagerNames;
     Description: string;

@@ -2728,6 +2728,51 @@ type Assets = Folder & {
 				};
 			};
 		};
+		VillagerRenders: ScreenGui & {
+			Woodsman: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Merchant: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Carpenter: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Shephard: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Stewart: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			LocalScript: LocalScript;
+			Farmer: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Mason: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Gatherer: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Tailor: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Herbalist: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Blacksmith: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Baker: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Miner: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			Sculptor: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+		};
 		DialogueSell: BillboardGui & {
 			Stuff: LocalScript;
 			Frame: Frame & {

@@ -8,6 +8,7 @@ import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import useEffect from "../hooks/useEffect";
+import paths from "shared/utils/paths";
 
 
 const formatDuration = (totalSeconds: number) => {
@@ -75,6 +76,8 @@ export default (pagePaths: PagePaths) => {
         villagersShop.forEach((villagerInfo, index) => {
             const villagerBox = exampleBox.Clone();
             const sizeOffset = UDim2.fromScale(1.01, 1.01);
+            const rarityImage = villagerBox.FindFirstChild("Rarity" + villagerInfo.Rarity) as ImageLabel | undefined;
+            const villagerRenderViewPort = paths.Assets.UI.VillagerRenders.FindFirstChild(villagerInfo.Name)?.Clone() as ViewportFrame | undefined;
 
             // set up
             villagerBox.Visible = true;
@@ -83,10 +86,17 @@ export default (pagePaths: PagePaths) => {
             villagerBox.Price.Text = `$${villagerInfo.Price}`;
             villagerBox.Stock.Text = `x${villagerInfo.InStock} stock`
             villagerBox.VillagerName.Text = villagerInfo.Name;
-            // villagerBox.VillagerViewPort.Image = villagerInfo.Image;
-            // villagerBox.RarityCommon.Image = villagerInfo.RarityImage;
             villagerBox.Tier.Text = `Tier ${villagerInfo.Tier}`;
             villagerBox.Parent = villagersContent;
+
+            // sets the rarity
+            if (rarityImage) rarityImage.Visible = true;
+
+            // sets up the view port
+            if (villagerRenderViewPort) {
+                villagerRenderViewPort.Visible = true;
+                villagerRenderViewPort.Parent = villagerRenderViewPort
+            }
 
             // binds the focus action
             newTrash.Add(UIUtilities.ButtonAction({
