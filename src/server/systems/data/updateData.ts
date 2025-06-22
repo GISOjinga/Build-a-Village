@@ -8,7 +8,7 @@ import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { routes } from "shared/data/network";
 import Net from "@rbxts/yetanothernet";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { setEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { createEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";
 
 // function to call when data changes
 const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>, newData: Partial<PlayerData>, oldData: PlayerData, entity: Entity) => void>([
@@ -62,8 +62,11 @@ export default (world: World) => {
     // gives bodies data
     for (const [bodyEntity, { model }] of world.query(Body).without(Data)) {
         const player = Players.GetPlayerFromCharacter(model);
+
         if (player) {
             const playerData = getPlayerData(player);
+
+            setEntity.addTargetForReplication(bodyEntity, player, Data);
             if (playerData) {
                 world.set(bodyEntity, Data, playerData);
                 world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity, updateAll: true });
@@ -71,6 +74,7 @@ export default (world: World) => {
                 warn(`No player data found for ${player.Name}`);
             }
         } else {
+            setEntity.addTargetForReplication(bodyEntity, [], Data);
             world.set(bodyEntity, Data, deepCopy(defaultData));
             world.set(world.entity(), UpdateData, { updateFunction: () => defaultData, bodyEntity, updateAll: true });
         }
