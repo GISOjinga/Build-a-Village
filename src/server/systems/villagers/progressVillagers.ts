@@ -58,7 +58,7 @@ export default (world: World) => {
                     if (totalResources > 0) {
                         printJecs($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
                         // gives the produce to the player
-                        createEntity.inventoryProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
+                        createEntity.collectProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
 
                         // sets the resources to 0
                         villagerData.villagerData.Progress.Progression.Resources.Amount = 0;

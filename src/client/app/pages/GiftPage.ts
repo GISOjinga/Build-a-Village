@@ -58,7 +58,7 @@ export default (pagePaths: PagePaths) => {
 
                 // if produict to gift then
                 if (productToGift) {
-                    routes.giftTo.send(player)
+                    routes.shopGiftTo.send(player)
                     MarketplaceService.PromptProductPurchase(player, productToGift);
                     return;
                 }

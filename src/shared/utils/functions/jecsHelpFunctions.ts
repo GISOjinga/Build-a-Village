@@ -149,22 +149,54 @@ export const createEntity = {
         })
     },
 
-    // to adds a villager tool to your inventory
-    inventoryProduce: (bodyEntity: Entity, produceName: ProduceNames, amount:number = 1) => {
+    // to adds a villager tool to your inventory randomly includes rarities
+    collectProduce: (bodyEntity: Entity, _produceName: ProduceNames, amount:number = 1) => {
         createEntity.updateData(bodyEntity, (oldData: PlayerData) => {
-            const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName)
+            // for the total amount adds a produce
+            for (let i = 0; i < amount; i++) {
+                const produceName = (math.random(0, 100) < 1 ? "Rainbow "+_produceName : math.random(0, 100) < 5 ? "Gold "+_produceName : _produceName) as ProduceNames // cast to ProduceNames
+                const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName)
             
-            // sets the new amount
-            if (produceIndex > -1) {
-                oldData.Produce[produceIndex] = {
-                    Name: produceName,
-                    Amount: (oldData.Produce[produceIndex]?.Amount || 0) + amount, // if it exists then increase the amount
+                // sets the new amount
+                if (produceIndex > -1) {
+                    oldData.Produce[produceIndex] = {
+                        Name:  produceName,
+                        Amount: (oldData.Produce[produceIndex]?.Amount || 0) + 1, // if it exists then increase the amount
+                    }
+                } else {
+                    // for the total amount
+                    oldData.Produce.push({
+                        Name: produceName,
+                        Amount: 1, // if it exists then increase the amount
+                    })
                 }
-            } else {
-                oldData.Produce.push({
-                    Name: produceName,
-                    Amount: amount, // if it exists then increase the amount
-                })
+            }
+
+            // returns the updated data
+            return oldData;
+        })
+    },
+
+    // inserts a produce with exact name
+    giveProduce: (bodyEntity: Entity, produceName: ProduceNames, amount:number = 1) => {
+        createEntity.updateData(bodyEntity, (oldData: PlayerData) => {
+            // for the total amount adds a produce
+            for (let i = 0; i < amount; i++) {
+                const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName)
+            
+                // sets the new amount
+                if (produceIndex > -1) {
+                    oldData.Produce[produceIndex] = {
+                        Name:  produceName,
+                        Amount: (oldData.Produce[produceIndex]?.Amount || 0) + 1, // if it exists then increase the amount
+                    }
+                } else {
+                    // for the total amount
+                    oldData.Produce.push({
+                        Name: produceName,
+                        Amount: 1, // if it exists then increase the amount
+                    })
+                }
             }
 
             // returns the updated data

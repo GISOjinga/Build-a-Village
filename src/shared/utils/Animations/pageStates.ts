@@ -14,6 +14,7 @@ const pageStates = {
     totalTimeForNewVillager: atom(0),
     hoverInfo: atom({ visible: false, info: "" }),
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
+    npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "None", text: "" }),
     coins: atom(0),
 }
 

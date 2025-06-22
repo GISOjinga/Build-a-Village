@@ -7,7 +7,7 @@ import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, getPlayerData, setPlayerData } from "./extra/playersData";
 
 
-
+print("Saving Player Data System Loaded")
 
 
 // saves the players data

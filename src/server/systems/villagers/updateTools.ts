@@ -3,6 +3,7 @@ import { deepEquals } from "@rbxts/object-utils";
 import { $line } from "rbxts-transformer-inline";
 import { printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Body, Changed, Data, Player, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import paths from "shared/utils/paths";
 
 
 
@@ -59,10 +60,11 @@ export default (world: World) => {
                 // for all produce
                 data.Produce.forEach((produceData) => {
                     const produceName = produceData.Name;
-                    const tool = new Instance("Tool");
+                    const realTool = paths.Assets.Tools.Produce.FindFirstChild<Tool>(produceName);
+                    const tool = realTool ? realTool.Clone() : new Instance("Tool");
 
                     // set up and parenting
-                    tool.RequiresHandle = false
+                    tool.RequiresHandle = realTool ? realTool.RequiresHandle : false;
                     tool.Name = `${produceName} (${produceData.Amount})`;
                     tool.SetAttribute("ItemType", "Commodity");
                     tool.SetAttribute("ItemName", produceName);

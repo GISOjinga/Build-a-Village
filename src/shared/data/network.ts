@@ -3,6 +3,7 @@ import { Entity } from "@rbxts/jecs";
 import { EventLike } from "@rbxts/planck/out/types";
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import pageStates, { PageStates } from "shared/utils/Animations/pageStates";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
@@ -92,6 +93,27 @@ const packets = defineNamespace("gameEvents", () => {
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
 
     return {
+        // to buy wall
+        buyWall: definePacket({
+            value: struct({
+                wallName: ByteNet.string as ByteNetType<WallNames>,
+                currency: ByteNet.string as ByteNetType<"Coins" | "Robux">,
+            }),
+        }),
+
+        // equip wall
+        equipWall: definePacket({
+            value: struct({
+                wallName: ByteNet.string as ByteNetType<WallNames>,
+                equip: bool,
+            }),
+        }),
+
+        // to toggle pages
+        togglePage: definePacket({
+            value: ByteNet.string as ByteNetType<ReturnType<typeof pageStates.openPage>>,
+        }),
+
         // closes out the sell menu
         toggleSellMenuOpen: definePacket({
             value: ByteNet.bool
@@ -110,8 +132,21 @@ const packets = defineNamespace("gameEvents", () => {
             }),
         }),
 
+        // npc dialogue
+        npcDialogue: definePacket({
+            value: struct({
+                target: ByteNet.string as ByteNetType<"Buy" | "Sell" | "None">,
+                text: ByteNet.string,
+            }),
+        }),
+
         // to gift your next robux purchace to a player
-        giftTo: definePacket({
+        shopGiftTo: definePacket({
+            value: ByteNet.inst as ByteNetType<Player>,
+        }),
+
+        // hand your tool to the player 
+        handToolToPlayer: definePacket({
             value: ByteNet.inst as ByteNetType<Player>,
         }),
 
@@ -184,11 +219,21 @@ const packets = defineNamespace("gameEvents", () => {
                 value: componentStruct(struct({
                     Version: ByteNet.string,
                     Coins: ByteNet.uint32,
-                    Fence: ByteNet.string as ByteNetType<FenceNames>,
                     Villagers: array(villagerStruct),
                     Produce: array(struct({
                         Name: ByteNet.string as ByteNetType<ProduceNames>,
-                        Amount: ByteNet.uint8 as ByteNetType<number>,
+                        Amount: ByteNet.unknown as ByteNetType<number>,
+                    })),
+                    Walls: array(struct({
+                        Name: ByteNet.string as ByteNetType<WallNames>,
+                        Description: ByteNet.string,
+                        Image: ByteNet.string,
+                        Price: ByteNet.unknown as ByteNetType<number>,
+                        GamePassId: ByteNet.unknown as ByteNetType<number>,
+                        CashMultiplier: ByteNet.unknown as ByteNetType<number>,
+                        Rarity: ByteNet.string as ByteNetType<WallRarity>,
+                        Owned: bool,
+                        Equipped: bool,
                     })),
                 })),
             }),

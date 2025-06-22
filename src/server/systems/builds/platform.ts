@@ -5,19 +5,7 @@ import { Added, Body, ModelDebugger, PlatformOccupied, Platform, Player, Removed
 import paths from "shared/utils/paths";
 
 
-// to toggle fence visibility
-function toggleFenceVisibility(fence: Model, visible: boolean) {
-    fence.GetDescendants().forEach((fence) => {
-        if (fence.IsA("BasePart")) {
-            fence.Transparency = visible ? 0 : 1
-            fence.CanCollide = visible
-            fence.CastShadow = visible
-            fence.CanQuery = visible
-            fence.CanTouch = false
-            fence.Anchored = true
-        }
-    })
-}
+
 
 // set up the gui containers
 function setUpSignGuiContainers(platform: PlatformExample, playerName?: string) {
@@ -67,10 +55,7 @@ export default (world: World) => {
         const platform = world.get(platformEntity, Platform)
 
         // if platform exists then hides the fences
-        if (platform) {
-            toggleFenceVisibility(platform.Fences, false)
-            setUpSignGuiContainers(platform)
-        }
+        if (platform) setUpSignGuiContainers(platform)
     }
 
     // for all players added chooses an un occupied platform
@@ -92,7 +77,6 @@ export default (world: World) => {
 
                 // claims the platform and sets it up
                 claimPlatform(platformEntity, playerEntity, body, platform)
-                toggleFenceVisibility(platform.Fences[data.Fence], true)
                 setUpSignGuiContainers(platform, player.Name)
                 addComponent(playerEntity, Body, { ...body, platform: platform })
             } else {
@@ -113,10 +97,7 @@ export default (world: World) => {
             platform.SetAttribute("ServerId", platformEntity)
 
             // hides the fences
-            if (platform) {
-                toggleFenceVisibility(platform.Fences, false)
-                setUpSignGuiContainers(platform)
-            }
+            if (platform) setUpSignGuiContainers(platform)
         }
     })
 }

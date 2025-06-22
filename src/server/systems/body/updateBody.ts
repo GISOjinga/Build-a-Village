@@ -3,6 +3,7 @@ import { Entity, pair, World } from "@rbxts/jecs";
 import { useMemo } from "@rbxts/react";
 import { Debris, Players, Workspace } from "@rbxts/services";
 import { routes } from "shared/data/network";
+import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getCharacterParts } from "shared/utils/functions/characterFunctions";
 import { addComponent, getEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";
@@ -10,6 +11,10 @@ import { particlesToggle } from "shared/utils/functions/particlesFunctions";
 import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed, Platform } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { createInitialPlayerState } from "shared/utils/PlayerState";
+
+
+// players and their shop page states
+const playersShopPageStates = new Map<Player, "Sell" | "Buy" | "None">();
 
 // For all non-player characters, give them a body.
 export default (world: World) => {
@@ -56,6 +61,10 @@ export default (world: World) => {
     // Listen for changes in Body components and handle death/despawn.
     for (const [_, entity, { model, humanoid }] of world.query(TargetEntity, Added(Body))) {
         const newModel = model as Character<R6> | undefined;
+        const player = world.get(entity, Player);
+
+        // sets the player page state
+        if (player) playersShopPageStates.set(player, "None"); // reset player shop page state
 
         // set up
         humanoid.MaxSlopeAngle = 45
@@ -131,7 +140,7 @@ export default (world: World) => {
 
         // if platform and body then teleports the players rootpart to the platform spawn
         if (platform && body) {
-            routes.toggleSellMenuOpen.sendTo(false, player); // close sell menu if open
+            routes.togglePage.sendTo("None", player); // close sell menu if open
             body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
         }
     })
@@ -143,19 +152,6 @@ export default (world: World) => {
         const shopSpawn = paths.Map.Shops[shopName].SpawnLocation
 
         // if platform and body then teleports the players rootpart to the platform spawn
-        if (body) {
-            body.rootPart.CFrame = shopSpawn.CFrame
-            if (shopName === "Sell") routes.toggleSellMenuOpen.sendTo(true, player); // close sell menu if open
-        }
+        if (body) body.rootPart.CFrame = shopSpawn.CFrame
     })
-
-
-    // Anti-flinging (currently commented out)
-    // for (const [entity, { rootPart, humanoid, model }] of world.query(Body)) {
-
-    //     if (rootPart.AssemblyAngularVelocity.Magnitude > 2) {
-    //         if (model.Name === "GIS_jinga") print(rootPart.AssemblyAngularVelocity.Magnitude)
-    //         rootPart.AssemblyAngularVelocity = Vector3.zero;
-    //     }
-    // }
 };

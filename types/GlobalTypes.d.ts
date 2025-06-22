@@ -130,6 +130,9 @@ type DialogueSellUI = Assets["UI"]["DialogueSell"]
 //* hover Box UI
 type HoverBoxUI = Assets["UI"]["HoverBox"]
 
+//* npcs dialogue
+type NpcDialogues = Assets["UI"]["NpcDialogues"]
+
 //* villager box info
 type VillagerRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary"
 type VillagerInfo = {
@@ -152,13 +155,17 @@ type LimitedTimePack = {
 }
 
 //* wall info
+type WallRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary"
 type WallInfo = {
     Name: WallNames;
     Description: string;
     Image: string;
     Price: number;
+    GamePassId: number;
     CashMultiplier: number;
-    Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+    Rarity: WallRarity;
+    Owned: boolean,
+    Equipped: boolean,
 }
 
 //* villager progress
@@ -211,10 +218,13 @@ type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {Item
 type VillagerNames = keyof Omit<Omit<Assets["Villagers"], keyof Folder>, "VillagerExample">;
 
 //* produce names
-type ProduceNames = "Bread" | "Sword"
+type ProduceNames = keyof Omit<Assets["Tools"]["Produce"], keyof Folder>
 
 //* wall names
-type WallNames = "Stone Wall" | "Wooden Wall" | "Metal Wall" | "Brick Wall" | "Glass Wall";
+type WallNames = "Wooden Fence" | "Log Wall" | "Stone Wall" | "Ironwood Fence" | "Castle Wall" | "Evil Wall";
 
 //* item name
 type ItemName = VillagerNames | ProduceNames;
+
+//* platform example
+type PlatformExample = GameMap["Platforms"]["Platform1"]

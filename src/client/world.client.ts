@@ -31,12 +31,15 @@ import hoverBoxUpdate from "./systems/ui/hoverBoxUpdate";
 import playerDataUpdate from "./systems/ui/playerDataUpdate";
 import shopDataUpdate from "./systems/ui/shopDataUpdate";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
+import playerThumbnail from "./systems/ui/playerThumbnail";
+import NpcDialogue from "./app/NpcDialogue";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
 const dialogueSellUI = paths.Assets.UI.DialogueSell.Clone()
 const hoverBoxUI = paths.Assets.UI.HoverBox.Clone()
 const gameUI = paths.Assets.UI.GameUI.Clone()
+const npcDialogues = paths.Assets.UI.NpcDialogues.Clone()
 
 // set up the UI
 gameUI.Parent = playerGui
@@ -51,6 +54,11 @@ DialogueSellUI(dialogueSellUI)
 hoverBoxUI.Parent = playerGui
 hoverBoxUI.Adornee = world.get(HoverBoxAttachment, HoverBoxAttachment)!
 HoverBoxUI(hoverBoxUI)
+
+// sets up the npc dialogues
+npcDialogues.Parent = playerGui
+NpcDialogue(npcDialogues)
+
 
 
 
@@ -102,6 +110,7 @@ const debug = setupMatter([
     { system: hoverBoxUpdate },
     { system: playerDataUpdate },
     { system: shopDataUpdate },
+    { system: playerThumbnail },
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,

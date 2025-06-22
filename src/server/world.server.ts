@@ -18,10 +18,11 @@ import watchRoutes from "shared/systems/hooks/watchRoutes";
 import append from "shared/systems/hooks/append";
 import platform from "./systems/builds/platform";
 import villagersShop from "./systems/villagers/villagersShop";
-import updateTools from "./systems/player/updateTools";
 import progressVillagers from "./systems/villagers/progressVillagers";
 import placeVillagers from "./systems/villagers/placeVillagers";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
+import updateTools from "./systems/villagers/updateTools";
+import updateWalls from "./systems/walls/updateWalls";
 
 
 
@@ -74,6 +75,9 @@ setupMatter([
     { system: villagersShop },
     { system: progressVillagers },
     { system: placeVillagers }, // tag added
+
+    // walls
+    { system: updateWalls, phase: Phases.Last },
 ], { // tag added
     // "TouchToAddSkin": touchToAddSkinTag,
     // "TouchToAddPower": touchToAddPowerTag,

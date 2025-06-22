@@ -223,7 +223,7 @@ export default (world: World) => {
             }
 
             // if the tool is a villager then
-            if (ToolType === "Villager") {
+            if (ToolType === "Villager" && platformFloor) {
                 const hitBox = new Instance("Part")
 
                 // sets up fake model
@@ -231,7 +231,7 @@ export default (world: World) => {
                 rotatedY = 0;
                 fakeModel = trash.Add(paths.Assets.Villagers[ItemName].Clone()) as VillagerModel;
                 fakeModel.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart")) descendant.CollisionGroup = "NoCollision"; });
-                fakeModel.PivotTo(body.rootPart.CFrame);
+                fakeModel.PivotTo(platformFloor.CFrame);
                 fakeModel.Parent = paths.TestPlacementFolder
 
                 // sets up highlight
@@ -277,26 +277,21 @@ export default (world: World) => {
             // open the placement page
             if (!UserInputService.KeyboardEnabled && pageStates.openPage() !== "Placement") pageStates.openPage("Placement");
 
-            // if the hit results are valid and the hit normal is upwards then
-            if (hitResults.hit && hitResults.normal === Vector3.yAxis) {
-                // convert world hit pos into platform-local space
-                const localHitPos = platformFloor.CFrame.PointToObjectSpace(hitResults.position);
-                const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
-                const goalPos = new Vector3(worldPos.X, math.max(worldPos.Y, platformFloor.Position.Y), worldPos.Z);
-                const finalCFrame = clampCFrameToBounds(CFrame.lookAlong(
-                    goalPos.add(Vector3.yAxis.mul(modelHalfExtents.Y - .25)),
-                    platformDirection,
-                    Vector3.yAxis
-                ).mul(CFrame.Angles(0, math.rad(rotatedY), 0)), fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
-                const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
+            // convert world hit pos into platform-local space
+            const localHitPos = platformFloor.CFrame.PointToObjectSpace(hitResults.position);
+            const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
+            const goalPos = new Vector3(worldPos.X, math.max(worldPos.Y, platformFloor.Position.Y), worldPos.Z);
+            const finalCFrame = clampCFrameToBounds(CFrame.lookAlong(
+                goalPos.add(Vector3.yAxis.mul(modelHalfExtents.Y - .25)),
+                platformDirection,
+                Vector3.yAxis
+            ).mul(CFrame.Angles(0, math.rad(rotatedY), 0)), fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
+            const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
 
-                // move the model
-                fakeModel.PivotTo(fakeModel.GetPivot().Lerp(realCFrame, .2));
-                goalCFrame = realCFrame
-                highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
-            } else {
-                highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
-            }
+            // move the model
+            fakeModel.PivotTo(fakeModel.GetPivot().Lerp(realCFrame, .2));
+            goalCFrame = realCFrame
+            highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
         }
     } else if (equippedTool?.GetAttribute("ItemType") === "DigTool" && platform && villagers && highlight) {
         const villagerPartResults = Tracer.ray(camera.CFrame.Position, mouse.Hit.Position).useRaycastParams(rayParamsInclude([platform.Villagers])).run()

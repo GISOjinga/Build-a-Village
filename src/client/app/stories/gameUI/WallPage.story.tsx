@@ -23,12 +23,15 @@ export = (gameUI: GameUI) => {
     pageStates.wallsShop((oldWallsShop) => {
         return [
             ...oldWallsShop, {
-                Name: "Wooden Wall",
+                Name: "Wooden Fence",
                 Price: 100000,
                 Image: "rbxassetid://112646206830150",
                 Description: "A friendly villager.",
                 Rarity: "Common",
                 CashMultiplier: 1,
+                GamePassId: 0,
+                Owned: false,
+                Equipped: false,
             },
         ] satisfies WallInfo[];
     })

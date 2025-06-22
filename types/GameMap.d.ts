@@ -35,6 +35,7 @@ type GameMap = Folder & {
 					WaistFrontAttachment: Attachment;
 				};
 				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
 					RootJoint: Motor6D;
 				};
 				["Right Arm"]: Part & {
@@ -80,6 +81,7 @@ type GameMap = Folder & {
 					WaistFrontAttachment: Attachment;
 				};
 				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
 					RootJoint: Motor6D;
 				};
 				["Right Arm"]: Part & {
@@ -127,6 +129,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
@@ -171,6 +174,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
@@ -215,6 +219,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
@@ -259,6 +264,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
@@ -303,6 +309,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
@@ -347,6 +354,7 @@ type GameMap = Folder & {
 				t: Texture;
 			};
 			NameSign: Model & {
+				Thumbnail: Part;
 				Container: Part & {
 					SurfaceGui: SurfaceGui & {
 						Title: TextLabel & {
