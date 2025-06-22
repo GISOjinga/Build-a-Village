@@ -147,7 +147,7 @@ type VillagerInfo = {
 }
 
 //* limited time shop
-type LimitedPrice = ({Amount:number, ProductId:0})
+type LimitedPrice = ({PackMultiplier:number, ProductId:0})
 type LimitedTimePrices = {
     Pack1: LimitedPrice,
     Pack3: LimitedPrice,

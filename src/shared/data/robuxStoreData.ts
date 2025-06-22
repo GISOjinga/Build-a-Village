@@ -4,9 +4,9 @@ export default {
         TimeEnds: os.clock() + 1000,
         Villagers: ["Farmer", "Miner", "Blacksmith", "Carpenter", "Baker", "Herbalist", "Tailor"],
         Pack: {
-            Pack1: { Amount: 1, ProductId: 0 },
-            Pack3: { Amount: 3, ProductId: 0 },
-            Pack10: { Amount: 10, ProductId: 0 },
+            Pack1: { PackMultiplier: 1, ProductId: 0 },
+            Pack3: { PackMultiplier: 3, ProductId: 0 },
+            Pack10: { PackMultiplier: 10, ProductId: 0 },
         },
     },
     Purchase2: {
@@ -14,9 +14,9 @@ export default {
         TimeEnds: os.clock() + 1000,
         Villagers: ["Farmer", "Miner", "Blacksmith", "Carpenter", "Baker", "Herbalist", "Tailor"],
         Pack: {
-            Pack1: { Amount: 1, ProductId: 0 },
-            Pack3: { Amount: 3, ProductId: 0 },
-            Pack10: { Amount: 10, ProductId: 0 },
+            Pack1: { PackMultiplier: 1, ProductId: 0 },
+            Pack3: { PackMultiplier: 3, ProductId: 0 },
+            Pack10: { PackMultiplier: 10, ProductId: 0 },
         },
     },
 } satisfies {

@@ -19,20 +19,8 @@ export default (pagePaths: PagePaths) => {
     const sizeOffset = UDim2.fromScale(1.2, 1.2);
     const robuxStorePage = pagePaths.RobuxStore;
     const scrollingFrame = robuxStorePage.ScrollingFrame;
-    type Sample = typeof scrollingFrame.Purchase1
-
-
-    // // loads in each box
-    // trash.Add(useEffect(() => {
-    //     robuxStorePage.Visible = pageStates.openPage() === "RobuxStore";
-    // }))
-
-    // // when ever the walls update
-    // scrollingFrame.GetChildren<Sample>().forEach((child: Sample) => {
-    //     if (child.IsA("Frame")) {
-
-    //     }
-    // })
+    const purchase1 = scrollingFrame.Purchase1;
+    const purchase2 = scrollingFrame.Purchase2;
 
     return trash
 }

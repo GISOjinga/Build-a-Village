@@ -9,7 +9,6 @@ const pageStates = {
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
     wallsShop: atom(new Array<WallInfo>()),
-    robuxStore: atom(new Array<LimitedTimePack>()),
     buyButtonFocus: atom({ visible: false, selectedVillagerIndex: -1 }),
     totalTimeForNewVillager: atom(0),
     hoverInfo: atom({ visible: false, info: "" }),
