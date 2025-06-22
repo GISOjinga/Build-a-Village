@@ -24,6 +24,17 @@ export function formatToHHMMSS(totalSeconds: number) {
     return string.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
+// Converts a number of seconds into "DD:HH:MM:SS" format
+export function formatToDDHHMMSS(totalSeconds: number) {
+    totalSeconds = math.max(0, totalSeconds || 0);
+
+    const days = math.floor(totalSeconds / 86400);
+    const hours = math.floor((totalSeconds % 86400) / 3600);
+    const minutes = math.floor((totalSeconds % 3600) / 60);
+    const seconds = math.floor(totalSeconds % 60);
+
+    return string.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds);
+}
 
 export function secondsToMinutesSecondsMilliseconds(seconds: number): string {
     const totalMilliseconds = seconds * 1000;

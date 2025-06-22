@@ -8,6 +8,7 @@ import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
+import robuxStoreData from "./robuxStoreData";
 
 
 const byteNetEntityInstance = ByteNet.unknown as ByteNetType<Instance>
@@ -93,6 +94,19 @@ const packets = defineNamespace("gameEvents", () => {
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
 
     return {
+        // update robux store
+        updateRobuxStore: definePacket({
+            value: ByteNet.unknown as ByteNetType<typeof robuxStoreData>,
+        }),
+
+        // request to buy robux pack
+        buyRobuxPack: definePacket({
+            value: struct({
+                purchase: ByteNet.string as ByteNetType<keyof typeof robuxStoreData>,
+                pack: ByteNet.string as ByteNetType<keyof LimitedTimePrices>,
+            }),
+        }),
+
         // to buy wall
         buyWall: definePacket({
             value: struct({

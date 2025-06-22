@@ -231,6 +231,7 @@ export default (world: World) => {
                 rotatedY = 0;
                 fakeModel = trash.Add(paths.Assets.Villagers[ItemName].Clone()) as VillagerModel;
                 fakeModel.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart")) descendant.CollisionGroup = "NoCollision"; });
+                fakeModel.Station.Parts.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart") && !descendant.IsDescendantOf(fakeModel!.Station.Parts.StationParts) && !descendant.IsDescendantOf(fakeModel!.Station.Parts.ProgressFull) && !descendant.IsDescendantOf(fakeModel!.Station.Parts.Resources)) descendant.Transparency = 1; })
                 fakeModel.PivotTo(platformFloor.CFrame);
                 fakeModel.Parent = paths.TestPlacementFolder
 

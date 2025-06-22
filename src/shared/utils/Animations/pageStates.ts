@@ -1,4 +1,5 @@
 import { Atom, atom } from "@rbxts/charm";
+import robuxStoreData from "shared/data/robuxStoreData";
 
 
 const pageStates = {
@@ -9,6 +10,7 @@ const pageStates = {
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
     wallsShop: atom(new Array<WallInfo>()),
+    robuxStore: atom(robuxStoreData),
     buyButtonFocus: atom({ visible: false, selectedVillagerIndex: -1 }),
     totalTimeForNewVillager: atom(0),
     hoverInfo: atom({ visible: false, info: "" }),

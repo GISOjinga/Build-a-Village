@@ -148,73 +148,76 @@ export default (world: World) => {
         let userId = _userId;
         let player = Players.GetPlayerByUserId(userId) as Player
         const playerEntity = player && getEntity.fromInstance(player);
+        const shopVillagerIndex = ShopData.Villagers.findIndex((v) => v.ProductId === productId);
 
-        // if the purchase was successful and the player exists
-        if (wasPurchased && player && playerEntity) {
-            const playerToGiftTo = world.get(playerEntity, GiftTo) as Player
-            const hasGitTo = world.has(playerEntity, GiftTo)
+        // makes sure its from the villagers page
+        if (shopVillagerIndex === -1 || productId === 3308848691) {
+            // if the purchase was successful and the player exists
+            if (wasPurchased && player && playerEntity) {
+                const playerToGiftTo = world.get(playerEntity, GiftTo) as Player
+                const hasGitTo = world.has(playerEntity, GiftTo)
 
-            printJecs($line, `Gift to`, playerToGiftTo, "for", productId, "was purchased:", wasPurchased);
-            printJecs($line, player.Name + " purchased product", productId, "for", "Robux");
-            if (hasGitTo && playerToGiftTo) {
-                // removes gift to
-                removeComponent(playerEntity, GiftTo)
+                printJecs($line, `Gift to`, playerToGiftTo, "for", productId, "was purchased:", wasPurchased);
+                printJecs($line, player.Name + " purchased product", productId, "for", "Robux");
+                if (hasGitTo && playerToGiftTo) {
+                    // removes gift to
+                    removeComponent(playerEntity, GiftTo)
 
-                // if the player to gift to is not a valid player in the game then return
-                if (!playerToGiftTo.Parent) return
+                    // if the player to gift to is not a valid player in the game then return
+                    if (!playerToGiftTo.Parent) return
 
-                // notifies both players
-                routes.notify.sendTo({
-                    text: player.Name + " has gifted you!",
-                    duration: 5,
-                }, playerToGiftTo);
-                routes.notify.sendTo({
-                    text: "You have gifted " + playerToGiftTo.Name + "!",
-                    duration: 5,
-                }, player);
+                    // notifies both players
+                    routes.notify.sendTo({
+                        text: player.Name + " has gifted you!",
+                        duration: 5,
+                    }, playerToGiftTo);
+                    routes.notify.sendTo({
+                        text: "You have gifted " + playerToGiftTo.Name + "!",
+                        duration: 5,
+                    }, player);
 
-                // if the player has a gift to then sets the player to the player to gift to
-                player = playerToGiftTo;
-                userId = playerToGiftTo.UserId
-            }
+                    // if the player has a gift to then sets the player to the player to gift to
+                    player = playerToGiftTo;
+                    userId = playerToGiftTo.UserId
+                }
 
-            if (productId === 3308848691) { // purchaed a full restock on all villagers
-                const newData = new Array<VillagerInfo>();
+                if (productId === 3308848691) { // purchaed a full restock on all villagers
+                    const newData = new Array<VillagerInfo>();
 
-                // loops through all villagers and restocks them
-                ShopData.Villagers.forEach((villager, index) => {
-                    newData[index] = {
-                        ...villager,
-                        InStock: 20, // sets the stock to 20
-                    };
-                });
+                    // loops through all villagers and restocks them
+                    ShopData.Villagers.forEach((villager, index) => {
+                        newData[index] = {
+                            ...villager,
+                            InStock: 20, // sets the stock to 20
+                        };
+                    });
 
-                // updates the shop data with the new data
-                ShopData.Villagers = newData;
-            } else {
-                const shopVillagerIndex = ShopData.Villagers.findIndex((v) => v.ProductId === productId);
+                    // updates the shop data with the new data
+                    ShopData.Villagers = newData;
+                } else {
 
-                // bought a villager from the shop
-                printJecs($line, player.Name + " bought villager from shop", shopVillagerIndex, "for", "Robux");
-                if (shopVillagerIndex !== undefined) {
-                    const villagerData = ShopData.Villagers[shopVillagerIndex];
-                    const entity = getEntity.fromInstance(player);
-                    const data = entity && world.get(entity, Data)
+                    // bought a villager from the shop
+                    printJecs($line, player.Name + " bought villager from shop", shopVillagerIndex, "for", "Robux");
+                    if (shopVillagerIndex !== undefined) {
+                        const villagerData = ShopData.Villagers[shopVillagerIndex];
+                        const entity = getEntity.fromInstance(player);
+                        const data = entity && world.get(entity, Data)
 
-                    // if data then
-                    printJecs($line, "Villager data", villagerData, data);
-                    if (data) {
-                        // updates your data
-                        createEntity.updateData(entity, (oldData) => {
-                            createEntity.inventoryVillager(entity, villagerData.Name);
-                            printJecs($line, player.Name + "Bought villager from shop", villagerData.Name, "for", "Robux");
-                            return oldData;
-                        });
+                        // if data then
+                        printJecs($line, "Villager data", villagerData, data);
+                        if (data) {
+                            // updates your data
+                            createEntity.updateData(entity, (oldData) => {
+                                createEntity.inventoryVillager(entity, villagerData.Name);
+                                printJecs($line, player.Name + "Bought villager from shop", villagerData.Name, "for", "Robux");
+                                return oldData;
+                            });
+                        }
                     }
                 }
+            } else if (!wasPurchased && playerEntity) { // makes sure to still remove the gift to
+                removeComponent(playerEntity, GiftTo);
             }
-        } else if (!wasPurchased && playerEntity) { // makes sure to still remove the gift to
-            removeComponent(playerEntity, GiftTo);
         }
     }
 
