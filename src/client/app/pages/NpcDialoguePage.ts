@@ -22,17 +22,17 @@ export default (dialoguePage: NpcDialogues) => {
 
     // uses use effect to set the dialogue
     trash.Add(useEffect((newTrash) => {
-        const npcDialogue = pageStates.npcDialogue();
-        const introText = pageStates.introText();
-        const textToArray = introText.text.split("");
-        const tween = newTrash.Add(createMotion(0, { start: true }), "destroy")
         const buyTextLabel = dialoguePage.Buy.TextLabel;
         const sellTextLabel = dialoguePage.Sell.TextLabel;
+        const npcDialogue = pageStates.npcDialogue();
+        const tween = newTrash.Add(createMotion(npcDialogue.target === "None" ? 1 : 0, { start: true }), "destroy")
+        const textToArray = (npcDialogue.target === "None" ? buyTextLabel.Text : npcDialogue.text).split("");
 
         // moves the intro text char by char
+        dialoguePage.Enabled = true;
         buyTextLabel.Text = "";
         sellTextLabel.Text = "";
-        tween.tween(1, { time: textToArray.size() * 0.01, style: Enum.EasingStyle.Linear })
+        tween.tween(npcDialogue.target === "None" ? 0 : 1, { time: textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.01), style: Enum.EasingStyle.Linear })
 
         // when the intro text page is visible
         newTrash.Add(tween.onStep((progress) => {
@@ -48,30 +48,48 @@ export default (dialoguePage: NpcDialogues) => {
             sellTextLabel.Text = (full ?? "")
         }))
 
-        // sets open pages to none
-        if (pageStates.openPage() !== "None" && pageStates.openPage() !== "Sell") pageStates.openPage("None")
+        newTrash.Add(tween.onComplete(() => {
+            newTrash.Add(task.delay(1, () => {
+                pageStates.openPage(npcDialogue.target)
+
+                // if target is none then hide
+                if (npcDialogue.target === "None") {
+                    dialoguePage.Sell.Visible = false;
+                    dialoguePage.Buy.Visible = false;
+                }
+            }))
+        }))
+
+        // // sets open pages to none
+        // if (pageStates.openPage() !== "None" && pageStates.openPage() !== "Sell") {
+        //     printTS($line, " CLOSING PAGESSSSSSS");
+        //     pageStates.openPage("None")
+        // }
 
         // sets the adornee
         if (npcDialogue.target === "Buy") {
             dialoguePage.Adornee = paths.Map.Shops.Buy.Noob.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
+            dialoguePage.Buy.Visible = true;
+            dialoguePage.Sell.Visible = false;
         } else if (npcDialogue.target === "Sell") {
             dialoguePage.Adornee = paths.Map.Shops.Sell.Noob.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
-        } else if (npcDialogue.target === "None") {
+            dialoguePage.Sell.Visible = true;
             dialoguePage.Buy.Visible = false;
-            dialoguePage.Sell.Visible = false;
+        } else if (npcDialogue.target === "None") {
             buyProximityPrompt.Enabled = true;
             sellProximityPrompt.Enabled = true;
         }
     }))
 
     // when open page changes then removed the npc dialogue
+    let oldPage: string = "None";
     trash.Add(effect(() => {
-        if (pageStates.openPage() === "None" || pageStates.openPage() === "Sell") return
-        pageStates.npcDialogue({ target: "None", text: "" });
+        if (oldPage === "Sell" || oldPage === "Buy") pageStates.npcDialogue({ target: "None", text: "" })
+        oldPage = pageStates.openPage();
     }))
 
     // watches for route calls

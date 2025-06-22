@@ -9,6 +9,7 @@ import { useChange, useEffect, useEvent, useMemo, useState, useThrottle } from "
 import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast, rayParamsInclude } from "shared/utils/functions/rayFunctions";
+import { CreateVisualizer } from "shared/utils/functions/vector3Functions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";
 import { Body, Changed, Data, Player, ReplicatedComponent, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
@@ -20,7 +21,8 @@ const player = Players.LocalPlayer
 const camera = Workspace.Camera
 const mouse = player.GetMouse()
 const registeredTools = new Map<Tool, ToolInfo>()
-const trash = new Janitor();
+const trash = new Janitor()
+const rayVisualizer = trash.Add(new CreateVisualizer())
 let villagerServerEntityToDig: Entity | undefined;
 let goalCFrame: CFrame | undefined;
 let highlight: Highlight | undefined;
@@ -28,7 +30,7 @@ let fakeModel: VillagerModel | undefined;
 let rotatedY = 0
 
 // sets up trash
-trash.LinkToInstance(script, false)
+trash.LinkToInstance(script, true)
 
 
 // function to tween highligh color
@@ -78,15 +80,6 @@ export function getSnappedGridCFrame(originCFrame: CFrame, objectCFrame: CFrame,
     );
 }
 
-/**
- * Clamps a CFrame (with size) to stay fully within a rotated bounding box.
- *
- * @param objectCFrame - The object's CFrame.
- * @param objectSize - The object's full size (from GetExtentsSize()).
- * @param boundsCFrame - The center CFrame of the bounding region.
- * @param boundsSize - The bounds' full size (e.g. platform size).
- * @returns A new CFrame with the object's position clamped, preserving rotation.
- */
 export function clampCFrameToBounds(
     objectCFrame: CFrame,
     objectSize: Vector3,
@@ -271,8 +264,8 @@ export default (world: World) => {
 
         if (ToolType === "Villager") {
             const hitResults = Tracer
-                .ray(camera.CFrame.Position.add(offsetDirection), !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 1000)
-                .useRaycastParams(rayParamsInclude([platformFloor]))
+                .ray(camera.CFrame.Position.add(offsetDirection), !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 100)
+                .useRaycastParams(rayParamsInclude([paths.Map]))
                 .run();
 
             // open the placement page
@@ -281,12 +274,13 @@ export default (world: World) => {
             // convert world hit pos into platform-local space
             const localHitPos = platformFloor.CFrame.PointToObjectSpace(hitResults.position);
             const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
-            const goalPos = new Vector3(worldPos.X, math.max(worldPos.Y, platformFloor.Position.Y), worldPos.Z);
-            const finalCFrame = clampCFrameToBounds(CFrame.lookAlong(
+            const goalPos = new Vector3(worldPos.X, platformFloor.Position.Y, worldPos.Z);
+            const testCFrame = CFrame.lookAlong(
                 goalPos.add(Vector3.yAxis.mul(modelHalfExtents.Y - .25)),
                 platformDirection,
                 Vector3.yAxis
-            ).mul(CFrame.Angles(0, math.rad(rotatedY), 0)), fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
+            ).mul(CFrame.Angles(0, math.rad(rotatedY), 0))
+            const finalCFrame = clampCFrameToBounds(testCFrame, fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
             const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
 
             // move the model

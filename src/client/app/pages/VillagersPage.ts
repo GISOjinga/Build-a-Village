@@ -95,7 +95,7 @@ export default (pagePaths: PagePaths) => {
             // sets up the view port
             if (villagerRenderViewPort) {
                 villagerRenderViewPort.Visible = true;
-                villagerRenderViewPort.Parent = villagerRenderViewPort
+                villagerRenderViewPort.Parent = villagerBox.VillagerViewPort
             }
 
             // binds the focus action
@@ -157,7 +157,7 @@ export default (pagePaths: PagePaths) => {
             trash.Add(task.spawn(() => {
                 const [passed, productInfo] = pcall(() => MarketplaceService.GetProductInfo(villagerInfo.ProductId, Enum.InfoType.Product));
                 buyButton.Robux.Text = `${passed ? productInfo.PriceInRobux : 0}`;
-                if (!passed) printTS($line, "Failed to get product info for villager", villagerInfo.Name, ":", productInfo);
+                // if (!passed) printTS($line, "Failed to get product info for villager", villagerInfo.Name, ":", productInfo);
             }))
 
             buyButton.Normal.Visible = villagerInfo.InStock > 0 ? true : false;

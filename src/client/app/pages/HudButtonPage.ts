@@ -1,9 +1,11 @@
 import { effect } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
+import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
+import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 
 
 
@@ -20,7 +22,6 @@ export default (pagePaths: PagePaths) => {
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Buy.Size, sizeOffset),
     }, () => {
         routes.teleportToShop.send("Buy")
-        pageStates.openPage("Buy")
     }))
 
     // binds an action animation to sell
@@ -30,7 +31,6 @@ export default (pagePaths: PagePaths) => {
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Sell.Size, sizeOffset),
     }, () => {
         routes.teleportToShop.send("Sell")
-        pageStates.openPage("None")
     }))
 
     // binds an action animation to village
@@ -50,6 +50,15 @@ export default (pagePaths: PagePaths) => {
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
     }, () => {
         pageStates.openPage("RobuxStore");
+    }))
+
+    // binds the wall button to open the shop
+    trash.Add(UIUtilities.ButtonAction({
+        Button: pagePaths.HUD.Walls,
+        ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
+        DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
+    }, () => {
+        pageStates.openPage("Wall");
     }))
 
     // updates your coins

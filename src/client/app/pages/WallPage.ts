@@ -33,7 +33,6 @@ export default (pagePaths: PagePaths) => {
         // loads in each of the walls
         wallsShop.forEach((wallInfo, index) => {
             const wallBox = sample.Clone();
-            const sizeOffset = UDim2.fromScale(1.01, 1.01);
             const buyButton = wallBox.buy;
             const equipButton = wallBox.equip;
             const unequipButton = wallBox.unequip;
@@ -49,6 +48,8 @@ export default (pagePaths: PagePaths) => {
             wallBox.buy.Visible = !wallInfo.Owned;
             wallBox.Price.Visible = wallInfo.Price > 0;
             wallBox.RobuxPrice.Visible = wallInfo.GamePassId > 0;
+            wallBox.buy.Visible = wallInfo.Price > 0 && !wallInfo.Owned
+            wallBox.robux.Visible = wallInfo.GamePassId > 0 && !wallInfo.Owned;
             wallBox.Price.Text = `$${addCommasEveryThreeDigits(wallInfo.Price)}`;
             wallBox.Multiplier.Text = `X${wallInfo.CashMultiplier} CASH GAIN`
             wallBox.SampleName.Text = wallInfo.Name;
@@ -56,10 +57,11 @@ export default (pagePaths: PagePaths) => {
 
             // sets up the pricing for robux walls
             trash.Add(task.spawn(() => {
-                const [passed, passInfo] = pcall(() => MarketplaceService.GetProductInfo(wallInfo.GamePassId, Enum.InfoType.GamePass));
-                wallBox.RobuxPrice.Visible = passed && (passInfo.PriceInRobux || 0) > 0;
-                wallBox.RobuxPrice.Text = `${passed ? passInfo.PriceInRobux : 0}`;
-                wallBox.buy.Visible = wallInfo.Price > 0 && !wallInfo.Owned
+                pcall(() => {
+                    const [passed, passInfo] = pcall(() => MarketplaceService.GetProductInfo(wallInfo.GamePassId, Enum.InfoType.GamePass));
+                    wallBox.RobuxPrice.Visible = passed && (passInfo.PriceInRobux || 0) > 0;
+                    wallBox.RobuxPrice.Text = `${passed ? passInfo.PriceInRobux : 0}`;
+                })
             }))
 
             // binds the focus action
@@ -127,16 +129,6 @@ export default (pagePaths: PagePaths) => {
                 }))
             }
         })
-    }))
-
-    // binds the wall button to open the shop
-    trash.Add(UIUtilities.ButtonAction({
-        Button: pagePaths.HUD.Walls,
-        ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
-        DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
-    }, () => {
-        printTS($line, "opening wall shop");
-        pageStates.openPage("Wall");
     }))
 
     return trash

@@ -42,6 +42,9 @@ export default (world: World) => {
         body?.model.SetAttribute("ClientId", clientEntity)
         player?.SetAttribute("ClientId", clientEntity)
         if (player && player !== Players.LocalPlayer) {
+            giftingPrompt.MaxActivationDistance = 10000
+            giftingPrompt.RequiresLineOfSight = false
+            giftingPrompt.HoldDuration = 5
             giftingPrompts.set(player, giftingPrompt)
             giftingPrompt.ActionText = "Gift to player";
             giftingPrompt.Parent = body.rootPart

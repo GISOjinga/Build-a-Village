@@ -81,7 +81,7 @@ setupMatter([
     { system: updateTools },
 
     // walls
-    { system: updateWalls, phase: Phases.Last },
+    { system: updateWalls },
 ], { // tag added
     // "TouchToAddSkin": touchToAddSkinTag,
     // "TouchToAddPower": touchToAddPowerTag,

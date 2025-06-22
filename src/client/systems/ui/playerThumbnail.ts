@@ -13,11 +13,11 @@ import paths from "shared/utils/paths";
 
 
 // variables
-const trash = new Janitor().LinkToInstances(script)
+const trash = new Janitor()
 const playerThumbnail = trash.Add(paths.Assets.UI.PlayerThumbnail.Clone())
 const player = Players.LocalPlayer
 const mouse = player.GetMouse()
-
+trash.LinkToInstance(script, true)
 
 // places the player thumbnail
 export default (world: World) => {

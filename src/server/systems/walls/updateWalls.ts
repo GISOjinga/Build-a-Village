@@ -1,13 +1,14 @@
-import { World } from "@rbxts/jecs";
+import { Entity, pair, World } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
+import { PlayerData } from "shared/data/defaultData";
 import { routes } from "shared/data/network";
 import wallsData from "shared/data/wallsData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
-import { createEntity, getEntity, printTS } from "shared/utils/functions/jecsHelpFunctions";
-import { Changed, Data, Platform, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { Added, Changed, Data, Platform, TargetEntity } from "shared/utils/jecs/jecsComponents";
 
 
 
@@ -41,11 +42,12 @@ export default (world: World) => {
                 createEntity.updateData(playerEntity, (oldData) => {
                     // updates your cash if you have it
                     if (oldData.Coins >= wallWishingToBeBought.Price) {
-                        printTS($line, `Buying wall ${wallWishingToBeBought.Name} for ${wallWishingToBeBought.Price} coins`);
+                        printJecs($line, `Buying wall ${wallWishingToBeBought.Name} for ${wallWishingToBeBought.Price} coins`);
                         // removes the coins from your data
                         oldData.Coins -= wallWishingToBeBought.Price;
 
                         // gived you the wall in your walls
+                        oldData.Walls.forEach((wall) => wall.Equipped = false); // unequips all walls
                         oldData.Walls.push({
                             ...wallWishingToBeBought,
                             Owned: true,
@@ -66,20 +68,23 @@ export default (world: World) => {
         const playerEntity = player && getEntity.fromInstance(player);
         const wallWishingToBeBought = wallsData.find((wall) => wall.GamePassId === gamePassId);
 
-        // if the purchase was successful and the player exists
-        if (wasPurchased && player && playerEntity && wallWishingToBeBought) {
-            printTS($line, `Player ${player.Name} purchased wall ${wallWishingToBeBought.Name} with robux`);
-            // updates your data to give you the wall
-            createEntity.updateData(playerEntity, (oldData) => {
-                // adds the wall to your walls
-                oldData.Walls.push({
-                    ...wallWishingToBeBought,
-                    Owned: true,
-                    Equipped: true,
+        task.spawn(() => {
+            printJecs($line, `Player ${player.Name} purchased game pass ${gamePassId} with result ${wasPurchased || MarketplaceService.UserOwnsGamePassAsync(player.UserId, gamePassId)}, wallWishingToBeBought`, gamePassId);
+            // if the purchase was successful and the player exists
+            if ((wasPurchased || MarketplaceService.UserOwnsGamePassAsync(player.UserId, gamePassId)) && player && playerEntity && wallWishingToBeBought) {
+                printJecs($line, `Player ${player.Name} purchased wall ${wallWishingToBeBought.Name} with robux`);
+                // updates your data to give you the wall
+                createEntity.updateData(playerEntity, (oldData) => {
+                    // adds the wall to your walls
+                    oldData.Walls.push({
+                        ...wallWishingToBeBought,
+                        Owned: true,
+                        Equipped: true,
+                    });
+                    return oldData;
                 });
-                return oldData;
-            });
-        }
+            }
+        })
     }
 
     // when ever equip wall is called it edits your data then equips the wall using create entity
@@ -89,17 +94,19 @@ export default (world: World) => {
 
         if (playerEntity && data) {
             // finds the wall you wish to equip
-            const wallToEquip = data.Walls.find((w) => w.Name === routeData.wallName);
+            const wallToEquip = data.Walls.find((wall) => wall.Name === routeData.wallName);
 
             // if you have the wall
             if (wallToEquip) {
-                printTS($line, `Equipping wall ${wallToEquip.Name} to ${routeData.equip ? "equip" : "unequip"}`);
+                printJecs($line, `Equipping wall ${wallToEquip.Name} to ${routeData.equip ? "equip" : "unequip"}`);
                 // updates your walls data
                 createEntity.updateData(playerEntity, (oldData) => {
                     oldData.Walls.forEach((wall) => {
                         if (wall.Name === wallToEquip.Name) {
-                            printTS($line, `Setting wall ${wall.Name} equipped to ${routeData.equip}`);
+                            printJecs($line, `Setting wall ${wall.Name} equipped to ${routeData.equip}`);
                             wall.Equipped = routeData.equip;
+                        } else {
+                            wall.Equipped = false;
                         }
                     })
                     return oldData
@@ -108,32 +115,41 @@ export default (world: World) => {
         }
     })
 
+    // function to toggle wall
+    function equipWall(playerEntity: Entity, data: PlayerData, platform: PlatformExample) {
+        const currentlyEquippedWall = data.Walls.find((w) => w.Owned && w.Equipped);
+        const wallModel = currentlyEquippedWall && platform.Fences.FindFirstChild(currentlyEquippedWall.Name);
+
+        // checks to see if the wall is already visible if so ignores it
+        printJecs($line, "Currently equipped wall:", currentlyEquippedWall ? currentlyEquippedWall.Name : "none", "Wall model:", wallModel ? wallModel.Name : "none");
+        if (!wallModel || !wallModel.GetAttribute("Visible")) {
+            printJecs($line, "Updating walls for player", playerEntity, "to", currentlyEquippedWall ? currentlyEquippedWall.Name : "none");
+
+            // hides all walls
+            platform.Fences.GetChildren().forEach((child) => {
+                child.SetAttribute("Visible", false);
+                toggleFenceVisibility(child, false);
+            });
+
+            // if the current wall exists then sets it visible
+            if (wallModel) {
+                wallModel.SetAttribute("Visible", true);
+                toggleFenceVisibility(wallModel, true);
+            }
+        }
+    }
+
+    // when platform gets added hides all the walls except the equipped one
+    for (const [_, platformEntity, platform] of world.query(TargetEntity, Added(Platform))) platform.Fences.GetChildren().forEach((fence) => toggleFenceVisibility(fence, false));
+
     // when ever your data gets updated it makes sure to set the equipped wall on your platform visible
     for (const [_, playerEntity, changed] of world.query(TargetEntity, Changed(Data))) {
         const data = changed.new;
-        const platform = world.contains(playerEntity) && world.get(playerEntity, Platform)
+        const platformEntity = world.contains(playerEntity) && world.get(playerEntity, pair(TargetEntity, Platform))
+        const platform = platformEntity && world.contains(platformEntity) && world.get(platformEntity, Platform);
 
         // if you have data and a platform then hides all your walls
-        if (platform && data) {
-            const currentlyEquippedWall = data.Walls.find((w) => w.Owned && w.Equipped);
-            const wallModel = currentlyEquippedWall && platform.Fences.FindFirstChild(currentlyEquippedWall.Name);
-
-            // checks to see if the wall is already visible if so ignores it
-            if (!wallModel || !wallModel.GetAttribute("Visible")) {
-                printTS($line, "Updating walls for player", playerEntity, "to", currentlyEquippedWall ? currentlyEquippedWall.Name : "none");
-
-                // hides all walls
-                platform.Fences.GetChildren().forEach((child) => {
-                    child.SetAttribute("Visible", false);
-                    toggleFenceVisibility(child, false);
-                });
-
-                // if the current wall exists then sets it visible
-                if (wallModel) {
-                    wallModel.SetAttribute("Visible", true);
-                    toggleFenceVisibility(wallModel, true);
-                }
-            }
-        }
+        printJecs($line, "Updating walls for player", playerEntity, "with data", data, platformEntity, platform);
+        if (platform && data) equipWall(playerEntity, data, platform);
     }
 }
