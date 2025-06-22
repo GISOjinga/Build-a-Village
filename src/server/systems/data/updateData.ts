@@ -66,8 +66,8 @@ export default (world: World) => {
         if (player) {
             const playerData = getPlayerData(player);
 
-            setEntity.addTargetForReplication(bodyEntity, player, Data);
             if (playerData) {
+                setEntity.addTargetForReplication(bodyEntity, player, Data);
                 world.set(bodyEntity, Data, playerData);
                 world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity, updateAll: true });
             } else {
