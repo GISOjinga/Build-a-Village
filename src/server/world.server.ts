@@ -70,7 +70,6 @@ setupMatter([
     { system: loadCharacter },
     { system: loadPlayerData },
     { system: savePlayerData },
-    { system: updateTools },
 
     // robux store
     { system: robuxStore },
@@ -79,6 +78,7 @@ setupMatter([
     { system: villagersShop },
     { system: progressVillagers },
     { system: placeVillagers }, // tag added
+    { system: updateTools },
 
     // walls
     { system: updateWalls, phase: Phases.Last },

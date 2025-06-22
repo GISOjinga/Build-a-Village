@@ -33,6 +33,7 @@ import shopDataUpdate from "./systems/ui/shopDataUpdate";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
 import playerThumbnail from "./systems/ui/playerThumbnail";
 import NpcDialogue from "./app/NpcDialogue";
+import updateWallsForSale from "./systems/ui/updateWallsForSale";
 
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
@@ -111,6 +112,7 @@ const debug = setupMatter([
     { system: playerDataUpdate },
     { system: shopDataUpdate },
     { system: playerThumbnail },
+    { system: updateWallsForSale },
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,
