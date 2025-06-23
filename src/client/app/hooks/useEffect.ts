@@ -8,6 +8,6 @@ export default (callback: (trash: Janitor) => void) => {
     return effect(() => {
         const newTrash = new Janitor();
         callback(newTrash);
-        return () => newTrash.Destroy();
+        return () => newTrash.Destroy?.();
     })
 }

@@ -188,7 +188,9 @@ type VillagerProgress = {
             StartTime: number;
         }
         Resources: {
-            Amount:number;
+            Normal: number;
+            Gold: number,
+            Rainbow: number,
         }
     };
     Building: {
@@ -206,9 +208,11 @@ type VillagerData = {
 }
 
 //* produce
+type ProduceVariant = "Normal" | "Gold" | "Rainbow"
 type ProduceData = {
     Name: ProduceNames,
     Amount: number,
+    Variant: "Normal" | "Gold" | "Rainbow"
 }
 
 //* villager model

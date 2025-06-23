@@ -1,15 +1,6 @@
 import ShopData from "./ShopData";
 
-export type VillagerInfo = {
-    Name: string;
-    Price: number;
-    InStock: number;
-    Image: string;
-    Description: string;
-    Rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythical";
-    Tier: number;
-    ProductId: number;
-};
+
 
 // ===== Configuration Tables =====
 // Chance each rarity appears (0–1)
@@ -19,7 +10,7 @@ const rarityAppearChance: Record<VillagerInfo["Rarity"], number> = {
     Rare: 0.40,
     Epic: 0.20,
     Legendary: 0.05,
-    Mythical: 0.01,
+    Mythic: 0.01,
 };
 
 // Weighted stock tables per rarity
@@ -51,7 +42,7 @@ const stockWeights: Record<VillagerInfo["Rarity"], Array<{ quantity: number; wei
         { quantity: 1, weight: 95 },
         { quantity: 2, weight: 5 },
     ],
-    Mythical: [
+    Mythic: [
         { quantity: 1, weight: 99 },
         { quantity: 2, weight: 1 },
     ],

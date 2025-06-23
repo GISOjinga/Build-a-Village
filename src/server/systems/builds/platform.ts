@@ -85,7 +85,6 @@ export default (world: World) => {
         }
     }
 
-
     // for each platform makes sure that it has a entity attached
     platformContainer.GetChildren<PlatformExample>().forEach((platform) => {
         if (!getEntity.fromInstance(platform)) {

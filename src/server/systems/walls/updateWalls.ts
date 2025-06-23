@@ -7,8 +7,8 @@ import wallsData from "shared/data/wallsData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
-import { createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
-import { Added, Changed, Data, Platform, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { Added, Changed, Data, GiftTo, Platform, PlatformOccupied, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 
 
 
@@ -140,7 +140,44 @@ export default (world: World) => {
     }
 
     // when platform gets added hides all the walls except the equipped one
-    for (const [_, platformEntity, platform] of world.query(TargetEntity, Added(Platform))) platform.Fences.GetChildren().forEach((fence) => toggleFenceVisibility(fence, false));
+    for (const [_, platformEntity, platform] of world.query(TargetEntity, Added(Platform))) platform.Fences.GetChildren().forEach((fence) => toggleFenceVisibility(fence, false))
+
+    // when platform occupiued gets added
+    for (const [_, platformEntity, playerOccupyingEntity] of world.query(TargetEntity, Added(PlatformOccupied))) {
+        const playerOccupying = world.get(playerOccupyingEntity, Player);
+        const platform = world.get(platformEntity, Platform);
+
+        // if platform exists then sets up the sign gui containers
+        if (platform && playerOccupying) {
+            const proximityPromptProduceAll = new Instance("ProximityPrompt", platform.BuySign.Container)
+
+            // sets up produce all
+            proximityPromptProduceAll.RequiresLineOfSight = false;
+            proximityPromptProduceAll.ActionText = "Produce All";
+            proximityPromptProduceAll.HoldDuration = 5;
+            proximityPromptProduceAll.MaxActivationDistance = 6;
+
+            // when triggered asks to buy a product called produce all
+            proximityPromptProduceAll.Triggered.Connect((playerWhoTriggered) => {
+                const playerWhoTriggeredEntity = getEntity.fromInstance(playerWhoTriggered)
+
+                if (playerWhoTriggeredEntity && world.contains(playerOccupyingEntity)) {
+                    addComponent(playerWhoTriggeredEntity, GiftTo, playerOccupying)
+                    MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3309650571);
+                }
+            })
+        }
+    }
+
+    // when ever platform occupied gets removed hides the fences
+    for (const [_, platformEntity] of world.query(TargetEntity, Removed(PlatformOccupied))) {
+        const platform = world.get(platformEntity, Platform);
+
+        if (platform) {
+            platform.BuySign.Container.FindFirstChildOfClass("ProximityPrompt")?.Destroy();
+            platform.Fences.GetChildren().forEach((fence) => toggleFenceVisibility(fence, false));
+        }
+    }
 
     // when ever your data gets updated it makes sure to set the equipped wall on your platform visible
     for (const [_, playerEntity, changed] of world.query(TargetEntity, Changed(Data))) {

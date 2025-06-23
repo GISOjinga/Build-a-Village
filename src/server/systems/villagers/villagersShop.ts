@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { routes } from "shared/data/network";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
 import ShopData from "./ShopData";
-import { Added, Body, Data, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, Data, GiftTo, Player, ProduceAll } from "shared/utils/jecs/jecsComponents";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
@@ -101,9 +101,10 @@ export default (world: World) => {
         const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
         const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
         const itemName = equippedTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
+        const itemVariant = equippedTool?.GetAttribute<ProduceVariant>("ItemVariant");
 
         // if data then
-        if (playerEntity && playerToGiftToEntity && (tooType === "Villager" || tooType === "Commodity")) {
+        if (playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Villager" || tooType === "Commodity")) {
             // updates playerGifting data
             createEntity.updateData(playerEntity, (oldData) => {
                 // removes the villager from the inventory
@@ -122,7 +123,7 @@ export default (world: World) => {
                     oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
 
                     // gives the player the produce
-                    createEntity.giveProduce(playerToGiftToEntity, itemName as ProduceNames, totalAmount);
+                    createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, totalAmount);
                 }
 
                 return oldData;
@@ -147,15 +148,16 @@ export default (world: World) => {
     for (const [_userId, productId, wasPurchased] of useEvent(MarketplaceService.PromptProductPurchaseFinished)) {
         let userId = _userId;
         let player = Players.GetPlayerByUserId(userId) as Player
-        const playerEntity = player && getEntity.fromInstance(player);
+        let playerEntity = player && getEntity.fromInstance(player);
         const shopVillagerIndex = ShopData.Villagers.findIndex((v) => v.ProductId === productId);
 
         // makes sure its from the villagers page
-        if (shopVillagerIndex === -1 || productId === 3308848691) {
+        if (shopVillagerIndex === -1 || productId === 3308848691 || productId === 3309650571) {
             // if the purchase was successful and the player exists
             if (wasPurchased && player && playerEntity) {
                 const playerToGiftTo = world.get(playerEntity, GiftTo) as Player
                 const hasGitTo = world.has(playerEntity, GiftTo)
+                const isTheSamePlayer = playerToGiftTo && playerToGiftTo.UserId === userId;
 
                 printJecs($line, `Gift to`, playerToGiftTo, "for", productId, "was purchased:", wasPurchased);
                 printJecs($line, player.Name + " purchased product", productId, "for", "Robux");
@@ -167,18 +169,21 @@ export default (world: World) => {
                     if (!playerToGiftTo.Parent) return
 
                     // notifies both players
-                    routes.notify.sendTo({
-                        text: player.Name + " has gifted you!",
-                        duration: 5,
-                    }, playerToGiftTo);
-                    routes.notify.sendTo({
-                        text: "You have gifted " + playerToGiftTo.Name + "!",
-                        duration: 5,
-                    }, player);
+                    if (!isTheSamePlayer) {
+                        routes.notify.sendTo({
+                            text: player.Name + " has gifted you!",
+                            duration: 5,
+                        }, playerToGiftTo);
+                        routes.notify.sendTo({
+                            text: "You have gifted " + playerToGiftTo.Name + "!",
+                            duration: 5,
+                        }, player);
+                    }
 
                     // if the player has a gift to then sets the player to the player to gift to
                     player = playerToGiftTo;
                     userId = playerToGiftTo.UserId
+                    playerEntity = getEntity.fromInstance(playerToGiftTo);
                 }
 
                 if (productId === 3308848691) { // purchaed a full restock on all villagers
@@ -194,6 +199,9 @@ export default (world: World) => {
 
                     // updates the shop data with the new data
                     ShopData.Villagers = newData;
+                } else if (productId === 3309650571) { // produce all
+                    // adds a produce all to the player
+                    if (playerEntity) addComponent(playerEntity, ProduceAll)
                 } else {
 
                     // bought a villager from the shop
@@ -234,38 +242,32 @@ export default (world: World) => {
             if (option === "Option1") {
                 // sells all your items in your inventory
                 createEntity.updateData(playerEntity, (oldData) => {
-                    const totalItemsWithNames = new Map<(VillagerNames | ProduceNames), number>();
+                    // if you have enough
+                    if ((oldData.Villagers.size() + oldData.Produce.size()) < 1) routes.npcDialogue.sendTo({
+                        text: "You’re not holding anything to sell.",
+                        target: "Sell",
+                    }, player);
 
                     // loops through your villagers tallys them up
                     oldData.Villagers.forEach((villagerData) => {
                         if (villagerData.RelativeLocation) return; // skip if the villager is placed
                         const villagerName = villagerData.Name;
-                        const currentAmount = totalItemsWithNames.get(villagerName) || 0;
-                        totalItemsWithNames.set(villagerName, currentAmount + 1);
+                        oldData.Coins += (ShopData.SellPrice[villagerName] || 0) * wallMultiplier; // adds the coins from the villager
                     });
 
                     // loops through your produce tallys them up
                     oldData.Produce.forEach((produceData) => {
                         const produceName = produceData.Name;
-                        const currentAmount = totalItemsWithNames.get(produceName) || 0;
-                        totalItemsWithNames.set(produceName, currentAmount + produceData.Amount);
+                        const variantMultiplier = (produceData.Variant === "Rainbow" ? 50 : produceData.Variant === "Gold" ? 10 : 1);
+                        oldData.Coins += (ShopData.SellPrice[produceName] || 0) * wallMultiplier * variantMultiplier; // adds the coins from the produce
                     });
 
                     // removes the villagers that arent spawned
                     oldData.Villagers = oldData.Villagers.filter((villagerData) => villagerData.RelativeLocation ? true : false);
                     oldData.Produce.clear();
 
-                    // adds up your coins
-                    totalItemsWithNames.forEach((amount, name) => {
-                        oldData.Coins += (amount * ShopData.SellPrice[name]) * wallMultiplier;
-                    });
-
+                    // prints the sell message
                     printTS($line, player.Name + " sold all items for", oldData.Coins, "Coins");
-
-                    if (totalItemsWithNames.size() < 1) routes.npcDialogue.sendTo({
-                        text: "You’re not holding anything to sell.",
-                        target: "Sell",
-                    }, player);
 
                     return oldData;
                 });
@@ -287,9 +289,10 @@ export default (world: World) => {
                             oldData.Villagers = oldData.Villagers.filter((v) => v.UniqueId !== uniqueId);
                             oldData.Coins += (ShopData.SellPrice[itemName] || 0) * wallMultiplier; // adds the coins from the villager
                         } else if (produceInfo) { // if the produce info is found then remove it
-                            printTS($line, player.Name + " sold produce", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
+                            const sellPrice = (ShopData.SellPrice[itemName] || 0) * (produceInfo.Variant === "Rainbow" ? 50 : produceInfo.Variant === "Gold" ? 10 : 1);
+                            printTS($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
                             oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
-                            oldData.Coins += (ShopData.SellPrice[itemName] || 0) * wallMultiplier; // adds the coins from the produce
+                            oldData.Coins += (sellPrice || 0) * wallMultiplier; // adds the coins from the produce
                         }
 
                         return oldData
@@ -304,12 +307,15 @@ export default (world: World) => {
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
                 const itemName = tool && tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
                 const isVillager = tool && tool.GetAttribute("UniqueId") as boolean;
+                const variant = tool && tool.GetAttribute("ItemVariant") as ProduceVariant;
 
                 // if the tool is a villager then tells you how much it costs
                 if (tool && itemName) {
-                    const totalItemCount = isVillager ? 1 : data.Produce.find((p) => p.Name === itemName)?.Amount || 1;
+                    const variantMultiplier = (variant === "Rainbow" ? 50 : variant === "Gold" ? 10 : 1);
+                    const produceInfo = variant && data.Produce.find((p) => p.Name === itemName && p.Variant === variant);
+                    const totalItemCount = isVillager ? 1 : produceInfo?.Amount || 1;
                     routes.npcDialogue.sendTo({
-                        text: `That would sell for ${(ShopData.SellPrice[itemName] || 0) * totalItemCount} Coins`,
+                        text: `That would sell for ${(ShopData.SellPrice[itemName] || 0) * totalItemCount * wallMultiplier * variantMultiplier} Coins`,
                         target: "Sell",
                     }, player);
                 } else {

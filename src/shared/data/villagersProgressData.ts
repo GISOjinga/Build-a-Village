@@ -20,7 +20,9 @@ paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
 				StartTime: 0,
 			},
 			Resources: {
-				Amount: 0,
+				Gold: 0,
+				Normal: 0,
+				Rainbow: 0,
 			},
 		},
 		Building: {

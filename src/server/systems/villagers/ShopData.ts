@@ -5,6 +5,7 @@ const sellPricesData = {} as { [key in (VillagerNames | ProduceNames)]: number }
 
 // This is a placeholder for the villagers data.
 paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
+    if (villager.Name === "VillagerExample") return
     const sellPrice = villager.GetAttribute<number>("Price") || 0
 
     sellPricesData[villager.Name as VillagerNames] = sellPrice

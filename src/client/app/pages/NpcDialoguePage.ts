@@ -1,6 +1,6 @@
 import { effect } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
-import { Players, TweenService } from "@rbxts/services";
+import { Players, SoundService, TweenService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
@@ -17,8 +17,8 @@ import { createMotion } from "@rbxts/ripple";
 
 export default (dialoguePage: NpcDialogues) => {
     const trash = new Janitor();
-    const buyProximityPrompt = paths.Map.Shops.Buy.Noob.HumanoidRootPart.ProximityPrompt;
-    const sellProximityPrompt = paths.Map.Shops.Sell.Noob.HumanoidRootPart.ProximityPrompt;
+    const buyProximityPrompt = paths.Map.Shops.WaitForChild("Buy").WaitForChild("Noob").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Buy.Noob.HumanoidRootPart.ProximityPrompt;
+    const sellProximityPrompt = paths.Map.Shops.WaitForChild("Sell").WaitForChild("Noob").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Sell.Noob.HumanoidRootPart.ProximityPrompt;
 
     // uses use effect to set the dialogue
     trash.Add(useEffect((newTrash) => {
@@ -44,12 +44,18 @@ export default (dialoguePage: NpcDialogues) => {
                     full += " ";
                 }
             }
+            if (buyTextLabel.Text !== full) {
+                const typingSound = newTrash.Add(paths.SFX.UI.singletype.Clone())
+                typingSound.Parent = SoundService
+                typingSound.Play()
+            };
             buyTextLabel.Text = (full ?? "")
             sellTextLabel.Text = (full ?? "")
         }))
 
         newTrash.Add(tween.onComplete(() => {
             newTrash.Add(task.delay(1, () => {
+                newTrash.Destroy()
                 pageStates.openPage(npcDialogue.target)
 
                 // if target is none then hide

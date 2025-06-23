@@ -1,18 +1,18 @@
 import { Entity, World } from "@rbxts/jecs";
 import { ContentProvider } from "@rbxts/services";
 import { addComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed } from "shared/utils/jecs/jecsComponents";
+import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
 task.spawn(() => ContentProvider.PreloadAsync(paths.Assets.Animations.GetDescendants().filter(asset => asset.IsA("Animation"))))
 
 // list of all animations
-export const savedAnimationTracks = new WeakMap<Animator, Map<string, AnimationTrack>>()
+export const savedAnimationTracks = new WeakMap<Animator, Map<Animation, AnimationTrack>>()
 
 // to get the animation
 export function getAnimation(animator: Animator, animation: Animation): AnimationTrack | undefined {
-    let track = savedAnimationTracks.get(animator)?.get(animation.GetFullName());
+    let track = savedAnimationTracks.get(animator)?.get(animation);
 
     if (!track) {
         track = animator.LoadAnimation(animation);
@@ -20,15 +20,17 @@ export function getAnimation(animator: Animator, animation: Animation): Animatio
         if (!savedAnimationTracks.has(animator)) {
             savedAnimationTracks.set(animator, new Map());
         }
-        savedAnimationTracks.get(animator)!.set(animation.GetFullName(), track);
+        savedAnimationTracks.get(animator)!.set(animation, track);
     }
     return track
 }
 
 export default (world: World) => {
-    // for all bodies with out loaded animations
-    for (const [entity, { animator }] of world.query(Body).without(LoadingAnimations)) {
-        const animations = new Map<string, AnimationTrack>();
+    // villagers without loading animations
+    for (const [entity, { villagerModel }] of world.query(Villager).without(LoadingAnimations)) {
+        if (!villagerModel.FindFirstChild("Npc")) continue
+        const animator = new Instance("Animator", villagerModel.Npc.Humanoid);
+        const animations = new Map<Animation, AnimationTrack>();
         let totalToLoad = 0
 
         // loops through all assets for animations to load
@@ -36,30 +38,43 @@ export default (world: World) => {
             if (asset.IsA("Animation")) {
                 const loadedAnimation = animator.LoadAnimation(asset)
 
-                // plays the animation
-                // task.defer(() => {
-                //     while (animator.GetPlayingAnimationTracks().size() > 200) {
-                //         for (const track of animator.GetPlayingAnimationTracks()) { if (track.Length > 0 || track.TimePosition > 0) track.Stop() }
-                //         task.wait(.01)
-                //     }
-
-                //     loadedAnimation.Play()
-                //     task.wait(.01)
-                //     loadedAnimation.Stop()
-                //     totalToLoad--
-                //     if (totalToLoad <= 0) world.set(entity, LoadedAnimations, true)
-                // })
-
                 // saves the animation
                 totalToLoad++
                 animations.set(
-                    asset.GetFullName(),
+                    asset,
                     loadedAnimation,
                 )
             }
         })
 
         // saves it to the entity
+        addComponent(entity, LoadedAnimations)
+        addComponent(entity, LoadingAnimations)
+        addComponent(entity, VillagerAnimator, animator)
+        savedAnimationTracks.set(animator, animations)
+    }
+
+    // for all bodies with out loaded animations
+    for (const [entity, { animator }] of world.query(Body).without(LoadingAnimations)) {
+        const animations = new Map<Animation, AnimationTrack>();
+        let totalToLoad = 0
+
+        // loops through all assets for animations to load
+        paths.Assets.Animations.GetDescendants().forEach(asset => {
+            if (asset.IsA("Animation")) {
+                const loadedAnimation = animator.LoadAnimation(asset)
+
+                // saves the animation
+                totalToLoad++
+                animations.set(
+                    asset,
+                    loadedAnimation,
+                )
+            }
+        })
+
+        // saves it to the entity
+        addComponent(entity, LoadingAnimations)
         addComponent(entity, LoadedAnimations)
         savedAnimationTracks.set(animator, animations)
     }

@@ -1,8 +1,11 @@
 import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
 import { useThrottle } from "shared/Plugin-Hook";
-import { addComponent, createEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { getAnimation } from "shared/systems/animator/loadAnimations";
+import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
+import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import paths from "shared/utils/paths";
 
 
 
@@ -25,6 +28,37 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 }
 
 
+// function to take resource spot
+const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant) => {
+    // loops through all the avliable resources and finds the one that is not ready and takes it
+    for (const [_, model] of pairs(villagerModel.Station.Parts.Resources.GetChildren())) {
+        // if the model has a variant and is not ready then
+        if (!model.GetAttribute<boolean>("Ready")) {
+            const variantParticles = paths.Assets.Particles.FindFirstChild(variant)?.Clone()
+            const partToplaceIn = model.FindFirstChildOfClass("Part");
+            const resourceProximityPrompt = model.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+
+            // sets the variant and ready
+            model.SetAttribute("Variant", variant);
+            model.SetAttribute("Ready", true);
+            if (resourceProximityPrompt) resourceProximityPrompt.Enabled = true
+
+            // if variant partielces then places it in
+            if (partToplaceIn && variantParticles) variantParticles.Parent = partToplaceIn;
+
+            // toggles the transparency
+            model.GetDescendants().forEach((child) => {
+                if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
+                    child.Destroy();
+                } else {
+                    toggleTransparency(child, true)
+                }
+            });
+            break;
+        }
+    }
+}
+
 
 export default (world: World) => {
     // when villager is added but not fully built then
@@ -34,8 +68,9 @@ export default (world: World) => {
         const buildingTimes = villagerData.Progress.Building
         const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
         const hitBox = new Instance("Part")
-        const proximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+        const tier2ProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
         const requiredResource = villagerData.Progress.Required
+        const produceName = villagerData.Progress.Produce
 
         // set up part
         hitBox.Transparency = 1;
@@ -44,30 +79,64 @@ export default (world: World) => {
         hitBox.Size = villagerModel.GetExtentsSize();
         hitBox.CFrame = villagerModel.GetPivot();
         hitBox.Name = "HitBox";
-        hitBox.Parent = villagerModel;
+        hitBox.Parent = villagerModel; // remember to make it so that progressing resources only takes up the spot of a avliable resoource
+
+        // for each resource that can be picked up adds a proximity prompt to it
+        villagerModel.Station.Parts.Resources.GetChildren<Model>().forEach((model) => {
+            const proximityPromptyPart = new Instance("Part", model)
+            const resourceProximityPrompt = paths.Assets.ProximityPrompts.ResourcesPrompt.Clone()
+
+            // sets up the proximity prompt
+            proximityPromptyPart.Name = "ProximityPromptPart"
+            proximityPromptyPart.Anchored = true
+            proximityPromptyPart.CanQuery = true
+            proximityPromptyPart.Transparency = 1
+            proximityPromptyPart.CanCollide = false
+            proximityPromptyPart.Size = Vector3.zero
+            proximityPromptyPart.PivotTo(model.GetPivot())
+            resourceProximityPrompt.Parent = proximityPromptyPart
+            resourceProximityPrompt.Enabled = false
+            resourceProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
+                const variant = model.GetAttribute<ProduceVariant>("Variant")
+                const readyToBePicked = model.GetAttribute<boolean>("Ready")
+                const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered)
+                const villagerInfo = world.get(villagerEntity, Villager)
+
+
+                // if both resource variant and ready then adds the collected item into the player who triggered it inventory and removes that variant
+                if (variant && readyToBePicked && playerEntityWhoTriggered && villagerInfo) {
+                    const progression = villagerInfo.villagerData.Progress.Progression
+
+                    // removes the variant and ready
+                    resourceProximityPrompt.Enabled = false
+                    model.SetAttribute("Variant", undefined)
+                    model.SetAttribute("Ready", undefined)
+                    model.GetDescendants().forEach((child) => {
+                        if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
+                            child.Destroy();
+                        } else {
+                            toggleTransparency(child, false)
+                        }
+                    });
+
+                    // removes the produce from the data
+                    progression.Resources[variant] -= 1
+                    addComponent(villagerEntity, Villager, { ...villagerInfo })
+
+                    // adds the produce to the data
+                    printJecs($line, `${playerWhoTriggered.Name} took ${produceName} with varaint ${variant} from ${playerEntity}`)
+                    createEntity.insertProduce(playerEntityWhoTriggered, produceName, variant)
+                    removeComponent(villagerEntity, MaxedOut);
+                }
+            })
+        })
 
         // when proximity prompt is called
-        proximityPrompt.Triggered.Connect((playerWhoTriggered) => {
-            const villagerData = world.contains(villagerEntity) && world.get(villagerEntity, Villager)
+        tier2ProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
+            const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager)
 
-            if (playerWhoTriggered === player && villagerData) {
-                if (proximityPrompt.ActionText === "Collect All") {
-                    const totalResources = villagerData.villagerData.Progress.Progression.Resources.Amount || 0
-
-                    // if villager has resources then updates the villlager data with the resources of 0 and gives the total away with inventoryProduce
-                    if (totalResources > 0) {
-                        printJecs($line, `Giving ${totalResources} ${villagerData.villagerData.Progress.Produce} to player ${player.Name}`)
-                        // gives the produce to the player
-                        createEntity.collectProduce(playerEntity, villagerData.villagerData.Progress.Produce, totalResources)
-
-                        // sets the resources to 0
-                        villagerData.villagerData.Progress.Progression.Resources.Amount = 0;
-
-                        // updates the villager entity
-                        addComponent(villagerEntity, Villager, villagerData);
-                        removeComponent(villagerEntity, MaxedOut);
-                    }
-                } else if (body && requiredResource && requiredResource.Amount < requiredResource.Max && proximityPrompt.ActionText === `Requires ${requiredResource.Produce}`) {
+            if (playerWhoTriggered === player && villagerInfo) {
+                if (body && requiredResource && requiredResource.Amount < requiredResource.Max && tier2ProximityPrompt.ActionText === `Requires ${requiredResource.Produce}`) {
                     const toolInHand = body.model.FindFirstChildOfClass("Tool")
                     const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
                     const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
@@ -87,9 +156,9 @@ export default (world: World) => {
                             // updates the villager
                             addComponent(villagerEntity, Villager, {
                                 villagerData: {
-                                    ...villagerData.villagerData,
+                                    ...villagerInfo.villagerData,
                                     Progress: {
-                                        ...villagerData.villagerData.Progress,
+                                        ...villagerInfo.villagerData.Progress,
                                         Required: {
                                             ...requiredResource,
                                             Amount: requiredResource.Amount + amountToTakeAway
@@ -137,26 +206,68 @@ export default (world: World) => {
         }
     }
 
+    // when villager gets added trys to load in all the resources
+    for (const [_, villagerEntity, villagerComp] of world.query(TargetEntity, Added(Villager))) {
+        const { villagerData, villagerModel } = villagerComp;
+        const resources = villagerData.Progress.Progression.Resources;
+
+        // adds the villager component back
+        addComponent(villagerEntity, Villager, villagerComp);
+
+        // loops through all the resources that you have
+        for (const [variant, amount] of pairs(resources)) {
+            // if the amount is greater than 0 then
+            if (amount > 0) takeResourceSpot(villagerModel, variant);
+        }
+    }
+
+    // when vilalger animator gets added
+    for (const [_, villagerEntity, animator] of world.query(TargetEntity, Added(VillagerAnimator))) {
+        const villagerComp = world.get(villagerEntity, Villager);
+
+        // if the villager component exists then
+        if (villagerComp) {
+            const { villagerData, villagerModel } = villagerComp;
+            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
+            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+
+            // plays the idle animation
+            if (productionTrack && sleepTrack) {
+                productionTrack.GetMarkerReachedSignal("impact").Connect(() => {
+                    print("Impact Animation Reached")
+                    particlesEmit(villagerModel)
+                })
+            }
+        }
+    }
+
     // takes the villager through its transitions
     if (useThrottle(.1)) {
-        for (const [villagerEntity, villagerComp] of world.query(Villager).without(MaxedOut)) {
+        for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).without(MaxedOut)) {
             const { villagerData, villagerModel } = villagerComp;
             const requiredResource = villagerData.Progress.Required
             const buildingTimes = villagerData.Progress.Building
             const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
-            const totalResourcesSoFar = villagerData.Progress.Progression.Resources.Amount || 0;
-            const proximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+            const resources = villagerData.Progress.Progression.Resources
+            const totalResourcesSoFar = resources.Gold + resources.Normal + resources.Rainbow;
+            const requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
+            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
 
             // toggles the interaction visiblity
-            proximityPrompt.ActionText = (totalResourcesSoFar > 0 || !requiredResource) ? "Collect All" : (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "Collect";
-            proximityPrompt.Enabled = (totalResourcesSoFar > 0 || (requiredResource && requiredResource.Amount < requiredResource.Max)) ? true : false;
+            requiredProximityPrompt.ActionText = (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "";
+            requiredProximityPrompt.Enabled = requiredResource ? true : false;
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
                 const progression = villagerData.Progress.Progression
                 const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
                 const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
-                const hasMaxedResources = progression.Resources.Amount >= maxResources;
+                const hasMaxedResources = totalResourcesSoFar >= maxResources;
                 const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
                 const inProgressPercentile = totalTimeSinceLastResource / progression.Time.RequiredTimePerResource
                 const hasMetRequiredTime = totalTimeSinceLastResource >= progression.Time.RequiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
@@ -172,7 +283,19 @@ export default (world: World) => {
 
                     // adds component maxed out
                     addComponent(villagerEntity, MaxedOut);
+                    sleepTrack?.Play(.1)
+                    productionTrack?.Stop(.1);
+                    particlesToggle(villagerModel, false);
                 } else {
+                    // controls the animation
+                    if (productionTrack && !productionTrack?.IsPlaying) {
+                        sleepTrack?.Stop(.1)
+                        if (!requiredResource || requiredResource.Amount > 0) {
+                            productionTrack.Looped = false
+                            productionTrack.Play(.1);
+                        }
+                    }
+
                     // shows in progress
                     villagerModel.Station.Parts.InProgress.GetChildren().forEach((child) => {
                         child.GetDescendants().forEach((descendant) => {
@@ -185,8 +308,11 @@ export default (world: World) => {
 
                     // if has met required time then
                     if (hasMetRequiredTime) {
-                        // increments the resources
-                        progression.Resources.Amount += 1;
+                        const variantToGive = math.random(1, 100) <= 1 ? "Rainbow" : math.random(1, 100) <= 5 ? "Gold" : "Normal";
+
+                        // takes the resource spot
+                        takeResourceSpot(villagerModel, variantToGive);
+                        progression.Resources[variantToGive] += 1;
 
                         // takes away from required
                         if (requiredResource) requiredResource.Amount -= 1
@@ -198,14 +324,6 @@ export default (world: World) => {
                         progression.Time.StartTime = os.time(); // resets the start time
                     }
                 }
-
-                // if has maxed resources then
-                villagerModel.Station.Parts.Resources.GetChildren().forEach((child) => {
-                    // if resourceAmount and is less than or equal to current resources then show it
-                    child.GetDescendants().forEach((descendant) => {
-                        toggleTransparency(descendant, (tonumber(child.Name) || 1) <= progression.Resources.Amount);
-                    })
-                })
 
                 // updates the component
                 addComponent(villagerEntity, Villager, villagerComp);
@@ -219,13 +337,16 @@ export default (world: World) => {
         const { villagerData, villagerModel } = villagerComp;
         const buildingTimes = villagerData.Progress.Building
         const progression = villagerData.Progress.Progression
-        const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
 
         // sets to fully built
         buildingTimes.EndTime = os.time()
 
-        // sets the max resources
-        progression.Resources.Amount = maxResources;
+        // loops through all resources and sets it to the max
+        villagerModel.Station.Parts.Resources.GetChildren().forEach((model) => {
+            const variantToGive = math.random(1, 100) <= 1 ? "Rainbow" : math.random(1, 100) <= 5 ? "Gold" : "Normal"
+            takeResourceSpot(villagerModel, variantToGive);
+            progression.Resources[variantToGive] = 1;
+        })
 
         // removes its self
         addComponent(villagerEntity, Villager, villagerComp);

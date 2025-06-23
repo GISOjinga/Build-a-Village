@@ -12,6 +12,19 @@ export function addCommasEveryThreeDigits(number: number = 0): string {
 }
 
 // Converts a number of seconds into "HH:MM:SS" format
+export function formatToMMSS(totalSeconds: number) {
+    // Ensure it's a number and not negative
+    totalSeconds = math.max(0, totalSeconds || 0)
+
+    const hours = math.floor(totalSeconds / 3600)
+    const minutes = math.floor((totalSeconds % 3600) / 60)
+    const seconds = math.floor(totalSeconds % 60)
+
+    // Format with leading zeros
+    return string.format("%02d:%02d", minutes, seconds)
+}
+
+// Converts a number of seconds into "HH:MM:SS" format
 export function formatToHHMMSS(totalSeconds: number) {
     // Ensure it's a number and not negative
     totalSeconds = math.max(0, totalSeconds || 0)

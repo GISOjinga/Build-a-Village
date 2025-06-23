@@ -62,12 +62,16 @@ export default (world: World) => {
                     const produceName = produceData.Name;
                     const realTool = paths.Assets.Tools.Produce.FindFirstChild<Tool>(produceName);
                     const tool = realTool ? realTool.Clone() : new Instance("Tool");
+                    const variantParticles = paths.Assets.Particles.FindFirstChild(produceData.Variant)?.Clone()
+                    const partToplaceIn = tool.FindFirstChildOfClass("Part");
 
                     // set up and parenting
                     tool.RequiresHandle = realTool ? realTool.RequiresHandle : false;
-                    tool.Name = `${produceName} (${produceData.Amount})`;
+                    tool.Name = `${produceData.Variant === 'Normal' ? produceName : produceData.Variant + ' ' + produceName} (${produceData.Amount})`;
                     tool.SetAttribute("ItemType", "Commodity");
+                    tool.SetAttribute("ItemVariant", produceData.Variant);
                     tool.SetAttribute("ItemName", produceName);
+                    if (variantParticles && partToplaceIn) variantParticles.Parent = partToplaceIn
                     tool.Parent = backpack
 
                     // when the tool is activated

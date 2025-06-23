@@ -115,6 +115,9 @@ export const NpcDialogueAttachment = component<Attachment>("NpcDialogueAttachmen
 // use to contain the active villagers entity
 export const ActiveVillagers = component<Array<{ uniqueId: number, entity: Entity }>>("ActiveVillagers");
 
+// animator
+export const VillagerAnimator = component<Animator>("VillagerAnimator");
+
 // villager
 export const Villager = component<{
     villagerData: VillagerData,

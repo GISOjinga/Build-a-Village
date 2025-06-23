@@ -22,42 +22,43 @@ export default (world: World) => {
         // Stop all animations except for the specified exceptions if any
         for (const [index, track] of pairs(body.animator.GetPlayingAnimationTracks())) {
             if (!track.Animation?.IsDescendantOf(paths.Assets.Animations) || exceptions?.includes(track)) continue
+            print("Stopping ALL")
             track.Stop();
         }
     }
 
     // Play animations based on SetAnimation component
-    for (const [entity, body, { state, transition, stopAllOtherAnimations, path, speed, weight, timePosition }] of world.query(Body, SetAnimation, LoadedAnimations)) {
-        const animations = savedAnimationTracks.get(body.animator)!;
-        const animationTrack = animations.get(path)
+    // for (const [entity, body, { state, transition, stopAllOtherAnimations, path, speed, weight, timePosition }] of world.query(Body, SetAnimation, LoadedAnimations)) {
+    //     const animations = savedAnimationTracks.get(body.animator)!;
+    //     const animationTrack = animations.get(path)
 
-        // Remove the SetAnimation component after processing
-        world.remove(entity, SetAnimation);
+    //     // Remove the SetAnimation component after processing
+    //     world.remove(entity, SetAnimation);
 
-        if (!animationTrack) {
-            warn(`Missing animation track for ${path} on ${body.model.Name}`);
-            return;
-        } else {
-            // Adjust animation properties
-            animationTrack.AdjustSpeed(speed || animationTrack.Speed);
-            animationTrack.AdjustWeight(weight || animationTrack.WeightTarget);
-            animationTrack.TimePosition = timePosition || animationTrack.TimePosition;
+    //     if (!animationTrack) {
+    //         warn(`Missing animation track for ${path} on ${body.model.Name}`);
+    //         return;
+    //     } else {
+    //         // Adjust animation properties
+    //         animationTrack.AdjustSpeed(speed || animationTrack.Speed);
+    //         animationTrack.AdjustWeight(weight || animationTrack.WeightTarget);
+    //         animationTrack.TimePosition = timePosition || animationTrack.TimePosition;
 
-            // Stop all other animations if specified
-            if (stopAllOtherAnimations) {
-                for (const track of body.animator.GetPlayingAnimationTracks()) {
-                    if (track !== animationTrack) {
-                        track.Stop();
-                    }
-                }
-            }
+    //         // Stop all other animations if specified
+    //         if (stopAllOtherAnimations) {
+    //             for (const track of body.animator.GetPlayingAnimationTracks()) {
+    //                 if (track !== animationTrack) {
+    //                     track.Stop();
+    //                 }
+    //             }
+    //         }
 
-            // Play or stop the animation
-            if (state === "Play") {
-                animationTrack.Play(transition || 0);
-            } else if (state === "Stop") {
-                animationTrack.Stop(transition || 0);
-            }
-        }
-    }
+    //         // Play or stop the animation
+    //         if (state === "Play") {
+    //             animationTrack.Play(transition || 0);
+    //         } else if (state === "Stop") {
+    //             animationTrack.Stop(transition || 0);
+    //         }
+    //     }
+    // }
 }

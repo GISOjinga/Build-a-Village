@@ -83,7 +83,9 @@ const packets = defineNamespace("gameEvents", () => {
                     StartTime: ByteNet.uint32,
                 }),
                 Resources: struct({
-                    Amount: ByteNet.uint8,
+                    Gold: ByteNet.uint8,
+                    Normal: ByteNet.uint8,
+                    Rainbow: ByteNet.uint8
                 }),
             }),
             Building: struct({
@@ -237,6 +239,7 @@ const packets = defineNamespace("gameEvents", () => {
                     Produce: array(struct({
                         Name: ByteNet.string as ByteNetType<ProduceNames>,
                         Amount: ByteNet.unknown as ByteNetType<number>,
+                        Variant: ByteNet.string as ByteNetType<ProduceVariant>
                     })),
                     Walls: array(struct({
                         Name: ByteNet.string as ByteNetType<WallNames>,

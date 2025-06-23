@@ -2,15 +2,14 @@ export default [
     {
         Name: "Wooden Fence",
         Description: "A basic wooden fence.",
-        Price: 50,
+        Price: 0,
         Image: "rbxassetid://1234567890", // Replace with actual asset ID
         GamePassId: 0,
         CashMultiplier: 1,
         Rarity: "Common",
         Owned: false,
         Equipped: false,
-    },
-    {
+    }, {
         Name: "Log Wall",
         Description: "A sturdy log wall.",
         Price: 100,

@@ -9,6 +9,7 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import useEffect from "../hooks/useEffect";
 import { addCommasEveryThreeDigits } from "shared/utils/functions/stringHelp";
+import paths from "shared/utils/paths";
 
 
 
@@ -40,6 +41,7 @@ export default (pagePaths: PagePaths) => {
 
             // set up
             sample.Visible = false
+            paths.Assets.UI.WallRenders[wallInfo.Name].Clone().Parent = wallBox.WallViewPort;
             wallBox.Visible = true;
             wallBox.Name = wallBox.Name;
             wallBox.LayoutOrder = index;
