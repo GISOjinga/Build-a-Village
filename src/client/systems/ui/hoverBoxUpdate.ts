@@ -45,22 +45,24 @@ export default (world: World) => {
     if (useChange([platform]) && platform) hoverAttachment.Position = platform.Floor.Position
 
     // when the mouse hovers over a villager and sets the time till built
-    if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
-        if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
-            pageStates.hoverInfo({
-                visible: true,
-                info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
-            })
-        } else if (timeTillNextProduce > 0) {
-            pageStates.hoverInfo({
-                visible: true,
-                info: `(${totalProduce}/${maxProduce}) next ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
-            })
-        }
-    }
-
-    // when the mouse is not hovering over a villager
-    if (useChange([villagerModel]) && !villagerEntity) {
+    // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
+    // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
+    if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
+        pageStates.hoverInfo({
+            visible: true,
+            info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
+        })
+    } else if (villagerEntity && timeTillNextProduce > 0) {
+        pageStates.hoverInfo({
+            visible: true,
+            info: `(${totalProduce}/${maxProduce}) ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
+        })
+    } else if (villagerEntity && totalProduce === maxProduce) {
+        pageStates.hoverInfo({
+            visible: true,
+            info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
+        });
+    } else if (!villagerEntity) {
         pageStates.hoverInfo({
             visible: false,
             info: "",

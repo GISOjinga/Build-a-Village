@@ -1,10 +1,11 @@
 import { World } from "@rbxts/jecs";
+import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
-import { useThrottle } from "shared/Plugin-Hook";
+import { useEvent, useThrottle } from "shared/Plugin-Hook";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -35,16 +36,8 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
         // if the model has a variant and is not ready then
         if (!model.GetAttribute<boolean>("Ready")) {
             const variantParticles = paths.Assets.Particles.FindFirstChild(variant)?.Clone()
-            const partToplaceIn = model.FindFirstChildOfClass("Part");
-            const resourceProximityPrompt = model.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
-
-            // sets the variant and ready
-            model.SetAttribute("Variant", variant);
-            model.SetAttribute("Ready", true);
-            if (resourceProximityPrompt) resourceProximityPrompt.Enabled = true
-
-            // if variant partielces then places it in
-            if (partToplaceIn && variantParticles) variantParticles.Parent = partToplaceIn;
+            const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
+            const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
 
             // toggles the transparency
             model.GetDescendants().forEach((child) => {
@@ -54,6 +47,17 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
                     toggleTransparency(child, true)
                 }
             });
+
+            // sets the variant and ready
+            model.SetAttribute("Variant", variant);
+            model.SetAttribute("Ready", true);
+            if (resourceProximityPrompt) resourceProximityPrompt.Enabled = true
+
+            // if variant partielces then places it in
+            if (proximityPromptPart && variantParticles) {
+                variantParticles.Parent = proximityPromptPart
+                particlesToggle(variantParticles, true)
+            };
             break;
         }
     }
@@ -105,28 +109,35 @@ export default (world: World) => {
 
                 // if both resource variant and ready then adds the collected item into the player who triggered it inventory and removes that variant
                 if (variant && readyToBePicked && playerEntityWhoTriggered && villagerInfo) {
-                    const progression = villagerInfo.villagerData.Progress.Progression
+                    if (playerWhoTriggered === player) {
+                        const progression = villagerInfo.villagerData.Progress.Progression
 
-                    // removes the variant and ready
-                    resourceProximityPrompt.Enabled = false
-                    model.SetAttribute("Variant", undefined)
-                    model.SetAttribute("Ready", undefined)
-                    model.GetDescendants().forEach((child) => {
-                        if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
-                            child.Destroy();
-                        } else {
-                            toggleTransparency(child, false)
-                        }
-                    });
+                        // removes the variant and ready
+                        resourceProximityPrompt.Enabled = false
+                        model.SetAttribute("Variant", undefined)
+                        model.SetAttribute("Ready", undefined)
+                        model.GetDescendants().forEach((child) => {
+                            if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
+                                child.Destroy();
+                            } else {
+                                toggleTransparency(child, false)
+                            }
+                        });
 
-                    // removes the produce from the data
-                    progression.Resources[variant] -= 1
-                    addComponent(villagerEntity, Villager, { ...villagerInfo })
+                        // removes the produce from the data
+                        progression.Resources[variant] -= 1
+                        addComponent(villagerEntity, Villager, { ...villagerInfo })
 
-                    // adds the produce to the data
-                    printJecs($line, `${playerWhoTriggered.Name} took ${produceName} with varaint ${variant} from ${playerEntity}`)
-                    createEntity.insertProduce(playerEntityWhoTriggered, produceName, variant)
-                    removeComponent(villagerEntity, MaxedOut);
+                        // adds the produce to the data
+                        printJecs($line, `${playerWhoTriggered.Name} took ${produceName} with varaint ${variant} from ${playerEntity}`)
+                        createEntity.insertProduce(playerEntityWhoTriggered, produceName, variant)
+                        removeComponent(villagerEntity, MaxedOut);
+                    } else { // prompts product purchase to steal the produce
+                        printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
+                        // adds component to take produce from player
+                        addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity, resourceModelName: model.Name, produceName, variant, })
+                        MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3315996934)
+                    }
                 }
             })
         })
@@ -235,10 +246,55 @@ export default (world: World) => {
 
             // plays the idle animation
             if (productionTrack && sleepTrack) {
-                productionTrack.GetMarkerReachedSignal("impact").Connect(() => {
-                    print("Impact Animation Reached")
-                    particlesEmit(villagerModel)
-                })
+                productionTrack.GetMarkerReachedSignal("impact").Connect(() => particlesEmit(villagerModel))
+            }
+        }
+    }
+
+
+    // use event to watch for stealing
+    for (const [userId, productId, wasPurchased] of useEvent(MarketplaceService.PromptProductPurchaseFinished)) {
+        const player = Players.GetPlayerByUserId(userId) as Player
+        const playerEntity = player && getEntity.fromInstance(player);
+        const takeFromVillager = playerEntity && world.get(playerEntity, TakeFromVillager);
+        const villagerEntity = takeFromVillager && takeFromVillager.villagerEntityToStealFrom
+        const villagerInfo = villagerEntity && world.get(villagerEntity, Villager);
+        const model = villagerInfo && villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(takeFromVillager.resourceModelName);
+
+        // makes sure its from the villagers page
+        if (productId === 3315996934) {
+            // if the purchase was successful and the player exists
+            if (wasPurchased && player && playerEntity && takeFromVillager && villagerInfo && model) {
+                const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
+                const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+                const progression = villagerInfo.villagerData.Progress.Progression
+                const variant = takeFromVillager.variant
+                const produceName = takeFromVillager.produceName;
+
+                // removes the variant and ready
+                if (resourceProximityPrompt) resourceProximityPrompt.Enabled = false
+                model.SetAttribute("Variant", undefined)
+                model.SetAttribute("Ready", undefined)
+                model.GetDescendants().forEach((child) => {
+                    if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
+                        child.Destroy();
+                    } else {
+                        toggleTransparency(child, false)
+                    }
+                });
+
+                // removes the produce from the data
+                progression.Resources[variant] -= 1
+                addComponent(villagerEntity, Villager, { ...villagerInfo })
+
+                // adds the produce to the data
+                printJecs($line, `${player.Name} took ${takeFromVillager.produceName} with varaint ${variant} from villager ${villagerEntity}`)
+                createEntity.insertProduce(playerEntity, produceName, variant)
+                removeComponent(villagerEntity, MaxedOut);
+
+                // reduces the item by 1 
+            } else if (!wasPurchased && playerEntity) { // makes sure to still remove the gift to
+                removeComponent(playerEntity, TakeFromVillager);
             }
         }
     }
@@ -285,7 +341,6 @@ export default (world: World) => {
                     addComponent(villagerEntity, MaxedOut);
                     sleepTrack?.Play(.1)
                     productionTrack?.Stop(.1);
-                    particlesToggle(villagerModel, false);
                 } else {
                     // controls the animation
                     if (productionTrack && !productionTrack?.IsPlaying) {

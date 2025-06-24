@@ -110,28 +110,6 @@ export function clampCFrameToBounds(
     return new CFrame(clampedWorldPos.X, clampedWorldPos.Y, clampedWorldPos.Z, R00, R01, R02, R10, R11, R12, R20, R21, R22);
 }
 
-
-// makes sure that all models in villagers have a absolute position relative to primary part
-function getPivotOffsetFromPrimaryPart(model: Model): CFrame | undefined {
-    let realPivot = model.GetAttribute("PivotOffsetToPrimaryPart") as CFrame | undefined;
-    const primaryPart = model.PrimaryPart;
-
-    // if there is no primary part then return undefined
-    if (!primaryPart) return
-
-    // if real pivot then returns that
-    if (realPivot) {
-        return realPivot;
-    } else {
-        const reducedCenter = model.GetDescendants().reduce((acc, part) => { return part.IsA("BasePart") ? { Total: acc.Total + 1, Position: acc.Position.add(part.Position) } : acc }, { Total: 0, Position: new Vector3(0, 0, 0) });
-        const absoluteCenter = reducedCenter.Position.div(reducedCenter.Total);
-        print(absoluteCenter, absoluteCenter.sub(primaryPart.Position).Magnitude)
-        const absoluteCFrame = primaryPart.CFrame.Rotation.add(absoluteCenter)
-        realPivot = absoluteCFrame.ToObjectSpace(primaryPart.CFrame)
-        model.SetAttribute("PivotOffsetToPrimaryPart", realPivot);
-    }
-}
-
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player);
     const platform = body && body.platform;
@@ -254,13 +232,13 @@ export default (world: World) => {
                 makeHighlight(fakeModel)
 
                 // set up part
-                // hitBox.Transparency = 1;
-                // hitBox.Anchored = true;
-                // hitBox.CanCollide = false
-                // hitBox.Size = fakeModel.GetExtentsSize();
-                // hitBox.CFrame = fakeModel.GetPivot();
-                // hitBox.Name = "HitBox";
-                // hitBox.Parent = fakeModel;
+                hitBox.Transparency = 1;
+                hitBox.Anchored = true;
+                hitBox.CanCollide = false
+                hitBox.Size = fakeModel.GetExtentsSize()
+                hitBox.CFrame = fakeModel.GetPivot();
+                hitBox.Name = "HitBox";
+                hitBox.Parent = fakeModel;
             } else if (ToolType === "DigTool") {
                 printJecs($line, "Creating highlight for DigTool", ItemName);
                 // sets up highlight
@@ -283,9 +261,9 @@ export default (world: World) => {
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
         const offsetDirection = platformFloor.CFrame.RightVector.mul(pageStates.placementOffset() * -1)
-        const modelOffset = fakeModel && getPivotOffsetFromPrimaryPart(fakeModel)
+        const rootPart = fakeModel.Npc.HumanoidRootPart
 
-        if (ToolType === "Villager" && modelOffset) {
+        if (ToolType === "Villager") {
             const hitResults = Tracer
                 .ray(camera.CFrame.Position.add(offsetDirection), !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 100)
                 .useRaycastParams(rayParamsInclude([paths.Map]))
@@ -299,15 +277,18 @@ export default (world: World) => {
             const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
             const goalPos = new Vector3(worldPos.X, platformFloor.Position.Y, worldPos.Z);
             const testCFrame = CFrame.lookAlong(
-                goalPos.add(Vector3.yAxis.mul(modelHalfExtents.Y - .25)),
+                goalPos.add(Vector3.yAxis.mul(2.9)),
                 platformDirection,
                 Vector3.yAxis
             ).mul(CFrame.Angles(0, math.rad(rotatedY), 0))
             const finalCFrame = clampCFrameToBounds(testCFrame, fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
             const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
+            const modelPivot = fakeModel.GetPivot()
+            const yPosDiff = realCFrame.Y - rootPart.Position.Y
+            const chosenCFrame = realCFrame.add(Vector3.yAxis.mul(yPosDiff));
 
             // move the model
-            fakeModel.PivotTo(fakeModel.GetPivot().Lerp(realCFrame.mul(modelOffset), .2));
+            fakeModel.PivotTo(modelPivot.Lerp(chosenCFrame, .2));
             goalCFrame = realCFrame
             highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
         }

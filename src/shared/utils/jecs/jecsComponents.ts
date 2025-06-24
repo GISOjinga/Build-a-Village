@@ -104,6 +104,9 @@ export const Alive = component("Alive");
 // to gift to
 export const GiftTo = component<Player>("GiftTo");
 
+// take from
+export const TakeFromVillager = component<{ villagerEntityToStealFrom: Entity, produceName: ProduceNames, variant: ProduceVariant, resourceModelName: string }>("TakeFromVillager");
+
 /*************** Villagers ***************/
 
 // the hover box attachment

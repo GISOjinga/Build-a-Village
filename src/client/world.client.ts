@@ -35,6 +35,7 @@ import playerThumbnail from "./systems/ui/playerThumbnail";
 import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
 
+if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
 const playerGui = Players.LocalPlayer.WaitForChild<PlayerGui>("PlayerGui")
 const dialogueSellUI = paths.Assets.UI.DialogueSell.Clone()

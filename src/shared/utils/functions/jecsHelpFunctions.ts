@@ -155,7 +155,7 @@ export const createEntity = {
     insertProduce: (bodyEntity: Entity, produceName: ProduceNames, variant:ProduceVariant, amount:number = 1) => {
         createEntity.updateData(bodyEntity, (oldData: PlayerData) => {
             // goes through each amount and adds them up
-            const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName)
+            const produceIndex = oldData.Produce.findIndex((p) => p.Name === produceName && p.Variant === variant) // finds the produce by name and variant
         
             // sets the new amount
             if (produceIndex > -1) {
