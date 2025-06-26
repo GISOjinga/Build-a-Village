@@ -96,6 +96,14 @@ const packets = defineNamespace("gameEvents", () => {
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
 
     return {
+        // plays sounds
+        playSound: definePacket({
+            value: struct({
+                sound: ByteNet.inst as ByteNetType<Sound>,
+                position: optional(ByteNet.vec3),
+            }),
+        }),
+
         // update robux store
         updateRobuxStore: definePacket({
             value: ByteNet.unknown as ByteNetType<typeof robuxStoreData>,

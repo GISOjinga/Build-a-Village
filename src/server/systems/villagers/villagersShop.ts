@@ -8,6 +8,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { selectVillagerToRestock } from "./villagerAlgorithim";
+import paths from "shared/utils/paths";
 
 
 
@@ -159,6 +160,13 @@ export default (world: World) => {
                 const hasGitTo = world.has(playerEntity, GiftTo)
                 const isTheSamePlayer = playerToGiftTo && playerToGiftTo.UserId === userId;
 
+                // plays the purchase sound to the player
+                routes.playSound.sendTo({
+                    sound: paths.SFX.UI.purchasepass,
+                    position: undefined
+                }, player);
+
+
                 printJecs($line, `Gift to`, playerToGiftTo, "for", productId, "was purchased:", wasPurchased);
                 printJecs($line, player.Name + " purchased product", productId, "for", "Robux");
                 if (hasGitTo && playerToGiftTo) {
@@ -225,6 +233,12 @@ export default (world: World) => {
                 }
             } else if (!wasPurchased && playerEntity) { // makes sure to still remove the gift to
                 removeComponent(playerEntity, GiftTo);
+
+                // plays the purchase sound to the player
+                routes.playSound.sendTo({
+                    sound: paths.SFX.UI.purchasefail,
+                    position: undefined
+                }, player);
             }
         }
     }
@@ -350,12 +364,24 @@ export default (world: World) => {
                     const currency = oldData.Coins
 
                     if (currency >= totalPrice) {
+                        // plays the purchase sound to the player
+                        routes.playSound.sendTo({
+                            sound: paths.SFX.UI.purchasepass,
+                            position: undefined
+                        }, player);
+
                         // updates your data
                         oldData.Coins -= totalPrice
                         createEntity.inventoryVillager(entity, villagerData.Name)
 
                         // takes from stock and sets the new shop data
                         takeVillagerFromStock(villagerData.Name)
+                    } else {
+                        // plays the purchase sound to the player
+                        routes.playSound.sendTo({
+                            sound: paths.SFX.UI.purchasefail,
+                            position: undefined
+                        }, player);
                     }
 
                     return oldData

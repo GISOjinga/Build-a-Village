@@ -35,6 +35,7 @@ import playerThumbnail from "./systems/ui/playerThumbnail";
 import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
 import gameMusic from "./systems/sounds/gameMusic";
+import generalSounds from "./systems/sounds/generalSounds";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -111,6 +112,7 @@ const debug = setupMatter([
 
     // sounds
     { system: gameMusic },
+    { system: generalSounds },
 
     // ui
     { system: hoverBoxUpdate },

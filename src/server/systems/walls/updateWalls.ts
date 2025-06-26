@@ -43,6 +43,11 @@ export default (world: World) => {
                 createEntity.updateData(playerEntity, (oldData) => {
                     // updates your cash if you have it
                     if (oldData.Coins >= wallWishingToBeBought.Price) {
+                        // plays the purchase sound to the player
+                        routes.playSound.sendTo({
+                            sound: paths.SFX.UI.purchasepass,
+                            position: undefined
+                        }, player);
                         printJecs($line, `Buying wall ${wallWishingToBeBought.Name} for ${wallWishingToBeBought.Price} coins`);
                         // removes the coins from your data
                         oldData.Coins -= wallWishingToBeBought.Price;
@@ -54,6 +59,12 @@ export default (world: World) => {
                             Owned: true,
                             Equipped: true,
                         })
+                    } else {
+                        // plays the purchase sound to the player
+                        routes.playSound.sendTo({
+                            sound: paths.SFX.UI.purchasefail,
+                            position: undefined
+                        }, player);
                     }
                     return oldData
                 })
@@ -71,8 +82,15 @@ export default (world: World) => {
 
         task.spawn(() => {
             printJecs($line, `Player ${player.Name} purchased game pass ${gamePassId} with result ${wasPurchased || MarketplaceService.UserOwnsGamePassAsync(player.UserId, gamePassId)}, wallWishingToBeBought`, gamePassId);
+
             // if the purchase was successful and the player exists
-            if ((wasPurchased || MarketplaceService.UserOwnsGamePassAsync(player.UserId, gamePassId)) && player && playerEntity && wallWishingToBeBought) {
+            if ((wasPurchased || MarketplaceService.UserOwnsGamePassAsync(player.UserId, gamePassId)) && playerEntity && wallWishingToBeBought) {
+                // plays the purchase sound to the player
+                routes.playSound.sendTo({
+                    sound: paths.SFX.UI.purchasepass,
+                    position: undefined
+                }, player);
+
                 printJecs($line, `Player ${player.Name} purchased wall ${wallWishingToBeBought.Name} with robux`);
                 // updates your data to give you the wall
                 createEntity.updateData(playerEntity, (oldData) => {
@@ -84,6 +102,12 @@ export default (world: World) => {
                     });
                     return oldData;
                 });
+            } else {
+                // plays the purchase sound to the player
+                routes.playSound.sendTo({
+                    sound: paths.SFX.UI.purchasefail,
+                    position: undefined
+                }, player);
             }
         })
     }
