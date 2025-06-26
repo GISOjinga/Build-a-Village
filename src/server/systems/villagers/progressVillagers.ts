@@ -80,6 +80,7 @@ export default (world: World) => {
         hitBox.Transparency = 1;
         hitBox.Anchored = true;
         hitBox.CanCollide = false
+        hitBox.CanQuery = true;
         hitBox.Size = villagerModel.GetExtentsSize();
         hitBox.CFrame = villagerModel.GetPivot();
         hitBox.Name = "HitBox";
@@ -329,6 +330,24 @@ export default (world: World) => {
                 const hasMetRequiredTime = totalTimeSinceLastResource >= progression.Time.RequiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
                 const currentInProgressPhase = math.max(1, maxInProgressPhases * inProgressPercentile);
 
+
+                if (productionTrack && sleepTrack) {
+                    productionTrack.Looped = true
+                    sleepTrack.Looped = true;
+
+                    if (hasMaxedResources || (requiredResource && requiredResource.Amount <= 0)) {
+                        if (!sleepTrack.IsPlaying) {
+                            sleepTrack.Play(.1);
+                            productionTrack.Stop(.1);
+                        }
+                    } else if (!hasMaxedResources && (!requiredResource || (requiredResource && requiredResource.Amount > 0))) {
+                        if (!productionTrack.IsPlaying) {
+                            productionTrack.Play(.1);
+                            sleepTrack.Stop(.1);
+                        }
+                    }
+                }
+
                 // if has maxed resources then     
                 if (hasMaxedResources) {
                     // hides in progress
@@ -339,17 +358,7 @@ export default (world: World) => {
 
                     // adds component maxed out
                     addComponent(villagerEntity, MaxedOut);
-                    sleepTrack?.Play(.1)
-                    productionTrack?.Stop(.1);
                 } else {
-                    // controls the animation
-                    if (productionTrack && !productionTrack?.IsPlaying) {
-                        sleepTrack?.Stop(.1)
-                        if (!requiredResource || requiredResource.Amount > 0) {
-                            productionTrack.Looped = false
-                            productionTrack.Play(.1);
-                        }
-                    }
 
                     // shows in progress
                     villagerModel.Station.Parts.InProgress.GetChildren().forEach((child) => {

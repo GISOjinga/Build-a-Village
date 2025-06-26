@@ -293,8 +293,8 @@ export default (world: World) => {
             highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
         }
     } else if (equippedTool?.GetAttribute("ItemType") === "DigTool" && platform && villagers && highlight) {
-        const villagerPartResults = Tracer.ray(camera.CFrame.Position, mouse.Hit.Position).useRaycastParams(rayParamsInclude([platform.Villagers])).run()
-        const villagerPartHovered = villagers && villagerPartResults?.hit?.IsDescendantOf(villagers) && villagerPartResults.hit
+        const villagerPartResults = Tracer.sphere(.5, camera.CFrame.Position, !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 100).useRaycastParams(rayParamsInclude([platform.Villagers])).run()
+        const villagerPartHovered = villagerPartResults.hit;
         const villagerModel = villagerPartHovered && villagers?.GetChildren().find((child) => villagerPartHovered.IsDescendantOf(child));
         const villagerEntity = villagerModel && getEntity.fromInstance(villagerModel);
         const villagerServerEntity = villagerEntity && world.get(villagerEntity, ReplicatedComponent);

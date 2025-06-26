@@ -133,6 +133,9 @@ type HoverBoxUI = Assets["UI"]["HoverBox"]
 //* npcs dialogue
 type NpcDialogues = Assets["UI"]["NpcDialogues"]
 
+//* different sound tracks
+type GameMusicNames = keyof Omit<SFXFolder["GameMusic"], keyof Folder>
+
 //* villager box info
 type VillagerRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic"
 type VillagerInfo = {

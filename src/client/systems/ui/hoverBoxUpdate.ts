@@ -32,6 +32,8 @@ export default (world: World) => {
     const produce = progressionInfo && progressionInfo.Produce;
     const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
     const requiredProduceTime = progressionInfo && progressionInfo.Progression.Time.RequiredTimePerResource;
+    const totalRequireResources = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Amount) || 0
+    const requiredProduceName = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Produce) || "";
     const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
     const timeTillNextProduce = progressionInfo && produceEndTime && produceEndTime - os.time() > 0 ? produceEndTime - os.time() : 0;
     const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
@@ -51,6 +53,11 @@ export default (world: World) => {
         pageStates.hoverInfo({
             visible: true,
             info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
+        })
+    } else if (villagerEntity && requiredProduceName && totalRequireResources <= 0) {
+        pageStates.hoverInfo({
+            visible: true,
+            info: `Waiting on ${requiredProduceName}`,
         })
     } else if (villagerEntity && timeTillNextProduce > 0) {
         pageStates.hoverInfo({

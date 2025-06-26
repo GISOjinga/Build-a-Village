@@ -3,7 +3,7 @@ import wallsData from "./wallsData"
 
 const defaultData = {
     Version: "0.0.0",
-    Coins: 50000,
+    Coins: 100000,
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,

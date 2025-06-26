@@ -9,6 +9,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Changed, Data, GiftTo, Platform, PlatformOccupied, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import paths from "shared/utils/paths";
 
 
 
@@ -149,23 +150,22 @@ export default (world: World) => {
 
         // if platform exists then sets up the sign gui containers
         if (platform && playerOccupying) {
-            const proximityPromptProduceAll = new Instance("ProximityPrompt", platform.BuySign.Container)
+            const proximityPromptProduceAll = paths.Assets.ProximityPrompts.FindFirstChild("ProduceAll")?.Clone() as ProximityPrompt | undefined;
 
             // sets up produce all
-            proximityPromptProduceAll.RequiresLineOfSight = false;
-            proximityPromptProduceAll.ActionText = "Produce All";
-            proximityPromptProduceAll.HoldDuration = 5;
-            proximityPromptProduceAll.MaxActivationDistance = 6;
+            if (proximityPromptProduceAll) {
+                proximityPromptProduceAll.Parent = platform.BuySign.Container
 
-            // when triggered asks to buy a product called produce all
-            proximityPromptProduceAll.Triggered.Connect((playerWhoTriggered) => {
-                const playerWhoTriggeredEntity = getEntity.fromInstance(playerWhoTriggered)
+                // when triggered asks to buy a product called produce all
+                proximityPromptProduceAll.Triggered.Connect((playerWhoTriggered) => {
+                    const playerWhoTriggeredEntity = getEntity.fromInstance(playerWhoTriggered)
 
-                if (playerWhoTriggeredEntity && world.contains(playerOccupyingEntity)) {
-                    addComponent(playerWhoTriggeredEntity, GiftTo, playerOccupying)
-                    MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3309650571);
-                }
-            })
+                    if (playerWhoTriggeredEntity && world.contains(playerOccupyingEntity)) {
+                        addComponent(playerWhoTriggeredEntity, GiftTo, playerOccupying)
+                        MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3309650571);
+                    }
+                })
+            }
         }
     }
 

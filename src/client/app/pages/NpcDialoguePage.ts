@@ -32,10 +32,16 @@ export default (dialoguePage: NpcDialogues) => {
         dialoguePage.Enabled = true;
         buyTextLabel.Text = "";
         sellTextLabel.Text = "";
-        tween.tween(npcDialogue.target === "None" ? 0 : 1, { time: textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.01), style: Enum.EasingStyle.Linear })
+        tween.tween(npcDialogue.target === "None" ? 0 : 1, { time: textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.02), style: Enum.EasingStyle.Linear })
 
         // when the intro text page is visible
         newTrash.Add(tween.onStep((progress) => {
+            const transparency = new NumberSequence([
+                new NumberSequenceKeypoint(0, 1),
+                new NumberSequenceKeypoint(.5, 1 - (progress * .25)),
+                new NumberSequenceKeypoint(1, 1)
+            ])
+
             let full = ""
             for (let i = 0; i < math.floor(textToArray.size() * progress); i++) {
                 if (i < math.floor(textToArray.size() * progress)) {
@@ -51,6 +57,8 @@ export default (dialoguePage: NpcDialogues) => {
             };
             buyTextLabel.Text = (full ?? "")
             sellTextLabel.Text = (full ?? "")
+            dialoguePage.Buy.UIGradient.Transparency = transparency
+            dialoguePage.Sell.UIGradient.Transparency = transparency
         }))
 
         newTrash.Add(tween.onComplete(() => {

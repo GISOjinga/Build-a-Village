@@ -57,7 +57,7 @@ export default (pagePaths: PagePaths) => {
         newTrash.Add(tween.onComplete(() => {
             // tweens to the goal
             newTrash.Add(task.delay(introText.duration, () => {
-                tween.tween(0, { time: textToArray.size() * 0.01, style: Enum.EasingStyle.Linear })
+                tween.tween(0, { time: textToArray.size() * 0.02, style: Enum.EasingStyle.Linear })
                 newTrash.Add(tween.onComplete(() => newTrash.Destroy()))
             }));
         }))
