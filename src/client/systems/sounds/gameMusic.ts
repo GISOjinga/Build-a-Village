@@ -16,7 +16,7 @@ function trackCompleted() {
 
 export default (world: World) => {
     if (trackCompleted()) {
-        const trackFoldersToChoseFrom = paths.SFX.GetChildren().filter((child) => child.Name !== chosenTrack)
+        const trackFoldersToChoseFrom = paths.SFX.GameMusic.GetChildren().filter((child) => child.Name !== chosenTrack)
         const folderToPlayMusicFrom = trackFoldersToChoseFrom[math.floor(trackFoldersToChoseFrom.size() * math.random())] as Folder;
 
         // sets the new chosen track

@@ -34,6 +34,7 @@ import debuggerHook from "shared/systems/hooks/debuggerHook";
 import playerThumbnail from "./systems/ui/playerThumbnail";
 import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
+import gameMusic from "./systems/sounds/gameMusic";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -107,6 +108,9 @@ const debug = setupMatter([
 
     // player
     { system: updateTools },
+
+    // sounds
+    { system: gameMusic },
 
     // ui
     { system: hoverBoxUpdate },
