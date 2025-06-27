@@ -2,9 +2,10 @@ import { World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
-import { useEvent } from "shared/Plugin-Hook";
+import { useEvent, useMemo } from "shared/Plugin-Hook";
 import { getEntity, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import paths from "shared/utils/paths";
 
 
 
@@ -13,40 +14,51 @@ const player = Players.LocalPlayer
 const giftingPrompts = new WeakMap<Player, ProximityPrompt>();
 
 export default (world: World) => {
+    const idleAnimation = paths.Assets.Animations.Shop.Idle;
+    const buyNoob = paths.Map.Shops.Buy.Noob
+    const sellNoob = paths.Map.Shops.Sell.Noob
+    const buyIdleTrack = useMemo(() => buyNoob.Humanoid.Animator.LoadAnimation(idleAnimation), [buyNoob]);
+    const sellIdleTrack = useMemo(() => sellNoob.Humanoid.Animator.LoadAnimation(idleAnimation), [sellNoob]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
+
+    // makes sure animation is playing
+    if (!buyIdleTrack.IsPlaying || !sellIdleTrack.IsPlaying) {
+        printTS($line, "Setting up animations for player: ", player.Name);
+        buyIdleTrack.Play();
+        sellIdleTrack.Play();
+    }
 
     // loops through all the gifting prompts watching
     giftingPrompts.forEach((prompt, playerToGift) => {
         const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
 
         // toggiles the prompts visibility
-        prompt.Enabled = tooType === "Villager" || tooType === "Commodity";
+        prompt.Enabled = tooType === "Commodity";
 
         // watches for the prompt to be activated
         for (const [] of useEvent(prompt.Triggered, debug.traceback() + playerToGift.UserId)) {
             // if the player is not the local player, we send a gift request
-            if (playerToGift !== Players.LocalPlayer) {
+            if (playerToGift !== Players.LocalPlayer && equippedTool) {
                 printTS($line, "Gifting to player: ", playerToGift.Name, " with tool: ", equippedTool?.Name);
-                routes.handToolToPlayer.send(playerToGift)
+                routes.giftToPlayer.send({
+                    playerToGift,
+                    produceTool: equippedTool
+                })
             }
         }
     })
 
     // when a body is added, we add a proximity prompt to it
     for (const [_, clientEntity, body] of world.query(TargetEntity, Added(Body))) {
-        const giftingPrompt = new Instance("ProximityPrompt");
+        const giftingPrompt = paths.Assets.ProximityPrompts.GiftingProximityPrompt.Clone();
         const player = body && Players.GetPlayerFromCharacter(body.model)
 
         // when added it sets the client id property
         body?.model.SetAttribute("ClientId", clientEntity)
         player?.SetAttribute("ClientId", clientEntity)
         if (player && player !== Players.LocalPlayer) {
-            giftingPrompt.MaxActivationDistance = 10000
-            giftingPrompt.RequiresLineOfSight = false
-            giftingPrompt.HoldDuration = 5
             giftingPrompts.set(player, giftingPrompt)
-            giftingPrompt.ActionText = "Gift to player";
             giftingPrompt.Parent = body.rootPart
         }
     }

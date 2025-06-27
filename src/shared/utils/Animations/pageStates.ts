@@ -7,6 +7,7 @@ const pageStates = {
     placeVillager: atom(false),
     digVillager: atom(false),
     openPage: atom("None") as Atom<"Placement" | "Dig" | "Wall" | "Gift" | "Buy" | "RobuxStore" | "Sell" | "None">,
+    confirmPrompt: atom({ title: "", message: "" }),
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
     wallsShop: atom(new Array<WallInfo>()),

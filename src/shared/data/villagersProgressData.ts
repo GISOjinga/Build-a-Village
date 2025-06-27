@@ -1,13 +1,13 @@
 import paths from "shared/utils/paths"
 
 type ProgressMap = ReturnType<<A extends VillagerNames>() => Map<A, VillagerProgress>>
-const villagerProgressMap = new Map<VillagerNames, VillagerProgress>()
+const villagersProgressData = new Map<VillagerNames, VillagerProgress>()
 
 // This is a placeholder for the villagers data.
 paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
     const requiredProduceName = villager.GetAttribute<string>("RequiredProduceName")
     const requiredAmount = villager.GetAttribute<number>("RequiredProduceAmount") || 0
-	villagerProgressMap.set(villager.Name as VillagerNames, {
+	villagersProgressData.set(villager.Name as VillagerNames, {
 		Produce: villager.GetAttribute("Produce") as ProduceNames || "Bread", // fallback to "Bread"
         Required: (requiredProduceName && requiredProduceName !== "" && requiredAmount > 0) ? {
             Produce: requiredProduceName as ProduceNames,
@@ -32,4 +32,4 @@ paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
 	} satisfies VillagerProgress)
 })
 
-export default villagerProgressMap
+export default villagersProgressData

@@ -36,6 +36,8 @@ import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
 import gameMusic from "./systems/sounds/gameMusic";
 import generalSounds from "./systems/sounds/generalSounds";
+import resourcePromptTag from "./tags/resourcePromptTag";
+import confirmationPrompt from "./systems/ui/confirmationPrompt";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -120,9 +122,11 @@ const debug = setupMatter([
     { system: shopDataUpdate },
     { system: playerThumbnail },
     { system: updateWallsForSale },
+    { system: confirmationPrompt }
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,
+    resourcePromptTag,
 })
 
 

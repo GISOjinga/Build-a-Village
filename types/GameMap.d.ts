@@ -1,13 +1,15 @@
 type GameMap = Folder & {
 	Paths: Model;
 	Shops: Folder & {
-		Extra: Model & {
+		Extra: Folder & {
 			Model: Model;
 		};
 		Sell: Model & {
 			Noob: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
@@ -50,10 +52,11 @@ type GameMap = Folder & {
 			TalkBox: Part;
 		};
 		Buy: Model & {
-			SpawnLocation: SpawnLocation;
 			Noob: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
@@ -93,6 +96,7 @@ type GameMap = Folder & {
 				["Body Colors"]: BodyColors;
 			};
 			Parts: Model;
+			SpawnLocation: SpawnLocation;
 		};
 	};
 	Floor: Part;

@@ -7,6 +7,8 @@ import { addComponent, createEntity, getEntity, printJecs, printTS, removeCompon
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
 import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+import ShopData from "./ShopData";
+import villagersProgressData from "shared/data/villagersProgressData";
 
 
 
@@ -33,8 +35,10 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant) => {
     // loops through all the avliable resources and finds the one that is not ready and takes it
     for (const [_, model] of pairs(villagerModel.Station.Parts.Resources.GetChildren())) {
+        const villagerInfo = villagersProgressData.get(villagerModel.Name as VillagerNames);
+
         // if the model has a variant and is not ready then
-        if (!model.GetAttribute<boolean>("Ready")) {
+        if (!model.GetAttribute<boolean>("Ready") && villagerInfo) {
             const variantParticles = paths.Assets.Particles.FindFirstChild(variant)?.Clone()
             const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
             const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
@@ -50,6 +54,7 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
 
             // sets the variant and ready
             model.SetAttribute("Variant", variant);
+            model.SetAttribute("ProduceName", villagerInfo.Produce);
             model.SetAttribute("Ready", true);
             if (resourceProximityPrompt) resourceProximityPrompt.Enabled = true
 
@@ -99,6 +104,7 @@ export default (world: World) => {
             proximityPromptyPart.CanCollide = false
             proximityPromptyPart.Size = Vector3.zero
             proximityPromptyPart.PivotTo(model.GetPivot())
+            resourceProximityPrompt.ActionText = `Collect`
             resourceProximityPrompt.Parent = proximityPromptyPart
             resourceProximityPrompt.Enabled = false
             resourceProximityPrompt.Triggered.Connect((playerWhoTriggered) => {

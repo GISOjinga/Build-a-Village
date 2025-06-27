@@ -188,6 +188,16 @@ export const SpawnedAtSpawn = component("SpawnedAtSpawn");
 
 /*************** body ***************/
 
+
+// confirmation prompt
+export const ConfirmationPrompt = component<{
+    title: string,
+    message: string,
+    confirmation?: boolean,
+    onConfirm: () => void,
+    onDecline?: () => void,
+}>("ConfirmationPrompt");
+
 // Body components
 export const AppearanceLoaded = component("AppearanceLoaded");
 export const NoBodyCollisions = component("NoBodyCollisions");
@@ -273,7 +283,7 @@ export const IncreaseParticlesSize = component<{
 }>("IncreaseParticleSize");
 
 
-export const componentsToReplicate = { Body, Villager, Data, ModelDebugger };
+export const componentsToReplicate = { Body, Villager, Data, ModelDebugger, ConfirmationPrompt };
 
 // list of phases in order
 const phaseNamesWithOrder = [

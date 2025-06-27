@@ -24,6 +24,7 @@ import debuggerHook from "shared/systems/hooks/debuggerHook";
 import updateTools from "./systems/villagers/updateTools";
 import updateWalls from "./systems/walls/updateWalls";
 import robuxStore from "./systems/robuxStore/robuxStore";
+import confirmationPrompt from "./systems/player/confirmationPrompt";
 
 
 
@@ -70,6 +71,7 @@ setupMatter([
     { system: loadCharacter },
     { system: loadPlayerData },
     { system: savePlayerData },
+    { system: confirmationPrompt },
 
     // robux store
     { system: robuxStore },

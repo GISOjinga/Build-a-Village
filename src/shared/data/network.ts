@@ -19,6 +19,7 @@ type ByteNetType<T> = {
 
 
 type MapTableToByteNet<T> =
+    T extends (undefined) ? ByteNetType<T> :
     // 1) Already a ByteNetType
     T extends ByteNetType<any> ? T :
     // entity
@@ -96,6 +97,19 @@ const packets = defineNamespace("gameEvents", () => {
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
 
     return {
+        // confirm prompt
+        confirmPrompt: definePacket({
+            value: bool,
+        }),
+
+        // hand to player as gift
+        giftToPlayer: definePacket({
+            value: struct({
+                playerToGift: ByteNet.inst as ByteNetType<Player>,
+                produceTool: ByteNet.inst as ByteNetType<Tool>
+            }),
+        }),
+
         // plays sounds
         playSound: definePacket({
             value: struct({
@@ -166,11 +180,6 @@ const packets = defineNamespace("gameEvents", () => {
 
         // to gift your next robux purchace to a player
         shopGiftTo: definePacket({
-            value: ByteNet.inst as ByteNetType<Player>,
-        }),
-
-        // hand your tool to the player 
-        handToolToPlayer: definePacket({
             value: ByteNet.inst as ByteNetType<Player>,
         }),
 
@@ -263,6 +272,18 @@ const packets = defineNamespace("gameEvents", () => {
                 })),
             }),
 
+            // confirmation prompt
+            ConfirmationPrompt: definePacket({
+                value: componentStruct(struct({
+                    title: ByteNet.string,
+                    message: ByteNet.string,
+                    confirmation: ByteNet.bool,
+                    onConfirm: ByteNet.unknown as ByteNetType<() => void>,
+                    onDecline: optional(ByteNet.unknown) as ByteNetType<unknown>,
+                })) as unknown as any,
+            }),
+
+            // for replicating player state
             ModelDebugger: definePacket({
                 value: componentStruct(byteNetEntityInstance as ByteNetType<Model | BasePart>),
             }),

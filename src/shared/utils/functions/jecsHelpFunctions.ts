@@ -106,6 +106,18 @@ function getUntakenNumber(villagersData: VillagerData[]): number {
 }
 
 export const createEntity = {
+    // confirmation prompt
+    confirmationPrompt: (playerEntity: Entity, title: string, message:string, onConfirm: Callback, onDecline?: Callback) => {
+        const player = world.get(playerEntity, components.Player)
+
+        // sets the confirmation prompt
+        if (player) {
+            setEntity.addTargetForReplication(playerEntity, player, components.ConfirmationPrompt);
+            addComponent(playerEntity, components.ConfirmationPrompt, { title, message, onConfirm, onDecline})
+        }
+
+    },
+
     // creates a villager
     villagerNpc: (playerEntity:Entity, villagerData:VillagerData, platform:PlatformExample) => {
         const player = world.get(playerEntity, components.Player)

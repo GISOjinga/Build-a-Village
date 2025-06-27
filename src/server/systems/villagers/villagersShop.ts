@@ -2,8 +2,8 @@ import { World } from "@rbxts/jecs";
 import { routes } from "shared/data/network";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
 import ShopData from "./ShopData";
-import { Added, Body, Data, GiftTo, Player, ProduceAll } from "shared/utils/jecs/jecsComponents";
-import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { Added, Body, ConfirmationPrompt, Data, GiftTo, Player, ProduceAll, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent, setEntity } from "shared/utils/functions/jecsHelpFunctions";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
@@ -94,54 +94,69 @@ export default (world: World) => {
         };
     })
 
+
     // when handToolToPlayer is called
-    useRoute(routes.handToolToPlayer, (playerToGiftTo, playerGifting) => {
+    useRoute(routes.giftToPlayer, ({ playerToGift, produceTool }, playerGifting) => {
         const playerEntity = getEntity.fromInstance(playerGifting);
-        const playerToGiftToEntity = getEntity.fromInstance(playerToGiftTo);
-        const body = playerEntity && world.get(playerEntity, Body);
-        const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
-        const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
-        const itemName = equippedTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
-        const itemVariant = equippedTool?.GetAttribute<ProduceVariant>("ItemVariant");
+        const playerToGiftToEntity = getEntity.fromInstance(playerToGift);
+        const tooType = produceTool?.GetAttribute<ToolType>("ItemType")
+        const itemName = produceTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
+        const itemVariant = produceTool?.GetAttribute<ProduceVariant>("ItemVariant");
 
         // if data then
-        if (playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Villager" || tooType === "Commodity")) {
-            // updates playerGifting data
-            createEntity.updateData(playerEntity, (oldData) => {
-                // removes the villager from the inventory
-                if (tooType === "Villager") {
-                    // removes it from their inventory
-                    oldData.Villagers = oldData.Villagers.filter((v) => v.Name !== itemName);
+        if (playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Commodity")) {
 
-                    // adds the villager to their inventory
-                    createEntity.inventoryVillager(playerToGiftToEntity, itemName as VillagerNames);
-                    printTS($line, playerGifting.Name + " gifted villager", itemName, "to", playerToGiftTo.Name);
-                } else if (tooType === "Commodity") {
-                    const produceIndex = oldData.Produce.findIndex((p) => p.Name === itemName);
-                    const totalAmount = oldData.Produce[produceIndex]?.Amount || 1;
+            // adds a confirmation prompt to the player to gift to
+            createEntity.confirmationPrompt(playerToGiftToEntity, "Gift From " + `[${playerGifting.Name}]`, itemName + `[${itemVariant}]`, () => {
+                // updates playerGifting data
+                createEntity.updateData(playerEntity, (oldData) => {
+                    if (tooType === "Commodity") {
+                        const produceIndex = oldData.Produce.findIndex((p) => p.Name === itemName && p.Variant === itemVariant);
 
-                    // updates the player to gift to data
-                    oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
+                        // if not produce index
+                        if (produceIndex === -1) {
+                            routes.notify.sendTo({
+                                text: `Could not find ${itemName} (${itemVariant}) in your inventory.`,
+                                duration: 5,
+                            }, playerGifting);
+                            routes.notify.sendTo({
+                                text: `${playerGifting.Name} tried to gift you ${itemName} but they don't have it.`,
+                                duration: 5,
+                            }, playerToGift);
+                            return oldData;
+                        } else {
+                            // retuces it by 1
+                            oldData.Produce[produceIndex].Amount -= 1;
+                            if (oldData.Produce[produceIndex].Amount <= 0) oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
 
-                    // gives the player the produce
-                    createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, totalAmount);
-                }
+                            // gives the player the produce
+                            createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1);
 
-                return oldData;
-            })
+                            // notifys them both
+                            routes.notify.sendTo({
+                                text: `You gifted ${playerToGift.Name} ${itemName} (${itemVariant})`,
+                                duration: 5,
+                            }, playerGifting);
+                            routes.notify.sendTo({
+                                text: `${playerGifting.Name} gifted you ${itemName} (${itemVariant})`,
+                                duration: 5,
+                            }, playerToGift);
+                        }
+                    }
 
-            // notifies both players
-            routes.notify.sendTo({
-                text: playerGifting.Name + " has gifted you!",
-                duration: 5,
-            }, playerToGiftTo);
-            routes.notify.sendTo({
-                text: "You have gifted " + playerToGiftTo.Name + "!",
-                duration: 5,
-            }, playerGifting);
-
-            // print test statements
-            printTS($line, playerGifting.Name + " is gifting to", playerToGiftTo.Name)
+                    return oldData;
+                })
+            }, () => {
+                routes.notify.sendTo({
+                    text: `Your gift to ${playerToGift.Name} was declined.`,
+                    duration: 5,
+                }, playerGifting)
+                routes.notify.sendTo({
+                    text: `You declined the gift from ${playerGifting.Name}.`,
+                    duration: 5,
+                }, playerToGift)
+            }
+            );
         }
     })
 

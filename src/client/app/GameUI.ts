@@ -11,6 +11,7 @@ import IntroTextPage from "./pages/IntroTextPage";
 import PlacementPage from "./pages/PlacementPage";
 import { routes } from "shared/data/network";
 import pageStates from "shared/utils/Animations/pageStates";
+import ConfirmationPage from "./pages/ConfirmationPage";
 
 
 
@@ -25,6 +26,7 @@ export default (pagePaths: PagePaths) => {
 		RobuxStorePage,
 		IntroTextPage,
 		PlacementPage,
+		ConfirmationPage,
 	]
 
 	// listen to page changes
