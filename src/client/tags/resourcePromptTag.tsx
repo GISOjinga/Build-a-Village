@@ -8,6 +8,14 @@ import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
 
 
+// highlights for each platform
+const highlight = new Instance("Highlight", Workspace.Terrain);
+
+// sets up highlight
+highlight.Name = "ResourcePromptHighlight";
+highlight.FillTransparency = 1
+highlight.OutlineTransparency = 0;
+highlight.OutlineColor = new Color3(1, 1, 1);
 
 // varibles
 export default (isTagged: boolean, resourcePrompt: ProximityPrompt, world: World) => {
@@ -35,11 +43,13 @@ export default (isTagged: boolean, resourcePrompt: ProximityPrompt, world: World
             produceInfo.Frame.ProduceName.Text = produceName;
             produceInfo.Frame.Rarity.Text = produceVariant;
             produceInfo.Enabled = true;
+            highlight.Adornee = model;
         })
 
         // when the prompt is hidden
         resourcePrompt.PromptHidden.Connect(() => {
             produceInfo.Enabled = false;
+            highlight.Adornee = undefined;
         })
     } else {
 
