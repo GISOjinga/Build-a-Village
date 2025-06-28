@@ -1,675 +1,112 @@
 type Assets = Folder & {
-	Tools: Folder & {
-		Produce: Folder & {
-			Wheat: Tool & {
-				Handle: Part;
-			};
-			Log: Tool & {
-				Handle: Part;
-			};
-			Honeycomb: Tool & {
-				Handle: Part;
-			};
-			["Iron Bar"]: Tool & {
-				Handle: Part;
-			};
-			Sword: Tool & {
-				Handle: Part;
-			};
-			Basket: Tool & {
-				Handle: Part;
-			};
-			Book: Tool & {
-				Handle: Part;
-			};
-			Clothing: Tool & {
-				Handle: Part;
-			};
-			Potion: Tool & {
-				Handle: Part;
-			};
-			Wool: Tool & {
-				Handle: Part;
-			};
-			Bricks: Tool & {
-				Handle: Part;
-			};
-			Bread: Tool & {
-				Handle: Part;
-			};
-			Planks: Tool & {
-				Handle: Part;
-			};
-			Statue: Tool & {
-				Handle: Part;
-			};
-		};
-	};
-	UI: Folder & {
-		PlayerThumbnail: SurfaceGui & {
-			Frame: Frame & {
-				CanvasGroup: CanvasGroup & {
-					UICorner: UICorner;
-					image: ImageLabel;
-				};
-				bgin: ImageLabel;
-				PlayerThumbnail: LocalScript;
-				bgout: ImageLabel;
-			};
-		};
-		WallRenders: ScreenGui & {
-			["Evil Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Castle Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Ironwood Fence"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Stone Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Log Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Wooden Fence"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-		};
-		HoverBox: BillboardGui & {
-			LocalScript: LocalScript;
-			Frame: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
-			};
-		};
-		ProduceInfo: BillboardGui & {
-			Frame: Frame & {
-				UIListLayout: UIListLayout;
-				Rarity: TextLabel & {
-					Rainbow: UIGradient;
-					Stroke: UIStroke;
-					Normal: UIGradient;
-					Gold: UIGradient;
-				};
-				ProduceName: TextLabel & {
-					Rainbow: UIGradient;
-					Stroke: UIStroke;
-					Normal: UIGradient;
-					Gold: UIGradient;
-				};
-			};
-		};
-		Icon: ModuleScript & {
-			Packages: Folder & {
-				Janitor: ModuleScript;
-				GoodSignal: ModuleScript;
-			};
-			Utility: ModuleScript;
-			Elements: Folder & {
-				Notice: ModuleScript;
-				Dropdown: ModuleScript;
-				Menu: ModuleScript;
-				Selection: ModuleScript;
-				Caption: ModuleScript;
-				Indicator: ModuleScript;
-				Widget: ModuleScript;
-				Container: ModuleScript;
-			};
-			Features: Folder & {
-				Gamepad: ModuleScript;
-				Themes: ModuleScript & {
-					Classic: ModuleScript;
-					Default: ModuleScript;
-				};
-				Overflow: ModuleScript;
-			};
-			VERSION: ModuleScript;
-			Reference: ModuleScript;
-			Attribute: ModuleScript;
-			PackageLink: PackageLink;
-		};
-		VillagerRenders: ScreenGui & {
-			Woodsman: ViewportFrame & {
-				script: LocalScript;
-			};
-			Merchant: ViewportFrame & {
-				script: LocalScript;
-			};
-			Carpenter: ViewportFrame & {
-				script: LocalScript;
-			};
-			Baker: ViewportFrame & {
-				script: LocalScript;
-			};
-			Farmer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Miner: ViewportFrame & {
-				script: LocalScript;
-			};
-			LocalScript: LocalScript;
-			Mason: ViewportFrame & {
-				script: LocalScript;
-			};
-			Gatherer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Tailor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Sculptor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Blacksmith: ViewportFrame & {
-				script: LocalScript;
-			};
-			Steward: ViewportFrame & {
-				script: LocalScript;
-			};
-			Shepherd: ViewportFrame & {
-				script: LocalScript;
-			};
-			Alchemist: ViewportFrame & {
-				script: LocalScript;
-			};
-		};
-		NpcDialogues: BillboardGui & {
-			Buy: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
-			};
-			Sell: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
-			};
-		};
-		GameUI: ScreenGui & {
-			PromoCode: CanvasGroup & {
-				Title: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Close: TextButton & {
-					UICorner: UICorner;
-				};
-				UICorner: UICorner;
-				UIStroke: UIStroke;
-				RedeemButton: TextButton & {
-					UICorner: UICorner;
-				};
-				TextBox: TextBox & {
-					UICorner: UICorner;
-				};
-			};
-			InviteIncentive: TextLabel & {
-				InviteIncentiveSuccess: LocalScript;
-				UIStroke: UIStroke;
-			};
-			GiftList: CanvasGroup & {
-				Header: TextLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
-				};
-				Close: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-				["bg header"]: ImageLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
-				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				ScrollingFrame: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					UIPadding: UIPadding;
-					Sample: ImageButton & {
-						UIStroke: UIStroke;
-						UIAspectRatioConstraint: UIAspectRatioConstraint;
-						SampleName: TextLabel & {
-							TextLabel: TextLabel & {
-								UIAspectRatioConstraint: UIAspectRatioConstraint;
-								UIStroke: UIStroke;
-							};
-							UIAspectRatioConstraint: UIAspectRatioConstraint;
-						};
-					};
-				};
-				bg: ImageLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-			};
-			Viewports: Folder & {
-				mason: ViewportFrame;
-			};
-			ConfirmationPrompt: Frame & {
-				message: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Decline: TextButton & {
-					UIStroke: UIStroke;
-					bg: ImageLabel;
-					TextLabel: TextLabel & {
-						UIStroke: UIStroke;
-					};
-				};
-				title: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Accept: TextButton & {
-					UIStroke: UIStroke;
-					bg: ImageLabel;
-					TextLabel: TextLabel & {
-						UIStroke: UIStroke;
-					};
-				};
-				["bg header"]: ImageLabel & {
-					UIStroke: UIStroke;
-				};
-				UIStroke: UIStroke;
-				bg: ImageLabel;
-			};
-			Playercash: TextLabel & {
-				subtract: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				logics: LocalScript;
-				UIStroke: UIStroke;
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				add: TextLabel & {
-					UIStroke: UIStroke;
-				};
-			};
-			PlaceFrame: Frame & {
-				Placetext: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-				};
-				LeftPress: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-				};
-				RightPress: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-				};
-			};
-			RobuxStore: Frame & {
-				Header: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Close: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-				};
-				["bg header"]: ImageLabel & {
-					UIStroke: UIStroke;
-				};
-				bg: ImageLabel;
-				ScrollingFrame: ScrollingFrame & {
-					UIPadding: UIPadding;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIListLayout: UIListLayout;
-					PurchaseForever: Frame & {
-						name: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						timer: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIStroke: UIStroke;
-						ScrollingFrame: ScrollingFrame & {
-							UIStroke: UIStroke;
-							Sample: Frame & {
-								purchaseroblox: TextButton;
-								purchaseunavailable: TextButton;
-								icon: ImageLabel & {
-									UIStroke: UIStroke;
-								};
-								purchaseavailable: TextButton;
-							};
-							Arrow: ImageLabel;
-						};
-						bg: ImageLabel;
-					};
-					StarterPack: Frame & {
-						purchaseoptions: Frame & {
-							gift: ImageButton & {
-								UIStroke: UIStroke;
-							};
-							buy: TextButton & {
-								UIStroke2: UIStroke;
-								UIStroke1: UIStroke;
-								bg: ImageLabel;
-							};
-						};
-						LimitedTime: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						items: Frame & {
-							m2: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							b1: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							m1: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							cash: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-						decor: Frame & {
-							Farmer: ViewportFrame & {
-								script: LocalScript;
-							};
-							rotate: LocalScript;
-							title: TextLabel & {
-								UIStroke: UIStroke;
-							};
-							desc: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-						packname: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						CountDown: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIStroke: UIStroke;
-						bg: ImageLabel;
-						["new"]: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-					LaunchPack: Frame & {
-						purchaseoptions: Frame & {
-							gift: ImageButton & {
-								UIStroke: UIStroke;
-							};
-							buy: TextButton & {
-								price: TextLabel & {
-									UIStroke: UIStroke;
-								};
-								UIStroke: UIStroke;
-								bg: ImageLabel;
-								markdown: TextLabel & {
-									Frame: Frame;
-									UIStroke: UIStroke;
-								};
-							};
-						};
-						LimitedTime: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						items: Frame & {
-							s3: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							s1: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							b1: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							s4: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-							s2: ViewportFrame & {
-								UIStroke: UIStroke;
-							};
-						};
-						decor: ViewportFrame;
-						timeleft: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						packname: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						CountDown: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIStroke: UIStroke;
-						bg: ImageLabel;
-						["new"]: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-			};
-			Wall: CanvasGroup & {
-				Header: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Close: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-				};
-				["bg header"]: ImageLabel & {
-					UIStroke: UIStroke;
-				};
-				bg: ImageLabel;
-				ScrollingFrame: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					Sample: Frame & {
-						WallViewPort: Frame & {
-							UIStroke: UIStroke;
-						};
-						robux: ImageButton & {
-							UIStroke: UIStroke;
-							text: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Multiplier: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						unequip: ImageButton & {
-							UIStroke: UIStroke;
-							text: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-						RobuxPrice: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						equip: ImageButton & {
-							UIStroke: UIStroke;
-							text: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-						SampleName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						bg: ImageLabel;
-						buy: ImageButton & {
-							UIStroke: UIStroke;
-							text: TextLabel & {
-								UIStroke: UIStroke;
-							};
-						};
-					};
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIPadding: UIPadding;
-				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-			};
-			Village: CanvasGroup & {
-				Countdown: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				ScrollingFrame: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					Sample: ImageButton & {
-						Stock: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityCommon: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityUncommon: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityEpic: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityMythic: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						VillagerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Tier: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityRare: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						RarityLegendary: ImageLabel & {
-							UIStroke: UIStroke;
-						};
-						bg: ImageLabel;
-						VillagerViewPort: Frame & {
-							UIStroke: UIStroke;
-						};
-					};
-					UIPadding: UIPadding;
-					Buy: ImageButton & {
-						Normal: TextButton & {
-							UIStroke2: UIStroke;
-							UIStroke1: UIStroke;
-						};
-						bg: ImageLabel;
-						Gift: ImageButton & {
-							UIStroke: UIStroke;
-						};
-						Robux: TextButton & {
-							UIStroke2: UIStroke;
-							UIStroke1: UIStroke;
-						};
-					};
-				};
-				Close: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-				};
-				["bg header"]: ImageLabel & {
-					UIStroke: UIStroke;
-				};
-				bg: ImageLabel;
-				ReStock: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-			};
-			Introtext: Frame & {
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				text: TextLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
-				};
-			};
-			HUD: Frame & {
-				Shop: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-				Walls: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-				Village: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-				Sell: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-				Buy: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-				};
-			};
-		};
-		DialogueSell: BillboardGui & {
-			Stuff: LocalScript;
-			Frame: Frame & {
-				Option3: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
-				};
-				Option4: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
-				};
-				Option2: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
-				};
-				Option1: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
-				};
-			};
-		};
-	};
 	Villagers: Folder & {
+		Witch: Model & {
+			Station: Model & {
+				Interaction: Model & {
+					Collect: Part & {
+						ProximityPrompt: ProximityPrompt;
+						Weld: ManualWeld;
+					};
+				};
+				Particles: Model;
+				Parts: Model & {
+					StationParts: Model;
+					Resources: Model & {
+						["1"]: Model & {
+							["Cube.008"]: MeshPart & {
+								Weld: ManualWeld;
+								Attachment: Attachment & {
+									Glare: ParticleEmitter;
+									Star: ParticleEmitter;
+									Glow: ParticleEmitter;
+								};
+							};
+						};
+					};
+					InProgress: Model & {
+						["1"]: Model;
+					};
+					ProgressFull: Model & {
+						["1"]: Model;
+					};
+				};
+			};
+			Npc: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Accessories: Model & {
+				Orb: Model & {
+					Icosphere: MeshPart & {
+						Weld: ManualWeld;
+						Attachment: Attachment & {
+							Glare: ParticleEmitter;
+							Star: ParticleEmitter;
+							Glow: ParticleEmitter;
+						};
+					};
+				};
+				Hat: Model & {
+					Grid: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.011"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+				};
+				Staff: Model & {
+					["Cube.007"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.008"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.009"]: MeshPart & {
+						Weld: ManualWeld;
+						Attachment: Attachment & {
+							Glare: ParticleEmitter;
+							Star: ParticleEmitter;
+							Glow: ParticleEmitter;
+						};
+					};
+				};
+			};
+		};
 		Carpenter: Model & {
 			Accessories: Model & {
 				Hat: Model & {
@@ -1923,6 +1360,70 @@ type Assets = Folder & {
 			};
 		};
 	};
+	Animations: Folder & {
+		Shop: Folder & {
+			Idle: Animation;
+		};
+		Villager: Folder & {
+			Woodsman: Folder & {
+				Production: Animation;
+			};
+			Carpenter: Folder & {
+				Production: Animation;
+			};
+			Beekeeper: Folder & {
+				Production: Animation;
+			};
+			Baker: Folder & {
+				Production: Animation;
+			};
+			Sleep: Animation;
+			Scribe: Folder & {
+				Production: Animation;
+			};
+			Sculptor: Folder & {
+				Production: Animation;
+			};
+			Alchemist: Folder & {
+				Production: Animation;
+			};
+			Gatherer: Folder & {
+				Production: Animation;
+			};
+			Tailor: Folder & {
+				Production: Animation;
+			};
+			Farmer: Folder & {
+				Production: Animation;
+			};
+			Blacksmith: Folder & {
+				Production: Animation;
+			};
+			Mason: Folder & {
+				Production: Animation;
+			};
+			Miner: Folder & {
+				Production: Animation;
+			};
+			Shepherd: Folder & {
+				Production: Animation;
+			};
+		};
+	};
+	ProximityPrompts: Folder & {
+		ProduceAll: ProximityPrompt;
+		AddFriend: ProximityPrompt;
+		GiftingProximityPrompt: ProximityPrompt;
+		ResourcesPrompt: ProximityPrompt;
+	};
+	Walls: Folder & {
+		["Evil Wall"]: Model;
+		["Castle Wall"]: Model;
+		["Log Wall"]: Model;
+		["Wooden Fence"]: Model;
+		["Stone Wall"]: Model;
+		["Ironwood Fence"]: Model;
+	};
 	villagerviewports: Folder & {
 		Produce: Folder & {
 			Wheat: Model;
@@ -2588,61 +2089,632 @@ type Assets = Folder & {
 			};
 		};
 	};
-	Animations: Folder & {
-		Shop: Folder & {
-			Idle: Animation;
+	UI: Folder & {
+		PlayerThumbnail: SurfaceGui & {
+			Frame: Frame & {
+				CanvasGroup: CanvasGroup & {
+					UICorner: UICorner;
+					image: ImageLabel;
+				};
+				bgin: ImageLabel;
+				PlayerThumbnail: LocalScript;
+				bgout: ImageLabel;
+			};
 		};
-		Villager: Folder & {
-			Woodsman: Folder & {
-				Production: Animation;
+		WallRenders: ScreenGui & {
+			["Evil Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Carpenter: Folder & {
-				Production: Animation;
+			["Castle Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Beekeeper: Folder & {
-				Production: Animation;
+			["Ironwood Fence"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Baker: Folder & {
-				Production: Animation;
+			["Stone Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Sleep: Animation;
-			Scribe: Folder & {
-				Production: Animation;
+			["Log Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Sculptor: Folder & {
-				Production: Animation;
+			["Wooden Fence"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Alchemist: Folder & {
-				Production: Animation;
+		};
+		HoverBox: BillboardGui & {
+			LocalScript: LocalScript;
+			Frame: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
 			};
-			Gatherer: Folder & {
-				Production: Animation;
+		};
+		ProduceInfo: BillboardGui & {
+			Frame: Frame & {
+				UIListLayout: UIListLayout;
+				Rarity: TextLabel & {
+					Rainbow: UIGradient;
+					Stroke: UIStroke;
+					Normal: UIGradient;
+					Gold: UIGradient;
+				};
+				ProduceName: TextLabel & {
+					Rainbow: UIGradient;
+					Stroke: UIStroke;
+					Normal: UIGradient;
+					Gold: UIGradient;
+				};
 			};
-			Tailor: Folder & {
-				Production: Animation;
+		};
+		Icon: ModuleScript & {
+			Packages: Folder & {
+				Janitor: ModuleScript;
+				GoodSignal: ModuleScript;
 			};
-			Farmer: Folder & {
-				Production: Animation;
+			Utility: ModuleScript;
+			Elements: Folder & {
+				Notice: ModuleScript;
+				Dropdown: ModuleScript;
+				Menu: ModuleScript;
+				Selection: ModuleScript;
+				Caption: ModuleScript;
+				Indicator: ModuleScript;
+				Widget: ModuleScript;
+				Container: ModuleScript;
 			};
-			Blacksmith: Folder & {
-				Production: Animation;
+			Features: Folder & {
+				Gamepad: ModuleScript;
+				Themes: ModuleScript & {
+					Classic: ModuleScript;
+					Default: ModuleScript;
+				};
+				Overflow: ModuleScript;
 			};
-			Mason: Folder & {
-				Production: Animation;
+			VERSION: ModuleScript;
+			Reference: ModuleScript;
+			Attribute: ModuleScript;
+			PackageLink: PackageLink;
+		};
+		VillagerRenders: ScreenGui & {
+			Woodsman: ViewportFrame & {
+				script: LocalScript;
 			};
-			Miner: Folder & {
-				Production: Animation;
+			Merchant: ViewportFrame & {
+				script: LocalScript;
 			};
-			Shepherd: Folder & {
-				Production: Animation;
+			Carpenter: ViewportFrame & {
+				script: LocalScript;
+			};
+			Baker: ViewportFrame & {
+				script: LocalScript;
+			};
+			Farmer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Miner: ViewportFrame & {
+				script: LocalScript;
+			};
+			LocalScript: LocalScript;
+			Mason: ViewportFrame & {
+				script: LocalScript;
+			};
+			Gatherer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Tailor: ViewportFrame & {
+				script: LocalScript;
+			};
+			Sculptor: ViewportFrame & {
+				script: LocalScript;
+			};
+			Blacksmith: ViewportFrame & {
+				script: LocalScript;
+			};
+			Steward: ViewportFrame & {
+				script: LocalScript;
+			};
+			Shepherd: ViewportFrame & {
+				script: LocalScript;
+			};
+			Alchemist: ViewportFrame & {
+				script: LocalScript;
+			};
+		};
+		NpcDialogues: BillboardGui & {
+			Buy: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+			Sell: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+		};
+		GameUI: ScreenGui & {
+			PromoCode: CanvasGroup & {
+				Title: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Close: TextButton & {
+					UICorner: UICorner;
+				};
+				UICorner: UICorner;
+				UIStroke: UIStroke;
+				RedeemButton: TextButton & {
+					UICorner: UICorner;
+				};
+				TextBox: TextBox & {
+					UICorner: UICorner;
+				};
+			};
+			InviteIncentive: TextLabel & {
+				InviteIncentiveSuccess: LocalScript;
+				UIStroke: UIStroke;
+			};
+			GiftList: CanvasGroup & {
+				Header: TextLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
+				};
+				Close: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				["bg header"]: ImageLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
+				};
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				ScrollingFrame: ScrollingFrame & {
+					UIListLayout: UIListLayout;
+					UIPadding: UIPadding;
+					Sample: ImageButton & {
+						UIStroke: UIStroke;
+						UIAspectRatioConstraint: UIAspectRatioConstraint;
+						SampleName: TextLabel & {
+							TextLabel: TextLabel & {
+								UIAspectRatioConstraint: UIAspectRatioConstraint;
+								UIStroke: UIStroke;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+					};
+				};
+				bg: ImageLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+			};
+			Viewports: Folder & {
+				mason: ViewportFrame;
+			};
+			ConfirmationPrompt: Frame & {
+				message: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Decline: TextButton & {
+					UIStroke: UIStroke;
+					bg: ImageLabel;
+					TextLabel: TextLabel & {
+						UIStroke: UIStroke;
+					};
+				};
+				title: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Accept: TextButton & {
+					UIStroke: UIStroke;
+					bg: ImageLabel;
+					TextLabel: TextLabel & {
+						UIStroke: UIStroke;
+					};
+				};
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				UIStroke: UIStroke;
+				bg: ImageLabel;
+			};
+			Playercash: TextLabel & {
+				subtract: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				logics: LocalScript;
+				UIStroke: UIStroke;
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				add: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+			PlaceFrame: Frame & {
+				Placetext: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+				};
+				LeftPress: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+				};
+				RightPress: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+				};
+			};
+			RobuxStore: Frame & {
+				Header: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Close: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+				};
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				bg: ImageLabel;
+				ScrollingFrame: ScrollingFrame & {
+					UIPadding: UIPadding;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIListLayout: UIListLayout;
+					PurchaseForever: Frame & {
+						name: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						timer: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIStroke: UIStroke;
+						ScrollingFrame: ScrollingFrame & {
+							UIStroke: UIStroke;
+							Sample: Frame & {
+								purchaseroblox: TextButton;
+								purchaseunavailable: TextButton;
+								icon: ImageLabel & {
+									UIStroke: UIStroke;
+								};
+								purchaseavailable: TextButton;
+							};
+							Arrow: ImageLabel;
+						};
+						bg: ImageLabel;
+					};
+					StarterPack: Frame & {
+						purchaseoptions: Frame & {
+							gift: ImageButton & {
+								UIStroke: UIStroke;
+							};
+							buy: TextButton & {
+								UIStroke2: UIStroke;
+								UIStroke1: UIStroke;
+								bg: ImageLabel;
+							};
+						};
+						LimitedTime: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						items: Frame & {
+							m2: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							b1: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							m1: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							cash: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+						decor: Frame & {
+							Farmer: ViewportFrame & {
+								script: LocalScript;
+							};
+							rotate: LocalScript;
+							title: TextLabel & {
+								UIStroke: UIStroke;
+							};
+							desc: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+						packname: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						CountDown: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIStroke: UIStroke;
+						bg: ImageLabel;
+						["new"]: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+					LaunchPack: Frame & {
+						purchaseoptions: Frame & {
+							gift: ImageButton & {
+								UIStroke: UIStroke;
+							};
+							buy: TextButton & {
+								price: TextLabel & {
+									UIStroke: UIStroke;
+								};
+								UIStroke: UIStroke;
+								bg: ImageLabel;
+								markdown: TextLabel & {
+									Frame: Frame;
+									UIStroke: UIStroke;
+								};
+							};
+						};
+						LimitedTime: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						items: Frame & {
+							s3: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							s1: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							b1: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							s4: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+							s2: ViewportFrame & {
+								UIStroke: UIStroke;
+							};
+						};
+						decor: ViewportFrame;
+						timeleft: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						packname: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						CountDown: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIStroke: UIStroke;
+						bg: ImageLabel;
+						["new"]: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+			};
+			Wall: CanvasGroup & {
+				Header: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Close: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+				};
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				bg: ImageLabel;
+				ScrollingFrame: ScrollingFrame & {
+					UIListLayout: UIListLayout;
+					Sample: Frame & {
+						WallViewPort: Frame & {
+							UIStroke: UIStroke;
+						};
+						robux: ImageButton & {
+							UIStroke: UIStroke;
+							text: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Multiplier: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						unequip: ImageButton & {
+							UIStroke: UIStroke;
+							text: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+						RobuxPrice: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						equip: ImageButton & {
+							UIStroke: UIStroke;
+							text: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+						SampleName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						bg: ImageLabel;
+						buy: ImageButton & {
+							UIStroke: UIStroke;
+							text: TextLabel & {
+								UIStroke: UIStroke;
+							};
+						};
+					};
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIPadding: UIPadding;
+				};
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+			};
+			Village: CanvasGroup & {
+				Countdown: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				ScrollingFrame: ScrollingFrame & {
+					UIListLayout: UIListLayout;
+					Sample: ImageButton & {
+						Stock: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityCommon: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityUncommon: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityEpic: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityMythic: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						VillagerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Tier: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityRare: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						RarityLegendary: ImageLabel & {
+							UIStroke: UIStroke;
+						};
+						bg: ImageLabel;
+						VillagerViewPort: Frame & {
+							UIStroke: UIStroke;
+						};
+					};
+					UIPadding: UIPadding;
+					Buy: ImageButton & {
+						Normal: TextButton & {
+							UIStroke2: UIStroke;
+							UIStroke1: UIStroke;
+						};
+						bg: ImageLabel;
+						Gift: ImageButton & {
+							UIStroke: UIStroke;
+						};
+						Robux: TextButton & {
+							UIStroke2: UIStroke;
+							UIStroke1: UIStroke;
+						};
+					};
+				};
+				Close: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+				};
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				bg: ImageLabel;
+				ReStock: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+				};
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+			};
+			Introtext: Frame & {
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				text: TextLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
+				};
+			};
+			HUD: Frame & {
+				Shop: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				Walls: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				Village: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				Sell: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				Buy: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+			};
+		};
+		DialogueSell: BillboardGui & {
+			Stuff: LocalScript;
+			Frame: Frame & {
+				Option3: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					UIGradient: UIGradient;
+					HoverDetect: TextButton;
+				};
+				Option4: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					UIGradient: UIGradient;
+					HoverDetect: TextButton;
+				};
+				Option2: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					UIGradient: UIGradient;
+					HoverDetect: TextButton;
+				};
+				Option1: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					UIGradient: UIGradient;
+					HoverDetect: TextButton;
+				};
 			};
 		};
 	};
-	ProximityPrompts: Folder & {
-		ProduceAll: ProximityPrompt;
-		AddFriend: ProximityPrompt;
-		GiftingProximityPrompt: ProximityPrompt;
-		ResourcesPrompt: ProximityPrompt;
+	Tutorial: Folder & {
+		Arrow: Model;
 	};
 	Particles: Part & {
 		Rainbow: Attachment & {
@@ -2655,12 +2727,59 @@ type Assets = Folder & {
 			Star: ParticleEmitter;
 		};
 	};
-	Walls: Folder & {
-		["Evil Wall"]: Model;
-		["Castle Wall"]: Model;
-		["Log Wall"]: Model;
-		["Wooden Fence"]: Model;
-		["Stone Wall"]: Model;
-		["Ironwood Fence"]: Model;
+	Tools: Folder & {
+		Produce: Folder & {
+			Wheat: Tool & {
+				Handle: Part;
+			};
+			Log: Tool & {
+				Handle: Part;
+			};
+			Honeycomb: Tool & {
+				Handle: Part;
+			};
+			["Iron Bar"]: Tool & {
+				Handle: Part;
+			};
+			Sword: Tool & {
+				Handle: Part;
+			};
+			Crystal: Tool & {
+				Handle: MeshPart & {
+					Attachment: Attachment & {
+						Glare: ParticleEmitter;
+						Star: ParticleEmitter;
+						Glow: ParticleEmitter;
+					};
+				};
+			};
+			Basket: Tool & {
+				Handle: Part;
+			};
+			Book: Tool & {
+				Handle: Part;
+			};
+			Clothing: Tool & {
+				Handle: Part;
+			};
+			Potion: Tool & {
+				Handle: Part;
+			};
+			Wool: Tool & {
+				Handle: Part;
+			};
+			Bricks: Tool & {
+				Handle: Part;
+			};
+			Bread: Tool & {
+				Handle: Part;
+			};
+			Planks: Tool & {
+				Handle: Part;
+			};
+			Statue: Tool & {
+				Handle: Part;
+			};
+		};
 	};
 }

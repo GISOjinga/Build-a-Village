@@ -263,6 +263,7 @@ const packets = defineNamespace("gameEvents", () => {
                     Coins: ByteNet.uint32,
                     Villagers: array(villagerStruct),
                     PromoCodesRedeemed: array(ByteNet.string),
+                    Tutorial: ByteNet.unknown as ByteNetType<"Done" | number>,
                     Produce: array(struct({
                         Name: ByteNet.string as ByteNetType<ProduceNames>,
                         Amount: ByteNet.unknown as ByteNetType<number>,
