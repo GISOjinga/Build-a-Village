@@ -97,7 +97,7 @@ export default (world: World) => {
                     createEntity.inventoryVillager(targetEntity, villager);
                 }
 
-                const starter = info.purchase as Partial<StarterPack>;
+                const starter = info.purchase as Partial<StarterShopPack>;
                 if (starter.Coins) {
                     createEntity.updateData(targetEntity, (old) => {
                         old.Coins += starter.Coins as number;

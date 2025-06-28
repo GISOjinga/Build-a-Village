@@ -15,7 +15,7 @@ import paths from "shared/utils/paths";
 
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
-    const sizeOffset = UDim2.fromScale(1.2, 1.2);
+    const sizeOffset = UDim2.fromScale(1.02, 1.02);
     const robuxStorePage = pagePaths.RobuxStore;
     const scrollingFrame = robuxStorePage.ScrollingFrame;
     const starterPackFrame = scrollingFrame.StarterPack;
@@ -23,7 +23,7 @@ export default (pagePaths: PagePaths) => {
 
     trash.Add(useEffect((effectTrash) => {
         const setupPurchase = (frame: typeof starterPackFrame | typeof launchPackFrame, purchaseKey: keyof typeof robuxStoreData) => {
-            const purchaseData = pageStates.robuxStore()[purchaseKey];
+            const purchaseData = pageStates.robuxStore()[purchaseKey] as StarterShopPack
 
             frame.packname.Text = purchaseData.Name;
             const buyButton = frame.purchaseoptions.buy;
@@ -34,10 +34,10 @@ export default (pagePaths: PagePaths) => {
                 const [ok, info] = pcall(() => MarketplaceService.GetProductInfo(purchaseData.ProductId, Enum.InfoType.Product));
                 const price = ok ? (info as ProductInfo).PriceInRobux : 0;
                 if (frame === starterPackFrame) {
-                    (buyButton as TextButton).Text = `\uE002 ${price}`;
+                    (buyButton as TextButton).Text = ` ${price}`;
                 } else {
                     const launchBuy = buyButton as typeof launchPackFrame.purchaseoptions.buy;
-                    launchBuy.price.Text = `\uE002 ${price}`;
+                    launchBuy.price.Text = ` ${price}`;
                 }
             });
 

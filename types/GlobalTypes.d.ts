@@ -150,18 +150,18 @@ type VillagerInfo = {
 }
 
 //* limited time shop
-type StarterPack = {
+type StarterShopPack = {
     Name: string,
     TimeEnds: number,
-    ProductId: number,
+    GamePassId: number,
     Coins: number,
     Villagers: [VillagerNames, VillagerNames, VillagerNames],
 }
 
-type LaunchPack = {
+type LaunchShopPack = {
     Name: string,
     TimeEnds: number,
-    ProductId: number,
+    GamePassId: number,
     Villagers: [
         VillagerNames,
         VillagerNames,
