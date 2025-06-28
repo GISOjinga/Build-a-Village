@@ -6,7 +6,7 @@ const pageStates = {
     placementOffset: atom(0),
     placeVillager: atom(false),
     digVillager: atom(false),
-    openPage: atom("None") as Atom<"Placement" | "Dig" | "Wall" | "Gift" | "Buy" | "RobuxStore" | "Sell" | "None">,
+    openPage: atom("None") as Atom<"Placement" | "Dig" | "Wall" | "Gift" | "Buy" | "RobuxStore" | "Promo" | "Sell" | "None">,
     confirmPrompt: atom({ title: "", message: "" }),
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
@@ -18,6 +18,7 @@ const pageStates = {
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
     npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "None", text: "" }),
     coins: atom(0),
+    friendsBonus: atom(false),
 }
 
 export type PageStates = typeof pageStates;

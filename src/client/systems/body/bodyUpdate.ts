@@ -12,6 +12,7 @@ import paths from "shared/utils/paths";
 // variables
 const player = Players.LocalPlayer
 const giftingPrompts = new WeakMap<Player, ProximityPrompt>();
+const friendPrompts = new WeakMap<Player, ProximityPrompt>();
 
 export default (world: World) => {
     const idleAnimation = paths.Assets.Animations.Shop.Idle;
@@ -49,9 +50,19 @@ export default (world: World) => {
         }
     })
 
+    friendPrompts.forEach((prompt, otherPlayer) => {
+        prompt.Enabled = true;
+        for (const [] of useEvent(prompt.Triggered, debug.traceback() + otherPlayer.UserId)) {
+            if (otherPlayer !== Players.LocalPlayer) {
+                routes.requestAddFriend.send(otherPlayer);
+            }
+        }
+    })
+
     // when a body is added, we add a proximity prompt to it
     for (const [_, clientEntity, body] of world.query(TargetEntity, Added(Body))) {
         const giftingPrompt = paths.Assets.ProximityPrompts.GiftingProximityPrompt.Clone();
+        const friendPrompt = paths.Assets.ProximityPrompts.AddFriend.Clone();
         const player = body && Players.GetPlayerFromCharacter(body.model)
 
         // when added it sets the client id property
@@ -59,7 +70,9 @@ export default (world: World) => {
         player?.SetAttribute("ClientId", clientEntity)
         if (player && player !== Players.LocalPlayer) {
             giftingPrompts.set(player, giftingPrompt)
+            friendPrompts.set(player, friendPrompt)
             giftingPrompt.Parent = body.rootPart
+            friendPrompt.Parent = body.rootPart
         }
     }
 }

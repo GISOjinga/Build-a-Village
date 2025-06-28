@@ -25,6 +25,9 @@ import updateTools from "./systems/villagers/updateTools";
 import updateWalls from "./systems/walls/updateWalls";
 import robuxStore from "./systems/robuxStore/robuxStore";
 import confirmationPrompt from "./systems/player/confirmationPrompt";
+import promoCodes from "./systems/promotions/promoCodes";
+import friendRequest from "./systems/player/friendRequest";
+import friendsBonus from "./systems/promotions/friendsBonus";
 
 
 
@@ -72,6 +75,9 @@ setupMatter([
     { system: loadPlayerData },
     { system: savePlayerData },
     { system: confirmationPrompt },
+    { system: friendRequest },
+    { system: friendsBonus },
+    { system: promoCodes },
 
     // robux store
     { system: robuxStore },
