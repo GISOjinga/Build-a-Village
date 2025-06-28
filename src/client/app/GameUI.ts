@@ -9,6 +9,8 @@ import WallPage from "./pages/WallPage";
 import RobuxStorePage from "./pages/RobuxStorePage";
 import IntroTextPage from "./pages/IntroTextPage";
 import PlacementPage from "./pages/PlacementPage";
+import PromoPage from "./pages/PromoPage";
+import InviteIncentivePage from "./pages/InviteIncentivePage";
 import { routes } from "shared/data/network";
 import pageStates from "shared/utils/Animations/pageStates";
 import ConfirmationPage from "./pages/ConfirmationPage";
@@ -17,17 +19,19 @@ import ConfirmationPage from "./pages/ConfirmationPage";
 
 export default (pagePaths: PagePaths) => {
 	const trash = new Janitor();
-	const pages = [
-		HudPage,
-		OpenPage,
-		VillagersPage,
-		GiftPage,
-		WallPage,
-		RobuxStorePage,
-		IntroTextPage,
-		PlacementPage,
-		ConfirmationPage,
-	]
+        const pages = [
+                HudPage,
+                OpenPage,
+                VillagersPage,
+                GiftPage,
+                WallPage,
+                RobuxStorePage,
+                IntroTextPage,
+                PlacementPage,
+                ConfirmationPage,
+                PromoPage,
+                InviteIncentivePage,
+        ]
 
 	// listen to page changes
 	trash.Add(routes.togglePage.listen(pageStates.openPage));

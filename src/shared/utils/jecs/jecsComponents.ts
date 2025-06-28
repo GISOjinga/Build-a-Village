@@ -198,6 +198,9 @@ export const ConfirmationPrompt = component<{
     onDecline?: () => void,
 }>("ConfirmationPrompt");
 
+// friends bonus multiplier
+export const FriendsBonus = component<{ multiplier: number }>("FriendsBonus");
+
 // Body components
 export const AppearanceLoaded = component("AppearanceLoaded");
 export const NoBodyCollisions = component("NoBodyCollisions");

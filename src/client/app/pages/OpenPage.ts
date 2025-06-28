@@ -19,12 +19,14 @@ export default (pagePaths: PagePaths) => {
         Wall: pagePaths.WallPage.Position,
         Buy: pagePaths.VillagersPage.Position,
         RobuxStore: pagePaths.RobuxStore.Position,
+        Promo: pagePaths.PromoPage.Position,
     }
     const pageNameToInstance = {
         Gift: pagePaths.GiftPage,
         Wall: pagePaths.WallPage,
         Buy: pagePaths.VillagersPage,
         RobuxStore: pagePaths.RobuxStore,
+        Promo: pagePaths.PromoPage,
     }
 
     // loops through all the page paths
@@ -57,7 +59,8 @@ export default (pagePaths: PagePaths) => {
                 : pageName === "Buy" ? UDim2.fromScale(originalPositions.Buy.X.Scale, -2)
                     : pageName === "RobuxStore" ? UDim2.fromScale(-2 * robuxStoreDirection, originalPositions.RobuxStore.Y.Scale)
                         : pageName === "Wall" ? UDim2.fromScale(-2 * wallDirection, originalPositions.Wall.Y.Scale)
-                            : UDim2.fromScale(.5, -2);
+                            : pageName === "Promo" ? UDim2.fromScale(originalPositions.Promo.X.Scale, 2)
+                                : UDim2.fromScale(.5, -2);
 
             // sets the position of the page
             page.Visible = true;

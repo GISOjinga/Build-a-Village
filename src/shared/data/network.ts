@@ -177,6 +177,23 @@ const packets = defineNamespace("gameEvents", () => {
             }),
         }),
 
+        // promotions
+        updateFriendsBonus: definePacket({
+            value: ByteNet.bool,
+        }),
+        sendFriendRequest: definePacket({
+            value: ByteNet.inst as ByteNetType<Player>,
+        }),
+        requestAddFriend: definePacket({
+            value: ByteNet.inst as ByteNetType<Player>,
+        }),
+        redeemPromo: definePacket({
+            value: ByteNet.string,
+        }),
+        promoResult: definePacket({
+            value: struct({ success: bool, message: ByteNet.string }),
+        }),
+
         // to gift your next robux purchace to a player
         shopGiftTo: definePacket({
             value: ByteNet.inst as ByteNetType<Player>,
