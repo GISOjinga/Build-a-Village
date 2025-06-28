@@ -295,7 +295,13 @@ export default (world: World) => {
 
                     // removes the villagers that arent spawned
                     oldData.Villagers = oldData.Villagers.filter((villagerData) => villagerData.RelativeLocation ? true : false);
+                    const soldWheat = oldData.Produce.find((p) => p.Name === "Wheat") !== undefined;
                     oldData.Produce.clear();
+
+                    if (oldData.Tutorial === 3 && soldWheat) {
+                        oldData.Coins += 500;
+                        oldData.Tutorial = "Done";
+                    }
 
                     // prints the sell message
                     printTS($line, player.Name + " sold all items for", oldData.Coins, "Coins");
@@ -324,6 +330,10 @@ export default (world: World) => {
                             printTS($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
                             oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
                             oldData.Coins += (sellPrice || 0) * cashMultiplier; // adds the coins from the produce
+                            if (itemName === "Wheat" && oldData.Tutorial === 3) {
+                                oldData.Coins += 500;
+                                oldData.Tutorial = "Done";
+                            }
                         }
 
                         return oldData
@@ -390,6 +400,7 @@ export default (world: World) => {
                         // updates your data
                         oldData.Coins -= totalPrice
                         createEntity.inventoryVillager(entity, villagerData.Name)
+                        if (oldData.Tutorial === 0 && villagerData.Name === "Farmer") oldData.Tutorial = 1
 
                         // takes from stock and sets the new shop data
                         takeVillagerFromStock(villagerData.Name)

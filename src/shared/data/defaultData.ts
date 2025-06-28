@@ -6,6 +6,7 @@ const defaultData = {
     Coins: 100000,
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,
+    Tutorial: 0 as number | "Done",
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,
     PromoCodesRedeemed: [] as Array<string>,
 }

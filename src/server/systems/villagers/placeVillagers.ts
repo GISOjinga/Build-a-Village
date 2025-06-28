@@ -42,6 +42,7 @@ export default (world: World) => {
                 villagerData.Progress.Progression.Time.StartTime = os.time();
                 villagerData.Progress.Building.StartTime = os.time();
                 villagerData.Progress.Building.EndTime = os.time() + 5;
+                if (oldData.Tutorial === 1 && villagerName === "Farmer") oldData.Tutorial = 2
                 return oldData
             })
         }
