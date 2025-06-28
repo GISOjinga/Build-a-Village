@@ -12,14 +12,21 @@ export default (world: World) => {
             routes.promoResult.sendTo({ success: false, message: "Invalid code" }, player);
             return;
         }
+
         if (reward.coins) {
-            createEntity.updateData(playerEntity, (old) => {
-                old.Coins += reward.coins as number;
-                return old;
+            createEntity.updateData(playerEntity, (oldData) => {
+                if (oldData.PromoCodesRedeemed.find((c) => c === code)) {
+                    routes.promoResult.sendTo({ success: false, message: "Code already redeemed" }, player);
+                    return oldData;
+                } else {
+                    routes.promoResult.sendTo({ success: true, message: `$${reward.coins} redeemed` }, player);
+                    oldData.Coins += reward.coins as number;
+                    return oldData;
+                }
             });
-            routes.promoResult.sendTo({ success: true, message: `$${reward.coins} redeemed` }, player);
-        } else if (reward.item) {
-            routes.promoResult.sendTo({ success: true, message: `${reward.item} redeemed` }, player);
         }
+        // else if (reward.item) {
+        //     routes.promoResult.sendTo({ success: true, message: `${reward.item} redeemed` }, player);
+        // }
     });
 };
