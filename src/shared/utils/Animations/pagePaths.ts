@@ -7,7 +7,7 @@ const pagePaths = (page: GameUI) => {
         WallPage: page.Wall,
         IntroTextPage: page.Introtext,
         PlacementPage: page.PlaceFrame,
-        ConfirmPage: page.GiftToPlayer,
+        ConfirmPage: page.ConfirmationPrompt,
         Page: page,
     };
 }

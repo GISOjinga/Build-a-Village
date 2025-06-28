@@ -26,8 +26,8 @@ export default (pagePaths: PagePaths) => {
         const confirmInfo = pageStates.confirmPrompt();
 
         // sets the texts
-        confirmPage.GiftFrom.Text = confirmInfo.title;
-        confirmPage.ItemDetail.Text = confirmInfo.message;
+        confirmPage.title.Text = confirmInfo.title;
+        confirmPage.message.Text = confirmInfo.message;
 
         // if the confirm info is not set then return
         if (confirmInfo.title === "" || confirmInfo.message === "") {
