@@ -11,7 +11,7 @@ export default (world: World) => {
         if (!playerToFriendEntity) return;
         printJecs($line, `Received friend request from ${player.Name} for player: ${otherPlayer.Name}`);
         createEntity.confirmationPrompt(playerToFriendEntity, `${player.Name} wants to add you`, "Accept friend request?", () => {
-            print(`Adding friend: ${otherPlayer.Name}`);
+            printJecs($line, `Adding friend: ${otherPlayer.Name}`);
             routes.sendFriendRequest.sendTo(otherPlayer, player);
             routes.sendFriendRequest.sendTo(player, otherPlayer);
         });
