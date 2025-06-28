@@ -1,25 +1,24 @@
-export default {
-    Purchase1: {
+import { StarterPack, LaunchPack } from "types/GlobalTypes";
+
+export type RobuxStoreData = {
+    StarterPack: StarterPack;
+    LaunchPack: LaunchPack;
+};
+
+const robuxStoreData: RobuxStoreData = {
+    StarterPack: {
         Name: "Starter Pack",
-        TimeEnds: os.clock() + 1000,
-        Villagers: ["Farmer", "Miner", "Blacksmith", "Carpenter", "Baker", "Mason", "Tailor"],
-        Pack: {
-            Pack1: { PackMultiplier: 1, ProductId: 0 },
-            Pack3: { PackMultiplier: 3, ProductId: 0 },
-            Pack10: { PackMultiplier: 10, ProductId: 0 },
-        },
+        TimeEnds: os.time() + 24 * 60 * 60,
+        ProductId: 0,
+        Coins: 1000,
+        Villagers: ["Farmer", "Miner", "Baker"],
     },
-    Purchase2: {
-        Name: "Starter Pack",
-        TimeEnds: os.clock() + 1000,
-        Villagers: ["Farmer", "Miner", "Blacksmith", "Carpenter", "Baker", "Mason", "Tailor"],
-        Pack: {
-            Pack1: { PackMultiplier: 1, ProductId: 0 },
-            Pack3: { PackMultiplier: 3, ProductId: 0 },
-            Pack10: { PackMultiplier: 10, ProductId: 0 },
-        },
+    LaunchPack: {
+        Name: "Launch Pack",
+        TimeEnds: os.time() + 7 * 24 * 60 * 60,
+        ProductId: 0,
+        Villagers: ["Carpenter", "Mason", "Tailor", "Blacksmith", "Steward"],
     },
-} satisfies {
-    Purchase1: LimitedTimePack,
-    Purchase2: LimitedTimePack,
-}
+};
+
+export default robuxStoreData;

@@ -150,17 +150,25 @@ type VillagerInfo = {
 }
 
 //* limited time shop
-type LimitedPrice = ({PackMultiplier:number, ProductId:0})
-type LimitedTimePrices = {
-    Pack1: LimitedPrice,
-    Pack3: LimitedPrice,
-    Pack10: LimitedPrice,
-}
-type LimitedTimePack = {
+type StarterPack = {
     Name: string,
     TimeEnds: number,
-    Pack: LimitedTimePrices,
-    Villagers:[VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames, VillagerNames]
+    ProductId: number,
+    Coins: number,
+    Villagers: [VillagerNames, VillagerNames, VillagerNames],
+}
+
+type LaunchPack = {
+    Name: string,
+    TimeEnds: number,
+    ProductId: number,
+    Villagers: [
+        VillagerNames,
+        VillagerNames,
+        VillagerNames,
+        VillagerNames,
+        VillagerNames,
+    ],
 }
 
 //* wall info

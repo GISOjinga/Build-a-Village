@@ -127,7 +127,6 @@ const packets = defineNamespace("gameEvents", () => {
         buyRobuxPack: definePacket({
             value: struct({
                 purchase: ByteNet.string as ByteNetType<keyof typeof robuxStoreData>,
-                pack: ByteNet.string as ByteNetType<keyof LimitedTimePrices>,
             }),
         }),
 

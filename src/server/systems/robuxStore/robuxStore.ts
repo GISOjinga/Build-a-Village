@@ -2,35 +2,73 @@ import { World } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
-import robuxStoreData from "shared/data/robuxStoreData";
+import robuxStoreData, { RobuxStoreData } from "shared/data/robuxStoreData";
+import paths from "shared/utils/paths";
+import ShopData from "../villagers/ShopData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity, removeComponent, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
 
+function getDailySeed() {
+    return math.floor(os.time() / (60 * 60 * 24));
+}
+
+function chooseVillagers(rng: Random, count: number) {
+    const pool = ShopData.Villagers.map(v => v.Name);
+    const result = new Array<VillagerNames>();
+    while (result.size() < count) {
+        const idx = rng.NextInteger(1, pool.size()) - 1;
+        const name = pool[idx];
+        if (!result.includes(name)) result.push(name);
+    }
+    return result;
+}
+
+let currentSeed = 0;
+
 // helper to find purchase info by productId
 function findPurchaseByProduct(productId: number) {
     for (const [purchaseName, purchase] of pairs(robuxStoreData)) {
-        for (const [packName, pack] of pairs(purchase.Pack)) {
-            if (pack.ProductId === productId) {
-                return { purchaseName: purchaseName as keyof typeof robuxStoreData, purchase, pack };
-            }
+        if (purchase.ProductId === productId) {
+            return { purchaseName: purchaseName as keyof RobuxStoreData, purchase };
         }
     }
     return undefined;
 }
 
 export default (world: World) => {
-    // send store data to players when they join
+    const seed = getDailySeed();
+    if (seed !== currentSeed) {
+        currentSeed = seed;
+        const starterRng = new Random(seed + 142);
+        const launchRng = new Random(seed + 532);
+        robuxStoreData.StarterPack.Villagers = chooseVillagers(starterRng, 3) as [
+            VillagerNames,
+            VillagerNames,
+            VillagerNames
+        ];
+        robuxStoreData.LaunchPack.Villagers = chooseVillagers(launchRng, 5) as [
+            VillagerNames,
+            VillagerNames,
+            VillagerNames,
+            VillagerNames,
+            VillagerNames
+        ];
+        robuxStoreData.StarterPack.Coins = starterRng.NextInteger(1000, 5000);
+        robuxStoreData.StarterPack.TimeEnds = os.time() + 24 * 60 * 60;
+        robuxStoreData.LaunchPack.TimeEnds = os.time() + 7 * 24 * 60 * 60;
+        routes.updateRobuxStore.sendToAll(robuxStoreData);
+    }
+
     for (const [_, player] of world.query(Added(Player))) {
         routes.updateRobuxStore.sendTo(robuxStoreData, player);
     }
 
     // handle client requests to buy a pack
-    useRoute(routes.buyRobuxPack, ({ purchase, pack }, player) => {
+    useRoute(routes.buyRobuxPack, ({ purchase }, player) => {
         const purchaseData = robuxStoreData[purchase];
-        const packData = purchaseData?.Pack[pack];
-        if (packData) MarketplaceService.PromptProductPurchase(player, packData.ProductId);
+        if (purchaseData) MarketplaceService.PromptProductPurchase(player, purchaseData.ProductId);
     });
 
     // handle completed purchases
@@ -56,11 +94,18 @@ export default (world: World) => {
 
             if (targetEntity) {
                 for (const villager of info.purchase.Villagers) {
-                    for (let i = 0; i < info.pack.PackMultiplier; i++) {
-                        createEntity.inventoryVillager(targetEntity, villager);
-                    }
+                    createEntity.inventoryVillager(targetEntity, villager);
                 }
-                printTS($line, `${targetPlayer.Name} received pack`, info.purchaseName, "x", info.pack.PackMultiplier);
+
+                const starter = info.purchase as Partial<StarterPack>;
+                if (starter.Coins) {
+                    createEntity.updateData(targetEntity, (old) => {
+                        old.Coins += starter.Coins as number;
+                        return old;
+                    });
+                }
+
+                printTS($line, `${targetPlayer.Name} received pack`, info.purchaseName);
             }
         } else {
             removeComponent(playerEntity, GiftTo);
