@@ -153,7 +153,7 @@ type VillagerInfo = {
 type StarterShopPack = {
     Name: string,
     TimeEnds: number,
-    GamePassId: number,
+    ProductId: number,
     Coins: number,
     Villagers: [VillagerNames, VillagerNames, VillagerNames],
 }
@@ -161,7 +161,7 @@ type StarterShopPack = {
 type LaunchShopPack = {
     Name: string,
     TimeEnds: number,
-    GamePassId: number,
+    ProductId: number,
     Villagers: [
         VillagerNames,
         VillagerNames,
