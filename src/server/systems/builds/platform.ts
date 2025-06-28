@@ -59,7 +59,7 @@ export default (world: World) => {
     }
 
     // for all players added chooses an un occupied platform
-    for (const [_, playerEntity, player] of world.query(TargetEntity, Added(Player))) {
+    for (const [playerEntity, player] of world.query(Player).without(pair(TargetEntity, Platform))) {
         const body = world.get(playerEntity, Body)
         const data = world.get(playerEntity, Data)
         const platformsSorted: [Entity, PlatformExample][] = []

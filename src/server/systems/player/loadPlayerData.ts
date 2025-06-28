@@ -38,7 +38,8 @@ export default (world: World) => {
             player.SetAttribute("DataLoaded", true)
 
             // when the player loads the character
-            useMemo(() => task.spawn(() => {
+            task.spawn(() => {
+                print("Loading Player Data for", player.Name)
                 let [playerData] = dataStore.GetAsync<PlayerData>(`${player.UserId}`)
 
                 // if not player data then creates one
@@ -46,7 +47,8 @@ export default (world: World) => {
 
                 // sets their data
                 setPlayerData(player, migrateData(playerData))
-            }), [])
+                print("Player Data Loaded for", player.Name)
+            })
         }
     });
 }

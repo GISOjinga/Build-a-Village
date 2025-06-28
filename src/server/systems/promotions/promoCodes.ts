@@ -20,6 +20,7 @@ export default (world: World) => {
                     return oldData;
                 } else {
                     routes.promoResult.sendTo({ success: true, message: `$${reward.coins} redeemed` }, player);
+                    oldData.PromoCodesRedeemed.push(code);
                     oldData.Coins += reward.coins as number;
                     return oldData;
                 }

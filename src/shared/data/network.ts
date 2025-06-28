@@ -19,25 +19,18 @@ type ByteNetType<T> = {
 
 
 type MapTableToByteNet<T> =
-    T extends (undefined) ? ByteNetType<T> :
-    // 1) Already a ByteNetType
-    T extends ByteNetType<any> ? T :
-    // entity
     T extends Entity ? ByteNetType<Entity> :
-    // 2) Roblox Instance -> path
     T extends Instance ? ByteNetType<T> :
-    // 3) Primitive Vector3
     T extends Vector3 ? ByteNetType<Vector3> :
-    // 5) Maps
-    T extends Map<infer G, infer V> ? ByteNetType<Map<G, MapTableToByteNet<V>>> :
-    // 6) Plain objects (exclude functions)
+    T extends Map<infer G, infer V> ? ByteNetType<Map<G, MapTableToByteNet<V>["value"]>> :
+    T extends (...args: any[]) => any ? ByteNetType<T> :
     T extends object
-    ? (T extends Function
-        ? ByteNetType<T>                                     // functions get wrapped
-        : struct<{ [K in keyof T]: MapTableToByteNet<T[K]> }>) // objects -> struct
-    :
-    // 7) Fallback
-    ByteNetType<T>;
+    ? struct<{
+        [K in keyof T]-?: undefined extends T[K]
+        ? optional<MapTableToByteNet<NonNullable<T[K]>>>
+        : MapTableToByteNet<T[K]>
+    }> // 👈 this entire mapped object gets wrapped in `struct<>`
+    : ByteNetType<T>;
 
 
 // function to give a jecs component struct
@@ -294,10 +287,10 @@ const packets = defineNamespace("gameEvents", () => {
                 value: componentStruct(struct({
                     title: ByteNet.string,
                     message: ByteNet.string,
-                    confirmation: ByteNet.bool,
+                    confirmation: optional(ByteNet.bool),
                     onConfirm: ByteNet.unknown as ByteNetType<() => void>,
-                    onDecline: optional(ByteNet.unknown) as ByteNetType<unknown>,
-                })) as unknown as any,
+                    onDecline: optional(ByteNet.unknown as ByteNetType<() => void>),
+                })),
             }),
 
             // for replicating player state

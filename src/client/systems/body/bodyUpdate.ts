@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
-import { getEntity, printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -25,7 +25,7 @@ export default (world: World) => {
 
     // makes sure animation is playing
     if (!buyIdleTrack.IsPlaying || !sellIdleTrack.IsPlaying) {
-        printTS($line, "Setting up animations for player: ", player.Name);
+        printJecs($line, "Setting up animations for player: ", player.Name);
         buyIdleTrack.Play();
         sellIdleTrack.Play();
     }
@@ -41,7 +41,7 @@ export default (world: World) => {
         for (const [] of useEvent(prompt.Triggered, debug.traceback() + playerToGift.UserId)) {
             // if the player is not the local player, we send a gift request
             if (playerToGift !== Players.LocalPlayer && equippedTool) {
-                printTS($line, "Gifting to player: ", playerToGift.Name, " with tool: ", equippedTool?.Name);
+                printJecs($line, "Gifting to player: ", playerToGift.Name, " with tool: ", equippedTool?.Name);
                 routes.giftToPlayer.send({
                     playerToGift,
                     produceTool: equippedTool
@@ -54,6 +54,7 @@ export default (world: World) => {
         prompt.Enabled = true;
         for (const [] of useEvent(prompt.Triggered, debug.traceback() + otherPlayer.UserId)) {
             if (otherPlayer !== Players.LocalPlayer) {
+                printJecs($line, "Adding friend: ", otherPlayer.Name);
                 routes.requestAddFriend.send(otherPlayer);
             }
         }
@@ -73,6 +74,7 @@ export default (world: World) => {
             friendPrompts.set(player, friendPrompt)
             giftingPrompt.Parent = body.rootPart
             friendPrompt.Parent = body.rootPart
+            friendPrompt.ActionText = `Add ${player.Name} as a Friend?`;
         }
     }
 }

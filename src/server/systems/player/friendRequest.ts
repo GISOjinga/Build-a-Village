@@ -1,14 +1,19 @@
 import { World } from "@rbxts/jecs";
+import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 
 export default (world: World) => {
     useRoute(routes.requestAddFriend, (otherPlayer, player) => {
-        const playerEntity = getEntity.fromInstance(player);
-        if (!playerEntity) return;
-        createEntity.confirmationPrompt(playerEntity, `Add ${otherPlayer.Name}?`, "Send friend request?", () => {
+        const playerToFriendEntity = getEntity.fromInstance(otherPlayer);
+        printJecs($line, `Creating confirmation prompt for player: ${playerToFriendEntity}`);
+        if (!playerToFriendEntity) return;
+        printJecs($line, `Received friend request from ${player.Name} for player: ${otherPlayer.Name}`);
+        createEntity.confirmationPrompt(playerToFriendEntity, `${player.Name} wants to add you`, "Accept friend request?", () => {
+            print(`Adding friend: ${otherPlayer.Name}`);
             routes.sendFriendRequest.sendTo(otherPlayer, player);
+            routes.sendFriendRequest.sendTo(player, otherPlayer);
         });
     });
 };

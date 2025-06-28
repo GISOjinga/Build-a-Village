@@ -56,6 +56,7 @@ export default (pagePaths: PagePaths) => {
     }, () => {
         routes.confirmPrompt.send(true)
     }))
+    confirmPage.Visible = true;
 
     return trash
 }

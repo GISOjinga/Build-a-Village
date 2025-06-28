@@ -1,9 +1,10 @@
 import { Janitor } from "@rbxts/janitor";
-import { StarterGui } from "@rbxts/services";
+import { StarterGui, Workspace } from "@rbxts/services";
 import { routes } from "shared/data/network";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
+import useEffect from "../hooks/useEffect";
 
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
@@ -32,6 +33,20 @@ export default (pagePaths: PagePaths) => {
     trash.Add(routes.promoResult.listen(({ success, message }) => {
         promoPage.Title.Text = message;
     }));
+
+    // when open pages changes
+    trash.Add(useEffect(() => {
+        Workspace.SetAttribute("PromoCodes", pageStates.openPage() === "Promo" ? true : false);
+    }));
+
+    // when ever promo codes get set and if open pages wasnt promo codes then sets it
+    trash.Add(Workspace.GetAttributeChangedSignal("PromoCodes").Connect(() => {
+        if (Workspace.GetAttribute("PromoCodes") && pageStates.openPage() !== "Promo") {
+            pageStates.openPage("Promo");
+        } else if (!Workspace.GetAttribute("PromoCodes") && pageStates.openPage() === "Promo") {
+            pageStates.openPage("None");
+        }
+    }))
 
     return trash;
 };
