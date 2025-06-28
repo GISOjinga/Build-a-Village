@@ -5,11 +5,11 @@ import { FriendsBonus, Player } from "shared/utils/jecs/jecsComponents";
 import { addComponent, getEntity } from "shared/utils/functions/jecsHelpFunctions";
 
 export default (world: World) => {
-    for (const [_, playerEntity, player] of world.query(FriendsBonus).without(Player)) {
+    for (const [playerEntity, player] of world.query(FriendsBonus).without(Player)) {
         // just placeholder to satisfy query typing
     }
 
-    for (const [_, playerEntity, player] of world.query(Player)) {
+    for (const [playerEntity, player] of world.query(Player)) {
         let hasFriend = false;
         for (const other of Players.GetPlayers()) {
             if (other !== player && player.IsFriendsWith(other.UserId)) {
