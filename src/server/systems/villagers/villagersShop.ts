@@ -168,7 +168,7 @@ export default (world: World) => {
         const shopVillagerIndex = ShopData.Villagers.findIndex((v) => v.ProductId === productId);
 
         // makes sure its from the villagers page
-        if (shopVillagerIndex === -1 || productId === 3308848691 || productId === 3309650571) {
+        if (shopVillagerIndex !== -1 || productId === 3308848691 || productId === 3309650571) {
             // if the purchase was successful and the player exists
             if (wasPurchased && player && playerEntity) {
                 const playerToGiftTo = world.get(playerEntity, GiftTo) as Player

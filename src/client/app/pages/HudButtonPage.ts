@@ -6,6 +6,7 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
+import useEffect from "../hooks/useEffect";
 
 
 
@@ -62,8 +63,21 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // updates your coins
-    trash.Add(effect(() => {
-        pagePaths.Page.Playercash.Text = `$${pageStates.coins()}`;
+    trash.Add(useEffect((newTrash) => {
+        const newPrice = pageStates.coins()
+        const [oldPriceString] = pagePaths.Page.Playercash.Text.gsub("%$", "")
+        let oldPrice = tonumber(oldPriceString) || 0;
+
+        // tweens the price
+        pagePaths.Page.Playercash.SetAttribute("Coins", newPrice);
+        newTrash.Add(task.spawn(() => {
+            while (oldPrice !== newPrice) {
+                const directionToNewPrice = newPrice - oldPrice > 0 ? 1 : -1;
+                oldPrice += math.floor(directionToNewPrice * math.max(1, math.abs(newPrice - oldPrice) / 10));
+                pagePaths.Page.Playercash.Text = `$${oldPrice}`;
+                task.wait(0.01);
+            }
+        }))
     }));
 
     return trash
