@@ -2,7 +2,7 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { MarketplaceService } from "@rbxts/services";
 import useEffect from "../hooks/useEffect";
 import { addCommasEveryThreeDigits, formatToDDHHMMSS } from "shared/utils/functions/stringHelp";
-import robuxStoreData from "shared/data/robuxStoreData";
+import robuxStoreData, { WEEK_LENGTH } from "shared/data/robuxStoreData";
 import { Janitor } from "@rbxts/janitor";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
@@ -88,7 +88,7 @@ export default (pagePaths: PagePaths) => {
 
             effectTrash.Add(task.spawn(() => {
                 while (true) {
-                    const timeLeft = math.max(0, purchaseData.TimeEnds - os.time());
+                    const timeLeft = WEEK_LENGTH - (os.time() % WEEK_LENGTH);
                     frame.CountDown.Text = formatToDDHHMMSS(timeLeft);
                     task.wait(1);
                 }

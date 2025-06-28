@@ -10,8 +10,10 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity, removeComponent, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
 
-function getDailySeed() {
-    return math.floor(os.time() / (60 * 60 * 24));
+const WEEK_LENGTH = 7 * 24 * 60 * 60;
+
+function getWeeklySeed() {
+    return math.floor(os.time() / WEEK_LENGTH);
 }
 
 function chooseVillagers(rng: Random, count: number) {
@@ -38,7 +40,7 @@ function findPurchaseByProduct(productId: number) {
 }
 
 export default (world: World) => {
-    const seed = getDailySeed();
+    const seed = getWeeklySeed();
     if (seed !== currentSeed) {
         currentSeed = seed;
         const starterRng = new Random(seed + 142);
@@ -56,8 +58,6 @@ export default (world: World) => {
             VillagerNames
         ];
         robuxStoreData.StarterPack.Coins = starterRng.NextInteger(1000, 5000);
-        robuxStoreData.StarterPack.TimeEnds = os.time() + 24 * 60 * 60;
-        robuxStoreData.LaunchPack.TimeEnds = os.time() + 7 * 24 * 60 * 60;
         routes.updateRobuxStore.sendToAll(robuxStoreData);
     }
 
