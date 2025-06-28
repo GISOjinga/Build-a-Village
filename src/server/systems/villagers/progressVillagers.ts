@@ -138,6 +138,10 @@ export default (world: World) => {
                         // adds the produce to the data
                         printJecs($line, `${playerWhoTriggered.Name} took ${produceName} with varaint ${variant} from ${playerEntity}`)
                         createEntity.insertProduce(playerEntityWhoTriggered, produceName, variant)
+                        createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
+                            if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) oldData.Tutorial = 3
+                            return oldData
+                        })
                         removeComponent(villagerEntity, MaxedOut);
                     } else { // prompts product purchase to steal the produce
                         printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)

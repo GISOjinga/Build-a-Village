@@ -39,6 +39,7 @@ import generalSounds from "./systems/sounds/generalSounds";
 import resourcePromptTag from "./tags/resourcePromptTag";
 import confirmationPrompt from "./systems/ui/confirmationPrompt";
 import promotions from "./systems/ui/promotions";
+import tutorial from "./systems/tutorial/tutorial";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -123,6 +124,7 @@ const debug = setupMatter([
     { system: shopDataUpdate },
     { system: playerThumbnail },
     { system: updateWallsForSale },
+    { system: tutorial },
     { system: confirmationPrompt },
     { system: promotions }
 ], { // on added && removed
