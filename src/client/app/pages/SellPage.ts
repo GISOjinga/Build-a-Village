@@ -35,7 +35,6 @@ export default (sellPage: DialogueSellUI) => {
 
     // when the route to toggle sell menu is called then
     trash.Add(routes.toggleSellMenuOpen.listen((open: boolean) => {
-        printTS($line, "Toggling sell menu", open)
         pageStates.openPage(open ? "Sell" : "None");
     }))
 

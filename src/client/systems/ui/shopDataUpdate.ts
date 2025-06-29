@@ -39,14 +39,17 @@ export default (world: World) => {
     // this can open and close the shop menus based on distance
     if (body) {
         const openPage = pageStates.openPage();
-        const distanceFromBuyNoob = body.rootPart.Position.sub(paths.Map.Shops.Buy.Noob.HumanoidRootPart.Position).Magnitude;
-        const distanceFromSellNoob = body.rootPart.Position.sub(paths.Map.Shops.Sell.Noob.HumanoidRootPart.Position).Magnitude;
+        const distanceFromBuyNoob = body.rootPart.Position.sub(paths.Map.Shops.King.Npc.HumanoidRootPart.Position).Magnitude;
+        const distanceFromSellNoob = body.rootPart.Position.sub(paths.Map.Shops.Merchant.Npc.HumanoidRootPart.Position).Magnitude;
+        const distanceFromArchitectNoob = body.rootPart.Position.sub(paths.Map.Shops.Architect.Npc.HumanoidRootPart.Position).Magnitude;
         const maxDistance = 20
 
         // makes sure the player is within range of the buy/sell noob
         if (openPage === "Buy" && distanceFromBuyNoob > maxDistance) {
             pageStates.openPage("None");
         } else if (openPage === "Sell" && distanceFromSellNoob > maxDistance) {
+            pageStates.openPage("None");
+        } else if (openPage === "Wall" && distanceFromArchitectNoob > maxDistance) {
             pageStates.openPage("None");
         }
     }

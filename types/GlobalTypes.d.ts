@@ -225,7 +225,7 @@ type ProduceData = {
 }
 
 //* villager model
-type VillagerModel = Assets["Villagers"]["VillagerExample"];
+type VillagerModel = Assets["Villagers"]["Farmer"];
 
 //* tool type
 type ToolType = "Villager" | "Commodity" | "DigTool";
@@ -234,7 +234,7 @@ type ToolType = "Villager" | "Commodity" | "DigTool";
 type ToolInfo = ReturnType<<A extends ToolType>()=> A extends "Villager" ? {ItemName: VillagerNames, ToolType: A} : { ItemName: ItemName, ToolType: A }>
 
 //* villager names
-type VillagerNames = keyof Omit<Omit<Assets["Villagers"], keyof Folder>, "VillagerExample">;
+type VillagerNames = keyof Omit<Assets["Villagers"], keyof Folder>;
 
 //* produce names
 type ProduceNames = keyof Omit<Assets["Tools"]["Produce"], keyof Folder>

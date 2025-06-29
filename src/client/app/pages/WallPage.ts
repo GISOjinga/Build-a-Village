@@ -13,7 +13,8 @@ import paths from "shared/utils/paths";
 
 
 
-
+// mapped to the game pass id to the product info
+const wallsAndGamePassInfo = new Map<number, GamePassProductInfo>();
 
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
@@ -24,113 +25,131 @@ export default (pagePaths: PagePaths) => {
 
     // when ever the walls update
     trash.Add(useEffect((newTrash) => {
-        const wallsShop = pageStates.wallsShop();
+        const _wallsShop = pageStates.wallsShop();
 
-        // starts off by clearing up the wall shop scrolling frame
-        scrollingFrame.GetChildren().forEach((child) => {
-            if (child !== sample && child.IsA("Frame")) child.Destroy();
-        })
+        // if the walls shop is empty then return
+        newTrash.Add(task.spawn(() => {
+            // if the walls shop is not loaded then return
+            _wallsShop.forEach((wall) => { if (wall.GamePassId > 0 && !wallsAndGamePassInfo.has(wall.GamePassId)) { wallsAndGamePassInfo.set(wall.GamePassId, MarketplaceService.GetProductInfo(wall.GamePassId, Enum.InfoType.GamePass)) } })
 
-        // loads in each of the walls
-        wallsShop.forEach((wallInfo, index) => {
-            const wallBox = sample.Clone();
-            const buyButton = wallBox.buy;
-            const equipButton = wallBox.equip;
-            const unequipButton = wallBox.unequip;
-            const robuxButton = wallBox.robux;
+            // if the walls shop is empty then return
+            const wallsShop = _wallsShop.sort((a, b) => { // sorts the walls by price
+                if (a.GamePassId || b.GamePassId) {
+                    const aTotalPrice = (a.GamePassId > 0 ? wallsAndGamePassInfo.get(a.GamePassId)?.PriceInRobux || 0 : -1); // adds 1000 to robux walls
+                    const bTotalPrice = (b.GamePassId > 0 ? wallsAndGamePassInfo.get(b.GamePassId)?.PriceInRobux || 0 : -1);
 
-            // set up
-            sample.Visible = false
-            paths.Assets.UI.WallRenders[wallInfo.Name].Clone().Parent = wallBox.WallViewPort;
-            wallBox.Visible = true;
-            wallBox.Name = wallBox.Name;
-            wallBox.LayoutOrder = index;
-            wallBox.equip.Visible = wallInfo.Owned && !wallInfo.Equipped
-            wallBox.unequip.Visible = wallInfo.Equipped;
-            wallBox.buy.Visible = !wallInfo.Owned;
-            wallBox.Price.Visible = wallInfo.Price > 0;
-            wallBox.RobuxPrice.Visible = wallInfo.GamePassId > 0;
-            wallBox.buy.Visible = wallInfo.Price > 0 && !wallInfo.Owned
-            wallBox.robux.Visible = wallInfo.GamePassId > 0 && !wallInfo.Owned;
-            wallBox.Price.Text = `$${addCommasEveryThreeDigits(wallInfo.Price)}`;
-            wallBox.Multiplier.Text = `X${wallInfo.CashMultiplier} CASH GAIN`
-            wallBox.SampleName.Text = wallInfo.Name;
-            wallBox.Parent = scrollingFrame;
+                    return aTotalPrice < bTotalPrice
+                } else {
+                    const aTotalPrice = a.Price;
+                    const bTotalPrice = b.Price;
 
-            // sets up the pricing for robux walls
-            trash.Add(task.spawn(() => {
-                pcall(() => {
-                    const [passed, passInfo] = pcall(() => MarketplaceService.GetProductInfo(wallInfo.GamePassId, Enum.InfoType.GamePass));
-                    wallBox.RobuxPrice.Visible = passed && (passInfo.PriceInRobux || 0) > 0;
-                    wallBox.RobuxPrice.Text = `${passed ? passInfo.PriceInRobux : 0}`;
-                })
-            }))
+                    return aTotalPrice < bTotalPrice
+                }
+            })
 
-            // binds the focus action
-            if (wallInfo.Owned && !wallInfo.Equipped) { // if the wall is owned but not equipped
 
-                // sets the buttons to be interactable
-                robuxButton.Interactable = false
-                buyButton.Interactable = false;
-                equipButton.Interactable = true;
-                unequipButton.Interactable = false;
+            // starts off by clearing up the wall shop scrolling frame
+            scrollingFrame.GetChildren().forEach((child) => {
+                if (child !== sample && child.IsA("Frame")) child.Destroy();
+            })
 
-                // binds equip
-                newTrash.Add(UIUtilities.ButtonAction({
-                    Button: equipButton,
-                    ExpandedSize: UIUtilities.MultiplyUdim2(equipButton.Size, sizeOffset),
-                    DeExpandedSize: UIUtilities.DivideUdim2(equipButton.Size, sizeOffset),
-                }, () => {
-                    printTS($line, "equipping wall", wallInfo.Name);
-                    routes.equipWall.send({
-                        wallName: wallInfo.Name,
-                        equip: true,
-                    });
-                }))
-            } else if (wallInfo.Equipped && wallInfo.Owned) { // if the wall is equipped so un equip
+            // loads in each of the walls
+            wallsShop.forEach((wallInfo, index) => {
+                const wallBox = sample.Clone();
+                const buyButton = wallBox.buy;
+                const equipButton = wallBox.equip;
+                const unequipButton = wallBox.unequip;
+                const robuxButton = wallBox.robux;
+                const passInfo = wallsAndGamePassInfo.get(wallInfo.GamePassId || 0)
 
-                // sets the buttons to be interactable
-                robuxButton.Interactable = false
-                buyButton.Interactable = false;
-                equipButton.Interactable = false;
-                unequipButton.Interactable = true;
+                // set up
+                sample.Visible = false
+                paths.Assets.UI.WallRenders[wallInfo.Name].Clone().Parent = wallBox.WallViewPort;
+                wallBox.Visible = true;
+                wallBox.Name = wallBox.Name;
+                wallBox.LayoutOrder = index;
+                wallBox.equip.Visible = wallInfo.Owned && !wallInfo.Equipped
+                wallBox.unequip.Visible = wallInfo.Equipped;
+                wallBox.buy.Visible = !wallInfo.Owned;
+                wallBox.Price.Visible = wallInfo.Price > 0;
+                wallBox.RobuxPrice.Visible = wallInfo.GamePassId > 0;
+                wallBox.buy.Visible = wallInfo.Price > 0 && !wallInfo.Owned
+                wallBox.robux.Visible = wallInfo.GamePassId > 0 && !wallInfo.Owned;
+                wallBox.Price.Text = `$${addCommasEveryThreeDigits(wallInfo.Price)}`;
+                wallBox.Multiplier.Text = `X${wallInfo.CashMultiplier} CASH GAIN`
+                wallBox.SampleName.Text = wallInfo.Name;
+                wallBox.Parent = scrollingFrame;
 
-                // binds un unequip
-                newTrash.Add(UIUtilities.ButtonAction({
-                    Button: unequipButton,
-                    ExpandedSize: UIUtilities.MultiplyUdim2(unequipButton.Size, sizeOffset),
-                    DeExpandedSize: UIUtilities.DivideUdim2(unequipButton.Size, sizeOffset),
-                }, () => {
-                    printTS($line, "unequipping wall", wallInfo.Name);
-                    routes.equipWall.send({
-                        wallName: wallInfo.Name,
-                        equip: false,
-                    });
-                }))
-            } else { // if the wall is not owned
-                const realBuyButton = wallInfo.Price > 0 ? buyButton : robuxButton;
+                // sets up the pricing for robux walls
+                wallBox.RobuxPrice.Visible = passInfo ? (passInfo.PriceInRobux || 0) > 0 : false;
+                wallBox.RobuxPrice.Text = `${passInfo ? passInfo.PriceInRobux : 0}`;
 
-                // sets the buttons to be interactable
-                robuxButton.Interactable = false;
-                buyButton.Interactable = false;
-                equipButton.Interactable = false;
-                unequipButton.Interactable = false;
-                realBuyButton.Interactable = true;
+                // binds the focus action
+                if (wallInfo.Owned && !wallInfo.Equipped) { // if the wall is owned but not equipped
 
-                // binds the robux button to prompt the purchase
-                newTrash.Add(UIUtilities.ButtonAction({
-                    Button: realBuyButton,
-                    ExpandedSize: UIUtilities.MultiplyUdim2(realBuyButton.Size, sizeOffset),
-                    DeExpandedSize: UIUtilities.DivideUdim2(realBuyButton.Size, sizeOffset),
-                }, () => {
-                    printTS($line, "buying wall", wallInfo.Name, wallInfo.Price);
-                    routes.buyWall.send({
-                        wallName: wallInfo.Name,
-                        currency: realBuyButton === robuxButton ? "Robux" : "Coins",
-                    })
-                }))
-            }
-        })
+                    // sets the buttons to be interactable
+                    robuxButton.Interactable = false
+                    buyButton.Interactable = false;
+                    equipButton.Interactable = true;
+                    unequipButton.Interactable = false;
+
+                    // binds equip
+                    newTrash.Add(UIUtilities.ButtonAction({
+                        Button: equipButton,
+                        ExpandedSize: UIUtilities.MultiplyUdim2(equipButton.Size, sizeOffset),
+                        DeExpandedSize: UIUtilities.DivideUdim2(equipButton.Size, sizeOffset),
+                    }, () => {
+                        printTS($line, "equipping wall", wallInfo.Name);
+                        routes.equipWall.send({
+                            wallName: wallInfo.Name,
+                            equip: true,
+                        });
+                    }))
+                } else if (wallInfo.Equipped && wallInfo.Owned) { // if the wall is equipped so un equip
+
+                    // sets the buttons to be interactable
+                    robuxButton.Interactable = false
+                    buyButton.Interactable = false;
+                    equipButton.Interactable = false;
+                    unequipButton.Interactable = true;
+
+                    // binds un unequip
+                    newTrash.Add(UIUtilities.ButtonAction({
+                        Button: unequipButton,
+                        ExpandedSize: UIUtilities.MultiplyUdim2(unequipButton.Size, sizeOffset),
+                        DeExpandedSize: UIUtilities.DivideUdim2(unequipButton.Size, sizeOffset),
+                    }, () => {
+                        printTS($line, "unequipping wall", wallInfo.Name);
+                        routes.equipWall.send({
+                            wallName: wallInfo.Name,
+                            equip: false,
+                        });
+                    }))
+                } else { // if the wall is not owned
+                    const realBuyButton = wallInfo.Price > 0 ? buyButton : robuxButton;
+
+                    // sets the buttons to be interactable
+                    robuxButton.Interactable = false;
+                    buyButton.Interactable = false;
+                    equipButton.Interactable = false;
+                    unequipButton.Interactable = false;
+                    realBuyButton.Interactable = true;
+
+                    // binds the robux button to prompt the purchase
+                    newTrash.Add(UIUtilities.ButtonAction({
+                        Button: realBuyButton,
+                        ExpandedSize: UIUtilities.MultiplyUdim2(realBuyButton.Size, sizeOffset),
+                        DeExpandedSize: UIUtilities.DivideUdim2(realBuyButton.Size, sizeOffset),
+                    }, () => {
+                        printTS($line, "buying wall", wallInfo.Name, wallInfo.Price);
+                        routes.buyWall.send({
+                            wallName: wallInfo.Name,
+                            currency: realBuyButton === robuxButton ? "Robux" : "Coins",
+                        })
+                    }))
+                }
+            })
+        }))
     }))
 
     return trash

@@ -39,14 +39,14 @@ export default (pagePaths: PagePaths) => {
         Button: placementPage.RightPress,
         ExpandedSize: UIUtilities.MultiplyUdim2(placementPage.RightPress.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(placementPage.RightPress.Size, sizeOffset),
-    }, () => pageStates.placementOffset((offset) => offset + 1)))
+    }, () => pageStates.placementRotationOffset((offset) => offset + 90)))
 
     // when ever the left press is pressed
     trash.Add(UIUtilities.ButtonAction({
         Button: placementPage.LeftPress,
         ExpandedSize: UIUtilities.MultiplyUdim2(placementPage.LeftPress.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(placementPage.LeftPress.Size, sizeOffset),
-    }, () => pageStates.placementOffset((offset) => offset - 1)))
+    }, () => pageStates.placementRotationOffset((offset) => offset - 90)))
 
     // when the place button is pressed
     trash.Add(UIUtilities.ButtonAction({

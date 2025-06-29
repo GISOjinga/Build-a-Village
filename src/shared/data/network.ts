@@ -225,7 +225,7 @@ const packets = defineNamespace("gameEvents", () => {
 
         // teleport to buy or sell
         teleportToShop: definePacket({
-            value: ByteNet.string as ByteNetType<"Buy" | "Sell">
+            value: ByteNet.string as ByteNetType<"Buy" | "Sell" | "Wall">
         }),
 
         // route to get replicated components

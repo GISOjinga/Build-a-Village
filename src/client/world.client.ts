@@ -31,7 +31,6 @@ import hoverBoxUpdate from "./systems/ui/hoverBoxUpdate";
 import playerDataUpdate from "./systems/ui/playerDataUpdate";
 import shopDataUpdate from "./systems/ui/shopDataUpdate";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
-import playerThumbnail from "./systems/ui/playerThumbnail";
 import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
 import gameMusic from "./systems/sounds/gameMusic";
@@ -55,7 +54,7 @@ GameUI(pagePaths(gameUI))
 
 // sets up dialogue sell
 dialogueSellUI.Parent = playerGui
-dialogueSellUI.Adornee = paths.Map.Shops.WaitForChild("Sell").WaitForChild("TalkBox") as BasePart
+dialogueSellUI.Adornee = paths.Map.Shops.WaitForChild("Merchant").WaitForChild("TalkBox") as BasePart
 DialogueSellUI(dialogueSellUI)
 
 // sets up hover box
@@ -122,7 +121,6 @@ const debug = setupMatter([
     { system: hoverBoxUpdate },
     { system: playerDataUpdate },
     { system: shopDataUpdate },
-    { system: playerThumbnail },
     { system: updateWallsForSale },
     { system: tutorial },
     { system: confirmationPrompt },

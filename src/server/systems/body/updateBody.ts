@@ -143,7 +143,7 @@ export default (world: World) => {
     useRoute(routes.teleportToShop, (shopName, player) => {
         const entity = getEntity.fromInstance(player);
         const body = entity && world.get(entity, Body);
-        const shopSpawn = paths.Map.Shops[shopName].SpawnLocation
+        const shopSpawn = paths.Map.Shops[shopName === "Buy" ? "King" : shopName === "Sell" ? "Merchant" : "Architect"].SpawnLocation
 
         // if platform and body then teleports the players rootpart to the platform spawn
         if (body) body.rootPart.CFrame = shopSpawn.CFrame

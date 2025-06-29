@@ -1,4 +1,5 @@
 import { Entity, pair, World } from "@rbxts/jecs";
+import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { addComponent, ComponentValue, getEntity, printJecs, printTS, removeComponent, warnTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, ModelDebugger, PlatformOccupied, Platform, Player, Removed, TargetEntity, Data } from "shared/utils/jecs/jecsComponents";
@@ -11,6 +12,7 @@ import paths from "shared/utils/paths";
 function setUpSignGuiContainers(platform: PlatformExample, playerName?: string) {
     const buyGui = platform.BuySign.Container.SurfaceGui
     const nameGui = platform.NameSign.Container.SurfaceGui
+    const player = Players.GetPlayers().find((p) => p.Name === playerName)
 
     // set up the buy sign
     buyGui.Price.Visible = playerName ? true : false
@@ -21,6 +23,7 @@ function setUpSignGuiContainers(platform: PlatformExample, playerName?: string) 
     nameGui.Title.Visible = true
     nameGui.PlayerName.Visible = true
     nameGui.PlayerName.Text = playerName ? playerName : "No Ones"
+    if (player) platform.NameSign.Thumbnail.SetAttribute("UserId", player.UserId)
 }
 
 // to claim maps

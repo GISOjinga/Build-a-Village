@@ -59,7 +59,7 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
     }, () => {
-        pageStates.openPage("Wall");
+        routes.teleportToShop.send("Wall")
     }))
 
     // updates your coins

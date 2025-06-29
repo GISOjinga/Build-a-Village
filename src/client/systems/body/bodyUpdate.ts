@@ -15,19 +15,24 @@ const giftingPrompts = new WeakMap<Player, ProximityPrompt>();
 const friendPrompts = new WeakMap<Player, ProximityPrompt>();
 
 export default (world: World) => {
-    const idleAnimation = paths.Assets.Animations.Shop.Idle;
-    const buyNoob = paths.Map.Shops.Buy.Noob
-    const sellNoob = paths.Map.Shops.Sell.Noob
-    const buyIdleTrack = useMemo(() => buyNoob.Humanoid.Animator.LoadAnimation(idleAnimation), [buyNoob]);
-    const sellIdleTrack = useMemo(() => sellNoob.Humanoid.Animator.LoadAnimation(idleAnimation), [sellNoob]);
+    const kingIdle = paths.Assets.Animations.Shop.King;
+    const merchantIdle = paths.Assets.Animations.Shop.Merchant;
+    const architectIdle = paths.Assets.Animations.Shop.Architect
+    const king = paths.Map.Shops.King.Npc
+    const merchant = paths.Map.Shops.Merchant.Npc
+    const architect = paths.Map.Shops.Architect.Npc
+    const kingIdleTrack = useMemo(() => king.Humanoid.Animator.LoadAnimation(kingIdle), [king]);
+    const merchantIdleTrack = useMemo(() => merchant.Humanoid.Animator.LoadAnimation(merchantIdle), [merchant]);
+    const architectIdleTrack = useMemo(() => architect.Humanoid.Animator.LoadAnimation(architectIdle), [architect]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
 
     // makes sure animation is playing
-    if (!buyIdleTrack.IsPlaying || !sellIdleTrack.IsPlaying) {
+    if (!kingIdleTrack.IsPlaying || !merchantIdleTrack.IsPlaying || !architectIdleTrack.IsPlaying) {
         printJecs($line, "Setting up animations for player: ", player.Name);
-        buyIdleTrack.Play();
-        sellIdleTrack.Play();
+        kingIdleTrack.Play();
+        merchantIdleTrack.Play();
+        architectIdleTrack.Play();
     }
 
     // loops through all the gifting prompts watching

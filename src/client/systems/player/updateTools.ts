@@ -27,7 +27,6 @@ let villagerServerEntityToDig: Entity | undefined;
 let goalCFrame: CFrame | undefined;
 let highlight: Highlight | undefined;
 let fakeModel: VillagerModel | undefined;
-let rotatedY = 0
 
 // sets up trash
 trash.LinkToInstance(script, true)
@@ -190,7 +189,7 @@ export default (world: World) => {
         fakeModel = undefined;
         highlight = undefined;
         villagerServerEntityToDig = undefined;
-        pageStates.placementOffset(0);
+        pageStates.placementRotationOffset(0);
         pageStates.placeVillager(false);
         pageStates.digVillager(false);
         pageStates.openPage("None");
@@ -221,7 +220,7 @@ export default (world: World) => {
 
                 // sets up fake model
                 printJecs($line, "Creating fake model for Villager", ItemName);
-                rotatedY = 0;
+                pageStates.placementRotationOffset(0)
                 fakeModel = trash.Add(paths.Assets.Villagers[ItemName].Clone()) as VillagerModel;
                 fakeModel.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart")) descendant.CollisionGroup = "NoCollision"; });
                 fakeModel.Station.Parts.GetDescendants().forEach((descendant) => { if (descendant.IsA("BasePart") && !descendant.IsDescendantOf(fakeModel!.Station.Parts.StationParts) && !descendant.IsDescendantOf(fakeModel!.Station.Parts.ProgressFull) && !descendant.IsDescendantOf(fakeModel!.Station.Parts.Resources)) descendant.Transparency = 1; })
@@ -250,7 +249,7 @@ export default (world: World) => {
     // if r is being held down then increase r by 1
     for (const [input] of useEvent(UserInputService.InputBegan)) {
         if (input.KeyCode === Enum.KeyCode.R && fakeModel) {
-            rotatedY = ((rotatedY + 90) >= 360) ? 0 : rotatedY + 90;
+            pageStates.placementRotationOffset((rotatedY) => ((rotatedY + 90) >= 360) ? 0 : rotatedY + 90)
         }
     }
 
@@ -261,12 +260,11 @@ export default (world: World) => {
         const modelHeight = fakeModel.GetAttribute<number>("Height") || 6
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
-        const offsetDirection = platformFloor.CFrame.RightVector.mul(pageStates.placementOffset() * -1)
         const rootPart = fakeModel.Npc.HumanoidRootPart
 
         if (ToolType === "Villager") {
             const hitResults = Tracer
-                .ray(camera.CFrame.Position.add(offsetDirection), !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 100)
+                .ray(camera.CFrame.Position, !UserInputService.KeyboardEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 100)
                 .useRaycastParams(rayParamsInclude([paths.Map]))
                 .run();
 
@@ -281,7 +279,7 @@ export default (world: World) => {
                 goalPos,
                 platformDirection,
                 Vector3.yAxis
-            ).mul(CFrame.Angles(0, math.rad(rotatedY), 0))
+            ).mul(CFrame.Angles(0, math.rad(pageStates.placementRotationOffset()), 0))
             const finalCFrame = clampCFrameToBounds(testCFrame, fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
             const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
             const modelPivot = fakeModel.GetPivot()

@@ -313,7 +313,7 @@ export default (world: World) => {
                     }
 
                     // prints the sell message
-                    printTS($line, player.Name + " sold all items for", oldData.Coins, "Coins");
+                    printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
 
                     return oldData;
                 });

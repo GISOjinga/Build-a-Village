@@ -1,64 +1,59 @@
 type Assets = Folder & {
 	Villagers: Folder & {
-		Witch: Model & {
+		Woodsman: Model & {
 			Station: Model & {
 				Interaction: Model & {
 					Collect: Part & {
 						ProximityPrompt: ProximityPrompt;
-						Weld: ManualWeld;
+						WeldConstraint: WeldConstraint;
 					};
 				};
-				Particles: Model;
-				Parts: Model & {
-					StationParts: Model;
-					Resources: Model & {
-						["1"]: Model & {
-							["Cube.008"]: MeshPart & {
-								Weld: ManualWeld;
-								Attachment: Attachment & {
-									Glare: ParticleEmitter;
-									Star: ParticleEmitter;
-									Glow: ParticleEmitter;
-								};
-							};
-						};
+				Particles: Model & {
+					Part: Part & {
+						Water: ParticleEmitter;
 					};
-					InProgress: Model & {
+				};
+				Parts: Model & {
+					Resources: Model & {
 						["1"]: Model;
 					};
 					ProgressFull: Model & {
 						["1"]: Model;
 					};
+					StationParts: Model & {
+						PlotOfGrass: Model & {
+							Part3: Part;
+							Part1: Part;
+							Center: Part;
+							Part2: Part;
+							Part4: Part;
+						};
+						Container: Model;
+					};
+					InProgress: Model & {
+						["1"]: Model;
+						["4"]: Model;
+						["3"]: Model;
+						["2"]: Model;
+					};
 				};
 			};
 			Npc: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
-					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					Part: Weld;
 					face: Decal;
 					Mesh: SpecialMesh;
 					FaceCenterAttachment: Attachment;
 				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
+				["Body Colors"]: BodyColors;
 				HumanoidRootPart: Part & {
 					RootJoint: Motor6D;
 				};
@@ -68,43 +63,58 @@ type Assets = Folder & {
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
 				};
-				["Body Colors"]: BodyColors;
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					roblox: Decal;
+					["Right Shoulder"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					LeftCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
+				};
+				Animate: Script & {
+					idle: StringValue & {
+						Animation2: Animation & {
+							Weight: NumberValue;
+						};
+						Animation1: Animation & {
+							Weight: NumberValue;
+						};
+					};
+					climb: StringValue & {
+						ClimbAnim: Animation;
+					};
+					sit: StringValue & {
+						SitAnim: Animation;
+					};
+					run: StringValue & {
+						RunAnim: Animation;
+					};
+					ScaleDampeningPercent: NumberValue;
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
+					};
+					fall: StringValue & {
+						FallAnim: Animation;
+					};
+					jump: StringValue & {
+						JumpAnim: Animation;
+					};
+					walk: StringValue & {
+						WalkAnim: Animation;
+					};
+				};
 			};
 			Accessories: Model & {
-				Orb: Model & {
-					Icosphere: MeshPart & {
-						Weld: ManualWeld;
-						Attachment: Attachment & {
-							Glare: ParticleEmitter;
-							Star: ParticleEmitter;
-							Glow: ParticleEmitter;
-						};
-					};
-				};
-				Hat: Model & {
-					Grid: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.011"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-				};
-				Staff: Model & {
-					["Cube.007"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.008"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.009"]: MeshPart & {
-						Weld: ManualWeld;
-						Attachment: Attachment & {
-							Glare: ParticleEmitter;
-							Star: ParticleEmitter;
-							Glow: ParticleEmitter;
-						};
-					};
-				};
+				Pot: Model;
+				Hat: Model;
 			};
 		};
 		Carpenter: Model & {
@@ -190,26 +200,37 @@ type Assets = Folder & {
 				};
 			};
 		};
-		Scribe: Model & {
+		Witch: Model & {
 			Station: Model & {
 				Interaction: Model & {
 					Collect: Part & {
 						ProximityPrompt: ProximityPrompt;
-						Weld: ManualWeld;
+						WeldConstraint: WeldConstraint;
 					};
 				};
-				Particles: Model;
+				Particles: Model & {
+					Part: Part & {
+						Water: ParticleEmitter;
+					};
+				};
 				Parts: Model & {
-					StationParts: Model;
+					Resources: Model & {
+						["1"]: Model;
+					};
 					ProgressFull: Model & {
 						["1"]: Model;
 					};
-					InProgress: Model & {
-						["1"]: Model;
-						["3"]: Model;
-						["2"]: Model;
+					StationParts: Model & {
+						PlotOfGrass: Model & {
+							Part3: Part;
+							Part1: Part;
+							Center: Part;
+							Part2: Part;
+							Part4: Part;
+						};
+						Container: Model;
 					};
-					Resources: Model & {
+					InProgress: Model & {
 						["1"]: Model;
 						["4"]: Model;
 						["3"]: Model;
@@ -217,38 +238,22 @@ type Assets = Folder & {
 					};
 				};
 			};
-			Accessories: Model & {
-				Glasses: Model;
-				Pen: Model;
-			};
 			Npc: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
-					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					Part: Weld;
 					face: Decal;
 					Mesh: SpecialMesh;
 					FaceCenterAttachment: Attachment;
 				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
+				["Body Colors"]: BodyColors;
 				HumanoidRootPart: Part & {
 					RootJoint: Motor6D;
 				};
@@ -258,7 +263,58 @@ type Assets = Folder & {
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
 				};
-				["Body Colors"]: BodyColors;
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					roblox: Decal;
+					["Right Shoulder"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					LeftCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
+				};
+				Animate: Script & {
+					idle: StringValue & {
+						Animation2: Animation & {
+							Weight: NumberValue;
+						};
+						Animation1: Animation & {
+							Weight: NumberValue;
+						};
+					};
+					climb: StringValue & {
+						ClimbAnim: Animation;
+					};
+					sit: StringValue & {
+						SitAnim: Animation;
+					};
+					run: StringValue & {
+						RunAnim: Animation;
+					};
+					ScaleDampeningPercent: NumberValue;
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
+					};
+					fall: StringValue & {
+						FallAnim: Animation;
+					};
+					jump: StringValue & {
+						JumpAnim: Animation;
+					};
+					walk: StringValue & {
+						WalkAnim: Animation;
+					};
+				};
+			};
+			Accessories: Model & {
+				Pot: Model;
+				Hat: Model;
 			};
 		};
 		Baker: Model & {
@@ -356,34 +412,42 @@ type Assets = Folder & {
 				};
 			};
 		};
-		Alchemist: Model & {
+		Scribe: Model & {
 			Station: Model & {
 				Interaction: Model & {
 					Collect: Part & {
 						ProximityPrompt: ProximityPrompt;
-						Weld: ManualWeld;
+						WeldConstraint: WeldConstraint;
 					};
 				};
 				Particles: Model & {
-					Particles: Part & {
-						Weld: ManualWeld;
-						Bubble: ParticleEmitter;
+					Part: Part & {
+						Water: ParticleEmitter;
 					};
 				};
 				Parts: Model & {
-					InProgress: Model;
 					Resources: Model & {
+						["1"]: Model;
+					};
+					ProgressFull: Model & {
+						["1"]: Model;
+					};
+					StationParts: Model & {
+						PlotOfGrass: Model & {
+							Part3: Part;
+							Part1: Part;
+							Center: Part;
+							Part2: Part;
+							Part4: Part;
+						};
+						Container: Model;
+					};
+					InProgress: Model & {
 						["1"]: Model;
 						["4"]: Model;
 						["3"]: Model;
 						["2"]: Model;
 					};
-					StationParts: Model & {
-						Table: Model;
-						Spoon: Model;
-						Cauldron: Model;
-					};
-					ProgressFull: Model;
 				};
 			};
 			Npc: Model & {
@@ -394,28 +458,14 @@ type Assets = Folder & {
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
-					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					Part: Weld;
 					face: Decal;
 					Mesh: SpecialMesh;
 					FaceCenterAttachment: Attachment;
 				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
+				["Body Colors"]: BodyColors;
 				HumanoidRootPart: Part & {
 					RootJoint: Motor6D;
 				};
@@ -425,104 +475,61 @@ type Assets = Folder & {
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
 				};
-				["Body Colors"]: BodyColors;
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					roblox: Decal;
+					["Right Shoulder"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					LeftCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
+				};
+				Animate: Script & {
+					idle: StringValue & {
+						Animation2: Animation & {
+							Weight: NumberValue;
+						};
+						Animation1: Animation & {
+							Weight: NumberValue;
+						};
+					};
+					climb: StringValue & {
+						ClimbAnim: Animation;
+					};
+					sit: StringValue & {
+						SitAnim: Animation;
+					};
+					run: StringValue & {
+						RunAnim: Animation;
+					};
+					ScaleDampeningPercent: NumberValue;
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
+					};
+					fall: StringValue & {
+						FallAnim: Animation;
+					};
+					jump: StringValue & {
+						JumpAnim: Animation;
+					};
+					walk: StringValue & {
+						WalkAnim: Animation;
+					};
+				};
 			};
 			Accessories: Model & {
-				Spoon: Model & {
-					handle: Part & {
-						Weld: ManualWeld;
-					};
-				};
-				Hat: Model & {
-					handle: Part & {
-						Weld: ManualWeld;
-					};
-					Model: Model;
-				};
+				Pot: Model;
+				Hat: Model;
 			};
 		};
 		Beekeeper: Model & {
-			Station: Model & {
-				Interaction: Model & {
-					Collect: Part & {
-						ProximityPrompt: ProximityPrompt;
-						Weld: ManualWeld;
-					};
-				};
-				Particles: Model & {
-					Particle: Part & {
-						Weld: ManualWeld;
-					};
-				};
-				Parts: Model & {
-					ProgressFull: Model & {
-						["1"]: Model;
-					};
-					Resources: Model & {
-						["1"]: Model;
-						["3"]: Model;
-						["2"]: Model;
-					};
-					InProgress: Model & {
-						["1"]: Model;
-						["3"]: Model;
-						["2"]: Model;
-					};
-					StationParts: Model;
-				};
-			};
-			Accessories: Model & {
-				Smoker: Model & {
-					Particle: Model & {
-						Particle: Part & {
-							Weld: ManualWeld;
-							TBD: ParticleEmitter;
-						};
-					};
-				};
-				Hat: Model;
-			};
-			Npc: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				["Body Colors"]: BodyColors;
-			};
-		};
-		Farmer: Model & {
 			Station: Model & {
 				Interaction: Model & {
 					Collect: Part & {
@@ -712,6 +719,91 @@ type Assets = Folder & {
 				};
 			};
 		};
+		Alchemist: Model & {
+			Station: Model & {
+				Interaction: Model & {
+					Collect: Part & {
+						ProximityPrompt: ProximityPrompt;
+						Weld: ManualWeld;
+					};
+				};
+				Particles: Model & {
+					Particles: Part & {
+						Weld: ManualWeld;
+						Bubble: ParticleEmitter;
+					};
+				};
+				Parts: Model & {
+					InProgress: Model;
+					Resources: Model & {
+						["1"]: Model;
+						["4"]: Model;
+						["3"]: Model;
+						["2"]: Model;
+					};
+					StationParts: Model & {
+						Table: Model;
+						Spoon: Model;
+						Cauldron: Model;
+					};
+					ProgressFull: Model;
+				};
+			};
+			Npc: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Accessories: Model & {
+				Spoon: Model & {
+					handle: Part & {
+						Weld: ManualWeld;
+					};
+				};
+				Hat: Model & {
+					handle: Part & {
+						Weld: ManualWeld;
+					};
+					Model: Model;
+				};
+			};
+		};
 		Gatherer: Model & {
 			Npc: Model & {
 				["Left Leg"]: Part;
@@ -781,7 +873,7 @@ type Assets = Folder & {
 				Hat: Model;
 			};
 		};
-		VillagerExample: Model & {
+		Farmer: Model & {
 			Station: Model & {
 				Interaction: Model & {
 					Collect: Part & {
@@ -792,15 +884,24 @@ type Assets = Folder & {
 				Particles: Model & {
 					Part: Part & {
 						Water: ParticleEmitter;
-						Part: Weld;
 					};
 				};
 				Parts: Model & {
+					Resources: Model & {
+						["1"]: Model;
+					};
 					ProgressFull: Model & {
 						["1"]: Model;
 					};
-					Resources: Model & {
-						["1"]: Model;
+					StationParts: Model & {
+						PlotOfGrass: Model & {
+							Part3: Part;
+							Part1: Part;
+							Center: Part;
+							Part2: Part;
+							Part4: Part;
+						};
+						Container: Model;
 					};
 					InProgress: Model & {
 						["1"]: Model;
@@ -808,56 +909,48 @@ type Assets = Folder & {
 						["3"]: Model;
 						["2"]: Model;
 					};
-					StationParts: Model & {
-						PlotOfGrass: Model & {
-							Part3: Part;
-							Part2: Part;
-							Center: Part;
-							Part1: Part;
-							Part4: Part;
-						};
-						Container: Model;
-					};
 				};
 			};
 			Npc: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
-					Part: Weld;
-					HairAttachment: Attachment;
 					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					Part: Weld;
 					face: Decal;
 					Mesh: SpecialMesh;
 					FaceCenterAttachment: Attachment;
 				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
+				["Body Colors"]: BodyColors;
 				HumanoidRootPart: Part & {
 					RootJoint: Motor6D;
 				};
 				["Right Arm"]: Part & {
 					RightShoulderAttachment: Attachment;
-					Part: Weld;
 				};
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
+				};
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					roblox: Decal;
+					["Right Shoulder"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					LeftCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
 				};
 				Animate: Script & {
 					idle: StringValue & {
@@ -878,20 +971,19 @@ type Assets = Folder & {
 						RunAnim: Animation;
 					};
 					ScaleDampeningPercent: NumberValue;
-					jump: StringValue & {
-						JumpAnim: Animation;
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
 					};
 					fall: StringValue & {
 						FallAnim: Animation;
 					};
-					toolnone: StringValue & {
-						ToolNoneAnim: Animation;
+					jump: StringValue & {
+						JumpAnim: Animation;
 					};
 					walk: StringValue & {
 						WalkAnim: Animation;
 					};
 				};
-				["Body Colors"]: BodyColors;
 			};
 			Accessories: Model & {
 				Pot: Model;
@@ -1362,7 +1454,9 @@ type Assets = Folder & {
 	};
 	Animations: Folder & {
 		Shop: Folder & {
-			Idle: Animation;
+			King: Animation;
+			Merchant: Animation;
+			Architect: Animation;
 		};
 		Villager: Folder & {
 			Woodsman: Folder & {
@@ -1419,7 +1513,7 @@ type Assets = Folder & {
 	Walls: Folder & {
 		["Evil Wall"]: Model;
 		["Castle Wall"]: Model;
-		["Log Wall"]: Model;
+		["Log Palisade"]: Model;
 		["Wooden Fence"]: Model;
 		["Stone Wall"]: Model;
 		["Ironwood Fence"]: Model;
@@ -2312,26 +2406,6 @@ type Assets = Folder & {
 				};
 			};
 		};
-		WallRenders: ScreenGui & {
-			["Evil Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Castle Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Ironwood Fence"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Stone Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Log Wall"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-			["Wooden Fence"]: ViewportFrame & {
-				LocalScript: LocalScript;
-			};
-		};
 		HoverBox: BillboardGui & {
 			LocalScript: LocalScript;
 			Frame: Frame & {
@@ -2425,21 +2499,18 @@ type Assets = Folder & {
 			Viewports: Folder & {
 				mason: ViewportFrame;
 			};
-			PlaceFrame: Frame & {
-				Placetext: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
+			InviteIncentive: Frame & {
+				InviteIncentive: TextLabel & {
+					UIStroke: UIStroke;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					InviteIncentiveSuccess: LocalScript;
 				};
-				LeftPress: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
-				};
-				RightPress: TextButton & {
-					UIStroke2: UIStroke;
-					UIStroke1: UIStroke;
-					bg: ImageLabel;
+			};
+			Introtext: Frame & {
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				text: TextLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
 				};
 			};
 			Playercash: TextLabel & {
@@ -2737,11 +2808,21 @@ type Assets = Folder & {
 				};
 				UIAspectRatioConstraint: UIAspectRatioConstraint;
 			};
-			Introtext: Frame & {
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				text: TextLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
+			PlaceFrame: Frame & {
+				Placetext: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+				};
+				LeftPress: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
+				};
+				RightPress: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
 				};
 			};
 			HUD: Frame & {
@@ -2777,15 +2858,24 @@ type Assets = Folder & {
 				};
 			};
 		};
-		PlayerThumbnail: SurfaceGui & {
-			Frame: Frame & {
-				CanvasGroup: CanvasGroup & {
-					UICorner: UICorner;
-					image: ImageLabel;
+		NpcDialogues: BillboardGui & {
+			Wall: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
 				};
-				bgin: ImageLabel;
-				PlayerThumbnail: LocalScript;
-				bgout: ImageLabel;
+			};
+			Sell: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+			Buy: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
 			};
 		};
 		VillagerRenders: ScreenGui & {
@@ -2916,23 +3006,34 @@ type Assets = Folder & {
 			Attribute: ModuleScript;
 			PackageLink: PackageLink;
 		};
-		NpcDialogues: BillboardGui & {
-			Buy: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
+		WallRenders: ScreenGui & {
+			["Evil Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
-			Sell: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
+			["Castle Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			["Ironwood Fence"]: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			["Stone Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			["Log Wall"]: ViewportFrame & {
+				LocalScript: LocalScript;
+			};
+			["Wooden Fence"]: ViewportFrame & {
+				LocalScript: LocalScript;
 			};
 		};
 	};
 	Tutorial: Folder & {
-		Arrow: Model;
+		ArrowTutorial: Part & {
+			Attachment0: Attachment & {
+				Beam: Beam;
+			};
+			Attachment1: Attachment;
+		};
 	};
 	Particles: Part & {
 		Rainbow: Attachment & {
