@@ -29,13 +29,14 @@ export function rayDistance(unitRay: Ray, point: Vector3): { distanceFromRay: nu
 export const Raycast = {
     Include: {
         Map: rayParamsInclude(map ? [map] : []),
+        Floors: rayParamsInclude(map ? map.Platforms.GetChildren<PlatformExample>().map((child) => child.FindFirstChild("Floor")).filterUndefined() : []),
         Players: rayParamsInclude(players ? [players] : []),
     }
 }
 
-export const Ray = {
-    Include: {
-        Map: rayParamsInclude(map ? [map] : []),
-        Players: rayParamsInclude(players ? [players] : []),
-    }
-}
+// when ever a child gets added into platforms
+map.Platforms.GetChildren<PlatformExample>().forEach((platform) => {
+    platform.ChildAdded.Connect((floor) => {
+        if (floor.Name === "Floor") Raycast.Include.Floors = rayParamsInclude(map ? map.Platforms.GetChildren<PlatformExample>().map((child) => child.FindFirstChild("Floor")).filterUndefined() : [])
+    })
+})

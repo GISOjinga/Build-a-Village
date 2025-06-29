@@ -1,9 +1,11 @@
 import { World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
+import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
-import { useEvent, useMemo } from "shared/Plugin-Hook";
+import { useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
 import { getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { Raycast } from "shared/utils/functions/rayFunctions";
 import { Added, Body, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -33,6 +35,15 @@ export default (world: World) => {
         kingIdleTrack.Play();
         merchantIdleTrack.Play();
         architectIdleTrack.Play();
+    }
+
+    // casts a ray down if body and if standing on a platform floor then increase walkspeed on humanoid to 20 else 16 with tracer
+    if (useThrottle(.1) && body) {
+        const rootCFrame = body.rootPart.CFrame;
+        const results = Tracer.ray(rootCFrame.Position, Vector3.yAxis, -6).useRaycastParams(Raycast.Include.Floors).run()
+
+        // sets the walkspeed
+        body.humanoid.WalkSpeed = results.hit ? 16 : 20;
     }
 
     // loops through all the gifting prompts watching

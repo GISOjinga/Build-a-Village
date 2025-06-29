@@ -1,6 +1,5 @@
 import { randomPointOnPart } from "shared/utils/functions/partFunctions";
 import { Tracer } from "@rbxts/tracer";
-import { Ray } from "shared/utils/functions/rayFunctions";
 import { pair, Wildcard, World } from "@rbxts/jecs";
 import { Workspace } from "@rbxts/services";
 import paths from "../../utils/paths";
