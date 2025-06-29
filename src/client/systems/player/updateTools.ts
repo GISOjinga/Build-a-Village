@@ -99,7 +99,7 @@ export function clampCFrameToBounds(
 
     // Clamp local position so the object stays fully within the bounds
     const clampedX = math.clamp(localPos.X, -boundsHalf.X + objectHalf.X, boundsHalf.X - objectHalf.X);
-    const clampedY = math.clamp(localPos.Y, -boundsHalf.Y + objectHalf.Y, boundsHalf.Y - objectHalf.Y);
+    const clampedY = localPos.Y;
     const clampedZ = math.clamp(localPos.Z, -boundsHalf.Z + objectHalf.Z, boundsHalf.Z - objectHalf.Z);
 
     const clampedLocalPos = new Vector3(clampedX, clampedY, clampedZ);
@@ -258,6 +258,7 @@ export default (world: World) => {
     if (useThrottle(.01) && fakeModel && highlight && platform && platformFloor && equippedTool && registeredTools.has(equippedTool)) {
         const fullModelSize = fakeModel.GetExtentsSize();
         const modelHalfExtents = fullModelSize.mul(0.5);
+        const modelHeight = fakeModel.GetAttribute<number>("Height") || 6
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
         const offsetDirection = platformFloor.CFrame.RightVector.mul(pageStates.placementOffset() * -1)
@@ -277,7 +278,7 @@ export default (world: World) => {
             const worldPos = platformFloor.CFrame.PointToWorldSpace(localHitPos)
             const goalPos = new Vector3(worldPos.X, platformFloor.Position.Y, worldPos.Z);
             const testCFrame = CFrame.lookAlong(
-                goalPos.add(Vector3.yAxis.mul(2.9)),
+                goalPos,
                 platformDirection,
                 Vector3.yAxis
             ).mul(CFrame.Angles(0, math.rad(rotatedY), 0))
@@ -285,11 +286,11 @@ export default (world: World) => {
             const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
             const modelPivot = fakeModel.GetPivot()
             const yPosDiff = realCFrame.Y - rootPart.Position.Y
-            const chosenCFrame = realCFrame.add(Vector3.yAxis.mul(yPosDiff));
+            const chosenCFrame = realCFrame.add(Vector3.yAxis.mul(yPosDiff)).add(Vector3.yAxis.mul(modelHeight))
 
             // move the model
             fakeModel.PivotTo(modelPivot.Lerp(chosenCFrame, .2));
-            goalCFrame = realCFrame
+            goalCFrame = chosenCFrame
             highlightTween(isVillagersOverlapping(platform.Villagers.GetChildren(), fakeModel) ? false : true);
         }
     } else if (equippedTool?.GetAttribute("ItemType") === "DigTool" && platform && villagers && highlight) {
