@@ -49,6 +49,7 @@ export default (pagePaths: PagePaths) => {
     const buyButtonTweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
 
     // sets the buy button size to be invisible
+    pagePaths.VillagersPage.Visible = true;
     exampleBox.Visible = false;
     buyButton.Size = UDim2.fromScale(0, 0);
     buyButton.Visible = true;

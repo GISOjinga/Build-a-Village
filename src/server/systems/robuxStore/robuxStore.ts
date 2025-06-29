@@ -79,6 +79,8 @@ export default (world: World) => {
         if (!player || !playerEntity || !info) continue;
 
         if (wasPurchased) {
+            routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined }, player);
+
             let targetPlayer = player;
             let targetEntity = playerEntity;
             const giftPlayer = world.get(playerEntity, GiftTo) as Player | undefined;
@@ -108,6 +110,7 @@ export default (world: World) => {
                 printTS($line, `${targetPlayer.Name} received pack`, info.purchaseName);
             }
         } else {
+            routes.playSound.sendTo({ sound: paths.SFX.UI.purchasefail, position: undefined }, player);
             removeComponent(playerEntity, GiftTo);
         }
     }

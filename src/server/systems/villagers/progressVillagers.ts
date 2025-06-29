@@ -9,6 +9,7 @@ import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceA
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
+import { routes } from "shared/data/network";
 
 
 
@@ -304,8 +305,10 @@ export default (world: World) => {
                 removeComponent(villagerEntity, MaxedOut);
 
                 // reduces the item by 1 
+                routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined }, player);
             } else if (!wasPurchased && playerEntity) { // makes sure to still remove the gift to
                 removeComponent(playerEntity, TakeFromVillager);
+                routes.playSound.sendTo({ sound: paths.SFX.UI.purchasefail, position: undefined }, player);
             }
         }
     }

@@ -2341,116 +2341,6 @@ type Assets = Folder & {
 				};
 			};
 		};
-		DialogueSell: BillboardGui & {
-			Stuff: LocalScript;
-			Frame: Frame & {
-				Option3: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					bg: ImageLabel;
-					HoverDetect: TextButton;
-				};
-				Option4: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					bg: ImageLabel;
-					HoverDetect: TextButton;
-				};
-				Option2: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					bg: ImageLabel;
-					HoverDetect: TextButton;
-				};
-				Option1: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					bg: ImageLabel;
-					HoverDetect: TextButton;
-				};
-			};
-		};
-		PlayerThumbnail: SurfaceGui & {
-			Frame: Frame & {
-				CanvasGroup: CanvasGroup & {
-					UICorner: UICorner;
-					image: ImageLabel;
-				};
-				bgin: ImageLabel;
-				PlayerThumbnail: LocalScript;
-				bgout: ImageLabel;
-			};
-		};
-		VillagerRenders: ScreenGui & {
-			Woodsman: ViewportFrame & {
-				script: LocalScript;
-			};
-			Merchant: ViewportFrame & {
-				script: LocalScript;
-			};
-			LocalScript: LocalScript;
-			Beekeeper: ViewportFrame & {
-				script: LocalScript;
-			};
-			Alchemist: ViewportFrame & {
-				script: LocalScript;
-			};
-			Tailor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Steward: ViewportFrame & {
-				script: LocalScript;
-			};
-			Miner: ViewportFrame & {
-				script: LocalScript;
-			};
-			Carpenter: ViewportFrame & {
-				script: LocalScript;
-			};
-			Scribe: ViewportFrame & {
-				script: LocalScript;
-			};
-			Witch: ViewportFrame & {
-				script: LocalScript;
-			};
-			Gatherer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Baker: ViewportFrame & {
-				script: LocalScript;
-			};
-			Sculptor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Farmer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Mason: ViewportFrame & {
-				script: LocalScript;
-			};
-			Shepherd: ViewportFrame & {
-				script: LocalScript;
-			};
-			Blacksmith: ViewportFrame & {
-				script: LocalScript;
-			};
-		};
 		GameUI: ScreenGui & {
 			PromoCode: CanvasGroup & {
 				RedeemButton: TextButton & {
@@ -2534,14 +2424,6 @@ type Assets = Folder & {
 			};
 			Viewports: Folder & {
 				mason: ViewportFrame;
-			};
-			InviteIncentive: Frame & {
-				Positioning: LocalScript;
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				InviteIncentive: TextLabel & {
-					InviteIncentiveSuccess: LocalScript;
-					UIStroke: UIStroke;
-				};
 			};
 			PlaceFrame: Frame & {
 				Placetext: TextButton & {
@@ -2826,7 +2708,7 @@ type Assets = Folder & {
 						};
 					};
 					UIPadding: UIPadding;
-					Buy: Frame & {
+					Buy: ImageButton & {
 						Normal: TextButton & {
 							UIStroke2: UIStroke;
 							UIStroke1: UIStroke;
@@ -2892,6 +2774,116 @@ type Assets = Folder & {
 					UIStroke1: UIStroke;
 					bg: ImageLabel;
 					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+			};
+		};
+		PlayerThumbnail: SurfaceGui & {
+			Frame: Frame & {
+				CanvasGroup: CanvasGroup & {
+					UICorner: UICorner;
+					image: ImageLabel;
+				};
+				bgin: ImageLabel;
+				PlayerThumbnail: LocalScript;
+				bgout: ImageLabel;
+			};
+		};
+		VillagerRenders: ScreenGui & {
+			Woodsman: ViewportFrame & {
+				script: LocalScript;
+			};
+			Merchant: ViewportFrame & {
+				script: LocalScript;
+			};
+			LocalScript: LocalScript;
+			Beekeeper: ViewportFrame & {
+				script: LocalScript;
+			};
+			Alchemist: ViewportFrame & {
+				script: LocalScript;
+			};
+			Tailor: ViewportFrame & {
+				script: LocalScript;
+			};
+			Steward: ViewportFrame & {
+				script: LocalScript;
+			};
+			Miner: ViewportFrame & {
+				script: LocalScript;
+			};
+			Carpenter: ViewportFrame & {
+				script: LocalScript;
+			};
+			Scribe: ViewportFrame & {
+				script: LocalScript;
+			};
+			Witch: ViewportFrame & {
+				script: LocalScript;
+			};
+			Gatherer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Baker: ViewportFrame & {
+				script: LocalScript;
+			};
+			Sculptor: ViewportFrame & {
+				script: LocalScript;
+			};
+			Farmer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Mason: ViewportFrame & {
+				script: LocalScript;
+			};
+			Shepherd: ViewportFrame & {
+				script: LocalScript;
+			};
+			Blacksmith: ViewportFrame & {
+				script: LocalScript;
+			};
+		};
+		DialogueSell: BillboardGui & {
+			Stuff: LocalScript;
+			Frame: Frame & {
+				Option3: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
+				};
+				Option4: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
+				};
+				Option2: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
+				};
+				Option1: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
 				};
 			};
 		};
