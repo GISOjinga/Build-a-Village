@@ -7,7 +7,7 @@ import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { rayParamsInclude } from "shared/utils/functions/rayFunctions";
 import { formatToHHMMSS, formatToMMSS } from "shared/utils/functions/stringHelp";
-import { Changed, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { Changed, Data, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
 // variables
@@ -17,7 +17,9 @@ const mouse = player.GetMouse()
 
 export default (world: World) => {
     const camera = Workspace.Camera;
+    const clientEntity = getEntity.fromInstance(player);
     const body = getEntity.bodyFromPlayer(player);
+    const playerData = clientEntity && world.get(clientEntity, Data);
     const platform = body && body.platform;
     const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
     const hoverAttachment = world.get(HoverBoxAttachment, HoverBoxAttachment)!
@@ -31,7 +33,7 @@ export default (world: World) => {
     const progressionInfo = villagerInfo && villagerInfo.villagerData.Progress
     const produce = progressionInfo && progressionInfo.Produce;
     const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
-    const requiredProduceTime = progressionInfo && progressionInfo.Progression.Time.RequiredTimePerResource;
+    const requiredProduceTime = progressionInfo && ((playerData?.Tutorial === 2 && villagerInfo.villagerData.Name === "Farmer") ? 5 : progressionInfo.Progression.Time.RequiredTimePerResource);
     const totalRequireResources = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Amount) || 0
     const requiredProduceName = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Produce) || "";
     const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
@@ -49,7 +51,12 @@ export default (world: World) => {
     // when the mouse hovers over a villager and sets the time till built
     // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
     // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
-    if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
+    if (villagerEntity && totalProduce === maxProduce) {
+        pageStates.hoverInfo({
+            visible: true,
+            info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
+        });
+    } else if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
         pageStates.hoverInfo({
             visible: true,
             info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
@@ -64,11 +71,6 @@ export default (world: World) => {
             visible: true,
             info: `(${totalProduce}/${maxProduce}) ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
         })
-    } else if (villagerEntity && totalProduce === maxProduce) {
-        pageStates.hoverInfo({
-            visible: true,
-            info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
-        });
     } else if (!villagerEntity) {
         pageStates.hoverInfo({
             visible: false,

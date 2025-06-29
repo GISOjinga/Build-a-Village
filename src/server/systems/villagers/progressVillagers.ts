@@ -5,7 +5,7 @@ import { useEvent, useThrottle } from "shared/Plugin-Hook";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, Data, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -316,11 +316,13 @@ export default (world: World) => {
     // takes the villager through its transitions
     if (useThrottle(.1)) {
         for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).without(MaxedOut)) {
+            const playerData = world.get(villagerComp.playerEntity, Data);
             const { villagerData, villagerModel } = villagerComp;
             const requiredResource = villagerData.Progress.Required
             const buildingTimes = villagerData.Progress.Building
             const timeTillFullyBuilt = buildingTimes.EndTime - os.time();
             const resources = villagerData.Progress.Progression.Resources
+            const progression = villagerData.Progress.Progression
             const totalResourcesSoFar = resources.Gold + resources.Normal + resources.Rainbow;
             const requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
             const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
@@ -334,13 +336,13 @@ export default (world: World) => {
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
-                const progression = villagerData.Progress.Progression
                 const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
                 const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
                 const hasMaxedResources = totalResourcesSoFar >= maxResources;
                 const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
-                const inProgressPercentile = totalTimeSinceLastResource / progression.Time.RequiredTimePerResource
-                const hasMetRequiredTime = totalTimeSinceLastResource >= progression.Time.RequiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
+                const requiredTimePerResource = (playerData?.Tutorial === 2 && villagerData.Name === "Farmer") ? 5 : progression.Time.RequiredTimePerResource
+                const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
+                const hasMetRequiredTime = totalTimeSinceLastResource >= requiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
                 const currentInProgressPhase = math.max(1, maxInProgressPhases * inProgressPercentile);
 
 
@@ -402,10 +404,12 @@ export default (world: World) => {
                         progression.Time.StartTime = os.time(); // resets the start time
                     }
                 }
-
-                // updates the component
-                addComponent(villagerEntity, Villager, villagerComp);
+            } else {
+                progression.Time.StartTime = os.time(); // resets the start time
             }
+
+            // updates the component
+            addComponent(villagerEntity, Villager, villagerComp);
         }
     }
 
