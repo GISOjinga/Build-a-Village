@@ -1,10 +1,12 @@
 import { Janitor } from "@rbxts/janitor";
 import { World } from "@rbxts/jecs";
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Tracer } from "@rbxts/tracer";
 import { PlayerData } from "shared/data/defaultData";
 import { useMemo } from "shared/Plugin-Hook";
 import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { Raycast } from "shared/utils/functions/rayFunctions";
 import { Body, Data, ActiveVillagers, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -55,7 +57,8 @@ export default function tutorial(world: World) {
     if (target) {
         const targetCFrame = target.GetPivot()
         const lookAt = new Vector3(targetCFrame.Position.X, arrow.GetPivot().Y, targetCFrame.Position.Z);
-        arrow.PivotTo(arrow.GetPivot().Lerp(CFrame.lookAt(body.rootPart.Position.add(body.rootPart.CFrame.UpVector.mul(-3)), lookAt), .2))
+        const goalPosition = Tracer.sphere(.5, body.rootPart.Position, body.rootPart.CFrame.UpVector, -3).useRaycastParams(Raycast.Include.Map).run().position
+        arrow.PivotTo(arrow.GetPivot().Lerp(CFrame.lookAt(goalPosition, lookAt), .2))
         arrow.Parent = Workspace
     } else {
         arrow.Parent = ReplicatedStorage
