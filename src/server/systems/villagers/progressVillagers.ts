@@ -358,8 +358,9 @@ export default (world: World) => {
                     }
                 }
 
-                // if has maxed resources then     
+                // if has maxed resources then
                 if (hasMaxedResources) {
+
                     // hides in progress
                     villagerModel.Station.Parts.InProgress.GetDescendants().forEach((child) => toggleTransparency(child, false));
 
@@ -425,6 +426,18 @@ export default (world: World) => {
         // removes its self
         addComponent(villagerEntity, Villager, villagerComp);
         removeComponent(villagerEntity, ProduceAll);
+    }
+
+    // for the villagers with maxed out sets their progression start time to os.time
+    for (const [villagerEntity, villagerComp] of world.query(Villager, MaxedOut)) {
+        const { villagerData } = villagerComp;
+        const progression = villagerData.Progress.Progression;
+
+        // sets the start time to os.time
+        progression.Time.StartTime = os.time();
+
+        // updates the villager component
+        addComponent(villagerEntity, Villager, villagerComp);
     }
 
     // when ever player has produce all
