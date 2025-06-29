@@ -1426,20 +1426,57 @@ type Assets = Folder & {
 	};
 	villagerviewports: Folder & {
 		Produce: Folder & {
-			Wheat: Model;
-			Log: Model;
-			Coin: Model;
-			["Iron Bar"]: Model;
-			Statue: Model;
-			Basket: Model;
-			Chest: Model;
-			Sword: Model;
-			Bricks: Model;
-			Wool: Model;
-			Planks: Model;
-			Bread: Model;
-			Potion: Model;
-			Clothing: Model;
+			Wheat: Tool & {
+				Handle: Part;
+			};
+			Log: Tool & {
+				Handle: Part;
+			};
+			Honeycomb: Tool & {
+				Handle: Part;
+			};
+			Clothing: Tool & {
+				Handle: Part;
+			};
+			Sword: Tool & {
+				Handle: Part;
+			};
+			Statue: Tool & {
+				Handle: Part;
+			};
+			Basket: Tool & {
+				Handle: Part;
+			};
+			Planks: Tool & {
+				Handle: Part;
+			};
+			["Iron Bar"]: Tool & {
+				Handle: Part;
+			};
+			Bricks: Tool & {
+				Handle: Part;
+			};
+			Wool: Tool & {
+				Handle: Part;
+			};
+			Crystal: Tool & {
+				Handle: MeshPart & {
+					Attachment: Attachment & {
+						Glare: ParticleEmitter;
+						Star: ParticleEmitter;
+						Glow: ParticleEmitter;
+					};
+				};
+			};
+			Bread: Tool & {
+				Handle: Part;
+			};
+			Book: Tool & {
+				Handle: Part;
+			};
+			Potion: Tool & {
+				Handle: Part;
+			};
 		};
 		Villager: Folder & {
 			Woodsman: Model & {
@@ -1521,45 +1558,6 @@ type Assets = Folder & {
 				Model: Model;
 				["Body Colors"]: BodyColors;
 			};
-			Carpenter: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				["Body Colors"]: BodyColors;
-			};
 			Baker: Model & {
 				["Left Leg"]: Part;
 				Humanoid: Humanoid;
@@ -1600,6 +1598,101 @@ type Assets = Folder & {
 				Model: Model;
 				["Body Colors"]: BodyColors;
 			};
+			Beekeeper: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Accessories: Model & {
+					Smoker: Model & {
+						Particle: Model & {
+							Particle: Part & {
+								Weld: ManualWeld;
+								TBD: ParticleEmitter;
+							};
+						};
+					};
+					Hat: Model;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Alchemist: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Model: Model & {
+					handle: Part & {
+						Weld: ManualWeld;
+					};
+					Model: Model;
+				};
+				["Body Colors"]: BodyColors;
+			};
 			Tailor: Model & {
 				["Left Leg"]: Part;
 				Humanoid: Humanoid;
@@ -1638,6 +1731,367 @@ type Assets = Folder & {
 					LeftShoulderAttachment: Attachment;
 				};
 				Model: Model;
+				["Body Colors"]: BodyColors;
+			};
+			Blacksmith: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Accessories: Model & {
+					Googles: Model & {
+						Center: Part & {
+							Head: Weld;
+						};
+					};
+					Malet: Model & {
+						Part: Part;
+						Center: Part & {
+							Part: Weld;
+							["Right Arm"]: Weld;
+						};
+					};
+				};
+				Animate: Script & {
+					idle: StringValue & {
+						Animation2: Animation & {
+							Weight: NumberValue;
+						};
+						Animation1: Animation & {
+							Weight: NumberValue;
+						};
+					};
+					climb: StringValue & {
+						ClimbAnim: Animation;
+					};
+					sit: StringValue & {
+						SitAnim: Animation;
+					};
+					run: StringValue & {
+						RunAnim: Animation;
+					};
+					ScaleDampeningPercent: NumberValue;
+					jump: StringValue & {
+						JumpAnim: Animation;
+					};
+					fall: StringValue & {
+						FallAnim: Animation;
+					};
+					toolnone: StringValue & {
+						ToolNoneAnim: Animation;
+					};
+					walk: StringValue & {
+						WalkAnim: Animation;
+					};
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Miner: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Model: Model;
+				["Body Colors"]: BodyColors;
+			};
+			Carpenter: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Scribe: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Accessories: Model & {
+					Glasses: Model;
+					Pen: Model;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Gatherer: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Model: Model;
+				["Body Colors"]: BodyColors;
+			};
+			Witch: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				Accessories: Model & {
+					Orb: Model & {
+						Icosphere: MeshPart & {
+							Weld: ManualWeld;
+							Attachment: Attachment & {
+								Glare: ParticleEmitter;
+								Star: ParticleEmitter;
+								Glow: ParticleEmitter;
+							};
+						};
+					};
+					Hat: Model & {
+						Grid: MeshPart & {
+							Weld: ManualWeld;
+						};
+						["Cube.011"]: MeshPart & {
+							Weld: ManualWeld;
+						};
+					};
+					Staff: Model & {
+						["Cube.007"]: MeshPart & {
+							Weld: ManualWeld;
+						};
+						["Cube.008"]: MeshPart & {
+							Weld: ManualWeld;
+						};
+						["Cube.009"]: MeshPart & {
+							Weld: ManualWeld;
+							Attachment: Attachment & {
+								Glare: ParticleEmitter;
+								Star: ParticleEmitter;
+								Glow: ParticleEmitter;
+							};
+						};
+					};
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Sculptor: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
 				["Body Colors"]: BodyColors;
 			};
 			Steward: Model & {
@@ -1716,46 +2170,6 @@ type Assets = Folder & {
 				["Left Arm"]: Part & {
 					LeftShoulderAttachment: Attachment;
 				};
-				["Body Colors"]: BodyColors;
-			};
-			Gatherer: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				Model: Model;
 				["Body Colors"]: BodyColors;
 			};
 			Shepherd: Model & {
@@ -1878,227 +2292,24 @@ type Assets = Folder & {
 				};
 				["Body Colors"]: BodyColors;
 			};
-			Blacksmith: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				Accessories: Model & {
-					Googles: Model & {
-						Center: Part & {
-							Head: Weld;
-						};
-					};
-					Malet: Model & {
-						Part: Part;
-						Center: Part & {
-							Part: Weld;
-							["Right Arm"]: Weld;
-						};
-					};
-				};
-				Animate: Script & {
-					idle: StringValue & {
-						Animation2: Animation & {
-							Weight: NumberValue;
-						};
-						Animation1: Animation & {
-							Weight: NumberValue;
-						};
-					};
-					climb: StringValue & {
-						ClimbAnim: Animation;
-					};
-					sit: StringValue & {
-						SitAnim: Animation;
-					};
-					run: StringValue & {
-						RunAnim: Animation;
-					};
-					ScaleDampeningPercent: NumberValue;
-					jump: StringValue & {
-						JumpAnim: Animation;
-					};
-					fall: StringValue & {
-						FallAnim: Animation;
-					};
-					toolnone: StringValue & {
-						ToolNoneAnim: Animation;
-					};
-					walk: StringValue & {
-						WalkAnim: Animation;
-					};
-				};
-				["Body Colors"]: BodyColors;
-			};
-			Sculptor: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				["Body Colors"]: BodyColors;
-			};
-			Miner: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				Model: Model;
-				["Body Colors"]: BodyColors;
-			};
-			Alchemist: Model & {
-				["Left Leg"]: Part;
-				Humanoid: Humanoid;
-				["Right Leg"]: Part;
-				Head: Part & {
-					HatAttachment: Attachment;
-					HairAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					["Left Shoulder"]: Motor6D;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					["Right Hip"]: Motor6D;
-					WaistBackAttachment: Attachment;
-					roblox: Decal;
-					LeftCollarAttachment: Attachment;
-					NeckAttachment: Attachment;
-					RightCollarAttachment: Attachment;
-					BodyFrontAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					WaistFrontAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					RootJoint: Motor6D;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftShoulderAttachment: Attachment;
-				};
-				Model: Model & {
-					handle: Part & {
-						Weld: ManualWeld;
-					};
-					Model: Model;
-				};
-				["Body Colors"]: BodyColors;
-			};
 		};
 	};
 	UI: Folder & {
-		PlayerThumbnail: SurfaceGui & {
+		ProduceInfo: BillboardGui & {
 			Frame: Frame & {
-				CanvasGroup: CanvasGroup & {
-					UICorner: UICorner;
-					image: ImageLabel;
+				UIListLayout: UIListLayout;
+				Rarity: TextLabel & {
+					Rainbow: UIGradient;
+					Stroke: UIStroke;
+					Normal: UIGradient;
+					Gold: UIGradient;
 				};
-				bgin: ImageLabel;
-				PlayerThumbnail: LocalScript;
-				bgout: ImageLabel;
+				ProduceName: TextLabel & {
+					Rainbow: UIGradient;
+					Stroke: UIStroke;
+					Normal: UIGradient;
+					Gold: UIGradient;
+				};
 			};
 		};
 		WallRenders: ScreenGui & {
@@ -2130,51 +2341,61 @@ type Assets = Folder & {
 				};
 			};
 		};
-		ProduceInfo: BillboardGui & {
+		DialogueSell: BillboardGui & {
+			Stuff: LocalScript;
 			Frame: Frame & {
-				UIListLayout: UIListLayout;
-				Rarity: TextLabel & {
-					Rainbow: UIGradient;
-					Stroke: UIStroke;
-					Normal: UIGradient;
-					Gold: UIGradient;
+				Option3: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
 				};
-				ProduceName: TextLabel & {
-					Rainbow: UIGradient;
-					Stroke: UIStroke;
-					Normal: UIGradient;
-					Gold: UIGradient;
+				Option4: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
+				};
+				Option2: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
+				};
+				Option1: Frame & {
+					number: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					text: TextLabel & {
+						UIStroke: UIStroke;
+					};
+					bg: ImageLabel;
+					HoverDetect: TextButton;
 				};
 			};
 		};
-		Icon: ModuleScript & {
-			Packages: Folder & {
-				Janitor: ModuleScript;
-				GoodSignal: ModuleScript;
-			};
-			Utility: ModuleScript;
-			Elements: Folder & {
-				Notice: ModuleScript;
-				Dropdown: ModuleScript;
-				Menu: ModuleScript;
-				Selection: ModuleScript;
-				Caption: ModuleScript;
-				Indicator: ModuleScript;
-				Widget: ModuleScript;
-				Container: ModuleScript;
-			};
-			Features: Folder & {
-				Gamepad: ModuleScript;
-				Themes: ModuleScript & {
-					Classic: ModuleScript;
-					Default: ModuleScript;
+		PlayerThumbnail: SurfaceGui & {
+			Frame: Frame & {
+				CanvasGroup: CanvasGroup & {
+					UICorner: UICorner;
+					image: ImageLabel;
 				};
-				Overflow: ModuleScript;
+				bgin: ImageLabel;
+				PlayerThumbnail: LocalScript;
+				bgout: ImageLabel;
 			};
-			VERSION: ModuleScript;
-			Reference: ModuleScript;
-			Attribute: ModuleScript;
-			PackageLink: PackageLink;
 		};
 		VillagerRenders: ScreenGui & {
 			Woodsman: ViewportFrame & {
@@ -2183,115 +2404,74 @@ type Assets = Folder & {
 			Merchant: ViewportFrame & {
 				script: LocalScript;
 			};
-			Carpenter: ViewportFrame & {
-				script: LocalScript;
-			};
-			Baker: ViewportFrame & {
-				script: LocalScript;
-			};
-			Farmer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Miner: ViewportFrame & {
-				script: LocalScript;
-			};
 			LocalScript: LocalScript;
-			Mason: ViewportFrame & {
-				script: LocalScript;
-			};
-			Gatherer: ViewportFrame & {
-				script: LocalScript;
-			};
-			Tailor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Sculptor: ViewportFrame & {
-				script: LocalScript;
-			};
-			Blacksmith: ViewportFrame & {
-				script: LocalScript;
-			};
-			Steward: ViewportFrame & {
-				script: LocalScript;
-			};
-			Shepherd: ViewportFrame & {
+			Beekeeper: ViewportFrame & {
 				script: LocalScript;
 			};
 			Alchemist: ViewportFrame & {
 				script: LocalScript;
 			};
-		};
-		NpcDialogues: BillboardGui & {
-			Buy: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
+			Tailor: ViewportFrame & {
+				script: LocalScript;
 			};
-			Sell: Frame & {
-				UIGradient: UIGradient;
-				TextLabel: TextLabel & {
-					UIStroke: UIStroke;
-				};
+			Steward: ViewportFrame & {
+				script: LocalScript;
+			};
+			Miner: ViewportFrame & {
+				script: LocalScript;
+			};
+			Carpenter: ViewportFrame & {
+				script: LocalScript;
+			};
+			Scribe: ViewportFrame & {
+				script: LocalScript;
+			};
+			Witch: ViewportFrame & {
+				script: LocalScript;
+			};
+			Gatherer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Baker: ViewportFrame & {
+				script: LocalScript;
+			};
+			Sculptor: ViewportFrame & {
+				script: LocalScript;
+			};
+			Farmer: ViewportFrame & {
+				script: LocalScript;
+			};
+			Mason: ViewportFrame & {
+				script: LocalScript;
+			};
+			Shepherd: ViewportFrame & {
+				script: LocalScript;
+			};
+			Blacksmith: ViewportFrame & {
+				script: LocalScript;
 			};
 		};
 		GameUI: ScreenGui & {
 			PromoCode: CanvasGroup & {
-				Title: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Close: TextButton & {
-					UICorner: UICorner;
-				};
-				UICorner: UICorner;
-				UIStroke: UIStroke;
 				RedeemButton: TextButton & {
-					UICorner: UICorner;
-				};
-				TextBox: TextBox & {
-					UICorner: UICorner;
-				};
-			};
-			InviteIncentive: TextLabel & {
-				InviteIncentiveSuccess: LocalScript;
-				UIStroke: UIStroke;
-			};
-			GiftList: CanvasGroup & {
-				Header: TextLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					bg: ImageLabel;
 				};
 				Close: TextButton & {
 					UIStroke2: UIStroke;
 					UIStroke1: UIStroke;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
 				};
+				TextBox: TextBox;
 				["bg header"]: ImageLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					UIStroke: UIStroke;
 				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				ScrollingFrame: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					UIPadding: UIPadding;
-					Sample: ImageButton & {
-						UIStroke: UIStroke;
-						UIAspectRatioConstraint: UIAspectRatioConstraint;
-						SampleName: TextLabel & {
-							TextLabel: TextLabel & {
-								UIAspectRatioConstraint: UIAspectRatioConstraint;
-								UIStroke: UIStroke;
-							};
-							UIAspectRatioConstraint: UIAspectRatioConstraint;
-						};
-					};
-				};
 				bg: ImageLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
 				};
-			};
-			Viewports: Folder & {
-				mason: ViewportFrame;
+				Title: TextLabel & {
+					UIStroke: UIStroke;
+				};
 			};
 			ConfirmationPrompt: Frame & {
 				message: TextLabel & {
@@ -2320,14 +2500,46 @@ type Assets = Folder & {
 				UIStroke: UIStroke;
 				bg: ImageLabel;
 			};
-			Playercash: TextLabel & {
-				subtract: TextLabel & {
+			GiftList: CanvasGroup & {
+				Header: TextLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					UIStroke: UIStroke;
 				};
-				logics: LocalScript;
-				UIStroke: UIStroke;
+				Close: TextButton & {
+					UIStroke2: UIStroke;
+					UIStroke1: UIStroke;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+				["bg header"]: ImageLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStroke: UIStroke;
+				};
 				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				add: TextLabel & {
+				ScrollingFrame: ScrollingFrame & {
+					UIListLayout: UIListLayout;
+					UIPadding: UIPadding;
+					Sample: ImageButton & {
+						UIStroke: UIStroke;
+						UIAspectRatioConstraint: UIAspectRatioConstraint;
+						SampleName: TextLabel & {
+							UIStroke: UIStroke;
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+							UIPadding: UIPadding;
+						};
+					};
+				};
+				bg: ImageLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+			};
+			Viewports: Folder & {
+				mason: ViewportFrame;
+			};
+			InviteIncentive: Frame & {
+				Positioning: LocalScript;
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				InviteIncentive: TextLabel & {
+					InviteIncentiveSuccess: LocalScript;
 					UIStroke: UIStroke;
 				};
 			};
@@ -2346,6 +2558,17 @@ type Assets = Folder & {
 					UIStroke2: UIStroke;
 					UIStroke1: UIStroke;
 					bg: ImageLabel;
+				};
+			};
+			Playercash: TextLabel & {
+				subtract: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				logics: LocalScript;
+				UIStroke: UIStroke;
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				add: TextLabel & {
+					UIStroke: UIStroke;
 				};
 			};
 			RobuxStore: Frame & {
@@ -2458,6 +2681,7 @@ type Assets = Folder & {
 						LimitedTime: TextLabel & {
 							UIStroke: UIStroke;
 						};
+						LocalScript: LocalScript;
 						items: Frame & {
 							s3: ViewportFrame & {
 								UIStroke: UIStroke;
@@ -2485,8 +2709,12 @@ type Assets = Folder & {
 						CountDown: TextLabel & {
 							UIStroke: UIStroke;
 						};
-						UIStroke: UIStroke;
-						bg: ImageLabel;
+						UIStroke: UIStroke & {
+							UIGradient: UIGradient;
+						};
+						bg: ImageLabel & {
+							UIGradient: UIGradient;
+						};
 						["new"]: TextLabel & {
 							UIStroke: UIStroke;
 						};
@@ -2598,7 +2826,7 @@ type Assets = Folder & {
 						};
 					};
 					UIPadding: UIPadding;
-					Buy: ImageButton & {
+					Buy: Frame & {
 						Normal: TextButton & {
 							UIStroke2: UIStroke;
 							UIStroke1: UIStroke;
@@ -2667,48 +2895,46 @@ type Assets = Folder & {
 				};
 			};
 		};
-		DialogueSell: BillboardGui & {
-			Stuff: LocalScript;
-			Frame: Frame & {
-				Option3: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
+		Icon: ModuleScript & {
+			Packages: Folder & {
+				Janitor: ModuleScript;
+				GoodSignal: ModuleScript;
+			};
+			Utility: ModuleScript;
+			Elements: Folder & {
+				Notice: ModuleScript;
+				Dropdown: ModuleScript;
+				Menu: ModuleScript;
+				Selection: ModuleScript;
+				Caption: ModuleScript;
+				Indicator: ModuleScript;
+				Widget: ModuleScript;
+				Container: ModuleScript;
+			};
+			Features: Folder & {
+				Gamepad: ModuleScript;
+				Themes: ModuleScript & {
+					Classic: ModuleScript;
+					Default: ModuleScript;
 				};
-				Option4: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
+				Overflow: ModuleScript;
+			};
+			VERSION: ModuleScript;
+			Reference: ModuleScript;
+			Attribute: ModuleScript;
+			PackageLink: PackageLink;
+		};
+		NpcDialogues: BillboardGui & {
+			Buy: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
 				};
-				Option2: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
-				};
-				Option1: Frame & {
-					number: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					text: TextLabel & {
-						UIStroke: UIStroke;
-					};
-					UIGradient: UIGradient;
-					HoverDetect: TextButton;
+			};
+			Sell: Frame & {
+				UIGradient: UIGradient;
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
 				};
 			};
 		};

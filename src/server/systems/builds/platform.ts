@@ -1,6 +1,6 @@
 import { Entity, pair, World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
-import { addComponent, ComponentValue, getEntity, printTS, removeComponent, warnTS } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, ComponentValue, getEntity, printJecs, printTS, removeComponent, warnTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, ModelDebugger, PlatformOccupied, Platform, Player, Removed, TargetEntity, Data } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -37,16 +37,30 @@ function claimPlatform(platformEntity: Entity, playerEntity: Entity, body: Compo
 
 export default (world: World) => {
     const platformContainer = paths.Map.Platforms
-
     // when player is removed from the world then remove the platform from the player
     for (const [_, playerEntity] of world.query(TargetEntity, Removed(Player))) {
         const platformEntity = world.get(playerEntity, pair(TargetEntity, Platform))
 
         // if platform entity exists then the occupied and tags
         if (platformEntity !== undefined) {
+            printJecs($line, "Removing platform from player: ", playerEntity, "Platform Entity: ", platformEntity)
             removeComponent(platformEntity, PlatformOccupied)
             removeComponent(platformEntity, pair(TargetEntity, Player))
             removeComponent(playerEntity, pair(TargetEntity, Platform))
+        }
+
+        // removes the player from the platform
+        for (const [platformEntity, platform, playerEntityOccupying] of world.query(Platform, PlatformOccupied)) {
+            if (playerEntityOccupying === playerEntity) {
+                printJecs($line, "Removing player from platform: ", platformEntity, "Player Entity: ", playerEntity, "Platform: ", platform)
+                removeComponent(platformEntity, PlatformOccupied)
+                removeComponent(platformEntity, pair(TargetEntity, Player))
+                removeComponent(playerEntity, pair(TargetEntity, Platform))
+
+                // hides the fences
+                setUpSignGuiContainers(platform)
+                break
+            }
         }
     }
 
@@ -76,12 +90,26 @@ export default (world: World) => {
                 const [platformEntity, platform] = platformsSorted[0]
 
                 // claims the platform and sets it up
+                printJecs($line, "Claiming platform for player: ", player.Name, "Platform: ", platformEntity, platform)
                 claimPlatform(platformEntity, playerEntity, body, platform)
                 setUpSignGuiContainers(platform, player.Name)
                 addComponent(playerEntity, Body, { ...body, platform: platform })
             } else {
                 warnTS($line, "No platforms available for player: " + player.Name)
             }
+        }
+    }
+
+    // if body gets added and you have a platform then pivots you to the platform
+    for (const [_, bodyEntity, body] of world.query(TargetEntity, Added(Body))) {
+        const platformEntity = world.get(bodyEntity, pair(TargetEntity, Platform))
+
+        // if platform entity exists then the occupied and tags
+        if (platformEntity !== undefined) {
+            const platform = world.get(platformEntity, Platform)
+
+            // if platform exists then pivots the character to the platform
+            if (platform) body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
         }
     }
 

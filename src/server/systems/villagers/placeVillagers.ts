@@ -78,6 +78,16 @@ export default (world: World) => {
     // if player doesnt have ActiveVillagers then gives them one
     for (const [entity] of world.query(Player).without(ActiveVillagers)) addComponent(entity, ActiveVillagers, []);
 
+
+    // when active villagers get removed then goes through all the villagers and deletes them
+    for (const [_, activeVillagers] of world.query(Removed(ActiveVillagers))) {
+        printJecs($line, "Removing Active Villagers: ", activeVillagers);
+        // removes all the villagers from the platform
+        activeVillagers.forEach((villager) => {
+            if (villager.entity && world.contains(villager.entity)) world.delete(villager.entity)
+        });
+    }
+
     // for all active vilalgers of the player with data makes sure they are spawned in
     for (const [playerEntity, body, data, activeVillagers] of world.query(Body, Data, ActiveVillagers)) {
         if (!body.platform) continue

@@ -5,7 +5,7 @@ import useEffect from "../hooks/useEffect";
 
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
-    const label = pagePaths.Page.InviteIncentive;
+    const label = pagePaths.Page.InviteIncentive.InviteIncentive;
 
     trash.Add(useEffect(() => {
         label.Text = pageStates.friendsBonus() ? "10% bonus active" : "Play with a friend for 10% bonus";

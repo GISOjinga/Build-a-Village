@@ -43,7 +43,7 @@ export default (pagePaths: PagePaths) => {
 
             // sets the name
             playerSample.SampleName.Text = player.Name;
-            playerSample.SampleName.TextLabel.Text = player.Name;
+            playerSample.SampleName.Text = player.Name;
 
             // when clicked
             trash.Add(UIUtilities.ButtonAction({

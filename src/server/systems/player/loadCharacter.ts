@@ -1,7 +1,9 @@
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { Players } from "@rbxts/services";
 import paths from "shared/utils/paths";
+import { printJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { $line } from "rbxts-transformer-inline";
 
 
 

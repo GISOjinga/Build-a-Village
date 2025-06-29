@@ -30,7 +30,7 @@ export default (world: World) => {
 
             // Give the character a body if all required parts exist.
             if (model && humanoid && rootPart && animator && rootAttachment && head) {
-                const entity = world.entity();
+                const entity = player.GetAttribute<Entity>("ServerId") || world.entity();
                 addComponent(entity, Player, player);
                 world.set(entity, Body, {
                     head,
@@ -40,12 +40,6 @@ export default (world: World) => {
                     animator,
                     rootAttachment,
                     platform: undefined,
-                });
-                world.set(entity, PlayerState, createInitialPlayerState());
-
-                routes.replicatePlayerState.sendToAll({
-                    serverEntity: entity,
-                    data: createInitialPlayerState(),
                 });
                 // print("ATTACHED PlayerState TO:", entity);
                 // print("Initial PlayerState:", createInitialPlayerState());
@@ -77,7 +71,7 @@ export default (world: World) => {
         // When the model is destroying, delete its entity.
         newModel?.Destroying.Connect(() => {
             if (world.contains(entity)) {
-                world.delete(entity);
+                world.remove(entity, Body);
             }
         });
     }

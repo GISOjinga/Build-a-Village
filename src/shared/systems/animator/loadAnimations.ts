@@ -1,7 +1,7 @@
 import { Entity, World } from "@rbxts/jecs";
 import { ContentProvider } from "@rbxts/services";
-import { addComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { addComponent, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { Body, LoadedAnimations, LoadingAnimations, systemQueue, Changed, Villager, VillagerAnimator, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -77,5 +77,15 @@ export default (world: World) => {
         addComponent(entity, LoadingAnimations)
         addComponent(entity, LoadedAnimations)
         savedAnimationTracks.set(animator, animations)
+    }
+
+    // if body gets removed then remove loading animation and loaded animations
+    for (const [_, entity, { animator }] of world.query(TargetEntity, Removed(Body))) {
+        if (!animator) continue
+
+        // remove loading animations
+        if (world.contains(entity)) removeComponent(entity, LoadingAnimations, LoadedAnimations)
+        // remove saved animations
+        savedAnimationTracks.delete(animator)
     }
 }
