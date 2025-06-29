@@ -7,7 +7,7 @@ import paths from "shared/utils/paths";
 import ShopData from "../villagers/ShopData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { createEntity, getEntity, removeComponent, printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { createEntity, getEntity, removeComponent, printTS, addComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
 
 const WEEK_LENGTH = 7 * 24 * 60 * 60;
@@ -83,8 +83,10 @@ export default (world: World) => {
 
             let targetPlayer = player;
             let targetEntity = playerEntity;
-            const giftPlayer = world.get(playerEntity, GiftTo) as Player | undefined;
-            if (giftPlayer) {
+            const giftTo = world.get(playerEntity, GiftTo)
+            if (giftTo) {
+                const giftPlayer = giftTo.target
+                addComponent(playerEntity, GiftTo, { ...giftTo, gifted: true });
                 removeComponent(playerEntity, GiftTo);
                 if (giftPlayer.Parent) {
                     routes.notify.sendTo({ text: `${player.Name} has gifted you!`, duration: 5 }, giftPlayer);

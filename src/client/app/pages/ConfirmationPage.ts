@@ -31,11 +31,11 @@ export default (pagePaths: PagePaths) => {
 
         // if the confirm info is not set then return
         if (confirmInfo.title === "" || confirmInfo.message === "") {
-            tweenOutPosition.Play();
             tweenInPosition.Cancel();
+            tweenOutPosition.Play();
         } else {
-            tweenInPosition.Play();
             tweenOutPosition.Cancel();
+            tweenInPosition.Play();
         }
     }));
 
@@ -46,6 +46,7 @@ export default (pagePaths: PagePaths) => {
         DeExpandedSize: UIUtilities.DivideUdim2(confirmPage.Decline.Size, sizeOffset),
     }, () => {
         routes.confirmPrompt.send(false)
+        pageStates.confirmPrompt({ title: "", message: "" })
     }))
 
     // when clicked on accpect
@@ -55,6 +56,7 @@ export default (pagePaths: PagePaths) => {
         DeExpandedSize: UIUtilities.DivideUdim2(confirmPage.Accept.Size, sizeOffset),
     }, () => {
         routes.confirmPrompt.send(true)
+        pageStates.confirmPrompt({ title: "", message: "" })
     }))
     confirmPage.Visible = true;
 

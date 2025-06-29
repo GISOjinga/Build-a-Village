@@ -177,9 +177,9 @@ const packets = defineNamespace("gameEvents", () => {
         sendFriendRequest: definePacket({
             value: ByteNet.inst as ByteNetType<Player>,
         }),
-        requestAddFriend: definePacket({
-            value: ByteNet.inst as ByteNetType<Player>,
-        }),
+        // requestAddFriend: definePacket({
+        //     value: ByteNet.inst as ByteNetType<Player>,
+        // }),
         redeemPromo: definePacket({
             value: ByteNet.string,
         }),

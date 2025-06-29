@@ -185,7 +185,7 @@ export default (world: World) => {
                     const playerWhoTriggeredEntity = getEntity.fromInstance(playerWhoTriggered)
 
                     if (playerWhoTriggeredEntity && world.contains(playerOccupyingEntity)) {
-                        addComponent(playerWhoTriggeredEntity, GiftTo, playerOccupying)
+                        addComponent(playerWhoTriggeredEntity, GiftTo, { target: playerOccupying, gifted: false })
                         MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3309650571);
                     }
                 })

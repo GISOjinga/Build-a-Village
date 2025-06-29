@@ -102,7 +102,7 @@ export const Player = component<Player>("Player");
 export const Alive = component("Alive");
 
 // to gift to
-export const GiftTo = component<Player>("GiftTo");
+export const GiftTo = component<{ target: Player, gifted: boolean }>("GiftTo");
 
 // take from
 export const TakeFromVillager = component<{ villagerEntityToStealFrom: Entity, produceName: ProduceNames, variant: ProduceVariant, resourceModelName: string }>("TakeFromVillager");

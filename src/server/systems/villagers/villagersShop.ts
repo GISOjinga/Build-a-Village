@@ -89,7 +89,7 @@ export default (world: World) => {
 
         // if data then
         if (playerEntity) {
-            addComponent(playerEntity, GiftTo, playerToGiftTo)
+            addComponent(playerEntity, GiftTo, { target: playerToGiftTo, gifted: false })
             printJecs($line, player.Name + " is gifting through shop to", playerToGiftTo.Name)
         };
     })
@@ -141,6 +141,13 @@ export default (world: World) => {
                                 text: `${playerGifting.Name} gifted you ${itemName} (${itemVariant})`,
                                 duration: 5,
                             }, playerToGift);
+
+                            // another prompt to become friends
+                            createEntity.confirmationPrompt(playerToGiftToEntity, `Accept Friend Request?`, `Friend Request From @${playerGifting.Name}`, () => {
+                                printJecs($line, `Adding friend: ${playerGifting.Name}`);
+                                routes.sendFriendRequest.sendTo(playerGifting, playerToGift);
+                                routes.sendFriendRequest.sendTo(playerToGift, playerGifting);
+                            });
                         }
                     }
 
@@ -171,7 +178,8 @@ export default (world: World) => {
         if (shopVillagerIndex !== -1 || productId === 3308848691 || productId === 3309650571) {
             // if the purchase was successful and the player exists
             if (wasPurchased && player && playerEntity) {
-                const playerToGiftTo = world.get(playerEntity, GiftTo) as Player
+                const giftTo = world.get(playerEntity, GiftTo)
+                const playerToGiftTo = giftTo && giftTo.target
                 const hasGitTo = world.has(playerEntity, GiftTo)
                 const isTheSamePlayer = playerToGiftTo && playerToGiftTo.UserId === userId;
 
@@ -186,6 +194,7 @@ export default (world: World) => {
                 printJecs($line, player.Name + " purchased product", productId, "for", "Robux");
                 if (hasGitTo && playerToGiftTo) {
                     // removes gift to
+                    addComponent(playerEntity, GiftTo, { ...giftTo, gifted: true });
                     removeComponent(playerEntity, GiftTo)
 
                     // if the player to gift to is not a valid player in the game then return
