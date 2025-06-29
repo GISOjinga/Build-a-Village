@@ -21,8 +21,9 @@ function setUpSignGuiContainers(platform: PlatformExample, playerName?: string) 
 
     // set up the name sign
     nameGui.Title.Visible = true
+    nameGui.Title.Text = playerName ? "Village" : "village"
     nameGui.PlayerName.Visible = true
-    nameGui.PlayerName.Text = playerName ? playerName : "No Ones"
+    nameGui.PlayerName.Text = playerName ? playerName + "'s" : "empty"
     if (player) platform.NameSign.Thumbnail.SetAttribute("UserId", player.UserId)
 }
 
