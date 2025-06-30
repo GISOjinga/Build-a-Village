@@ -202,6 +202,19 @@ const packets = defineNamespace("gameEvents", () => {
             value: ByteNet.unknown as ByteNetType<Entity>,
         }),
 
+        // collect villager produce
+        collectVillagerProduce: definePacket({
+            value: struct({
+                villagerEntity: ByteNet.unknown as ByteNetType<Entity>,
+                resourceModelName: ByteNet.string,
+            }),
+        }),
+
+        // give required items to villager
+        supplyVillager: definePacket({
+            value: ByteNet.unknown as ByteNetType<Entity>,
+        }),
+
         // request to buy villager
         buyVillager: definePacket({
             value: struct({

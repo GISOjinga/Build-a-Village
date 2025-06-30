@@ -2,6 +2,7 @@ import { World } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent, useThrottle } from "shared/Plugin-Hook";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
@@ -71,6 +72,83 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
 
 
 export default (world: World) => {
+    // handle client requests
+    useRoute(routes.collectVillagerProduce, ({ villagerEntity, resourceModelName }, playerWhoTriggered) => {
+        const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
+        const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager);
+        const model = villagerInfo && villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(resourceModelName);
+        const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+
+        if (model && villagerInfo && playerEntityWhoTriggered) {
+            const variant = model.GetAttribute<ProduceVariant>("Variant");
+            const ready = model.GetAttribute<boolean>("Ready");
+            const player = world.get(villagerInfo.playerEntity, Player);
+            if (variant && ready) {
+                if (playerWhoTriggered === player) {
+                    const progression = villagerInfo.villagerData.Progress.Progression;
+                    if (resourceProximityPrompt) resourceProximityPrompt.Enabled = false;
+                    model.SetAttribute("Variant", undefined);
+                    model.SetAttribute("Ready", undefined);
+                    model.GetDescendants().forEach((child) => {
+                        if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) child.Destroy();
+                        else toggleTransparency(child, false);
+                    });
+                    progression.Resources[variant] -= 1;
+                    addComponent(villagerEntity, Villager, { ...villagerInfo });
+                    createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant);
+                    createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
+                        if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) oldData.Tutorial = 3;
+                        return oldData;
+                    });
+                    removeComponent(villagerEntity, MaxedOut);
+                } else {
+                    printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);
+                    addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity, resourceModelName: model.Name, produceName: villagerInfo.villagerData.Progress.Produce, variant });
+                    MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3315996934);
+                }
+            }
+        }
+    });
+
+    useRoute(routes.supplyVillager, (villagerEntity, playerWhoTriggered) => {
+        const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
+        const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager);
+        if (villagerInfo && playerEntityWhoTriggered === villagerInfo.playerEntity) {
+            const body = world.get(playerEntityWhoTriggered, Body);
+            const requiredResource = villagerInfo.villagerData.Progress.Required;
+            const villagerModel = villagerInfo.villagerModel;
+            if (body && requiredResource && requiredResource.Amount < requiredResource.Max) {
+                const toolInHand = body.model.FindFirstChildOfClass("Tool");
+                const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
+                const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
+                const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
+                if (toolType === "Commodity" && toolName === requiredResource.Produce) {
+                    createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
+                        const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
+                        const produce = oldData.Produce[produceIndex];
+                        const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);
+                        produce.Amount -= amountToTakeAway;
+                        addComponent(villagerEntity, Villager, {
+                            villagerData: {
+                                ...villagerInfo.villagerData,
+                                Progress: {
+                                    ...villagerInfo.villagerData.Progress,
+                                    Required: {
+                                        ...requiredResource,
+                                        Amount: requiredResource.Amount + amountToTakeAway,
+                                    },
+                                },
+                            },
+                            villagerModel,
+                            playerEntity: villagerInfo.playerEntity,
+                        });
+                        if (produce.Amount <= 0) oldData.Produce.remove(produceIndex);
+                        return oldData;
+                    });
+                }
+            }
+        }
+    });
     // when villager is added but not fully built then
     for (const [_, villagerEntity, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Added(Villager))) {
         const player = world.get(playerEntity, Player)
@@ -108,99 +186,9 @@ export default (world: World) => {
             resourceProximityPrompt.ActionText = `Collect`
             resourceProximityPrompt.Parent = proximityPromptyPart
             resourceProximityPrompt.Enabled = false
-            resourceProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
-                const variant = model.GetAttribute<ProduceVariant>("Variant")
-                const readyToBePicked = model.GetAttribute<boolean>("Ready")
-                const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered)
-                const villagerInfo = world.get(villagerEntity, Villager)
-
-
-                // if both resource variant and ready then adds the collected item into the player who triggered it inventory and removes that variant
-                if (variant && readyToBePicked && playerEntityWhoTriggered && villagerInfo) {
-                    if (playerWhoTriggered === player) {
-                        const progression = villagerInfo.villagerData.Progress.Progression
-
-                        // removes the variant and ready
-                        resourceProximityPrompt.Enabled = false
-                        model.SetAttribute("Variant", undefined)
-                        model.SetAttribute("Ready", undefined)
-                        model.GetDescendants().forEach((child) => {
-                            if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
-                                child.Destroy();
-                            } else {
-                                toggleTransparency(child, false)
-                            }
-                        });
-
-                        // removes the produce from the data
-                        progression.Resources[variant] -= 1
-                        addComponent(villagerEntity, Villager, { ...villagerInfo })
-
-                        // adds the produce to the data
-                        printJecs($line, `${playerWhoTriggered.Name} took ${produceName} with varaint ${variant} from ${playerEntity}`)
-                        createEntity.insertProduce(playerEntityWhoTriggered, produceName, variant)
-                        createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
-                            if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) oldData.Tutorial = 3
-                            return oldData
-                        })
-                        removeComponent(villagerEntity, MaxedOut);
-                    } else { // prompts product purchase to steal the produce
-                        printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
-                        // adds component to take produce from player
-                        addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity, resourceModelName: model.Name, produceName, variant, })
-                        MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3315996934)
-                    }
-                }
-            })
         })
 
-        // when proximity prompt is called
-        tier2ProximityPrompt.Triggered.Connect((playerWhoTriggered) => {
-            const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager)
-
-            if (playerWhoTriggered === player && villagerInfo) {
-                if (body && requiredResource && requiredResource.Amount < requiredResource.Max && tier2ProximityPrompt.ActionText === `Requires ${requiredResource.Produce}`) {
-                    const toolInHand = body.model.FindFirstChildOfClass("Tool")
-                    const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
-                    const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
-                    const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
-
-                    // if tool an
-                    if (toolType === "Commodity" && toolName === requiredResource.Produce) {
-                        // updates the players data
-                        createEntity.updateData(playerEntity, (oldData) => {
-                            const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
-                            const produce = oldData.Produce[produceIndex];
-                            const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);
-
-                            // takes away the produce from the player
-                            produce.Amount -= amountToTakeAway;
-
-                            // updates the villager
-                            addComponent(villagerEntity, Villager, {
-                                villagerData: {
-                                    ...villagerInfo.villagerData,
-                                    Progress: {
-                                        ...villagerInfo.villagerData.Progress,
-                                        Required: {
-                                            ...requiredResource,
-                                            Amount: requiredResource.Amount + amountToTakeAway
-                                        }
-                                    }
-                                },
-                                villagerModel,
-                                playerEntity
-                            })
-
-                            // if its 0 then removes it
-                            if (produce.Amount <= 0) oldData.Produce.remove(produceIndex);
-
-                            return oldData
-                        })
-                    }
-                }
-            }
-        })
+        // tier2ProximityPrompt connections handled on client
 
         // adds model debugger
         addComponent(villagerEntity, ModelDebugger, villagerModel)
@@ -332,7 +320,7 @@ export default (world: World) => {
 
             // toggles the interaction visiblity
             requiredProximityPrompt.ActionText = (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "";
-            requiredProximityPrompt.Enabled = requiredResource ? true : false;
+            requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
