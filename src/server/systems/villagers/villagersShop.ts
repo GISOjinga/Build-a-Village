@@ -8,6 +8,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { selectVillagerToRestock } from "./villagerAlgorithim";
+import { logTutorialStep, TutorialStep, logVillagerPurchase } from "../../utils/analytics";
 import paths from "shared/utils/paths";
 
 
@@ -314,6 +315,7 @@ export default (world: World) => {
                     if (oldData.Tutorial === 3 && soldWheat) {
                         oldData.Coins += 500;
                         oldData.Tutorial = "Done";
+                        logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                     }
 
                     // prints the sell message
@@ -347,6 +349,7 @@ export default (world: World) => {
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
                                     oldData.Coins += 500;
                                     oldData.Tutorial = "Done";
+                                    logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
                             }
                         }
@@ -395,6 +398,7 @@ export default (world: World) => {
         if (data) {
             const villagerData = ShopData.Villagers[villagerIndex]
             const totalPrice = villagerData.Price;
+            const alreadyOwned = data.Villagers.some(v => v.Name === villagerData.Name);
 
             if (currency === "Coins") {
 
@@ -419,6 +423,12 @@ export default (world: World) => {
 
                         // takes from stock and sets the new shop data
                         takeVillagerFromStock(villagerData.Name)
+                        if (!alreadyOwned) {
+                            logVillagerPurchase(player, villagerData.Name)
+                            if (villagerData.Name === "Farmer" && data.Tutorial === 0) {
+                                logTutorialStep(player, TutorialStep.FarmerBought, "tutorial_farmer_bought")
+                            }
+                        }
                     } else {
                         // plays the purchase sound to the player
                         routes.playSound.sendTo({

@@ -8,6 +8,7 @@ import paths from "shared/utils/paths";
 import { deepCopy } from "@rbxts/object-utils";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { $line } from "rbxts-transformer-inline";
+import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 
 
@@ -45,7 +46,10 @@ export default (world: World) => {
                 villagerData.Progress.Progression.Time.StartTime = os.time();
                 villagerData.Progress.Building.StartTime = os.time();
                 villagerData.Progress.Building.EndTime = os.time() + 5;
-                if (oldData.Tutorial === 1 && villagerName === "Farmer") oldData.Tutorial = 2
+                if (oldData.Tutorial === 1 && villagerName === "Farmer") {
+                    oldData.Tutorial = 2
+                    logTutorialStep(player, TutorialStep.FarmerPlaced, "tutorial_farmer_placed")
+                }
                 return oldData
             })
         }

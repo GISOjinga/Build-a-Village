@@ -8,7 +8,8 @@ import ShopData from "../villagers/ShopData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity, removeComponent, printTS, addComponent } from "shared/utils/functions/jecsHelpFunctions";
-import { Added, GiftTo, Player } from "shared/utils/jecs/jecsComponents";
+import { Added, GiftTo, Player, Data } from "shared/utils/jecs/jecsComponents";
+import { logVillagerPurchase, logTutorialStep, TutorialStep } from "../utils/analytics";
 
 const WEEK_LENGTH = 7 * 24 * 60 * 60;
 
@@ -97,8 +98,16 @@ export default (world: World) => {
             }
 
             if (targetEntity) {
+                const playerData = world.get(targetEntity, Data);
                 for (const villager of info.purchase.Villagers) {
+                    const owned = playerData?.Villagers.some(v => v.Name === villager);
                     createEntity.inventoryVillager(targetEntity, villager);
+                    if (!owned) {
+                        logVillagerPurchase(targetPlayer, villager);
+                        if (villager === "Farmer" && playerData && playerData.Tutorial === 0) {
+                            logTutorialStep(targetPlayer, TutorialStep.FarmerBought, "tutorial_farmer_bought");
+                        }
+                    }
                 }
 
                 const starter = info.purchase as Partial<StarterShopPack>;
