@@ -1,4 +1,6 @@
 import { AnalyticsService, HttpService } from "@rbxts/services";
+import { $line } from "rbxts-transformer-inline";
+import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 
 export enum TutorialStep {
     Start = 1,
@@ -10,6 +12,7 @@ export enum TutorialStep {
 }
 
 export function logTutorialStep(player: Player, step: TutorialStep, name: string) {
+    printTS($line, `Logging tutorial step: ${step} for player: ${player.Name} (${player.UserId}) with name: ${name}`);
     AnalyticsService.LogOnboardingFunnelStepEvent(player, step, name);
 }
 
