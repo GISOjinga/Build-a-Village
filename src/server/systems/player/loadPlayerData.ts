@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { Players } from "@rbxts/services";
 import paths from "shared/utils/paths";
-import defaultData, { PlayerData } from "../../../shared/data/defaultData";
+import defaultData, { decodePlayerData, PlayerData } from "../../../shared/data/defaultData";
 import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
@@ -47,6 +47,9 @@ export default (world: World) => {
                 if (!playerData) {
                     playerData = deepCopy(defaultData)
                     logTutorialStep(player, TutorialStep.Start, "tutorial_start")
+                } else {
+                    print(playerData)
+                    playerData = decodePlayerData(playerData as never)
                 }
 
                 // sets their data

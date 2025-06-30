@@ -240,7 +240,7 @@ type VillagerNames = keyof Omit<Assets["Villagers"], keyof Folder>;
 type ProduceNames = keyof Omit<Assets["Tools"]["Produce"], keyof Folder>
 
 //* wall names
-type WallNames = "Wooden Fence" | "Log Wall" | "Stone Wall" | "Ironwood Fence" | "Castle Wall" | "Evil Wall";
+type WallNames = keyof Omit<Assets["Walls"], keyof Folder>;
 
 //* item name
 type ItemName = VillagerNames | ProduceNames;
