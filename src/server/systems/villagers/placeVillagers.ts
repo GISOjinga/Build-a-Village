@@ -1,9 +1,9 @@
-import { World } from "@rbxts/jecs";
+import { pair, World } from "@rbxts/jecs";
 import { routes } from "shared/data/network";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";
-import { ActiveVillagers, Body, Changed, Data, Player, Removed, TargetEntity, Villager, world } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Body, Changed, Data, Platform, Player, Removed, TargetEntity, Villager, world } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { deepCopy } from "@rbxts/object-utils";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -89,7 +89,7 @@ export default (world: World) => {
     }
 
     // for all active vilalgers of the player with data makes sure they are spawned in
-    for (const [playerEntity, body, data, activeVillagers] of world.query(Body, Data, ActiveVillagers)) {
+    for (const [playerEntity, body, data, activeVillagers, platformEntity] of world.query(Body, Data, ActiveVillagers, pair(TargetEntity, Platform))) {
         if (!body.platform) continue
         const platform = body.platform
         const missingVillagers = data.Villagers.filter((v) => (v.RelativeLocation && !activeVillagers.find((av) => av.uniqueId === v.UniqueId)) ? true : false);
@@ -101,7 +101,7 @@ export default (world: World) => {
         // creates a villager
         missingVillagers.forEach((villager) => activeVillagers.push({
             uniqueId: villager.UniqueId,
-            entity: createEntity.villagerNpc(playerEntity, villager, platform),
+            entity: createEntity.villagerNpc(playerEntity, villager, platform, platformEntity),
         }));
 
         // updates active vilalgers
@@ -110,9 +110,12 @@ export default (world: World) => {
     }
 
     // when ever a villager entity is destroyed it goes saves all the progress and goes back to inventory
-    for (const [_, villagerEntity, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Removed(Villager))) {
+    for (const [_, __, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Removed(Villager))) {
         const playerData = playerEntity && world.contains(playerEntity) && world.get(playerEntity, Data)
         const activeVillagers = playerData && world.get(playerEntity, ActiveVillagers);
+
+        // destroys the villager
+        villagerModel.Destroy();
 
         // if player data exists then updates the villager data
         if (playerData && activeVillagers) {
@@ -131,7 +134,6 @@ export default (world: World) => {
             // });
 
             // pops it out shifting the rest of the villagers while also adding the component back
-            villagerModel.Destroy();
             activeVillagers.remove(activeVillagers.findIndex((v) => v.uniqueId === villagerData.UniqueId))
             addComponent(playerEntity, ActiveVillagers, activeVillagers);
         }

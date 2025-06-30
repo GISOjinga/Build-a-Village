@@ -2,7 +2,7 @@ import { Entity, pair, World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { addComponent, ComponentValue, getEntity, printJecs, printTS, removeComponent, warnTS } from "shared/utils/functions/jecsHelpFunctions";
-import { Added, Body, ModelDebugger, PlatformOccupied, Platform, Player, Removed, TargetEntity, Data } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, ModelDebugger, PlatformOccupied, Platform, Player, Removed, TargetEntity, Data, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -73,7 +73,11 @@ export default (world: World) => {
         const platform = world.get(platformEntity, Platform)
 
         // if platform exists then hides the fences
-        if (platform) setUpSignGuiContainers(platform)
+        if (platform) {
+            // loops through all pair(TargetEntity, Platform) and Villager with the platform entity to destroy the villager
+            for (const [platformEntity2, villagerEntity, villager] of world.query(pair(TargetEntity, Platform)).with(Villager)) if (platformEntity2 === platformEntity && world.contains(villagerEntity)) world.delete(villagerEntity)
+            setUpSignGuiContainers(platform)
+        }
     }
 
     // for all players added chooses an un occupied platform

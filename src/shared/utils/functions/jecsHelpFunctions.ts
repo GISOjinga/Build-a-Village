@@ -119,7 +119,7 @@ export const createEntity = {
     },
 
     // creates a villager
-    villagerNpc: (playerEntity:Entity, villagerData:VillagerData, platform:PlatformExample) => {
+    villagerNpc: (playerEntity:Entity, villagerData:VillagerData, platform:PlatformExample, platformEntity:Entity) => {
         const player = world.get(playerEntity, components.Player)
         const name = villagerData.Name
         const villagerModel = paths.Assets.Villagers[name].Clone() as VillagerModel
@@ -133,6 +133,7 @@ export const createEntity = {
         villagerModel.Parent = platform.Villagers
 
         // sets the villager
+        addComponent(villagerEntity, pair(components.TargetEntity, components.Platform), platformEntity)
         addComponent(villagerEntity, components.ModelDebugger, villagerModel)
         addComponent(villagerEntity, components.Villager, {
             villagerModel,
