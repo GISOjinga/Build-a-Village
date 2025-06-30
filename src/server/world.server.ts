@@ -28,6 +28,7 @@ import confirmationPrompt from "./systems/player/confirmationPrompt";
 import promoCodes from "./systems/promotions/promoCodes";
 import friendRequest from "./systems/player/friendRequest";
 import friendsBonus from "./systems/promotions/friendsBonus";
+import updateLeaderboard from "./systems/leaderboard/updateLeaderboard";
 
 
 
@@ -69,6 +70,9 @@ setupMatter([
 
     // data
     { system: updateData },
+
+    // leader board
+    { system: updateLeaderboard },
 
     // player
     { system: loadCharacter },
