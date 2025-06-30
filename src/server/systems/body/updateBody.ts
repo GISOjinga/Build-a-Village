@@ -8,9 +8,10 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getCharacterParts } from "shared/utils/functions/characterFunctions";
 import { addComponent, getEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed, Platform } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed, Platform, Data } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { createInitialPlayerState } from "shared/utils/PlayerState";
+import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 
 // players and their shop page states
@@ -140,10 +141,14 @@ export default (world: World) => {
     // use route watching for shop teleport
     useRoute(routes.teleportToShop, (shopName, player) => {
         const entity = getEntity.fromInstance(player);
-        const body = entity && world.get(entity, Body);
+        const [body, data] = entity ? world.get(entity, Body, Data) : [] as never;
         const shopSpawn = paths.Map.Shops[shopName === "Buy" ? "King" : shopName === "Sell" ? "Merchant" : "Architect"].SpawnLocation
 
         // if platform and body then teleports the players rootpart to the platform spawn
         if (body) body.rootPart.CFrame = shopSpawn.CFrame
+
+        if (shopName === "Buy" && data && data.Tutorial === 0) {
+            logTutorialStep(player, TutorialStep.ShopOpened, "tutorial_shop_opened")
+        }
     })
 };

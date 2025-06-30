@@ -8,6 +8,7 @@ import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { routes } from "shared/data/network";
+import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 
 
@@ -43,7 +44,10 @@ export default (world: World) => {
                 let [playerData] = dataStore.GetAsync<PlayerData>(`${player.UserId}`)
 
                 // if not player data then creates one
-                if (!playerData) playerData = deepCopy(defaultData)
+                if (!playerData) {
+                    playerData = deepCopy(defaultData)
+                    logTutorialStep(player, TutorialStep.Start, "tutorial_start")
+                }
 
                 // sets their data
                 setPlayerData(player, migrateData(playerData))

@@ -11,6 +11,7 @@ import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { routes } from "shared/data/network";
+import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 
 
@@ -98,7 +99,10 @@ export default (world: World) => {
                     addComponent(villagerEntity, Villager, { ...villagerInfo });
                     createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant);
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
-                        if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) oldData.Tutorial = 3;
+                        if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) {
+                            oldData.Tutorial = 3;
+                            logTutorialStep(playerWhoTriggered, TutorialStep.WheatCollected, "tutorial_wheat_collected")
+                        }
                         return oldData;
                     });
                     removeComponent(villagerEntity, MaxedOut);
