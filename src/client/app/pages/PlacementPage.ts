@@ -27,8 +27,8 @@ export default (pagePaths: PagePaths) => {
         placementPage.Placetext.Text = openPage === "Placement" ? "Place" : "Dig"
         placementPage.Placetext.BackgroundColor3 = openPage === "Placement" ? Color3.fromRGB(112, 227, 25) : Color3.fromRGB(227, 26, 26)
         placementPage.Placetext.BorderColor3 = openPage === "Placement" ? Color3.fromRGB(10, 99, 0) : Color3.fromRGB(99, 0, 0)
-        placementPage.Placetext.UIStroke1.Color = openPage === "Placement" ? Color3.fromRGB(10, 99, 0) : Color3.fromRGB(99, 0, 0)
-        placementPage.Placetext.UIStroke2.Color = openPage === "Placement" ? Color3.fromRGB(10, 99, 0) : Color3.fromRGB(99, 0, 0)
+        placementPage.Placetext.UIStrokeBG.Color = openPage === "Placement" ? Color3.fromRGB(10, 99, 0) : Color3.fromRGB(99, 0, 0)
+        placementPage.Placetext.UIStrokeText.Color = openPage === "Placement" ? Color3.fromRGB(10, 99, 0) : Color3.fromRGB(99, 0, 0)
         placementPage.RightPress.Visible = openPage === "Placement"
         placementPage.LeftPress.Visible = openPage === "Placement"
     }))
