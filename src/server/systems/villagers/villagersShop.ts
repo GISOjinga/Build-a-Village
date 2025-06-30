@@ -62,8 +62,7 @@ export default (world: World) => {
     useMemo(() => routes.updateVillagersShop.sendToAll({
         TimeTillRestock: timeTillRestock,
         Villagers: ShopData.Villagers,
-    }), [ShopData.Villagers])
-
+    }), [tostring(ShopData.Villagers)])
 
     // game initially starts fully stocks everything
     useMemo(() => {
@@ -331,12 +330,12 @@ export default (world: World) => {
                     createEntity.updateData(playerEntity, (oldData) => {
                         // if the villager info is found then remove it
                         if (villagerInfo) {
-                            printTS($line, player.Name + " sold villager", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
+                            printJecs($line, player.Name + " sold villager", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
                             oldData.Villagers = oldData.Villagers.filter((v) => v.UniqueId !== uniqueId);
                             oldData.Coins += (ShopData.SellPrice[itemName] || 0) * cashMultiplier; // adds the coins from the villager
                         } else if (produceInfo) { // if the produce info is found then remove it
                             const sellPrice = (ShopData.SellPrice[itemName] || 0) * (produceInfo.Variant === "Rainbow" ? 50 : produceInfo.Variant === "Gold" ? 10 : 1);
-                            printTS($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
+                            printJecs($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
                             oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
                             oldData.Coins += (sellPrice || 0) * cashMultiplier; // adds the coins from the produce
                             if (itemName === "Wheat" && oldData.Tutorial === 3) {
