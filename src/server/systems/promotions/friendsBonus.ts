@@ -1,30 +1,32 @@
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
 import { routes } from "shared/data/network";
-import { FriendsBonus, Player } from "shared/utils/jecs/jecsComponents";
-import { addComponent, getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { Added, FriendsBonus, Player, Removed } from "shared/utils/jecs/jecsComponents";
+import { addComponent, getEntity, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 
 export default (world: World) => {
-    for (const [playerEntity, player] of world.query(FriendsBonus).without(Player)) {
-        // just placeholder to satisfy query typing
-    }
+    const updateFriendBonus = () => {
+        const multiplier = 1.1; // friend bonus multiplier
 
-    for (const [playerEntity, player] of world.query(Player)) {
-        let hasFriend = false;
-        for (const other of Players.GetPlayers()) {
-            if (other !== player && player.IsFriendsWith(other.UserId)) {
-                hasFriend = true;
-                break;
+        // checks through all players to see if you have a friend
+        for (const [_, player] of pairs(Players.GetPlayers())) {
+            const playerEntity = getEntity.fromInstance(player);
+            if (playerEntity) {
+                removeComponent(playerEntity, FriendsBonus); // remove existing bonus
+                for (const [_, otherPlayer] of pairs(Players.GetPlayers())) {
+                    const otherPlayerEntity = getEntity.fromInstance(otherPlayer);
+                    if (otherPlayer !== player && player.IsFriendsWith(otherPlayer.UserId) && otherPlayerEntity) {
+                        addComponent(playerEntity, FriendsBonus, { multiplier });
+                        routes.updateFriendsBonus.sendTo(true, player);
+                        return;
+                    }
+                }
             }
         }
-        const multiplier = hasFriend ? 1.1 : 1;
-        const existing = world.get(playerEntity, FriendsBonus);
-        if (!existing) {
-            addComponent(playerEntity, FriendsBonus, { multiplier });
-            routes.updateFriendsBonus.sendTo(hasFriend, player);
-        } else if (existing.multiplier !== multiplier) {
-            world.set(playerEntity, FriendsBonus, { multiplier });
-            routes.updateFriendsBonus.sendTo(hasFriend, player);
-        }
     }
+
+
+    // when players get added/removed checks all players if they are friends if so give them both friend bounus only 
+    for (const [playerEntity, player] of world.query(Added(Player))) updateFriendBonus();
+    for (const [playerEntity, player] of world.query(Removed(Player))) updateFriendBonus();
 };

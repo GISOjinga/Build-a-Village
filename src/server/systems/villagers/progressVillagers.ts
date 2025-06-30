@@ -16,7 +16,7 @@ import { routes } from "shared/data/network";
 
 // function to give random variant
 const randomVariant = () => {
-    return math.random(1, 200) <= 1 ? "Rainbow" : math.random(1, 20) <= 5 ? "Gold" : "Normal"
+    return math.random(1, 200) <= 1 ? "Rainbow" : math.random(1, 20) <= 1 ? "Gold" : "Normal"
 }
 
 

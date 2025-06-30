@@ -1,9 +1,10 @@
 import { number } from "@rbxts/react/src/prop-types"
 import wallsData from "./wallsData"
+import paths from "shared/utils/paths"
 
 const defaultData = {
     Version: "0.0.0",
-    Coins: 100000,
+    Coins: paths.Assets.Villagers.Farmer.GetAttribute<number>("Price") || 0,
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,
     Tutorial: 0 as number | "Done",

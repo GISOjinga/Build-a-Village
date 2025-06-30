@@ -18,7 +18,7 @@ import { $line } from "rbxts-transformer-inline";
 
 
 export default (world: World) => {
-    useRoute(routes.placeVillager, (location, player) => {
+    useRoute(routes.placeVillager, (_location, player) => {
         const entity = getEntity.fromInstance(player);
         const body = getEntity.bodyFromPlayer(player);
         const tool = body && body.model.FindFirstChildOfClass("Tool");
@@ -26,10 +26,13 @@ export default (world: World) => {
         const villagerName = tool?.GetAttribute("ItemName") as VillagerNames | undefined;
         const uniqueId = tool?.GetAttribute("UniqueId") as number | undefined;
         const villagerModel = villagerName && paths.Assets.Villagers.FindFirstChild<VillagerModel>(villagerName)
+        const modelHeight = villagerModel?.GetAttribute<number>("Height") || 3.3
         const platform = body && body.platform;
+        const floorYPosition = platform && platform.Floor.Position.Y - (platform.Floor.Size.Y / 2)
+        const location = floorYPosition && new CFrame(_location.X, floorYPosition + modelHeight, _location.Z).mul(_location.Rotation)
 
         // if entity exists and tool exists then
-        if (entity !== undefined && uniqueId !== undefined && villagerModel && platform && tool && villagerName && itemType === "Villager" && !isVillagersOverlapping(platform.Villagers.GetChildren(), villagerModel, location)) {
+        if (location && entity !== undefined && uniqueId !== undefined && villagerModel && platform && tool && villagerName && itemType === "Villager" && !isVillagersOverlapping(platform.Villagers.GetChildren(), villagerModel, location)) {
 
             // removes the tool and adds you to the plot of land
             createEntity.updateData(entity, (oldData) => {

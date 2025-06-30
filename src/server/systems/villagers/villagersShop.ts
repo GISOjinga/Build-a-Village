@@ -287,27 +287,27 @@ export default (world: World) => {
                 // sells all your items in your inventory
                 createEntity.updateData(playerEntity, (oldData) => {
                     // if you have enough
-                    if ((oldData.Villagers.size() + oldData.Produce.size()) < 1) routes.npcDialogue.sendTo({
+                    if ((oldData.Produce.size()) < 1) routes.npcDialogue.sendTo({
                         text: "You’re not holding anything to sell.",
                         target: "Sell",
                     }, player);
 
                     // loops through your villagers tallys them up
-                    oldData.Villagers.forEach((villagerData) => {
-                        if (villagerData.RelativeLocation) return; // skip if the villager is placed
-                        const villagerName = villagerData.Name;
-                        oldData.Coins += (ShopData.SellPrice[villagerName] || 0) * cashMultiplier; // adds the coins from the villager
-                    });
+                    // oldData.Villagers.forEach((villagerData) => {
+                    //     if (villagerData.RelativeLocation) return; // skip if the villager is placed
+                    //     const villagerName = villagerData.Name;
+                    //     oldData.Coins += (ShopData.SellPrice[villagerName] || 0) * cashMultiplier; // adds the coins from the villager
+                    // });
 
                     // loops through your produce tallys them up
                     oldData.Produce.forEach((produceData) => {
                         const produceName = produceData.Name;
                         const variantMultiplier = (produceData.Variant === "Rainbow" ? 50 : produceData.Variant === "Gold" ? 10 : 1);
-                        oldData.Coins += (ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier; // adds the coins from the produce
+                        oldData.Coins += math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier * produceData.Amount) + .5); // adds the coins from the produce
                     });
 
                     // removes the villagers that arent spawned
-                    oldData.Villagers = oldData.Villagers.filter((villagerData) => villagerData.RelativeLocation ? true : false);
+                    // oldData.Villagers = oldData.Villagers.filter((villagerData) => villagerData.RelativeLocation ? true : false);
                     const soldWheat = oldData.Produce.find((p) => p.Name === "Wheat") !== undefined;
                     oldData.Produce.clear();
 
@@ -327,25 +327,27 @@ export default (world: World) => {
                 // if the tool is a villager then sells it
                 if (tool) {
                     const itemName = tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
-                    const uniqueId = tool.GetAttribute("UniqueId") as number;
-                    const villagerInfo = uniqueId !== undefined ? data.Villagers.find((v) => v.UniqueId === uniqueId) : undefined;
-                    const produceInfo = data.Produce.find((p) => p.Name === itemName);
+                    const variant = tool.GetAttribute("ItemVariant") as ProduceVariant;
 
                     // removes the item from the data
                     createEntity.updateData(playerEntity, (oldData) => {
                         // if the villager info is found then remove it
-                        if (villagerInfo) {
-                            printJecs($line, player.Name + " sold villager", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
-                            oldData.Villagers = oldData.Villagers.filter((v) => v.UniqueId !== uniqueId);
-                            oldData.Coins += (ShopData.SellPrice[itemName] || 0) * cashMultiplier; // adds the coins from the villager
-                        } else if (produceInfo) { // if the produce info is found then remove it
-                            const sellPrice = (ShopData.SellPrice[itemName] || 0) * (produceInfo.Variant === "Rainbow" ? 50 : produceInfo.Variant === "Gold" ? 10 : 1);
+                        // if (villagerInfo) {
+                        //     printJecs($line, player.Name + " sold villager", itemName, "for", ShopData.SellPrice[itemName] || 0, "Coins");
+                        //     oldData.Villagers = oldData.Villagers.filter((v) => v.UniqueId !== uniqueId);
+                        //     oldData.Coins += (ShopData.SellPrice[itemName] || 0) * cashMultiplier; // adds the coins from the villager
+                        // } else 
+                        if (variant && itemName) { // if the produce info is found then remove it
+                            const sellPrice = (ShopData.SellPrice[itemName] || 0) * (variant === "Rainbow" ? 50 : variant === "Gold" ? 10 : 1);
+                            const produceIndex = oldData.Produce.findIndex((p) => p.Name === itemName && p.Variant === variant);
                             printJecs($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
-                            oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
-                            oldData.Coins += (sellPrice || 0) * cashMultiplier; // adds the coins from the produce
-                            if (itemName === "Wheat" && oldData.Tutorial === 3) {
-                                oldData.Coins += 500;
-                                oldData.Tutorial = "Done";
+                            if (produceIndex !== -1) {
+                                oldData.Produce[produceIndex].Amount -= 1; // reduces the amount of produce by 1
+                                oldData.Coins += math.floor(((sellPrice || 0) * cashMultiplier) + .5); // adds the coins from the produce
+                                if (itemName === "Wheat" && oldData.Tutorial === 3) {
+                                    oldData.Coins += 500;
+                                    oldData.Tutorial = "Done";
+                                }
                             }
                         }
 
@@ -364,12 +366,12 @@ export default (world: World) => {
                 const variant = tool && tool.GetAttribute("ItemVariant") as ProduceVariant;
 
                 // if the tool is a villager then tells you how much it costs
-                if (tool && itemName) {
+                if (tool && itemName && !isVillager) {
                     const variantMultiplier = (variant === "Rainbow" ? 50 : variant === "Gold" ? 10 : 1);
-                    const produceInfo = variant && data.Produce.find((p) => p.Name === itemName && p.Variant === variant);
-                    const totalItemCount = isVillager ? 1 : produceInfo?.Amount || 1;
+                    // const produceInfo = variant && data.Produce.find((p) => p.Name === itemName && p.Variant === variant);
+                    const totalItemCount = 1
                     routes.npcDialogue.sendTo({
-                        text: `That would sell for ${(ShopData.SellPrice[itemName] || 0) * totalItemCount * cashMultiplier * variantMultiplier} Coins`,
+                        text: `That would sell for ${math.floor(((ShopData.SellPrice[itemName] || 0) * totalItemCount * cashMultiplier * variantMultiplier) + .5)} Coins`,
                         target: "Sell",
                     }, player);
                 } else {

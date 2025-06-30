@@ -104,7 +104,7 @@ export default (world: World) => {
                 const starter = info.purchase as Partial<StarterShopPack>;
                 if (starter.Coins) {
                     createEntity.updateData(targetEntity, (old) => {
-                        old.Coins += starter.Coins as number;
+                        old.Coins += math.floor((starter.Coins || 0) + .5) as number;
                         return old;
                     });
                 }

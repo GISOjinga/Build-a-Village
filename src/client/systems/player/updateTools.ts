@@ -257,10 +257,9 @@ export default (world: World) => {
     if (useThrottle(.01) && fakeModel && highlight && platform && platformFloor && equippedTool && registeredTools.has(equippedTool)) {
         const fullModelSize = fakeModel.GetExtentsSize();
         const modelHalfExtents = fullModelSize.mul(0.5);
-        const modelHeight = fakeModel.GetAttribute<number>("Height") || 6
+        const modelHeight = fakeModel.GetAttribute<number>("Height") || 3.3
         const platformDirection = platformFloor.CFrame.LookVector;
         const { ToolType } = registeredTools.get(equippedTool)!;
-        const rootPart = fakeModel.Npc.HumanoidRootPart
 
         if (ToolType === "Villager") {
             const hitResults = Tracer
@@ -283,8 +282,8 @@ export default (world: World) => {
             const finalCFrame = clampCFrameToBounds(testCFrame, fullModelSize, platformFloor.CFrame, platformFloor.Size.add(Vector3.yAxis.mul(1000)));
             const realCFrame = getSnappedGridCFrame(platformFloor.CFrame, finalCFrame, 1 + math.max(modelHalfExtents.X - math.floor(fullModelSize.X), modelHalfExtents.Z - math.floor(fullModelSize.Z)));
             const modelPivot = fakeModel.GetPivot()
-            const yPosDiff = realCFrame.Y - rootPart.Position.Y
-            const chosenCFrame = realCFrame.add(Vector3.yAxis.mul(yPosDiff)).add(Vector3.yAxis.mul(modelHeight))
+            const floorYPosition = platform && platform.Floor.Position.Y - (platform.Floor.Size.Y / 2)
+            const chosenCFrame = new CFrame(realCFrame.X, floorYPosition + modelHeight, realCFrame.Z).mul(realCFrame.Rotation)
 
             // move the model
             fakeModel.PivotTo(modelPivot.Lerp(chosenCFrame, .2));

@@ -41,8 +41,6 @@ export default (world: World) => {
                     rootAttachment,
                     platform: undefined,
                 });
-                // print("ATTACHED PlayerState TO:", entity);
-                // print("Initial PlayerState:", createInitialPlayerState());
 
                 world.set(entity, ModelDebugger, model);
 
