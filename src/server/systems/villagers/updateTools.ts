@@ -1,8 +1,9 @@
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
 import { $line } from "rbxts-transformer-inline";
+import { PlayerData } from "shared/data/defaultData";
 import { printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
-import { Body, Changed, Data, Player, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, Changed, Data, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -12,8 +13,8 @@ import paths from "shared/utils/paths";
 
 
 export default (world: World) => {
-    // when ever data gets updated makes sure the player has all the nesscary tools
-    for (const [_, bodyEntity, dataChange] of world.query(TargetEntity, Changed(Data))) {
+    // call to fix tools
+    const fixTools = (bodyEntity: Entity, dataChange: { new?: PlayerData, old?: PlayerData }) => {
         const data = dataChange.new
         const player = data && world.get(bodyEntity, Player)
         const backpack = player && player.FindFirstChild("Backpack");
@@ -82,4 +83,10 @@ export default (world: World) => {
             }
         }
     }
+
+    // if body gets removed then removes data
+    for (const [_, bodyEntity] of world.query(TargetEntity, Added(Body))) fixTools(bodyEntity, { new: world.get(bodyEntity, Data) })
+
+    // when ever data gets updated makes sure the player has all the nesscary tools
+    for (const [_, bodyEntity, dataChange] of world.query(TargetEntity, Changed(Data))) fixTools(bodyEntity, dataChange)
 }

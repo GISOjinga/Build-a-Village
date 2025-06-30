@@ -142,7 +142,7 @@ export const createEntity = {
         })
 
         // if player then adds it to target for replication 
-        if (player) setEntity.addTargetForReplication(villagerEntity, player, components.Villager)
+        // if (player) setEntity.addTargetForReplication(villagerEntity, player, components.Villager)
 
         // returns it
         return villagerEntity

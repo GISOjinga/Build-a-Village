@@ -14,7 +14,10 @@ import { routes } from "shared/data/network";
 
 
 
-
+// function to give random variant
+const randomVariant = () => {
+    return math.random(1, 200) <= 1 ? "Rainbow" : math.random(1, 20) <= 5 ? "Gold" : "Normal"
+}
 
 
 // function to togggle transparency
@@ -43,7 +46,7 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
         if (!model.GetAttribute<boolean>("Ready") && villagerInfo) {
             const variantParticles = paths.Assets.Particles.FindFirstChild(variant)?.Clone()
             const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
-            const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+            // const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
 
             // toggles the transparency
             model.GetDescendants().forEach((child) => {
@@ -58,7 +61,6 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
             model.SetAttribute("Variant", variant);
             model.SetAttribute("ProduceName", villagerInfo.Produce);
             model.SetAttribute("Ready", true);
-            if (resourceProximityPrompt) resourceProximityPrompt.Enabled = true
 
             // if variant partielces then places it in
             if (proximityPromptPart && variantParticles) {
@@ -76,8 +78,8 @@ export default (world: World) => {
     useRoute(routes.collectVillagerProduce, ({ villagerEntity, resourceModelName }, playerWhoTriggered) => {
         const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
         const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager);
-        const model = villagerInfo && villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(resourceModelName);
-        const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+        const model = villagerInfo ? villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(resourceModelName) : undefined;
+        // const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
 
         if (model && villagerInfo && playerEntityWhoTriggered) {
             const variant = model.GetAttribute<ProduceVariant>("Variant");
@@ -86,7 +88,6 @@ export default (world: World) => {
             if (variant && ready) {
                 if (playerWhoTriggered === player) {
                     const progression = villagerInfo.villagerData.Progress.Progression;
-                    if (resourceProximityPrompt) resourceProximityPrompt.Enabled = false;
                     model.SetAttribute("Variant", undefined);
                     model.SetAttribute("Ready", undefined);
                     model.GetDescendants().forEach((child) => {
@@ -173,7 +174,7 @@ export default (world: World) => {
         // for each resource that can be picked up adds a proximity prompt to it
         villagerModel.Station.Parts.Resources.GetChildren<Model>().forEach((model) => {
             const proximityPromptyPart = new Instance("Part", model)
-            const resourceProximityPrompt = paths.Assets.ProximityPrompts.ResourcesPrompt.Clone()
+            // const resourceProximityPrompt = paths.Assets.ProximityPrompts.ResourcesPrompt.Clone()
 
             // sets up the proximity prompt
             proximityPromptyPart.Name = "ProximityPromptPart"
@@ -183,9 +184,8 @@ export default (world: World) => {
             proximityPromptyPart.CanCollide = false
             proximityPromptyPart.Size = Vector3.zero
             proximityPromptyPart.PivotTo(model.GetPivot())
-            resourceProximityPrompt.ActionText = `Collect`
-            resourceProximityPrompt.Parent = proximityPromptyPart
-            resourceProximityPrompt.Enabled = false
+            // resourceProximityPrompt.ActionText = `Collect`
+            // resourceProximityPrompt.Parent = proximityPromptyPart
         })
 
         // tier2ProximityPrompt connections handled on client
@@ -265,14 +265,13 @@ export default (world: World) => {
         if (productId === 3315996934) {
             // if the purchase was successful and the player exists
             if (wasPurchased && player && playerEntity && takeFromVillager && villagerInfo && model) {
-                const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
-                const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
+                // const proximityPromptPart = model.FindFirstChild("ProximityPromptPart")
+                // const resourceProximityPrompt = proximityPromptPart?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
                 const progression = villagerInfo.villagerData.Progress.Progression
                 const variant = takeFromVillager.variant
                 const produceName = takeFromVillager.produceName;
 
                 // removes the variant and ready
-                if (resourceProximityPrompt) resourceProximityPrompt.Enabled = false
                 model.SetAttribute("Variant", undefined)
                 model.SetAttribute("Ready", undefined)
                 model.GetDescendants().forEach((child) => {
@@ -320,7 +319,7 @@ export default (world: World) => {
 
             // toggles the interaction visiblity
             requiredProximityPrompt.ActionText = (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "";
-            requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
+            // requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
 
             // if fully built then start progressing the foods
             if (timeTillFullyBuilt < 0) {
@@ -376,7 +375,7 @@ export default (world: World) => {
 
                     // if has met required time then
                     if (hasMetRequiredTime) {
-                        const variantToGive = math.random(1, 100) <= 1 ? "Rainbow" : math.random(1, 100) <= 5 ? "Gold" : "Normal";
+                        const variantToGive = randomVariant();
 
                         // takes the resource spot
                         takeResourceSpot(villagerModel, variantToGive);
@@ -413,7 +412,7 @@ export default (world: World) => {
 
         // loops through all resources and sets it to the max
         villagerModel.Station.Parts.Resources.GetChildren().forEach((model) => {
-            const variantToGive = math.random(1, 100) <= 1 ? "Rainbow" : math.random(1, 100) <= 5 ? "Gold" : "Normal"
+            const variantToGive = randomVariant()
             takeResourceSpot(villagerModel, variantToGive);
             progression.Resources[variantToGive] = 1;
         })

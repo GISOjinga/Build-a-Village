@@ -100,8 +100,8 @@ export default (world: World) => {
                 // claims the platform and sets it up
                 printJecs($line, "Claiming platform for player: ", player.Name, "Platform: ", platformEntity, platform)
                 claimPlatform(platformEntity, playerEntity, body, platform)
-                setUpSignGuiContainers(platform, player.Name)
                 addComponent(playerEntity, Body, { ...body, platform: platform })
+                setUpSignGuiContainers(platform, player.Name)
             } else {
                 warnTS($line, "No platforms available for player: " + player.Name)
             }
@@ -117,7 +117,10 @@ export default (world: World) => {
             const platform = world.get(platformEntity, Platform)
 
             // if platform exists then pivots the character to the platform
-            if (platform) body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
+            if (platform) {
+                claimPlatform(platformEntity, bodyEntity, body, platform)
+                addComponent(bodyEntity, Body, { ...body, platform: platform })
+            }
         }
     }
 

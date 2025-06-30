@@ -11,7 +11,7 @@ import { getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFu
 import { Raycast, rayParamsInclude } from "shared/utils/functions/rayFunctions";
 import { CreateVisualizer } from "shared/utils/functions/vector3Functions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";
-import { Body, Changed, Data, Player, ReplicatedComponent, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { Body, Changed, Data, Player, ReplicatedComponent, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 

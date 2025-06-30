@@ -18,11 +18,11 @@ export default (pagePaths: PagePaths) => {
     const sizeOffset = UDim2.fromScale(1.05, 1.05);
     const confirmPage = pagePaths.ConfirmPage
     const goalPosition = confirmPage.Position
-    const tweenInPosition = TweenService.Create(confirmPage, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position: goalPosition })
-    const tweenOutPosition = TweenService.Create(confirmPage, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position: AddUdim2(goalPosition, UDim2.fromScale(.5, 0)) })
 
     // use effect on trash
     trash.Add(useEffect((newTrash) => {
+        const tweenInPosition = newTrash.Add(TweenService.Create(confirmPage, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position: goalPosition }))
+        const tweenOutPosition = newTrash.Add(TweenService.Create(confirmPage, new TweenInfo(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position: AddUdim2(goalPosition, UDim2.fromScale(.5, 0)) }))
         const confirmInfo = pageStates.confirmPrompt();
 
         // sets the texts

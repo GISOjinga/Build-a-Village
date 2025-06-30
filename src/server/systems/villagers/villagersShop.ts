@@ -3,7 +3,7 @@ import { routes } from "shared/data/network";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
 import ShopData from "./ShopData";
 import { Added, Body, ConfirmationPrompt, Data, FriendsBonus, GiftTo, Player, ProduceAll, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
-import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent, setEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent, setEntity, warnTS } from "shared/utils/functions/jecsHelpFunctions";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
@@ -141,12 +141,17 @@ export default (world: World) => {
                                 duration: 5,
                             }, playerToGift);
 
-                            // another prompt to become friends
-                            createEntity.confirmationPrompt(playerToGiftToEntity, `Accept Friend Request?`, `Friend Request From @${playerGifting.Name}`, () => {
-                                printJecs($line, `Adding friend: ${playerGifting.Name}`);
-                                routes.sendFriendRequest.sendTo(playerGifting, playerToGift);
-                                routes.sendFriendRequest.sendTo(playerToGift, playerGifting);
-                            });
+                            // another prompt to become friends only if they arent already friends
+                            Promise.try(() => {
+                                if (!playerToGift.IsFriendsWith(playerGifting.UserId)) {
+                                    createEntity.confirmationPrompt(playerToGiftToEntity, `Accept Friend Request?`, `Friend Request From @${playerGifting.Name}`, () => {
+                                        printJecs($line, `Adding friend: ${playerGifting.Name}`);
+                                        routes.sendFriendRequest.sendTo(playerGifting, playerToGift);
+                                        routes.sendFriendRequest.sendTo(playerToGift, playerGifting);
+                                    });
+                                }
+                            }).catch((err) => warnTS($line, "Error adding friend:", err));
+
                         }
                     }
 

@@ -1,5 +1,5 @@
 import { Janitor } from "@rbxts/janitor";
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Tracer } from "@rbxts/tracer";
 import { PlayerData } from "shared/data/defaultData";
@@ -7,11 +7,12 @@ import { useMemo } from "shared/Plugin-Hook";
 import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast } from "shared/utils/functions/rayFunctions";
-import { Body, Data, ActiveVillagers, Villager, Changed } from "shared/utils/jecs/jecsComponents";
+import { Body, Data, ActiveVillagers, Villager, Changed, ReplicatedComponent } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 const player = Players.LocalPlayer;
 const trash = new Janitor();
+const arrow = trash.Add(paths.Assets.Tutorial.ArrowTutorial.Clone())
 let lastStage: PlayerData["Tutorial"] | undefined;
 
 trash.LinkToInstance(script, true);
@@ -26,9 +27,9 @@ function updateMessage(stage: PlayerData["Tutorial"], force: boolean = false) {
 }
 
 export default function tutorial(world: World) {
-    let arrow = useMemo(() => trash.Add(paths.Assets.Tutorial.ArrowTutorial.Clone()), [])
     const bodyEntity = getEntity.fromInstance(player);
-    if (!bodyEntity) return;
+    const serverEntity = player.GetAttribute<Entity>("ServerId");
+    if (!bodyEntity || !serverEntity) return;
 
     const body = world.get(bodyEntity, Body);
     const data = world.get(bodyEntity, Data);
@@ -38,12 +39,8 @@ export default function tutorial(world: World) {
         if (data.Tutorial === 0) return paths.Map.Shops.King.Npc.HumanoidRootPart;
         if (data.Tutorial === 1) return body.platform?.Floor;
         if (data.Tutorial === 2) {
-            const active = world.get(bodyEntity, ActiveVillagers);
-            if (active) {
-                for (const info of active) {
-                    const vInfo = world.get(info.entity, Villager);
-                    if (vInfo && vInfo.villagerData.Name === "Farmer") return vInfo.villagerModel.PrimaryPart ?? vInfo.villagerModel;
-                }
+            for (const [_, __, villagerInfo] of world.query(ReplicatedComponent, Villager)) {
+                if (villagerInfo.playerEntity === serverEntity && villagerInfo.villagerData.Name === "Farmer") return villagerInfo.villagerModel.PrimaryPart ?? villagerInfo.villagerModel;
             }
         }
         if (data.Tutorial === 3) return paths.Map.Shops.Merchant.Npc.HumanoidRootPart;

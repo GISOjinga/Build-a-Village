@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
 import { routes } from "shared/data/network";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { addComponent, getEntity, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { ConfirmationPrompt, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 
 
@@ -20,7 +20,7 @@ export default (world: World) => {
 
         // if data then
         if (confirmationPrompt) {
-            printTS($line, "Confirmation Prompt: ", confirmationPrompt, " for player: ", player.Name);
+            printJecs($line, "Confirmation Prompt: ", confirmationPrompt, " for player: ", player.Name);
             // if yes then removes the prompt
             addComponent(playerEntity, ConfirmationPrompt, { ...confirmationPrompt, confirmation: yes });
             removeComponent(playerEntity, ConfirmationPrompt);
@@ -29,6 +29,7 @@ export default (world: World) => {
 
     // when the confirmation prompt is removed then does the calls
     for (const [_, playerEntity, confirmationPrompt] of world.query(TargetEntity, Removed(ConfirmationPrompt))) {
+        printJecs($line, "Confirmation Prompt removed for player: ", playerEntity, " with confirmation: ", confirmationPrompt.confirmation);
         if (confirmationPrompt.confirmation) {
             // if the confirmation is true then calls the callback
             confirmationPrompt.onConfirm?.();
