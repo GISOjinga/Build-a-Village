@@ -1,5 +1,4 @@
 import { AnalyticsService, HttpService } from "@rbxts/services";
-import { VillagerNames } from "types/GlobalTypes";
 
 export enum TutorialStep {
     Start = 1,

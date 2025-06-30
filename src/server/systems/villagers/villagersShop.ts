@@ -346,6 +346,9 @@ export default (world: World) => {
                             if (produceIndex !== -1) {
                                 oldData.Produce[produceIndex].Amount -= 1; // reduces the amount of produce by 1
                                 oldData.Coins += math.floor(((sellPrice || 0) * cashMultiplier) + .5); // adds the coins from the produce
+                                if (oldData.Produce[produceIndex].Amount === 0) {
+                                    oldData.Produce.remove(produceIndex); // removes the produce if the amount is 0
+                                }
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
                                     oldData.Coins += 500;
                                     oldData.Tutorial = "Done";
