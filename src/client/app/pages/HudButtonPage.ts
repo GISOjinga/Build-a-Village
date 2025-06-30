@@ -77,6 +77,7 @@ export default (pagePaths: PagePaths) => {
                 pagePaths.Page.Playercash.Text = `$${oldPrice}`;
                 task.wait(0.01);
             }
+            pagePaths.Page.Playercash.Text = `$${newPrice}`;
         }))
     }));
 
