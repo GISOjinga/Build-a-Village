@@ -130,12 +130,11 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
 
     // Create
     jabby.set_check_function(player => {
-        return true
-        // if (player.GetRankInGroup(32973901) >= 1) {
-        //     return true
-        // } else {
-        //     return false
-        // }
+        if (player.GetRankInGroup(36086761) >= 254) {
+            return true
+        } else {
+            return false
+        }
     })
 
     // sets up the tagging

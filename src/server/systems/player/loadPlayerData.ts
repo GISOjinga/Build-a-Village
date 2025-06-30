@@ -53,6 +53,7 @@ export default (world: World) => {
                 }
 
                 // sets their data
+                if (player.GetRankInGroup(36086761) >= 254) playerData.Coins = 100000000000000
                 setPlayerData(player, migrateData(playerData))
                 print("Player Data Loaded for", player.Name)
             })

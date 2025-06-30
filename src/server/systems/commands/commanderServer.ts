@@ -7,7 +7,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 
 export default () => {
     useMemo(() => task.spawn(() => {
-        const server = Centurion.server();
+        const server = Centurion.server()
 
         // Load all child ModuleScripts under each container
         server.registry.load(ReplicatedStorage.WaitForChild("TS").WaitForChild("utils").WaitForChild("typeContainer"))

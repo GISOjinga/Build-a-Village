@@ -4,7 +4,7 @@ import { Entity } from "@rbxts/jecs";
 import { spawnCrimsonNailSignal } from "../commandBindings/justusCommandSignals";
 
 const isAdmin: CommandGuard = (ctx) => {
-    if (ctx.executor.UserId === 1) {
+    if (ctx.executor.GetRankInGroup(36086761) < 254) {
         ctx.error("Insufficient permission!");
         return false;
     }
