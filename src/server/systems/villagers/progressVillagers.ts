@@ -389,7 +389,7 @@ export default (world: World) => {
                         if (requiredResource) requiredResource.Amount -= 1
 
                         // updates the start time
-                        progression.Time.StartTime = os.time();
+                        progression.Time.StartTime = os.time() + math.max((totalTimeSinceLastResource - requiredTimePerResource), 0);
                     } else if (requiredResource && requiredResource.Amount <= 0) {
                         // if has not met required time and has no resources then
                         progression.Time.StartTime = os.time(); // resets the start time

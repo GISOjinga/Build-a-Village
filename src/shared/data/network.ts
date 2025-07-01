@@ -62,7 +62,7 @@ const packets = defineNamespace("gameEvents", () => {
     type T = ByteNetType<AllComponentNames>
     const villagerStruct = ByteNet.struct({
         Name: ByteNet.string as ByteNetType<VillagerNames>,
-        UniqueId: ByteNet.uint32,
+        UniqueId: ByteNet.unknown as ByteNetType<number>,
         RelativeLocation: optional(ByteNet.cframe),
         Progress: struct({
             Produce: ByteNet.string as ByteNetType<ProduceNames>,
@@ -74,7 +74,7 @@ const packets = defineNamespace("gameEvents", () => {
             Progression: struct({
                 Time: struct({
                     RequiredTimePerResource: ByteNet.uint16,
-                    StartTime: ByteNet.uint32,
+                    StartTime: ByteNet.unknown as ByteNetType<number>,
                 }),
                 Resources: struct({
                     Gold: ByteNet.uint8,
@@ -83,8 +83,8 @@ const packets = defineNamespace("gameEvents", () => {
                 }),
             }),
             Building: struct({
-                StartTime: ByteNet.uint32,
-                EndTime: ByteNet.uint32,
+                StartTime: ByteNet.unknown as ByteNetType<number>,
+                EndTime: ByteNet.unknown as ByteNetType<number>,
             }),
         }),
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
