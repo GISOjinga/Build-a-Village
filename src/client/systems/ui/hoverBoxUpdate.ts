@@ -29,7 +29,7 @@ export default (world: World) => {
     const villagerEntity = villagerModel && getEntity.fromInstance(villagerModel);
     const villagerInfo = villagerEntity && world.get(villagerEntity, Villager);
     const buildingTimes = villagerInfo && villagerInfo.villagerData.Progress.Building
-    const timeTillFullyBuilt = buildingTimes && buildingTimes.EndTime - os.time();
+    const timeTillFullyBuilt = buildingTimes && (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
     const progressionInfo = villagerInfo && villagerInfo.villagerData.Progress
     const produce = progressionInfo && progressionInfo.Produce;
     const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
@@ -39,7 +39,7 @@ export default (world: World) => {
     const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
     const timeTillNextProduce = progressionInfo && produceEndTime && produceEndTime - os.time() > 0 ? produceEndTime - os.time() : 0;
     const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
-    const totalProduce = resources && ((resources.Normal + resources.Gold + resources.Rainbow) || 0);
+    const totalProduce = resources && resources.size();
     const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
 
     // when the mouse moves

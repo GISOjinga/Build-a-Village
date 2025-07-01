@@ -196,15 +196,11 @@ type VillagerProgress = {
             RequiredTimePerResource: number;
             StartTime: number;
         }
-        Resources: {
-            Normal: number;
-            Gold: number,
-            Rainbow: number,
-        }
+        Resources: Array<ProduceVariant>;
     };
     Building: {
         StartTime: number;
-        EndTime: number;
+        TotalTime: number;
     };
 }
 

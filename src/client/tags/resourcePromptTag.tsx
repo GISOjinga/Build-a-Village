@@ -32,6 +32,7 @@ export default (isTagged: boolean, resourcePrompt: ProximityPrompt, world: World
 
         // when the prompt is activated
         resourcePrompt.PromptShown.Connect(() => {
+            task.wait()
             const produceName = model.GetAttribute("ProduceName") as ProduceNames;
             const produceVariant = model.GetAttribute("Variant") as ProduceVariant;
 

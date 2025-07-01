@@ -45,7 +45,7 @@ export default (world: World) => {
                 villagerData.Progress = deepCopy(villagersProgressData.get(villagerName)!);
                 villagerData.Progress.Progression.Time.StartTime = os.time();
                 villagerData.Progress.Building.StartTime = os.time();
-                villagerData.Progress.Building.EndTime = os.time() + 5;
+                villagerData.Progress.Building.TotalTime = 5;
                 if (oldData.Tutorial === 1 && villagerName === "Farmer") {
                     oldData.Tutorial = 2
                     logTutorialStep(player, TutorialStep.FarmerPlaced, "tutorial_farmer_placed")

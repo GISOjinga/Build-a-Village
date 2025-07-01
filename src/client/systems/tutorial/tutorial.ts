@@ -26,7 +26,7 @@ function updateMessage(stage: PlayerData["Tutorial"], force: boolean = false) {
     }
 }
 
-export default function tutorial(world: World) {
+export default (world: World) => {
     const bodyEntity = getEntity.fromInstance(player);
     const serverEntity = player.GetAttribute<Entity>("ServerId");
     if (!bodyEntity || !serverEntity) return;

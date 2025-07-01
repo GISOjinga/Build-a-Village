@@ -69,22 +69,18 @@ const packets = defineNamespace("gameEvents", () => {
             Required: optional(struct({
                 Produce: ByteNet.string as ByteNetType<ProduceNames>,
                 Amount: ByteNet.uint16,
-                Max: ByteNet.uint16,
+                Max: ByteNet.uint8,
             })),
             Progression: struct({
                 Time: struct({
                     RequiredTimePerResource: ByteNet.uint16,
                     StartTime: ByteNet.unknown as ByteNetType<number>,
                 }),
-                Resources: struct({
-                    Gold: ByteNet.uint8,
-                    Normal: ByteNet.uint8,
-                    Rainbow: ByteNet.uint8
-                }),
+                Resources: array(ByteNet.string as ByteNetType<ProduceVariant>),
             }),
             Building: struct({
                 StartTime: ByteNet.unknown as ByteNetType<number>,
-                EndTime: ByteNet.unknown as ByteNetType<number>,
+                TotalTime: ByteNet.uint16 as ByteNetType<number>,
             }),
         }),
     }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;

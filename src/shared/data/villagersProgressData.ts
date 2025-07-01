@@ -19,15 +19,11 @@ paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
 				RequiredTimePerResource: villager.GetAttribute("RequiredTimePerResource") as number || 10,
 				StartTime: 0,
 			},
-			Resources: {
-				Gold: 0,
-				Normal: 0,
-				Rainbow: 0,
-			},
+			Resources: [],
 		},
 		Building: {
 			StartTime: 0,
-			EndTime: 0,
+			TotalTime: 0,
 		},
 	} satisfies VillagerProgress)
 })
