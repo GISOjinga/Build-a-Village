@@ -22,9 +22,13 @@ export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player);
 
     // updates the villager shop data
-    useRoute(routes.updateVillagersShop, ({ TimeTillRestock, Villagers }) => {
-        tmeTillRestock = TimeTillRestock;
+    useRoute(routes.updateVillagersShop, (Villagers) => {
         pageStates.villagersShop(Villagers);
+    })
+
+    // update restock time
+    useRoute(routes.updateRestockTime, (time) => {
+        tmeTillRestock = time;
     })
 
     // updates the walls shop data

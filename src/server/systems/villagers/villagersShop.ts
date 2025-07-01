@@ -7,22 +7,29 @@ import { addComponent, createEntity, getEntity, printJecs, printTS, removeCompon
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
-import { selectVillagerToRestock } from "./villagerAlgorithim";
+import { getVillagersToRestock } from "./villagerAlgorithim";
 import { logTutorialStep, TutorialStep, logVillagerPurchase } from "../../utils/analytics";
 import paths from "shared/utils/paths";
+import villagersProgressData from "shared/data/villagersProgressData";
+import { deepCopy } from "@rbxts/object-utils";
 
 
 
-let timeTillRestock = os.time() + 60 * 5
-const takeVillagerFromStock = (villagerName: VillagerNames) => {
-    const villagersShopData = ShopData.Villagers;
+let timeTillRestock = os.time() + 5 * 60
+const takeVillagerFromStock = (villagerName: VillagerNames, player: Player) => {
+    const villagersShopData = getPlayersStock(player);
     const villagerIndex = villagersShopData.findIndex((villager) => villager.Name === villagerName);
     const villagerData = villagersShopData[villagerIndex];
 
     // if the villager is in stock then take from stock
     if (villagerData.InStock > 0) {
-        villagerData.InStock -= 1;
-        ShopData.Villagers = [...villagersShopData]
+        updatePlayersStock((stock) => {
+            stock[villagerIndex] = {
+                ...stock[villagerIndex],
+                InStock: stock[villagerIndex].InStock - 1,
+            };
+            return stock;
+        }, player); // updates the stock to the new stock
         return true;
     }
 
@@ -30,57 +37,57 @@ const takeVillagerFromStock = (villagerName: VillagerNames) => {
     return false;
 }
 
+// a maping of a players stock
+const _playerStock = new WeakMap<Player, typeof ShopData.Villagers>();
+
+// to update stock
+function updatePlayersStock(updateFunc: (oldStock: Array<VillagerInfo>) => Array<VillagerInfo>, player: Player): void {
+    const newStock = updateFunc(getPlayersStock(player));
+    _playerStock.set(player, newStock);
+    routes.updateVillagersShop.sendTo(newStock, player);
+}
+
+
+
+// get a read only version of the player stock
+function getPlayersStock(player: Player): Array<VillagerInfo> {
+    if (!_playerStock.has(player)) {
+        const villagersToRestock = getVillagersToRestock()
+        _playerStock.set(player, deepCopy(ShopData.Villagers));
+        updatePlayersStock((stock) => {
+            stock.forEach((villager) => { villager.InStock = villagersToRestock.findIndex((v) => v === villager.Name) !== -1 ? 20 : 0 });
+            return stock;
+        }, player);
+    }
+
+    return _playerStock.get(player)!
+}
+
+
 
 export default (world: World) => {
     // if the restock total time is 0 or less than 0 then restock a random villager
     if ((timeTillRestock - os.time()) <= 0) {
-        const villagersShopData = ShopData.Villagers;
-        const villagerIndex = selectVillagerToRestock();
+        const villagersToRestock = getVillagersToRestock()
 
-        if (villagerIndex !== undefined) {
-            const villagerData = villagersShopData[villagerIndex];
+        // sets the time till restock to the current time + the random time
+        timeTillRestock = os.time() + 5 * 60;
 
-            // if the villager is in stock then take from stock
-            villagerData.InStock = 20
-            ShopData.Villagers = [...villagersShopData];
-            timeTillRestock = os.time() + 60 * 5; // sets the time till restock to the current time + the random time
-            routes.updateVillagersShop.sendToAll({
-                TimeTillRestock: timeTillRestock,
-                Villagers: ShopData.Villagers
-            })
-        }
+        // loops through all the player stocks and update their stocks to max
+        Players.GetPlayers().forEach((player) => {
+            updatePlayersStock((stock) => {
+                stock.forEach((villager) => { villager.InStock = villagersToRestock.findIndex((v) => v === villager.Name) !== -1 ? 20 : 0 });
+                return stock;
+            }, player);
+            routes.updateRestockTime.sendTo(timeTillRestock, player);
+        })
     }
 
     // when ever a player gets added sends out the villagers
     for (const [_, player] of world.query(Added(Player))) {
-        routes.updateVillagersShop.sendTo({
-            TimeTillRestock: timeTillRestock,
-            Villagers: ShopData.Villagers
-        }, player)
+        getPlayersStock(player);
+        routes.updateRestockTime.sendTo(timeTillRestock, player);
     }
-
-    // any time villager shop data changes, update the villagers shop
-    useMemo(() => routes.updateVillagersShop.sendToAll({
-        TimeTillRestock: timeTillRestock,
-        Villagers: ShopData.Villagers,
-    }), [tostring(ShopData.Villagers)])
-
-    // game initially starts fully stocks everything
-    useMemo(() => {
-        const newData = new Array<VillagerInfo>();
-        const fullStockCount = 20;
-
-        // set the full stock count for each villager
-        ShopData.Villagers.forEach((villager, index) => {
-            newData[index] = {
-                ...villager,
-                InStock: fullStockCount,
-            };
-        })
-
-        // update the shop data with the new data
-        ShopData.Villagers = newData;
-    }, [])
 
 
     // when ever gift to is called
@@ -227,15 +234,15 @@ export default (world: World) => {
                     const newData = new Array<VillagerInfo>();
 
                     // loops through all villagers and restocks them
-                    ShopData.Villagers.forEach((villager, index) => {
-                        newData[index] = {
-                            ...villager,
-                            InStock: 20, // sets the stock to 20
-                        };
-                    });
-
-                    // updates the shop data with the new data
-                    ShopData.Villagers = newData;
+                    updatePlayersStock((stock) => {
+                        stock.forEach((villager, index) => {
+                            newData[index] = {
+                                ...villager,
+                                InStock: 20, // sets the stock to 20
+                            };
+                        });
+                        return newData;
+                    }, player); // updates the stock to the new stock
                 } else if (productId === 3309650571) { // produce all
                     // adds a produce all to the player
                     if (playerEntity) addComponent(playerEntity, ProduceAll)
@@ -425,7 +432,7 @@ export default (world: World) => {
                         if (oldData.Tutorial === 0 && villagerData.Name === "Farmer") oldData.Tutorial = 1
 
                         // takes from stock and sets the new shop data
-                        takeVillagerFromStock(villagerData.Name)
+                        takeVillagerFromStock(villagerData.Name, player)
                         if (!alreadyOwned) {
                             logVillagerPurchase(player, villagerData.Name)
                             if (villagerData.Name === "Farmer" && data.Tutorial === 0) {

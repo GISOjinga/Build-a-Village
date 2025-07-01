@@ -63,3 +63,54 @@ export function getInstanceByName(fullName: string): Instance | undefined {
     // Return the found instance
     return currentInstance;
 }
+
+
+function serializeValue(value: unknown): unknown {
+    if (typeIs(value, "Vector3")) {
+        return { __type: "Vector3", x: value.X, y: value.Y, z: value.Z };
+    } else if (typeIs(value, "CFrame")) {
+        return { __type: "CFrame", components: value.GetComponents() };
+    } else if (typeIs(value, "Color3")) {
+        return { __type: "Color3", r: value.R, g: value.G, b: value.B };
+    } else if (typeIs(value, "EnumItem")) {
+        return { __type: "EnumItem", value: tostring(value) };
+    } else {
+        return value;
+    }
+}
+
+function deserializeValue(value: unknown): unknown {
+    if (typeIs(value, "table") && value !== undefined) {
+        const t = value as { __type: string } & { [key in any]: never }
+        if (t.__type === "Vector3") {
+            return new Vector3(t.x, t.y, t.z);
+        } else if (t.__type === "CFrame") {
+            const components = (t as unknown as { components: number[] }).components
+            return new CFrame(...components as [number, number, number, number, number, number, number, number, number, number, number, number]);
+        } else if (t.__type === "Color3") {
+            return new Color3(t.r, t.g, t.b);
+        } else if (t.__type === "EnumItem") {
+            const parts = (t as unknown as { value: string }).value.split(".");
+            return (Enum as never)[parts[1]][parts[2]];
+        }
+    }
+    return value;
+}
+
+export function instanceToAttributeTree(instance: Instance): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    const attributes: Record<string, unknown> = {};
+
+    for (const [key, value] of pairs(instance.GetAttributes())) {
+        attributes[key] = serializeValue(value);
+    }
+
+    for (const child of instance.GetChildren()) {
+        const childTree = instanceToAttributeTree(child);
+        for (const [childName, childData] of pairs(childTree)) {
+            attributes[childName] = childData;
+        }
+    }
+    result[instance.Name] = attributes;
+    return result;
+}

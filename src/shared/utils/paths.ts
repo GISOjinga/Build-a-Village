@@ -5,5 +5,6 @@ export default {
     Assets: ReplicatedStorage.WaitForChild("Assets") as Assets,
     Map: Workspace.WaitForChild("GameMap") as GameMap,
     TestPlacementFolder: Workspace.WaitForChild("TestPlacementFolder") as Folder,
-    SFX: SoundService.WaitForChild("SFXFolder") as SFXFolder
+    SFX: SoundService.WaitForChild("SFXFolder") as SFXFolder,
+    GameSettingsConfig: ReplicatedStorage.WaitForChild("GameSettingsConfig") as GameSettingsConfig,
 }

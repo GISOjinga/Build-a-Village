@@ -219,12 +219,14 @@ const packets = defineNamespace("gameEvents", () => {
             }),
         }),
 
+        // update restock time
+        updateRestockTime: definePacket({
+            value: ByteNet.uint32,
+        }),
+
         // update shop villagers
         updateVillagersShop: definePacket({
-            value: struct({
-                TimeTillRestock: ByteNet.uint32,
-                Villagers: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
-            }),
+            value: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
         }),
 
         // teleport to your village
