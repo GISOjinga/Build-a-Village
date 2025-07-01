@@ -53,8 +53,6 @@ const takeResourceSpot = (villagerModel: VillagerModel, variant: ProduceVariant)
             model.GetDescendants().forEach((child) => {
                 if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
                     child.Destroy();
-                } else {
-                    toggleTransparency(child, true)
                 }
             });
 
@@ -93,7 +91,6 @@ export default (world: World) => {
                     model.SetAttribute("Ready", undefined);
                     model.GetDescendants().forEach((child) => {
                         if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) child.Destroy();
-                        else toggleTransparency(child, false);
                     });
                     progression.Resources[variant] -= 1;
                     addComponent(villagerEntity, Villager, { ...villagerInfo });
@@ -198,7 +195,7 @@ export default (world: World) => {
         addComponent(villagerEntity, ModelDebugger, villagerModel)
 
         // everything in resources should already be hidden
-        villagerModel.Station.Parts.Resources.GetDescendants().forEach((child) => toggleTransparency(child, false))
+        // resources will be made visible on the client when ready
         villagerModel.Station.Parts.InProgress.GetDescendants().forEach((child) => toggleTransparency(child, false))
         villagerModel.Station.Parts.ProgressFull.GetDescendants().forEach((child) => toggleTransparency(child, false))
 
@@ -281,8 +278,6 @@ export default (world: World) => {
                 model.GetDescendants().forEach((child) => {
                     if (child.IsA("Attachment") && (child.Name === "Gold" || child.Name === "Rainbow")) {
                         child.Destroy();
-                    } else {
-                        toggleTransparency(child, false)
                     }
                 });
 
