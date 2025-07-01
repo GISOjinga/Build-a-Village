@@ -4,12 +4,22 @@
 //----------------------------------------------------------------------------------
 
 import { Janitor } from "@rbxts/janitor";
-import { ReplicatedStorage, TweenService, UserInputService } from "@rbxts/services";
+import { Players, ReplicatedStorage, TweenService, UserInputService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { warnTS } from "../functions/jecsHelpFunctions";
 
+
+// variables
+const player = Players.LocalPlayer;
+const controlModule = require(player.WaitForChild("PlayerScripts").WaitForChild<ModuleScript>("PlayerModule").WaitForChild<ModuleScript>("ControlModule")) as { GetMoveVector(): Vector2 };
+
+function IsUsingTouchPadToWalk(): boolean {
+    return controlModule.GetMoveVector().Magnitude > 0 && UserInputService.KeyboardEnabled === false;
+}
+
 // Namespace to hold all utilities
 namespace UIUtilities {
+
     //----------------------------------------------------------------------------------
     // Determines whether a given InputObject should be treated as an activation (touch or click).
     //----------------------------------------------------------------------------------
@@ -145,6 +155,7 @@ namespace UIUtilities {
         trash.Add(
             button.InputBegan.Connect((input) => {
                 Promise.try(() => {
+                    if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (!extraControls._enabled) return;
                     if (IsInputActivated(input)) {
                         container.Size = defaultSize;
@@ -159,6 +170,7 @@ namespace UIUtilities {
         trash.Add(
             button.InputEnded.Connect((input) => {
                 Promise.try(() => {
+                    if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (!extraControls._enabled) return;
                     if (IsInputActivated(input)) {
                         trashTween.Add(TweenService.Create(container, elasticTweenInfo, { Size: defaultSize })).Play();
@@ -216,6 +228,7 @@ namespace UIUtilities {
         DeExpandedSize?: UDim2;
         HoveringTweenInfo?: TweenInfo;
         ElasticTweenInfo?: TweenInfo;
+        AccountForTouch?: boolean; // If true, uses touch input for activation
     }
 
     // Controls returned by ButtonAction, including internal flags

@@ -320,7 +320,7 @@ export default (world: World) => {
                     oldData.Produce.clear();
 
                     if (oldData.Tutorial === 3 && soldWheat) {
-                        oldData.Coins += 500;
+                        oldData.Coins += 50;
                         oldData.Tutorial = "Done";
                         logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                     }
@@ -357,7 +357,7 @@ export default (world: World) => {
                                     oldData.Produce.remove(produceIndex); // removes the produce if the amount is 0
                                 }
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
-                                    oldData.Coins += 500;
+                                    oldData.Coins += 50;
                                     oldData.Tutorial = "Done";
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
@@ -406,7 +406,7 @@ export default (world: World) => {
 
         // if data then
         if (data) {
-            const villagerData = ShopData.Villagers[villagerIndex]
+            const villagerData = getPlayersStock(player)[villagerIndex];
             const totalPrice = villagerData.Price;
             const alreadyOwned = data.Villagers.some(v => v.Name === villagerData.Name);
 

@@ -1,7 +1,7 @@
 import { PlayerData } from "../../../../shared/data/defaultData";
 
 const playerData = new Map<Player, PlayerData>()
-export const dataStore = game.GetService("DataStoreService").GetDataStore("Build A Village v.0.0.4")
+export const dataStore = game.GetService("DataStoreService").GetDataStore("Build A Village v.0.0.5")
 
 // lets you get the players data
 export function waitForPlayerData(player: Player) {

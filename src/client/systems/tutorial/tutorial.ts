@@ -62,7 +62,7 @@ export default (world: World) => {
             // if stage was 3 then changed to done then
             if (currentStage === "Done") {
                 if (oldData?.Tutorial === 3) {
-                    pageStates.introText({ text: "Well done! +500 Coins.", duration: 5 });
+                    pageStates.introText({ text: "Well done! +50 Coins.", duration: 5 });
                 } else {
                     pageStates.introText({ text: "", duration: 5 });
                 }

@@ -6,7 +6,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, Data, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -69,9 +69,9 @@ export default (world: World) => {
                 const toolInHand = body.model.FindFirstChildOfClass("Tool");
                 const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
                 const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
-                const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
                 if (toolType === "Commodity" && toolName === requiredResource.Produce) {
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
+                        const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
                         const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
                         const produce = oldData.Produce[produceIndex];
                         const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);

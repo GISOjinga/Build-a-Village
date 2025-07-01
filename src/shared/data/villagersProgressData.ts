@@ -5,6 +5,7 @@ const villagersProgressData = new Map<VillagerNames, VillagerProgress>()
 
 // This is a placeholder for the villagers data.
 paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
+	const maxResources = villager.Station.Parts.Resources.GetChildren().size()
     const requiredProduceName = villager.GetAttribute<string>("RequiredProduceName")
     const requiredAmount = villager.GetAttribute<number>("RequiredProduceAmount") || 0
 	villagersProgressData.set(villager.Name as VillagerNames, {
@@ -12,7 +13,7 @@ paths.Assets.Villagers.GetChildren<VillagerModel>().forEach((villager) => {
         Required: (requiredProduceName && requiredProduceName !== "" && requiredAmount > 0) ? {
             Produce: requiredProduceName as ProduceNames,
             Amount: 0,
-            Max: requiredAmount,
+            Max: maxResources,
         } : undefined,
 		Progression: {
 			Time: {

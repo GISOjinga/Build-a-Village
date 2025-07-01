@@ -43,7 +43,7 @@ export default (world: World) => {
         const results = Tracer.ray(rootCFrame.Position, Vector3.yAxis, -6).useRaycastParams(Raycast.Include.Floors).run()
 
         // sets the walkspeed
-        body.humanoid.WalkSpeed = results.hit ? 16 : 20;
+        body.humanoid.WalkSpeed = results.hit ? 16 : 25;
     }
 
     // loops through all the gifting prompts watching

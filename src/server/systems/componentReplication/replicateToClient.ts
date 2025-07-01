@@ -78,7 +78,7 @@ function serializeForReplication(data: unknown): unknown {
     // 1) If it's an Instance, replace with its FullName path
     if (typeIs(data, "Instance")) {
         return {
-            __ByteNetInstancePath: setInstanceWithUniqueId(data as Instance),
+            __ByteNetInstancePath: data //setInstanceWithUniqueId(data as Instance),
         } as never
     }
 

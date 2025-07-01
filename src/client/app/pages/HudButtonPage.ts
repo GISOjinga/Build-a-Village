@@ -49,6 +49,7 @@ export default (pagePaths: PagePaths) => {
         Button: pagePaths.HUD.Shop,
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
+        AccountForTouch: true,
     }, () => {
         pageStates.openPage("RobuxStore");
     }))

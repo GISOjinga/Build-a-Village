@@ -7,7 +7,7 @@ import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { rayParamsInclude } from "shared/utils/functions/rayFunctions";
 import { formatToHHMMSS, formatToMMSS } from "shared/utils/functions/stringHelp";
-import { Changed, Data, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { Body, Changed, Data, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 
 
 // variables
@@ -18,7 +18,7 @@ const mouse = player.GetMouse()
 export default (world: World) => {
     const camera = Workspace.Camera;
     const clientEntity = getEntity.fromInstance(player);
-    const body = getEntity.bodyFromPlayer(player);
+    const body = clientEntity && world.get(clientEntity, Body);
     const playerData = clientEntity && world.get(clientEntity, Data);
     const platform = body && body.platform;
     const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
@@ -52,26 +52,31 @@ export default (world: World) => {
     // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
     // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
     if (villagerEntity && totalProduce === maxProduce) {
+        // printTS($line, "Villager is fully built: ", villagerEntity, "Produce: ", produce, "Total Produce: ", totalProduce, "Max Produce: ", maxProduce);
         pageStates.hoverInfo({
             visible: true,
             info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
         });
     } else if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
+        // printTS($line, "Villager is building: ", villagerEntity, "Produce: ", produce, "Time Till Fully Built: ", timeTillFullyBuilt);
         pageStates.hoverInfo({
             visible: true,
             info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
         })
     } else if (villagerEntity && requiredProduceName && totalRequireResources <= 0) {
+        // printTS($line, "Villager is waiting for produce: ", villagerEntity, "Required Produce: ", requiredProduceName);
         pageStates.hoverInfo({
             visible: true,
             info: `Waiting on ${requiredProduceName}`,
         })
     } else if (villagerEntity && timeTillNextProduce > 0) {
+        // printTS($line, "Villager is producing: ", villagerEntity, "Produce: ", produce, "Time Till Next Produce: ", timeTillNextProduce);
         pageStates.hoverInfo({
             visible: true,
             info: `(${totalProduce}/${maxProduce}) ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
         })
     } else if (!villagerEntity) {
+        // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
         pageStates.hoverInfo({
             visible: false,
             info: "",

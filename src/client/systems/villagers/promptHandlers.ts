@@ -18,11 +18,12 @@ export default (world: World) => {
             const owner = villagerComp.playerEntity === playerEntity;
             const required = villagerComp.villagerData.Progress.Required;
             const requirementPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt;
+            const totalResources = villagerComp.villagerData.Progress.Progression.Resources.size();
 
             requirementPrompt.ActionText = (owner && required && required.Amount < required.Max)
                 ? `Requires ${required.Produce}`
                 : "";
-            requirementPrompt.Enabled = owner && required ? required.Amount < required.Max : false;
+            requirementPrompt.Enabled = owner && required ? ((required.Amount + totalResources) < required.Max) : false;
 
             if (owner) for (const [] of useEvent(requirementPrompt.Triggered, debug.traceback() + villagerEntity)) routes.supplyVillager.send(villagerEntity)
 

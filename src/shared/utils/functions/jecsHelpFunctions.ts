@@ -33,7 +33,11 @@ export const checkEntity = {
 
 // for getting
 export const getEntity = {
-    replicatedFromServerEntity: (serverEntity: Entity) => world.query(components.ReplicatedComponent, serverEntity).iter()()[0],
+    replicatedFromServerEntity: (serverEntity: Entity) => {
+        for (const [replicatedEntity, serverEntity2] of world.query(components.ReplicatedComponent)) {
+            if (serverEntity2 === serverEntity) return replicatedEntity
+        }
+    },
 
     // gets you the body from entity
     bodyFromPlayer: (player:Player) => {
@@ -131,7 +135,7 @@ export const createEntity = {
         villagerModel.SetAttribute("UniqueId", villagerData.UniqueId)
         villagerModel.PivotTo(platform.Floor.CFrame.mul(villagerData.RelativeLocation || new CFrame(0, 0, 0)))
         villagerModel.Parent = platform.Villagers
-
+        
         // sets the villager
         addComponent(villagerEntity, pair(components.TargetEntity, components.Platform), platformEntity)
         addComponent(villagerEntity, components.ModelDebugger, villagerModel)
@@ -224,7 +228,6 @@ export const createEntity = {
         const replicatedEntity = world.entity()
 
         // adds relationship
-        world.add(replicatedEntity, serverEntity as Entity<undefined>)
         world.set(replicatedEntity, components.ReplicatedComponent, serverEntity)
 
         // returns it

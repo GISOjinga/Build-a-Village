@@ -37,7 +37,7 @@ function checkData(data?: unknown) {
         // if data is a table then check each value
         if (typeIs(value, "table")) {
             if ("__ByteNetInstancePath" in value) {
-                const instance = getInstanceByUniqueIdPath(value.__ByteNetInstancePath as string[])
+                const instance = value.__ByteNetInstancePath//getInstanceByUniqueIdPath(value.__ByteNetInstancePath as string[])
 
                 if (!instance) {
                     return [false, path]
@@ -68,7 +68,7 @@ function checkData(data?: unknown) {
     // if data is a table and has __ByteNetInstancePath then return true
     if (typeIs(data, "table")) {
         if ("__ByteNetInstancePath" in data) {
-            const instance = getInstanceByUniqueIdPath(data.__ByteNetInstancePath as string[])
+            const instance = data.__ByteNetInstancePath// getInstanceByUniqueIdPath(data.__ByteNetInstancePath as string[])
 
             // if instance is not in the world then return false
             if (!instance) {

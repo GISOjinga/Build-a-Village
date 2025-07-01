@@ -67,20 +67,22 @@ export default (pagePaths: PagePaths) => {
     trash.Add(useEffect((newTrash) => {
         const villagersShop = pageStates.villagersShop();
         const buyButtonFocus = pageStates.buyButtonFocus();
-
         // cleans up the old ones
         villagersContent.GetChildren().forEach((child) => {
-            if (child.IsA("ImageButton") && child !== buyButton && child !== exampleBox) child.Destroy();
+            if (child.IsA("ImageButton") && child !== buyButton && child !== exampleBox) {
+                child.SetAttribute("InUse", false);
+            }
         })
 
         // loads them in
         villagersShop.forEach((villagerInfo, index) => {
-            const villagerBox = exampleBox.Clone();
+            const villagerBox = villagersContent.FindFirstChild<typeof exampleBox>(villagerInfo.Name) || exampleBox.Clone();
             const sizeOffset = UDim2.fromScale(1.01, 1.01);
             const rarityImage = villagerBox.FindFirstChild("Rarity" + villagerInfo.Rarity) as ImageLabel | undefined;
             const villagerRenderViewPort = paths.Assets.UI.VillagerRenders.FindFirstChild(villagerInfo.Name)?.Clone() as ViewportFrame | undefined;
 
             // set up
+            villagerBox.SetAttribute("InUse", true);
             villagerBox.Visible = true;
             villagerBox.Name = villagerInfo.Name;
             villagerBox.LayoutOrder = (index + 1) * 2;
@@ -111,6 +113,11 @@ export default (pagePaths: PagePaths) => {
                 })
             }))
         })
+
+        villagersContent.GetChildren().forEach((child) => {
+            if (child.IsA("ImageButton") && child !== buyButton && child !== exampleBox && !child.GetAttribute("InUse")) child.Destroy();
+        })
+
     }))
 
 
