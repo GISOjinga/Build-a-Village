@@ -40,6 +40,7 @@ import confirmationPrompt from "./systems/ui/confirmationPrompt";
 import promotions from "./systems/ui/promotions";
 import tutorial from "./systems/tutorial/tutorial";
 import promptHandlers from "./systems/villagers/promptHandlers";
+import resourceVisibility from "./systems/villagers/resourceVisibility";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -123,6 +124,7 @@ const debug = setupMatter([
     { system: playerDataUpdate },
     { system: shopDataUpdate },
     { system: updateWallsForSale },
+    { system: resourceVisibility },
     { system: promptHandlers },
     { system: tutorial },
     { system: confirmationPrompt },
