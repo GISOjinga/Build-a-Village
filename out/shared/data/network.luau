@@ -159,6 +159,7 @@ do
 		jingaRemote:FireServer(self.name, self:searlizeToBuffer(data))
 	end
 end
+local anotherNewRoute = (function() end)()
 -- === Example Remote Bindings === //
 local routes = (function()
 	local componentRecord = function(data)
@@ -333,5 +334,6 @@ return {
 	entity = entity,
 	inst = inst,
 	Network = Network,
+	anotherNewRoute = anotherNewRoute,
 	routes = routes,
 }

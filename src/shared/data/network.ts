@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
-import Squash, { Cursor, SerDes, OptionalSerDes, record, array, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack } from "@rbxts/squash";
+import Squash, { Cursor, SerDes, OptionalSerDes, record, array, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack, Optional } from "@rbxts/squash";
 import { getUniqueIdPathFromInstance, getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
@@ -20,44 +20,54 @@ const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes"
         })());
 
 
-// === Base JingaNet Type === //
-export type JingaNetType<T> = SerDes<T>;
+type JingaNetType<T> =
+    T extends (...args: any[]) => any ? T :
+    T extends Array<infer U> ? SerDes<Array<JingaNetType<U>>> :
+    T extends Record<string, unknown> ? { [K in keyof T]: JingaNetType<T[K]> } :
+    T extends CFrame ? SerDes<CFrame> :
+    T extends Vector3 ? SerDes<Vector3> :
+    T extends Vector2 ? SerDes<Vector2> :
+    T extends string ? SerDes<string> :
+    T extends number ? SerDes<number> :
+    T extends boolean ? SerDes<boolean> :
+    T extends Instance ? SerDes<Instance> : // loose fallback
+    T;
 
 
 // === Primitive Types === //
-const optional = Squash.opt;
-type arr<T extends unknown> = SerDes<T[]>;
-export const int8 = Squash.int(1)
-export const int16 = Squash.int(2);
-export const int32 = Squash.int(4);
-export const uint8 = Squash.uint(1);
-export const uint16 = Squash.uint(2);
-export const uint32 = Squash.uint(4);
-export const float32 = Squash.number(4);
-export const float64 = Squash.number(8);
-export const str = Squash.string();
-export const bool = Squash.boolean() as unknown as SerDes<boolean>;
-export const cframe = Squash.CFrame(Squash.number(4));
-export const vec3 = Squash.Vector3(Squash.number(4));
-export const vec2 = Squash.Vector2(Squash.number(4));
+const optional = Squash.opt as <SerDesType extends AnySerDesType>(serdes: SerDesType) => OptionalSerDes<SerDesType>;
+export const int8 = Squash.int(1) as JingaNetType<number>;
+export const int16 = Squash.int(2) as JingaNetType<number>;
+export const int32 = Squash.int(4) as JingaNetType<number>;
+export const uint8 = Squash.uint(1) as JingaNetType<number>;
+export const uint16 = Squash.uint(2) as JingaNetType<number>;
+export const uint32 = Squash.uint(4) as JingaNetType<number>;
+export const float32 = Squash.number(4) as JingaNetType<number>;
+export const float64 = Squash.number(8) as JingaNetType<number>;
+export const str = Squash.string() as JingaNetType<string>;
+export const bool = Squash.boolean() as unknown as JingaNetType<boolean>;
+export const cframe = Squash.CFrame(Squash.number(4)) as unknown as JingaNetType<CFrame>;
+export const vec3 = Squash.Vector3(Squash.number(4)) as unknown as JingaNetType<Vector3>;
+export const vec2 = Squash.Vector2(Squash.number(4)) as unknown as JingaNetType<Vector2>;
 export const nothing = {
     ser(this: void): void { },
     des(this: void): void { },
-} as unknown as SerDes<undefined>;
+} as unknown as JingaNetType<undefined>;
 export const unknown = {
     ser(this: void, idk: unknown) { return idk },
     des(this: void, idk: unknown) { return idk },
-} as unknown as SerDes<unknown>;
-export const entity = Squash.uint(8) as unknown as SerDes<Entity>;
-export const inst = record({
+} as unknown as JingaNetType<unknown>;
+export const entity = unknown as unknown as JingaNetType<Entity>;
+export const instance = unknown as JingaNetType<Instances[keyof Instances]>;
+export const compInst = record({
     __ByteNetInstancePath: array(str),
-}) as unknown as SerDes<Instance>;
+}) as unknown as JingaNetType<Instances[keyof Instances]>;
 
 
 type ExtractSerDes<T> = T extends SerDes<infer U> ? U : never;
 
 // === Remote Type Wrapper (fixed) === //
-export class Network<J extends SerDes<any>> {
+export class Network<J extends JingaNetType<any>> {
     constructor(
         private readonly name: string,
         private readonly packet: J,
@@ -144,53 +154,107 @@ export class Network<J extends SerDes<any>> {
 
 
 
-// === Example Remote Bindings === //
-export const routes = (() => {
-    const componentRecord = <T extends SerDes<unknown>>(data: T) => record({
-        serverEntity: entity,
-        data: optional(data),
+export const anotherNewRoute = (() => {
+    const componentRecord = <T>(data: T) => ({
+        serverEntity: entity as JingaNetType<Entity>,
+        data: optional(data as never) as unknown as Optional<T>,
     })
 
-    const villagerStruct = record({
-        Name: str as SerDes<VillagerNames>,
-        UniqueId: unknown as SerDes<number>,
-        RelativeLocation: optional(cframe),
-        Progress: record({
-            Produce: str as SerDes<ProduceNames>,
-            Required: optional(record({
-                Produce: str as SerDes<ProduceNames>,
-                Amount: unknown as SerDes<number>,
-                Max: unknown as SerDes<number>,
-            })),
-            Progression: record({
-                Time: record({
+    const villagerStruct = {
+        Name: str as JingaNetType<VillagerNames>,
+        UniqueId: unknown as JingaNetType<number>,
+        RelativeLocation: optional(cframe) as unknown as JingaNetType<CFrame | undefined>,
+        Progress: {
+            Produce: str as JingaNetType<ProduceNames>,
+            Required: optional({
+                Produce: str as JingaNetType<ProduceNames>,
+                Amount: unknown as JingaNetType<number>,
+                Max: unknown as JingaNetType<number>,
+            } as never) as never,
+            Progression: {
+                Time: {
                     RequiredTimePerResource: uint16,
-                    StartTime: unknown as SerDes<number>,
-                }),
-                Resources: array(str as SerDes<ProduceVariant>),
-            }),
-            Building: record({
-                StartTime: unknown as SerDes<number>,
-                TotalTime: unknown as SerDes<number>,
-            }),
+                    StartTime: unknown as JingaNetType<number>,
+                },
+                Resources: array(str as JingaNetType<ProduceVariant>) as unknown as JingaNetType<ProduceVariant[]>,
+            },
+            Building: {
+                StartTime: unknown as JingaNetType<number>,
+                TotalTime: unknown as JingaNetType<number>,
+            },
+        },
+    } as JingaNetType<VillagerData>
+
+
+    const componentRoutes = {
+        Body: componentRecord({
+            model: compInst as JingaNetType<Model>,
+            head: compInst as JingaNetType<BasePart>,
+            humanoid: compInst as JingaNetType<Humanoid>,
+            rootPart: compInst as JingaNetType<BasePart>,
+            animator: compInst as JingaNetType<Animator>,
+            rootAttachment: compInst as JingaNetType<Attachment>,
+            platform: optional(compInst) as unknown as JingaNetType<PlatformExample | undefined>,
         }),
-    })// satisfies SerDes<VillagerData> as SerDes<VillagerData>;
 
-    const events = {
-        jecsSetup: nothing as SerDes<undefined>,
+        // villager
+        Villager: componentRecord({
+            villagerModel: compInst as JingaNetType<VillagerModel>,
+            playerEntity: entity,
+            villagerData: villagerStruct as JingaNetType<VillagerData>,
+        }),
 
-        Jump: record({
-            position: record({
-                x: float32,
-                y: float32,
-                z: float32,
-            }),
-        }) as SerDes<{ position: { x: number; y: number; z: number } }>,
+        // data
+        Data: componentRecord({
+            Version: str as JingaNetType<string>,
+            Coins: uint32,
+            Villagers: [villagerStruct] as JingaNetType<VillagerData>[],
+            Produce: array(record({
+                Name: str as JingaNetType<ProduceNames>,
+                Amount: unknown as JingaNetType<number>,
+                Variant: str as JingaNetType<ProduceVariant>,
+            })) as unknown as JingaNetType<ProduceData[]>,
+            Tutorial: unknown as JingaNetType<"Done" | number>,
+            Walls: array(record({
+                Name: str as JingaNetType<WallNames>,
+                Description: str,
+                Image: str,
+                Price: unknown as JingaNetType<number>,
+                GamePassId: unknown as JingaNetType<number>,
+                CashMultiplier: unknown as JingaNetType<number>,
+                Rarity: str as JingaNetType<WallRarity>,
+                Owned: bool,
+                Equipped: bool,
+            })) as unknown as JingaNetType<WallInfo[]>,
+            PromoCodesRedeemed: array(str),
+        }),
 
-        buyVillager: record({
+        // model debugger
+        ModelDebugger: componentRecord(compInst as JingaNetType<Model | BasePart>),
+
+        // confirmation prompt
+        ConfirmationPrompt: componentRecord({
+            title: str,
+            message: str,
+            confirmation: optional(bool) as unknown as JingaNetType<boolean | undefined>,
+            onConfirm: unknown as JingaNetType<() => void>,
+            onDecline: undefined,
+        }),
+    } satisfies {
+        [k in keyof typeof componentsToReplicate]: {
+            serverEntity: JingaNetType<Entity>;
+            data: Optional<JingaNetType<ComponentValue<MappedComponents[k]>>>
+        };
+    };
+
+    // real routes
+    const realRoutes = {
+        jecsSetup: nothing as JingaNetType<undefined>,
+
+        buyVillager: {
             villagerIndex: int16,
             currency: str,
-        }) as SerDes<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
+        } as JingaNetType<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
 
         placeVillager: cframe as SerDes<CFrame>,
 
@@ -198,12 +262,12 @@ export const routes = (() => {
 
         supplyVillager: entity,
 
-        collectVillagerProduce: record({
+        collectVillagerProduce: {
             villagerEntity: entity,
             resourceModelName: str,
-        }) as SerDes<{ villagerEntity: Entity; resourceModelName: ProduceNames }>,
+        } as JingaNetType<{ villagerEntity: Entity; resourceModelName: ProduceNames }>,
 
-        teleportToVillage: nothing as SerDes<undefined>,
+        teleportToVillage: nothing as JingaNetType<undefined>,
 
         teleportToShop: str as SerDes<"Buy" | "Sell" | "Wall">,
 
@@ -213,10 +277,10 @@ export const routes = (() => {
 
         redeemPromo: str as SerDes<string>,
 
-        promoResult: record({
+        promoResult: {
             success: bool,
             message: str,
-        }) as SerDes<{ success: boolean; message: string }>,
+        } as JingaNetType<{ success: boolean; message: string }>,
 
         confirmSellOptions: str as SerDes<"Option1" | "Option2" | "Option3" | "Option4">,
 
@@ -226,109 +290,60 @@ export const routes = (() => {
 
         updateFriendsBonus: bool as SerDes<boolean>,
 
-        sendFriendRequest: inst as SerDes<Player>,
+        sendFriendRequest: instance as JingaNetType<Player>,
 
-        notify: record({
+        notify: {
             text: str,
             duration: uint8,
-        }) as SerDes<{ text: string; duration: number }>,
+        } as JingaNetType<{ text: string; duration: number }>,
 
-        npcDialogue: record({
+        npcDialogue: {
             target: str,
             text: str,
-        }) as SerDes<{ target: "Buy" | "Sell" | "None"; text: string }>,
+        } as JingaNetType<{ target: "Buy" | "Sell" | "None"; text: string }>,
 
-        buyWall: record({
+        buyWall: {
             wallName: str,
             currency: str,
-        }) as SerDes<{ wallName: string; currency: "Coins" | "Robux" }>,
+        } as JingaNetType<{ wallName: string; currency: "Coins" | "Robux" }>,
 
-        equipWall: record({
+        equipWall: {
             wallName: str,
             equip: bool,
-        }) as SerDes<{ wallName: string; equip: boolean }>,
+        } as JingaNetType<{ wallName: string; equip: boolean }>,
 
         togglePage: str as SerDes<ReturnType<typeof pageStates.openPage>>,
 
-        giftToPlayer: record({
-            playerToGift: inst,
-            produceTool: inst,
-        }) as SerDes<{ playerToGift: Player; produceTool: Tool }>,
+        giftToPlayer: {
+            playerToGift: instance,
+            produceTool: instance,
+        } as JingaNetType<{ playerToGift: Player; produceTool: Tool }>,
 
-        playSound: record({
-            sound: inst,
-            position: optional(vec3),
-        }) as SerDes<{ sound: Sound; position?: Vector3 }>,
+        playSound: {
+            sound: instance as JingaNetType<Sound>,
+            position: optional(vec3) as unknown as JingaNetType<Vector3 | undefined>,
+        } as JingaNetType<{ sound: Sound; position?: JingaNetType<Vector3 | undefined> }>,
 
-        shopGiftTo: inst as SerDes<Player>,
+        shopGiftTo: instance as JingaNetType<Player>,
 
-        updateRobuxStore: unknown as SerDes<typeof robuxStoreData>,
+        updateRobuxStore: unknown as JingaNetType<typeof robuxStoreData>,
 
-        buyRobuxPack: record({
+        buyRobuxPack: {
             purchase: str,
-        }) as SerDes<{ purchase: keyof typeof robuxStoreData }>,
+        } as JingaNetType<{ purchase: keyof typeof robuxStoreData }>,
 
-        getReplicatedComponents: nothing as SerDes<undefined>,
+        getReplicatedComponents: nothing as JingaNetType<undefined>,
 
         deleteReplicatedEntity: entity,
+    }
 
-        ...{
-            Body: componentRecord(record({
-                model: inst as SerDes<Model>,
-                head: inst as SerDes<BasePart>,
-                humanoid: inst as SerDes<Humanoid>,
-                rootPart: inst as SerDes<BasePart>,
-                animator: inst as SerDes<Animator>,
-                rootAttachment: inst as SerDes<Attachment>,
-                platform: optional(inst as SerDes<PlatformExample>),
-            })) as never,
 
-            Villager: componentRecord(record({
-                villagerModel: inst as SerDes<VillagerModel>,
-                playerEntity: entity,
-                villagerData: villagerStruct as SerDes<VillagerData>,
-            })) as never,
+    // transforms the routes into a network component
+    const routes = {} as { [K in keyof typeof realRoutes]: Network<typeof realRoutes[K]> } & { [K in keyof typeof componentRoutes]: Network<typeof componentRoutes[K]> };
 
-            Data: componentRecord(record({
-                Version: str as SerDes<string>,
-                Coins: uint32,
-                Villagers: array(villagerStruct) as SerDes<VillagerData[]>,
-                Produce: array(record({
-                    Name: str as SerDes<ProduceNames>,
-                    Amount: unknown as SerDes<number>,
-                    Variant: str as SerDes<ProduceVariant>,
-                })),
-                Tutorial: unknown as SerDes<"Done" | number>,
-                Walls: array(record({
-                    Name: str as SerDes<WallNames>,
-                    Description: str,
-                    Image: str,
-                    Price: unknown as SerDes<number>,
-                    GamePassId: unknown as SerDes<number>,
-                    CashMultiplier: unknown as SerDes<number>,
-                    Rarity: str as SerDes<WallRarity>,
-                    Owned: bool,
-                    Equipped: bool,
-                })),
-                PromoCodesRedeemed: array(str),
-            })) as never,
+    for (const [name, packet] of pairs(realRoutes)) routes[name] = new Network(name as string, packet as JingaNetType<any>, "reliable") as any;
+    for (const [name, packet] of pairs(componentRoutes)) routes[name] = new Network(name as string, packet as JingaNetType<any>, "reliable") as any;
 
-            ConfirmationPrompt: componentRecord(record({
-                title: str,
-                message: str,
-                confirmation: optional(bool),
-                onConfirm: unknown as SerDes<() => void>,
-                onDecline: optional(unknown as SerDes<() => void>),
-            })) as never,
+    return routes;
+})()
 
-            ModelDebugger: componentRecord(inst as SerDes<Model | BasePart>) as never,
-        } satisfies {
-            [k in keyof typeof componentsToReplicate]: SerDes<ComponentValue<MappedComponents[k]>>;
-        }
-    };
-
-    type events = typeof events;
-    const realRemotes = {} as { [K in keyof events]: Network<events[K]> };
-    for (const [name, packet] of pairs(events)) realRemotes[name] = new Network(name as string, packet as SerDes<any>, "reliable") as any;
-    return realRemotes;
-})();
