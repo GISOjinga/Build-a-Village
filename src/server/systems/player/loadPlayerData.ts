@@ -9,7 +9,7 @@ import migrations from "./extra/migrations";
 import { useRoute, useRoute2 } from "shared/Plugin-Hook/hooks/use-route";
 import { routes } from "shared/data/network";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
-import { remotes } from "shared/data/newNetwork";
+import { remotes } from "shared/data/network";
 
 
 

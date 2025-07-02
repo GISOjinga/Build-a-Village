@@ -27,7 +27,7 @@ import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
 import { appendJecs } from "shared/systems/hooks/append"
-import { remotes } from "shared/data/newNetwork"
+import { remotes } from "shared/data/network"
 
 
 // sets up a instance with a unique id path
@@ -65,7 +65,8 @@ function replicateAllToPlayer(world: World, player: Player) {
             } else {
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 if (targetReplication && targetReplication[component] && !targetReplication[component].includes(player)) continue
-                routes[componentName].sendTo({ serverEntity, data: data as never }, player);
+                const payload = serializeForReplication(data) as unknown;
+                routes[componentName].sendTo({ serverEntity, data: payload as never }, player);
             }
         }
     }
@@ -73,13 +74,13 @@ function replicateAllToPlayer(world: World, player: Player) {
 
 /*****************************************************************************************
  * Helper: Recursively serialize any Instance references in `data` into
- * `{ __ByteNetInstancePath: string }` tables, preserving all other values.
+ * `{ __JingaNetInstancePath: string }` tables, preserving all other values.
  *****************************************************************************************/
 function serializeForReplication(data: unknown): unknown {
     // 1) If it's an Instance, replace with its FullName path
     if (typeIs(data, "Instance")) {
         return {
-            __ByteNetInstancePath: data //setInstanceWithUniqueId(data as Instance),
+            __JingaNetInstancePath: getUniqueIdPathFromInstance(data as Instance),
         } as never
     }
 
@@ -124,14 +125,9 @@ export default {
                     } else {
                         // Wrap in Promise.try for robust error handling
                         Promise.try(() => {
-                            // Use our serializer for ANY data shape
-                            // const payload = serializeForReplication(changed.new)
-
-                            // send the serialized payload to all target players
-                            printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
-                            // print(messageEnum)
-                            // messaging.client.emit(players, messageEnum)
-                            // route.sendToList({ serverEntity, data: changed.new as never }, players)
+                            const payload = serializeForReplication(changed.new);
+                            printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to players:", players);
+                            route.sendToList({ serverEntity, data: payload as never }, players);
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
                         })

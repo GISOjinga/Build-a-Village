@@ -12,7 +12,7 @@ import { PlanckHooksPlugin } from "shared/Plugin-Hook";
 import { Phase } from "@rbxts/planck";
 import { getInstanceByName } from "../functions/instanceFunctions";
 import { createDebugger } from "../functions/jecsHelpFunctions";
-import { remotes } from "shared/data/newNetwork";
+import { remotes } from "shared/data/network";
 
 
 
