@@ -12,7 +12,6 @@ import { PlanckHooksPlugin } from "shared/Plugin-Hook";
 import { Phase } from "@rbxts/planck";
 import { getInstanceByName } from "../functions/instanceFunctions";
 import { createDebugger } from "../functions/jecsHelpFunctions";
-import { remotes } from "shared/data/network";
 
 
 
@@ -165,7 +164,7 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
     hotReload(systems)
 
 
-    if (RunService.IsClient()) remotes.jecsSetup.client.send()
+    if (RunService.IsClient()) routes.jecsSetup.send()
 
     // return the debugger
     return debug

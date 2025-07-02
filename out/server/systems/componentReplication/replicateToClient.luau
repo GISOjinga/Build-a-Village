@@ -19,15 +19,10 @@ local componentsToReplicate = _jecsComponents.componentsToReplicate
 local Phases = _jecsComponents.Phases
 local TargetEntity = _jecsComponents.TargetEntity
 local TargetReplication = _jecsComponents.TargetReplication
-local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
-local printTS = _jecsHelpFunctions.printTS
-local warnTS = _jecsHelpFunctions.warnTS
-local _use_route = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route")
-local useRoute = _use_route.useRoute
-local useRoute2 = _use_route.useRoute2
+local warnTS = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions").warnTS
+local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
 local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local Players = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Players
-local remotes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "newNetwork").remotes
 -- sets up a instance with a unique id path
 local registeredInstance = setmetatable({}, {
 	__mode = "k",
@@ -61,6 +56,7 @@ local function setInstanceWithUniqueId(instance, uniqueIdPath)
 	end
 end
 -- to replicate to a certian player
+local serializeForReplication
 local function replicateAllToPlayer(world, player)
 	-- loops through each
 	for componentName, component in pairs(componentsToReplicate) do
@@ -84,9 +80,9 @@ local function replicateAllToPlayer(world, player)
 				if _condition then
 					continue
 				end
-				routes[componentName].sendTo({
+				routes[componentName]:sendTo({
 					serverEntity = serverEntity,
-					data = data,
+					data = serializeForReplication(data),
 				}, player)
 			end
 		end
@@ -98,12 +94,12 @@ end
 	 * `{ __ByteNetInstancePath: string }` tables, preserving all other values.
 	 ****************************************************************************************
 ]]
-local function serializeForReplication(data)
+function serializeForReplication(data)
 	-- 1) If it's an Instance, replace with its FullName path
 	local _data = data
 	if typeof(_data) == "Instance" then
 		return {
-			__ByteNetInstancePath = data,
+			__ByteNetInstancePath = setInstanceWithUniqueId(data),
 		}
 	end
 	-- 2) If it's a table, recurse into each key/value
@@ -127,12 +123,19 @@ end
 local default = {
 	phase = Phases.First,
 	system = function(world)
+		-- when ever getReplicatedComponents is called
+		useRoute(routes.getReplicatedComponents, function(_, player)
+			return replicateAllToPlayer(world, player)
+		end)
+		-- when ever player gets added
+		useRoute(routes.jecsSetup, function(_, player)
+			return replicateAllToPlayer(world, player)
+		end)
 		-- loops through each component that needs replication
 		for componentName, component in pairs(componentsToReplicate) do
 			-- for each entity whose component just changed
 			for _, serverEntity, changed in world:query(TargetEntity, Changed(component)) do
 				local route = routes[componentName]
-				-- const messageEnum = Messages[componentName]
 				local targetReplication = world:get(serverEntity, TargetReplication)
 				local _condition = targetReplication
 				if _condition ~= 0 and _condition == _condition and _condition ~= "" and _condition then
@@ -148,32 +151,25 @@ local default = {
 					error(`Missing route for component replication: {componentName}`)
 				else
 					if not world:contains(serverEntity) then
-						routes.deleteReplicatedEntity.sendToAll(serverEntity)
+						routes.deleteReplicatedEntity:sendToAll(serverEntity)
 					else
 						-- Wrap in Promise.try for robust error handling
 						TS.Promise.try(function()
 							-- Use our serializer for ANY data shape
-							-- const payload = serializeForReplication(changed.new)
+							local payload = serializeForReplication(changed.new)
 							-- send the serialized payload to all target players
-							printTS(131, `Replicating {componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
-							-- print(messageEnum)
-							-- messaging.client.emit(players, messageEnum)
-							-- route.sendToList({ serverEntity, data: changed.new as never }, players)
+							-- printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
+							route:sendToList({
+								serverEntity = serverEntity,
+								data = payload,
+							}, players)
 						end):catch(function(err)
-							warnTS(136, `Replication error for {componentName} at line {136}: {tostring(err)}`)
+							warnTS(139, `Replication error for {componentName} at line {139}: {tostring(err)}`)
 						end)
 					end
 				end
 			end
 		end
-		-- when ever getReplicatedComponents is called
-		useRoute(routes.getReplicatedComponents, function(_, player)
-			return replicateAllToPlayer(world, player)
-		end)
-		-- when ever player gets added
-		useRoute2(remotes.jecsSetup, function(_, player)
-			return replicateAllToPlayer(world, player)
-		end)
 	end,
 }
 return {

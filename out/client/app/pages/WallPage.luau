@@ -156,7 +156,7 @@ local default = function(pagePaths)
 						DeExpandedSize = UIUtilities.DivideUdim2(equipButton.Size, sizeOffset),
 					}, function()
 						printTS(102, "equipping wall", wallInfo.Name)
-						routes.equipWall.send({
+						routes.equipWall:send({
 							wallName = wallInfo.Name,
 							equip = true,
 						})
@@ -174,7 +174,7 @@ local default = function(pagePaths)
 						DeExpandedSize = UIUtilities.DivideUdim2(unequipButton.Size, sizeOffset),
 					}, function()
 						printTS(122, "unequipping wall", wallInfo.Name)
-						routes.equipWall.send({
+						routes.equipWall:send({
 							wallName = wallInfo.Name,
 							equip = false,
 						})
@@ -194,7 +194,7 @@ local default = function(pagePaths)
 						DeExpandedSize = UIUtilities.DivideUdim2(realBuyButton.Size, sizeOffset),
 					}, function()
 						printTS(144, "buying wall", wallInfo.Name, wallInfo.Price)
-						routes.buyWall.send({
+						routes.buyWall:send({
 							wallName = wallInfo.Name,
 							currency = if realBuyButton == robuxButton then "Robux" else "Coins",
 						})

@@ -11,7 +11,7 @@ local default = function(world)
 		local reward = promoCodes[string.lower(code)]
 		local playerEntity = getEntity.fromInstance(player)
 		if not (playerEntity ~= 0 and playerEntity == playerEntity and playerEntity) or not reward then
-			routes.promoResult.sendTo({
+			routes.promoResult:sendTo({
 				success = false,
 				message = "Invalid code",
 			}, player)
@@ -34,13 +34,13 @@ local default = function(world)
 				end
 				-- ▲ ReadonlyArray.find ▲
 				if _result ~= "" and _result then
-					routes.promoResult.sendTo({
+					routes.promoResult:sendTo({
 						success = false,
 						message = "Code already redeemed",
 					}, player)
 					return oldData
 				else
-					routes.promoResult.sendTo({
+					routes.promoResult:sendTo({
 						success = true,
 						message = `${reward.coins} redeemed`,
 					}, player)

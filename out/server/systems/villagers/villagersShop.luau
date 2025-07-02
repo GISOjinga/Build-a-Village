@@ -70,7 +70,7 @@ function updatePlayersStock(updateFunc, player)
 	local newStock = updateFunc(getPlayersStock(player))
 	local _player = player
 	_playerStock[_player] = newStock
-	routes.updateVillagersShop.sendTo(newStock, player)
+	routes.updateVillagersShop:sendTo(newStock, player)
 end
 -- get a read only version of the player stock
 function getPlayersStock(player)
@@ -140,7 +140,7 @@ local default = function(world)
 				-- ▲ ReadonlyArray.forEach ▲
 				return stock
 			end, player)
-			routes.updateRestockTime.sendTo(timeTillRestock, player)
+			routes.updateRestockTime:sendTo(timeTillRestock, player)
 		end
 		for _k, _v in _exp do
 			_callback(_v, _k - 1, _exp)
@@ -150,7 +150,7 @@ local default = function(world)
 	-- when ever a player gets added sends out the villagers
 	for _, player in world:query(Added(Player)) do
 		getPlayersStock(player)
-		routes.updateRestockTime.sendTo(timeTillRestock, player)
+		routes.updateRestockTime:sendTo(timeTillRestock, player)
 	end
 	-- when ever gift to is called
 	useRoute(routes.shopGiftTo, function(playerToGiftTo, player)
@@ -218,11 +218,11 @@ local default = function(world)
 						local produceIndex = _result
 						-- if not produce index
 						if produceIndex == -1 then
-							routes.notify.sendTo({
+							routes.notify:sendTo({
 								text = `Could not find {itemName} ({itemVariant}) in your inventory.`,
 								duration = 5,
 							}, playerGifting)
-							routes.notify.sendTo({
+							routes.notify:sendTo({
 								text = `{playerGifting.Name} tried to gift you {itemName} but they don't have it.`,
 								duration = 5,
 							}, playerToGift)
@@ -250,11 +250,11 @@ local default = function(world)
 							-- gives the player the produce
 							createEntity.insertProduce(playerToGiftToEntity, itemName, itemVariant, 1)
 							-- notifys them both
-							routes.notify.sendTo({
+							routes.notify:sendTo({
 								text = `You gifted {playerToGift.Name} {itemName} ({itemVariant})`,
 								duration = 5,
 							}, playerGifting)
-							routes.notify.sendTo({
+							routes.notify:sendTo({
 								text = `{playerGifting.Name} gifted you {itemName} ({itemVariant})`,
 								duration = 5,
 							}, playerToGift)
@@ -263,8 +263,8 @@ local default = function(world)
 								if not playerToGift:IsFriendsWith(playerGifting.UserId) then
 									createEntity.confirmationPrompt(playerToGiftToEntity, `Accept Friend Request?`, `Friend Request From @{playerGifting.Name}`, function()
 										printJecs(156, `Adding friend: {playerGifting.Name}`)
-										routes.sendFriendRequest.sendTo(playerGifting, playerToGift)
-										routes.sendFriendRequest.sendTo(playerToGift, playerGifting)
+										routes.sendFriendRequest:sendTo(playerGifting, playerToGift)
+										routes.sendFriendRequest:sendTo(playerToGift, playerGifting)
 									end)
 								end
 							end):catch(function(err)
@@ -275,11 +275,11 @@ local default = function(world)
 					return oldData
 				end)
 			end, function()
-				routes.notify.sendTo({
+				routes.notify:sendTo({
 					text = `Your gift to {playerToGift.Name} was declined.`,
 					duration = 5,
 				}, playerGifting)
-				routes.notify.sendTo({
+				routes.notify:sendTo({
 					text = `You declined the gift from {playerGifting.Name}.`,
 					duration = 5,
 				}, playerToGift)
@@ -318,7 +318,7 @@ local default = function(world)
 				local hasGitTo = world:has(playerEntity, GiftTo)
 				local isTheSamePlayer = playerToGiftTo and playerToGiftTo.UserId == userId
 				-- plays the purchase sound to the player
-				routes.playSound.sendTo({
+				routes.playSound:sendTo({
 					sound = paths.SFX.UI.purchasepass,
 					position = nil,
 				}, player)
@@ -338,11 +338,11 @@ local default = function(world)
 					end
 					-- notifies both players
 					if not isTheSamePlayer then
-						routes.notify.sendTo({
+						routes.notify:sendTo({
 							text = player.Name .. " has gifted you!",
 							duration = 5,
 						}, playerToGiftTo)
-						routes.notify.sendTo({
+						routes.notify:sendTo({
 							text = "You have gifted " .. playerToGiftTo.Name .. "!",
 							duration = 5,
 						}, player)
@@ -402,7 +402,7 @@ local default = function(world)
 				if _value_1 ~= 0 and _value_1 == _value_1 and _value_1 then
 					removeComponent(playerEntity, GiftTo)
 					-- plays the purchase sound to the player
-					routes.playSound.sendTo({
+					routes.playSound:sendTo({
 						sound = paths.SFX.UI.purchasefail,
 						position = nil,
 					}, player)
@@ -466,7 +466,7 @@ local default = function(world)
 				createEntity.updateData(playerEntity, function(oldData)
 					-- if you have enough
 					if (#oldData.Produce) < 1 then
-						routes.npcDialogue.sendTo({
+						routes.npcDialogue:sendTo({
 							text = "You’re not holding anything to sell.",
 							target = "Sell",
 						}, player)
@@ -579,7 +579,7 @@ local default = function(world)
 						return oldData
 					end)
 				else
-					routes.npcDialogue.sendTo({
+					routes.npcDialogue:sendTo({
 						text = "You’re not holding anything to sell.",
 						target = "Sell",
 					}, player)
@@ -603,15 +603,15 @@ local default = function(world)
 					end
 					_object[_left] = `That would sell for {math.floor((_condition_5 * totalItemCount * cashMultiplier * variantMultiplier) + .5)} Coins`
 					_object.target = "Sell"
-					_npcDialogue.sendTo(_object, player)
+					_npcDialogue:sendTo(_object, player)
 				else
-					routes.npcDialogue.sendTo({
+					routes.npcDialogue:sendTo({
 						text = "You’re not holding anything to sell.",
 						target = "Sell",
 					}, player)
 				end
 			elseif option == "Option4" then
-				routes.toggleSellMenuOpen.sendTo(false, player)
+				routes.toggleSellMenuOpen:sendTo(false, player)
 			end
 		end
 	end)
@@ -653,7 +653,7 @@ local default = function(world)
 					local currency = oldData.Coins
 					if currency >= totalPrice then
 						-- plays the purchase sound to the player
-						routes.playSound.sendTo({
+						routes.playSound:sendTo({
 							sound = paths.SFX.UI.purchasepass,
 							position = nil,
 						}, player)
@@ -673,7 +673,7 @@ local default = function(world)
 						end
 					else
 						-- plays the purchase sound to the player
-						routes.playSound.sendTo({
+						routes.playSound:sendTo({
 							sound = paths.SFX.UI.purchasefail,
 							position = nil,
 						}, player)

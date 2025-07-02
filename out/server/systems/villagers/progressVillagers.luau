@@ -243,7 +243,7 @@ local default = function(world)
 				createEntity.insertProduce(playerEntity, produceName, variant)
 				removeComponent(villagerEntity, MaxedOut)
 				-- reduces the item by 1 
-				routes.playSound.sendTo({
+				routes.playSound:sendTo({
 					sound = paths.SFX.UI.purchasepass,
 					position = nil,
 				}, player)
@@ -251,7 +251,7 @@ local default = function(world)
 				local _value = not wasPurchased and playerEntity
 				if _value ~= 0 and _value == _value and _value then
 					removeComponent(playerEntity, TakeFromVillager)
-					routes.playSound.sendTo({
+					routes.playSound:sendTo({
 						sound = paths.SFX.UI.purchasefail,
 						position = nil,
 					}, player)

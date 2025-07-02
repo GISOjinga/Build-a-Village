@@ -20,12 +20,12 @@ local useMemo = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "P
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local createEntity = _jecsHelpFunctions.createEntity
 local getEntity = _jecsHelpFunctions.getEntity
-local printJecs = _jecsHelpFunctions.printJecs
-local printTS = _jecsHelpFunctions.printTS
+local warnTS = _jecsHelpFunctions.warnTS
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
 local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local deepCopy = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils").deepCopy
 local appendJecs = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").appendJecs
+local getInstanceByUniqueIdPath = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "instanceFunctions").getInstanceByUniqueIdPath
 -- checks data for __ByteNetInstancePath to make sure it has all the instances replicated
 local function checkData(data)
 	-- recursive check/fix
@@ -34,8 +34,8 @@ local function checkData(data)
 		local _value = value
 		if type(_value) == "table" then
 			if value.__ByteNetInstancePath ~= nil then
-				local instance = value.__ByteNetInstancePath
-				if not (instance ~= 0 and instance == instance and instance ~= "" and instance) then
+				local instance = getInstanceByUniqueIdPath(value.__ByteNetInstancePath)
+				if not instance then
 					return { false, path }
 				else
 					path[index] = instance
@@ -63,9 +63,9 @@ local function checkData(data)
 	local _data = data
 	if type(_data) == "table" then
 		if data.__ByteNetInstancePath ~= nil then
-			local instance = data.__ByteNetInstancePath
+			local instance = getInstanceByUniqueIdPath(data.__ByteNetInstancePath)
 			-- if instance is not in the world then return false
-			if not (instance ~= 0 and instance == instance and instance ~= "" and instance) then
+			if not instance then
 				return false, data
 			else
 				return true, instance
@@ -102,22 +102,27 @@ local default = {
 			replicate = function(_param)
 				local serverEntity = _param.serverEntity
 				local data = _param.data
-				-- const [passed, newData] = checkData(data)
+				local passed, newData = checkData(data)
 				-- if passed then continue
-				if data ~= 0 and data == data and data ~= "" and data then
+				if passed then
 					local _condition = getEntity.replicatedFromServerEntity(serverEntity)
 					if not (_condition ~= 0 and _condition == _condition and _condition) then
 						_condition = createEntity.replicated(serverEntity)
 					end
 					local clientEntity = _condition
-					printTS(113, `Replicating {componentName} for serverEntity:`, serverEntity, "to clientEntity:", clientEntity, "with data:", data)
-					world:set(clientEntity, component, data)
+					-- if client entity and not newData then delete entity
+					if not (newData ~= 0 and newData == newData and newData ~= "" and newData) then
+						world:remove(clientEntity, component)
+					else
+						print(`Replicating {componentName} for {serverEntity}: {newData}`)
+						world:set(clientEntity, component, newData)
+					end
 				else
-					printTS(116, `Failed to replicate {componentName} for {serverEntity}: {data}. Some parts arent fully replicated will try again.`)
+					warnTS(121, `Failed to replicate {componentName} for {serverEntity}: {newData}. Some parts arent fully replicated will try again.`)
 					appendJecs(function()
 						return replicate({
 							serverEntity = serverEntity,
-							data = data,
+							data = newData,
 						})
 					end)
 				end
@@ -130,13 +135,12 @@ local default = {
 			local clientEntity = getEntity.replicatedFromServerEntity(serverEntity)
 			-- if client entity then remove
 			if clientEntity ~= 0 and clientEntity == clientEntity and clientEntity then
-				printJecs(131, "Removing replicated entity:", clientEntity, "from server entity:", serverEntity)
 				world:delete(clientEntity)
 			end
 		end)
 		-- request to get it all
 		useMemo(function()
-			return routes.getReplicatedComponents.send()
+			return routes.getReplicatedComponents:send()
 		end, {})
 	end,
 }

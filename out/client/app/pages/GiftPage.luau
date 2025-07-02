@@ -65,7 +65,7 @@ local default = function(pagePaths)
 				pageStates.openPage("None")
 				-- if produict to gift then
 				if productToGift ~= 0 and productToGift == productToGift and productToGift then
-					routes.shopGiftTo.send(player)
+					routes.shopGiftTo:send(player)
 					MarketplaceService:PromptProductPurchase(player, productToGift)
 					return nil
 				end

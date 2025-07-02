@@ -6,8 +6,8 @@ import { defineCleanupCallback } from "@rbxts/hot-reloader";
 import { Changed, Trash, world } from "shared/utils/jecs/jecsComponents";
 import { Janitor } from "@rbxts/janitor";
 import { RunService } from "@rbxts/services";
-import { routesData, routesData2 } from "shared/systems/hooks/watchRoutes";
-import { remotes } from "shared/data/network";
+import { routesData } from "shared/systems/hooks/watchRoutes";
+
 
 
 // get instance by full name
@@ -36,20 +36,10 @@ function getInstanceByName(fullName: string): Instance | undefined {
     return currentInstance;
 }
 
-// export function useRoute<T extends typeof routes[keyof typeof routes]>(
-//     route: T,
-//     callback: FirstParam<T["listen"]>,
-// ) {
-//     // if system mod descendant of players
-//     routesData.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
-// }
-
-
-// use route 2
-export function useRoute<T extends typeof remotes[keyof typeof remotes]>(
+export function useRoute<T extends typeof routes[keyof typeof routes]>(
     route: T,
-    callback: FirstParam<T["server"]["listen"]>,
+    callback: FirstParam<T["listen"]>,
 ) {
     // if system mod descendant of players
-    routesData2.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
+    routesData.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
 }

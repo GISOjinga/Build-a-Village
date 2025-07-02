@@ -13,7 +13,7 @@ local default = function(pagePaths)
 	local introTextPage = pagePaths.IntroTextPage
 	-- when ever notify is called
 	introTextPage.Visible = true
-	trash:Add(routes.notify.listen(pageStates.introText))
+	trash:Add(routes.notify:listen(pageStates.introText))
 	-- loads in each box
 	trash:Add(useEffect(function(newTrash)
 		local introText = pageStates.introText()

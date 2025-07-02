@@ -83,7 +83,7 @@ local default = function(pagePaths)
 				ExpandedSize = UIUtilities.MultiplyUdim2(buyButton.Size, sizeOffset),
 				DeExpandedSize = UIUtilities.DivideUdim2(buyButton.Size, sizeOffset),
 			}, function()
-				routes.buyRobuxPack.send({
+				routes.buyRobuxPack:send({
 					purchase = purchaseKey,
 				})
 			end))

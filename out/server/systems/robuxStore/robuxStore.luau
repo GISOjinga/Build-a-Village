@@ -72,10 +72,10 @@ local default = function(world)
 		robuxStoreData.StarterPack.Villagers = chooseVillagers(starterRng, 3)
 		robuxStoreData.LaunchPack.Villagers = chooseVillagers(launchRng, 5)
 		robuxStoreData.StarterPack.Coins = starterRng:NextInteger(1000, 5000)
-		routes.updateRobuxStore.sendToAll(robuxStoreData)
+		routes.updateRobuxStore:sendToAll(robuxStoreData)
 	end
 	for _, player in world:query(Added(Player)) do
-		routes.updateRobuxStore.sendTo(robuxStoreData, player)
+		routes.updateRobuxStore:sendTo(robuxStoreData, player)
 	end
 	-- handle client requests to buy a pack
 	useRoute(routes.buyRobuxPack, function(_param, player)
@@ -97,7 +97,7 @@ local default = function(world)
 			continue
 		end
 		if wasPurchased then
-			routes.playSound.sendTo({
+			routes.playSound:sendTo({
 				sound = paths.SFX.UI.purchasepass,
 				position = nil,
 			}, player)
@@ -112,11 +112,11 @@ local default = function(world)
 				addComponent(playerEntity, GiftTo, _object)
 				removeComponent(playerEntity, GiftTo)
 				if giftPlayer.Parent then
-					routes.notify.sendTo({
+					routes.notify:sendTo({
 						text = `{player.Name} has gifted you!`,
 						duration = 5,
 					}, giftPlayer)
-					routes.notify.sendTo({
+					routes.notify:sendTo({
 						text = `You have gifted {giftPlayer.Name}!`,
 						duration = 5,
 					}, player)
@@ -168,7 +168,7 @@ local default = function(world)
 				printTS(121, `{targetPlayer.Name} received pack`, info.purchaseName)
 			end
 		else
-			routes.playSound.sendTo({
+			routes.playSound:sendTo({
 				sound = paths.SFX.UI.purchasefail,
 				position = nil,
 			}, player)

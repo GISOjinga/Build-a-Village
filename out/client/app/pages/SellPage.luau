@@ -20,7 +20,7 @@ local default = function(sellPage)
 				trash:Add(UIUtilities.ButtonAction({
 					Button = hoverButton,
 				}, function()
-					routes.confirmSellOptions.send(option)
+					routes.confirmSellOptions:send(option)
 				end))
 			end
 		end
@@ -30,7 +30,7 @@ local default = function(sellPage)
 	end
 	-- ▲ ReadonlyArray.forEach ▲
 	-- when the route to toggle sell menu is called then
-	trash:Add(routes.toggleSellMenuOpen.listen(function(open)
+	trash:Add(routes.toggleSellMenuOpen:listen(function(open)
 		pageStates.openPage(if open then "Sell" else "None")
 	end))
 	-- listens to changes to sell menu open

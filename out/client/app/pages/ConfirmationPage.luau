@@ -40,7 +40,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(confirmPage.Decline.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(confirmPage.Decline.Size, sizeOffset),
 	}, function()
-		routes.confirmPrompt.send(false)
+		routes.confirmPrompt:send(false)
 		pageStates.confirmPrompt({
 			title = "",
 			message = "",
@@ -52,7 +52,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(confirmPage.Accept.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(confirmPage.Accept.Size, sizeOffset),
 	}, function()
-		routes.confirmPrompt.send(true)
+		routes.confirmPrompt:send(true)
 		pageStates.confirmPrompt({
 			title = "",
 			message = "",

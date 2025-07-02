@@ -139,7 +139,7 @@ local default = function(dialoguePage)
 		oldPage = pageStates.openPage()
 	end))
 	-- watches for route calls
-	trash:Add(routes.npcDialogue.listen(function(newDialogue)
+	trash:Add(routes.npcDialogue:listen(function(newDialogue)
 		return pageStates.npcDialogue(newDialogue)
 	end))
 	-- when the buy button is clicked

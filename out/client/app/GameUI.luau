@@ -19,7 +19,7 @@ local default = function(pagePaths)
 	local trash = Janitor.new()
 	local pages = { HudPage, OpenPage, VillagersPage, GiftPage, WallPage, RobuxStorePage, IntroTextPage, PlacementPage, ConfirmationPage, PromoPage, InviteIncentivePage }
 	-- listen to page changes
-	trash:Add(routes.togglePage.listen(pageStates.openPage))
+	trash:Add(routes.togglePage:listen(pageStates.openPage))
 	-- renders the hud page
 	-- ▼ ReadonlyArray.forEach ▼
 	local _callback = function(page)

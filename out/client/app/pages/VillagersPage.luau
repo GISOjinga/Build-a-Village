@@ -224,7 +224,7 @@ local default = function(pagePaths)
 				ExpandedSize = UIUtilities.MultiplyUdim2(buyButton.Normal.Size, sizeOffset),
 				DeExpandedSize = UIUtilities.DivideUdim2(buyButton.Normal.Size, sizeOffset),
 			}, function()
-				routes.buyVillager.send({
+				routes.buyVillager:send({
 					villagerIndex = buyButtonFocus.selectedVillagerIndex,
 					currency = "Coins",
 				})
@@ -235,7 +235,7 @@ local default = function(pagePaths)
 				ExpandedSize = UIUtilities.MultiplyUdim2(buyButton.Robux.Size, sizeOffset),
 				DeExpandedSize = UIUtilities.DivideUdim2(buyButton.Robux.Size, sizeOffset),
 			}, function()
-				routes.buyVillager.send({
+				routes.buyVillager:send({
 					villagerIndex = buyButtonFocus.selectedVillagerIndex,
 					currency = "Robux",
 				})

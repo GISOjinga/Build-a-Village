@@ -204,7 +204,7 @@ local default = function(world)
 		local platform = _condition_2
 		-- if platform and body then teleports the players rootpart to the platform spawn
 		if platform and body then
-			routes.togglePage.sendTo("None", player)
+			routes.togglePage:sendTo("None", player)
 			local _cFrame = platform.SpawnLocation.CFrame
 			local _arg0 = Vector3.yAxis * 5
 			body.rootPart.CFrame = _cFrame + _arg0

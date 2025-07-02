@@ -76,7 +76,7 @@ local default = function(world)
 					_result = _result.Name
 				end
 				printJecs(60, "Gifting to player: ", _exp, " with tool: ", _result)
-				routes.giftToPlayer.send({
+				routes.giftToPlayer:send({
 					playerToGift = playerToGift,
 					produceTool = equippedTool,
 				})

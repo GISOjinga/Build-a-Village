@@ -24,7 +24,7 @@ local default = function(world)
 			requirementPrompt.Enabled = if owner and required then ((required.Amount + totalResources) < required.Max) else false
 			if owner then
 				for _binding in useEvent(requirementPrompt.Triggered, debug.traceback() .. tostring(villagerEntity)) do
-					routes.supplyVillager.send(villagerEntity)
+					routes.supplyVillager:send(villagerEntity)
 				end
 			end
 			local _exp = villagerModel.Station.Parts.Resources:GetChildren()
@@ -45,7 +45,7 @@ local default = function(world)
 				prompt.Parent = proximityPromptPart
 				for _binding in useEvent(prompt.Triggered, debug.traceback() .. tostring(index) .. tostring(villagerEntity)) do
 					printJecs(41, `Collecting {model.Name} from villager: `, villagerEntity)
-					routes.collectVillagerProduce.send({
+					routes.collectVillagerProduce:send({
 						villagerEntity = villagerEntity,
 						resourceModelName = model.Name,
 					})

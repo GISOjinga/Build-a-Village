@@ -39,7 +39,7 @@ export default (world: World) => {
                 prompt.Parent = proximityPromptPart
                 for (const [] of useEvent(prompt.Triggered, debug.traceback() + index + villagerEntity)) {
                     printJecs($line, `Collecting ${model.Name} from villager: `, villagerEntity);
-                    routes.collectVillagerProduce.send({ villagerEntity, resourceModelName: model.Name });
+                    routes.collectVillagerProduce.send({ villagerEntity, resourceModelName: model.Name as ProduceNames });
                 }
             });
         }).catch((promiseError) => warnJecs($line, "Error in villager prompt handler: ", promiseError, "Villager Entity: ", villagerEntity));

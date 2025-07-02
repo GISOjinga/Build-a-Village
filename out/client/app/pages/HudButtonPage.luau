@@ -14,7 +14,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(pagePaths.HUD.Buy.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(pagePaths.HUD.Buy.Size, sizeOffset),
 	}, function()
-		routes.teleportToShop.send("Buy")
+		routes.teleportToShop:send("Buy")
 	end))
 	-- binds an action animation to sell
 	trash:Add(UIUtilities.ButtonAction({
@@ -22,7 +22,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(pagePaths.HUD.Sell.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(pagePaths.HUD.Sell.Size, sizeOffset),
 	}, function()
-		routes.teleportToShop.send("Sell")
+		routes.teleportToShop:send("Sell")
 	end))
 	-- binds an action animation to village
 	trash:Add(UIUtilities.ButtonAction({
@@ -30,7 +30,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(pagePaths.HUD.Village.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(pagePaths.HUD.Village.Size, sizeOffset),
 	}, function()
-		routes.teleportToVillage.send()
+		routes.teleportToVillage:send()
 		pageStates.openPage("None")
 	end))
 	-- binds an action animation to shop
@@ -48,7 +48,7 @@ local default = function(pagePaths)
 		ExpandedSize = UIUtilities.MultiplyUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
 		DeExpandedSize = UIUtilities.DivideUdim2(pagePaths.HUD.Walls.Size, sizeOffset),
 	}, function()
-		routes.teleportToShop.send("Wall")
+		routes.teleportToShop:send("Wall")
 	end))
 	-- updates your coins
 	trash:Add(useEffect(function(newTrash)

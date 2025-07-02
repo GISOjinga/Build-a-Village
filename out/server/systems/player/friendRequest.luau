@@ -23,8 +23,8 @@ local default = function(world)
 			printJecs(18, `Removing gift to: {playerToFriend.Name} from player: {player.Name}`)
 			createEntity.confirmationPrompt(playerToFriendEntity, `Accept Friend Request?`, `Friend Request From @{player.Name}`, function()
 				printJecs(20, `Adding friend: {playerToFriend.Name}`)
-				routes.sendFriendRequest.sendTo(playerToFriend, player)
-				routes.sendFriendRequest.sendTo(player, playerToFriend)
+				routes.sendFriendRequest:sendTo(playerToFriend, player)
+				routes.sendFriendRequest:sendTo(player, playerToFriend)
 			end)
 		end
 	end

@@ -17,7 +17,7 @@ local default = function(pagePaths)
 		DeExpandedSize = UIUtilities.DivideUdim2(promoPage.RedeemButton.Size, sizeOffset),
 	}, function()
 		local code = promoPage.TextBox.Text
-		routes.redeemPromo.send(code)
+		routes.redeemPromo:send(code)
 	end))
 	-- Close button hides the page
 	trash:Add(UIUtilities.ButtonAction({
@@ -27,7 +27,7 @@ local default = function(pagePaths)
 	}, function()
 		pageStates.openPage("None")
 	end))
-	trash:Add(routes.promoResult.listen(function(_param)
+	trash:Add(routes.promoResult:listen(function(_param)
 		local success = _param.success
 		local message = _param.message
 		promoPage.Title.Text = message

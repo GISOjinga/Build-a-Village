@@ -75,7 +75,7 @@ local default = function(world)
 					-- updates your cash if you have it
 					if oldData.Coins >= wallWishingToBeBought.Price then
 						-- plays the purchase sound to the player
-						routes.playSound.sendTo({
+						routes.playSound:sendTo({
 							sound = paths.SFX.UI.purchasepass,
 							position = nil,
 						}, player)
@@ -101,7 +101,7 @@ local default = function(world)
 						table.insert(_walls, _object)
 					else
 						-- plays the purchase sound to the player
-						routes.playSound.sendTo({
+						routes.playSound:sendTo({
 							sound = paths.SFX.UI.purchasefail,
 							position = nil,
 						}, player)
@@ -145,7 +145,7 @@ local default = function(world)
 			end
 			if _condition then
 				-- plays the purchase sound to the player
-				routes.playSound.sendTo({
+				routes.playSound:sendTo({
 					sound = paths.SFX.UI.purchasepass,
 					position = nil,
 				}, player)
@@ -163,7 +163,7 @@ local default = function(world)
 				end)
 			else
 				-- plays the purchase sound to the player
-				routes.playSound.sendTo({
+				routes.playSound:sendTo({
 					sound = paths.SFX.UI.purchasefail,
 					position = nil,
 				}, player)

@@ -26,7 +26,7 @@ local default = function(world)
 						addComponent(playerEntity, FriendsBonus, {
 							multiplier = multiplier,
 						})
-						routes.updateFriendsBonus.sendTo(true, player)
+						routes.updateFriendsBonus:sendTo(true, player)
 						return nil
 					end
 				end

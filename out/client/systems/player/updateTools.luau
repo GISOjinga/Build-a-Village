@@ -120,13 +120,13 @@ local default = function(world)
 	if pageStates.placeVillager() and fakeModel and goalCFrame and not UserInputService.KeyboardEnabled then
 		printJecs(122, "Placing villager at", goalCFrame)
 		pageStates.placeVillager(false)
-		routes.placeVillager.send(goalCFrame)
+		routes.placeVillager:send(goalCFrame)
 	else
 		local _value = pageStates.digVillager() and villagerServerEntityToDig
 		if _value ~= 0 and _value == _value and _value then
 			printJecs(126, "Digging villager at", goalCFrame)
 			pageStates.digVillager(false)
-			routes.digVillager.send(villagerServerEntityToDig)
+			routes.digVillager:send(villagerServerEntityToDig)
 		end
 	end
 	-- when a tool is added to backpack that isnt registered then backpack
@@ -166,12 +166,12 @@ local default = function(world)
 					printJecs(149, "Activated", registeredTools, toolType)
 					if toolType == "Villager" and fakeModel and goalCFrame then
 						printJecs(151, "Placing villager at", goalCFrame)
-						routes.placeVillager.send(goalCFrame)
+						routes.placeVillager:send(goalCFrame)
 					else
 						local _value = toolType == "DigTool" and villagerServerEntityToDig
 						if _value ~= 0 and _value == _value and _value then
 							printJecs(154, "Digging villager at", goalCFrame)
-							routes.digVillager.send(villagerServerEntityToDig)
+							routes.digVillager:send(villagerServerEntityToDig)
 						end
 					end
 				end))

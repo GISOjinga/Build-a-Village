@@ -17,7 +17,7 @@ import { componentsToReplicate, Phases } from "shared/utils/jecs/jecsComponents"
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
-import { ComponentValue, createEntity, getEntity, printJecs, printTS, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
+import { ComponentValue, createEntity, getEntity, warnJecs, warnTS } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -30,14 +30,14 @@ import { getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFuncti
 
 
 
-// checks data for __JingaNetInstancePath to make sure it has all the instances replicated
+// checks data for __ByteNetInstancePath to make sure it has all the instances replicated
 function checkData(data?: unknown) {
     // recursive check/fix
     function check(path: object, index: never, value: unknown): [boolean, object] {
         // if data is a table then check each value
         if (typeIs(value, "table")) {
-            if ("__JingaNetInstancePath" in value) {
-                const instance = getInstanceByUniqueIdPath(value.__JingaNetInstancePath as string[])
+            if ("__ByteNetInstancePath" in value) {
+                const instance = getInstanceByUniqueIdPath(value.__ByteNetInstancePath as string[])
 
                 if (!instance) {
                     return [false, path]
@@ -65,10 +65,10 @@ function checkData(data?: unknown) {
         return [true, path]
     }
 
-    // if data is a table and has __JingaNetInstancePath then return true
+    // if data is a table and has __ByteNetInstancePath then return true
     if (typeIs(data, "table")) {
-        if ("__JingaNetInstancePath" in data) {
-            const instance = getInstanceByUniqueIdPath(data.__JingaNetInstancePath as string[])
+        if ("__ByteNetInstancePath" in data) {
+            const instance = getInstanceByUniqueIdPath(data.__ByteNetInstancePath as string[])
 
             // if instance is not in the world then return false
             if (!instance) {
@@ -104,17 +104,22 @@ export default {
 
             // function to replicate
             const replicate = ({ serverEntity, data }: { serverEntity: Entity, data?: unknown }) => {
-                // const [passed, newData] = checkData(data)
+                const [passed, newData] = checkData(data)
 
                 // if passed then continue
-                if (data) {
+                if (passed) {
                     const clientEntity = getEntity.replicatedFromServerEntity(serverEntity) || createEntity.replicated(serverEntity)
 
-                    printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to clientEntity:", clientEntity, "with data:", data)
-                    world.set(clientEntity, component, data as never)
+                    // if client entity and not newData then delete entity
+                    if (!newData) {
+                        world.remove(clientEntity, component)
+                    } else {
+                        print(`Replicating ${componentName} for ${serverEntity}: ${newData}`)
+                        world.set(clientEntity, component, newData as never)
+                    }
                 } else {
-                    printTS($line, `Failed to replicate ${componentName} for ${serverEntity}: ${data}. Some parts arent fully replicated will try again.`)
-                    appendJecs(() => replicate({ serverEntity, data: data }))
+                    warnTS($line, `Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
+                    appendJecs(() => replicate({ serverEntity, data: newData }))
                 }
             }
 
@@ -127,11 +132,9 @@ export default {
             const clientEntity = getEntity.replicatedFromServerEntity(serverEntity)
 
             // if client entity then remove
-            if (clientEntity) {
-                printJecs($line, "Removing replicated entity:", clientEntity, "from server entity:", serverEntity)
-                world.delete(clientEntity)
-            }
+            if (clientEntity) world.delete(clientEntity)
         })
+
 
         // request to get it all
         useMemo(() => routes.getReplicatedComponents.send(), [])

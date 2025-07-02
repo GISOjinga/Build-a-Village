@@ -1,8 +1,6 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local _watchRoutes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "watchRoutes")
-local routesData = _watchRoutes.routesData
-local routesData2 = _watchRoutes.routesData2
+local routesData = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "watchRoutes").routesData
 -- get instance by full name
 local function getInstanceByName(fullName)
 	-- Split the full name by '.' to get each part of the path
@@ -41,25 +39,6 @@ local function useRoute(route, callback)
 		-- ▲ ReadonlyArray.forEach ▲
 	end
 end
--- use route 2
-local function useRoute2(route, callback)
-	-- if system mod descendant of players
-	local _route = route
-	local _result = routesData2[_route]
-	if _result ~= nil then
-		-- ▼ ReadonlyArray.forEach ▼
-		local _callback = function(_param)
-			local data = _param[1]
-			local player = _param[2]
-			return callback(data, player)
-		end
-		for _k, _v in _result do
-			_callback(_v, _k - 1, _result)
-		end
-		-- ▲ ReadonlyArray.forEach ▲
-	end
-end
 return {
 	useRoute = useRoute,
-	useRoute2 = useRoute2,
 }
