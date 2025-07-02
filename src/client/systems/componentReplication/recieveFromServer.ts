@@ -17,7 +17,7 @@ import { componentsToReplicate, Phases } from "shared/utils/jecs/jecsComponents"
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEffect, useEvent, useMemo } from "shared/Plugin-Hook"
-import { ComponentValue, createEntity, getEntity, printJecs, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
+import { ComponentValue, createEntity, getEntity, printJecs, printTS, warnJecs } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -99,6 +99,28 @@ export default {
     phase: Phases.First,
     system: (world) => {
 
+        // loops through each
+        for (const [componentName, component] of pairs(componentsToReplicate)) {
+
+            // function to replicate
+            const replicate = ({ serverEntity, data }: { serverEntity: Entity, data?: unknown }) => {
+                // const [passed, newData] = checkData(data)
+
+                // if passed then continue
+                if (data) {
+                    const clientEntity = getEntity.replicatedFromServerEntity(serverEntity) || createEntity.replicated(serverEntity)
+
+                    printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to clientEntity:", clientEntity, "with data:", data)
+                    world.set(clientEntity, component, data as never)
+                } else {
+                    printTS($line, `Failed to replicate ${componentName} for ${serverEntity}: ${data}. Some parts arent fully replicated will try again.`)
+                    appendJecs(() => replicate({ serverEntity, data: data }))
+                }
+            }
+
+            // when ever data gets updated it updates the server entity
+            useRoute(routes[componentName], replicate)
+        }
 
         // when the deleteReplicatedEntity is called
         useRoute(routes.deleteReplicatedEntity, (serverEntity) => {
@@ -110,34 +132,6 @@ export default {
                 world.delete(clientEntity)
             }
         })
-
-        // loops through each
-        for (const [componentName, component] of pairs(componentsToReplicate)) {
-
-            // function to replicate
-            const replicate = ({ serverEntity, data }: { serverEntity: Entity, data?: unknown }) => {
-                const [passed, newData] = checkData(data)
-
-                // if passed then continue
-                if (passed) {
-                    const clientEntity = getEntity.replicatedFromServerEntity(serverEntity) || createEntity.replicated(serverEntity)
-
-                    // if client entity and not newData then delete entity
-                    if (!newData) {
-                        printJecs($line, `Removing replicated component ${componentName} for entity: ${serverEntity} as data is undefined.`)
-                        world.remove(clientEntity, component)
-                    } else {
-                        world.set(clientEntity, component, newData as never)
-                    }
-                } else {
-                    warnJecs($line, `Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
-                    appendJecs(() => replicate({ serverEntity, data: newData }))
-                }
-            }
-
-            // when ever data gets updated it updates the server entity
-            useRoute(routes[componentName], replicate)
-        }
 
         // request to get it all
         useMemo(() => routes.getReplicatedComponents.send(), [])

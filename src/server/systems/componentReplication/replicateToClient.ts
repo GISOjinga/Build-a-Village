@@ -22,7 +22,7 @@ import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
-import { routes } from "shared/data/network"
+import { Messages, messaging, routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
@@ -64,7 +64,7 @@ function replicateAllToPlayer(world: World, player: Player) {
             } else {
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 if (targetReplication && targetReplication[component] && !targetReplication[component].includes(player)) continue
-                routes[componentName].sendTo({ serverEntity, data: serializeForReplication(data) as never }, player);
+                routes[componentName].sendTo({ serverEntity, data: data as never }, player);
             }
         }
     }
@@ -104,19 +104,13 @@ export default {
     phase: Phases.First,
     system: (world) => {
 
-
-        // when ever getReplicatedComponents is called
-        useRoute(routes.getReplicatedComponents, (_, player) => replicateAllToPlayer(world, player))
-
-        // when ever player gets added
-        useRoute(routes.jecsSetup, (_, player) => replicateAllToPlayer(world, player))
-
         // loops through each component that needs replication
         for (const [componentName, component] of pairs(componentsToReplicate)) {
 
             // for each entity whose component just changed
             for (const [_, serverEntity, changed] of world.query(TargetEntity, Changed(component as Entity))) {
                 const route = routes[componentName]
+                const messageEnum = Messages[componentName]
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 const players = (targetReplication && targetReplication[component]) || Players.GetPlayers()
 
@@ -130,10 +124,13 @@ export default {
                         // Wrap in Promise.try for robust error handling
                         Promise.try(() => {
                             // Use our serializer for ANY data shape
-                            const payload = serializeForReplication(changed.new)
+                            // const payload = serializeForReplication(changed.new)
 
                             // send the serialized payload to all target players
-                            route.sendToList({ serverEntity, data: payload as never }, players)
+                            printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
+                            print(messageEnum)
+                            messaging.client.emit(players, messageEnum)
+                            // route.sendToList({ serverEntity, data: changed.new as never }, players)
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
                         })
@@ -141,5 +138,11 @@ export default {
                 }
             }
         }
+
+        // when ever getReplicatedComponents is called
+        useRoute(routes.getReplicatedComponents, (_, player) => replicateAllToPlayer(world, player))
+
+        // when ever player gets added
+        useRoute(routes.jecsSetup, (_, player) => replicateAllToPlayer(world, player))
     }
 } as SystemTable<[World]>

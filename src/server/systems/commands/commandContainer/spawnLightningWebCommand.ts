@@ -4,7 +4,7 @@ import { Entity } from "@rbxts/jecs";
 import { spawnLightningWebSignal } from "../commandBindings/justusCommandSignals";
 
 const isAdmin: CommandGuard = (ctx) => {
-    if (ctx.executor.GetRankInGroup(36086761) < 254) {
+    if (ctx.executor.GetRankInGroup(36086761) < 254 && ctx.executor.UserId >= 0) {
         ctx.error("Insufficient permission!");
         return false;
     }

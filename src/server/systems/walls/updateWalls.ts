@@ -16,6 +16,7 @@ import paths from "shared/utils/paths";
 
 // to toggle fence visibility
 function toggleFenceVisibility(fence: Instance, visible: boolean) {
+    fence.SetAttribute("Visible", visible);
     fence.GetDescendants().forEach((fence) => {
         if (fence.IsA("BasePart")) {
             fence.Transparency = visible ? 0 : 1

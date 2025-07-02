@@ -349,26 +349,30 @@ const getCallerSourceFromTraceback = () => {
 const jecsPrintRecord = new Map<string, (any[])[]>();
 const jecsWarnRecord = new Map<string, (any[])[]>();
 const debugRegistry = new Map<string, Entity>()
-export const createDebugger = (initial: boolean = false, _systemName?:string) => {
+export const createDebugger = (line:number, _systemName?:string) => {
     const scriptPath = getCallerSourceFromTraceback()
     const sourceScript = scriptPath && getInstanceByName(scriptPath)
     const systemName = _systemName || sourceScript && sourceScript.Name || "UnknownSystem";
     const debugEntity = debugRegistry.get(systemName)
     const debugInfo = debugEntity && world.get(debugEntity, components.Debug)
-    const jecsPrintMaping = jecsPrintRecord.get(systemName) || new Array();
-    const jecsWarnMaping = jecsWarnRecord.get(systemName) || new Array();
+    const systemLineName = systemName + ":" + line
+    const jecsPrintMaping = jecsPrintRecord.get(systemLineName) || new Array();
+    const jecsWarnMaping = jecsWarnRecord.get(systemLineName) || new Array();
+    const debugName = "TS Line: "+line
 
     // if the debug entity already exists, return the current state
     if (!debugRegistry.has(systemName)) {
         const debugEntity = world.entity()
 
-        world.set(debugEntity, components.Debug, { name: systemName, debug: initial !== undefined ? initial : false })
+        world.set(debugEntity, components.Debug, { name: systemName, linesToDebug: {} })
         world.set(debugEntity, Name, systemName)
         debugRegistry.set(systemName, debugEntity)
+    } else if (debugEntity && debugInfo) { // sets up the debug
+        world.set(debugEntity, components.Debug, { ...debugInfo , linesToDebug: {...debugInfo.linesToDebug, [debugName]: debugInfo.linesToDebug[debugName] || false } })
     }
 
     // for warns++
-    if (debugInfo?.debug === true && jecsWarnMaping.size() > 0) {
+    if (debugInfo?.linesToDebug[debugName] === true && jecsWarnMaping.size() > 0) {
 
         // if jecsMaping is greater than 0 then print 
         warn(`Previous Jecs Warnings (${jecsWarnMaping.size()}) On ${systemName}:`);
@@ -377,11 +381,11 @@ export const createDebugger = (initial: boolean = false, _systemName?:string) =>
         }
 
         // clears the record
-        jecsWarnRecord.set(systemName, []);
+        jecsWarnRecord.set(systemLineName, []);
     }
     
     // for prints
-    if (debugInfo?.debug === true && jecsPrintMaping.size() > 0) {
+    if (debugInfo?.linesToDebug[debugName] === true && jecsPrintMaping.size() > 0) {
 
         // if jecsMaping is greater than 0 then print 
         print(`Previous Jecs Calls (${jecsPrintMaping.size()}) On ${systemName}:`);
@@ -390,11 +394,11 @@ export const createDebugger = (initial: boolean = false, _systemName?:string) =>
         }
 
         // clears the record
-        jecsPrintRecord.set(systemName, []);
+        jecsPrintRecord.set(systemLineName, []);
     }
 
     // returns the current state of the print debug for the system
-    return debugInfo?.debug || false
+    return debugInfo?.linesToDebug[debugName] || false
 }
 
 // for warnings
@@ -402,10 +406,11 @@ export const warnJecs = (line:number, ...message:unknown[]) => {
     const fullName = [...message] as string[]
     const scriptPath = getCallerSourceFromTraceback()
     const sourceScript = scriptPath && getInstanceByName(scriptPath)
-    const debugEnabled = sourceScript && createDebugger()
-    const systemName = sourceScript && sourceScript.Name || "UnknownSystem";
-    const firstMessage = sourceScript && `   -   TypeScript(Jecs) ${systemName}:${line}`
-    const jecsWarnMaping = jecsWarnRecord.get(systemName)|| new Array();
+    const realSystemName = sourceScript && sourceScript.Name || "UnknownSystem";
+    const systemLineName = realSystemName + ":" + line
+    const debugEnabled = sourceScript && createDebugger(line, realSystemName)
+    const firstMessage = sourceScript && `   -   TypeScript(Jecs) ${realSystemName}:${line}`
+    const jecsWarnMaping = jecsWarnRecord.get(systemLineName)|| new Array();
 
     // if debug is disabled then return
     if (!sourceScript) {
@@ -420,7 +425,7 @@ export const warnJecs = (line:number, ...message:unknown[]) => {
                 jecsWarnMaping.pop()
             }
         }
-        jecsWarnRecord.set(systemName, jecsWarnMaping);
+        jecsWarnRecord.set(systemLineName, jecsWarnMaping);
         return
     }
 
@@ -434,10 +439,11 @@ export const printJecs = (line:number, ...message:unknown[]) => {
     const fullName = [...message] as string[]
     const scriptPath = getCallerSourceFromTraceback()
     const sourceScript = scriptPath && getInstanceByName(scriptPath)
-    const debugEnabled = sourceScript && createDebugger()
-    const systemName = sourceScript && sourceScript.Name || "UnknownSystem";
-    const firstMessage = sourceScript && `   -   TypeScript(Jecs) ${systemName}:${line}`
-    const jecsMaping = jecsPrintRecord.get(systemName)|| new Array();
+    const realSystemName = sourceScript && sourceScript.Name || "UnknownSystem";
+    const systemLineName = realSystemName + ":" + line
+    const debugEnabled = sourceScript && createDebugger(line, realSystemName)
+    const firstMessage = sourceScript && `   -   TypeScript(Jecs) ${realSystemName}:${line}`
+    const jecsMaping = jecsPrintRecord.get(systemLineName)|| new Array();
 
     // if debug is disabled then return
     if (!sourceScript) {
@@ -452,7 +458,7 @@ export const printJecs = (line:number, ...message:unknown[]) => {
                 jecsMaping.pop()
             }
         }
-        jecsPrintRecord.set(systemName, jecsMaping);
+        jecsPrintRecord.set(systemLineName, jecsMaping);
         return
     }
 

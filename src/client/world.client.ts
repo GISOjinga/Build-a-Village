@@ -139,5 +139,5 @@ const debug = setupMatter([
 const client = jabby.obtain_client()
 ContextActionService.BindAction("Open Jabby Home", (actionName: string, state: Enum.UserInputState) => {
     if (state !== Enum.UserInputState.Begin) return
-    if (Players.LocalPlayer.GetRankInGroup(36086761) >= 254) client.spawn_app(client.apps.home)
+    if (Players.LocalPlayer.GetRankInGroup(36086761) >= 254 || Players.LocalPlayer.UserId < 0) client.spawn_app(client.apps.home)
 }, false, Enum.KeyCode.F4)

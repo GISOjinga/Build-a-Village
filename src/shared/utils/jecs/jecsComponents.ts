@@ -42,7 +42,7 @@ export const Destroyed = component("Destroyed");
 export const MaxedOut = component("MaxedOut"); // Assuming it's a boolean flag for maxed-out spawns
 export const Spawned = component("Spawned");
 export const Trash = component<{ trash: Janitor }>("Trash");
-export const Debug = component<{ name: string, debug: boolean }>("Debug")
+export const Debug = component<{ name: string, linesToDebug: { [key in string]: boolean } }>("Debug")
 export const TargetEntity = component<Entity>("TargetEntity");
 export const ReplicatedComponent = component<Entity>("ReplicatedComponent");
 export const TargetReplication = component<{ [key in typeof componentsToReplicate[keyof typeof componentsToReplicate]]?: (Player[]) }>("TargetReplication"); // allows you to specify what players see what components (if it doesnt exist sends to all players)
@@ -287,6 +287,7 @@ export const IncreaseParticlesSize = component<{
 
 
 export const componentsToReplicate = { Body, Villager, Data, ModelDebugger, ConfirmationPrompt };
+
 
 // list of phases in order
 const phaseNamesWithOrder = [

@@ -130,7 +130,7 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
 
     // Create
     jabby.set_check_function(player => {
-        if (player.GetRankInGroup(36086761) >= 254) {
+        if (player.GetRankInGroup(36086761) >= 254 || player.UserId < 0) {
             return true
         } else {
             return false
@@ -147,7 +147,7 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
     // loops through all the start up systems and creates a debugger for them
     systems.forEach((systemStruct) => {
         let systemMod = getInstanceByName(debug.info(systemStruct.system, "s")[0])
-        if (systemMod) createDebugger(false, systemMod.Name)
+        // if (systemMod) createDebugger(false, systemMod.Name)
     })
 
     // adds the systems for initial start up

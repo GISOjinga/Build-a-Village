@@ -17,6 +17,6 @@ export default {
     phase: Phases.DebuggerHook,
     system: (world) => {
         // goes through all the debuggers
-        for (const [_, { name }] of world.query(Debug)) createDebugger(true, name)
+        // for (const [_, { name }] of world.query(Debug)) createDebugger(true, name)
     }
 } as SystemTable<[World]>

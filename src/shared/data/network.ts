@@ -1,4 +1,6 @@
 import ByteNet, { defineNamespace, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
+import { MessageEmitter } from "@rbxts/tether";
+import { Serializer, type Packed, type u8, } from "@rbxts/serio";
 import { Entity } from "@rbxts/jecs";
 import { EventLike } from "@rbxts/planck/out/types";
 import { RunService } from "@rbxts/services";
@@ -6,7 +8,8 @@ import Signal from "@rbxts/signal";
 import pageStates, { PageStates } from "shared/utils/Animations/pageStates";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
-import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
+import { Body, componentsToReplicate, ConfirmationPrompt, Data, ModelDebugger, Villager } from "shared/utils/jecs/jecsComponents";
+import * as components from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
 import robuxStoreData from "./robuxStoreData";
 
@@ -56,6 +59,40 @@ const definePacket = <T extends ByteNetType<any>>(packetProps: {
         ["wait"]: () => { },
     })) as unknown as packet<T>;
 }
+
+
+
+
+
+
+export const messaging = MessageEmitter.create<MessageData>();
+export enum Messages {
+    // components
+    Body,
+    Villager,
+    Data,
+    ModelDebugger,
+    ConfirmationPrompt,
+
+    // route to get replicated components
+    getReplicatedComponents,
+    deleteReplicatedEntity,
+    jecsSetup,
+}
+export interface MessageData {
+    // components
+    [Messages.Body]: Packed<typeof Body>,
+    [Messages.Villager]: Packed<typeof Villager>,
+    [Messages.Data]: Packed<typeof Data>,
+    [Messages.ModelDebugger]: Packed<typeof ModelDebugger>,
+    [Messages.ConfirmationPrompt]: Packed<typeof ConfirmationPrompt>,
+
+    // messages
+    [Messages.getReplicatedComponents]: undefined;
+    [Messages.deleteReplicatedEntity]: Packed<Entity>;
+    [Messages.jecsSetup]: undefined;
+}
+
 
 // Define namespace and packets
 const packets = defineNamespace("gameEvents", () => {

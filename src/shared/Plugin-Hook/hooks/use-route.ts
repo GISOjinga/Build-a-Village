@@ -1,4 +1,4 @@
-import { routes } from "shared/data/network";
+import { MessageData, Messages, routes } from "shared/data/network";
 import { useHookState } from "../topo";
 import { useChange } from "./use-change";
 import { useEffect } from "./use-effect";
@@ -38,6 +38,16 @@ function getInstanceByName(fullName: string): Instance | undefined {
 export function useRoute<T extends typeof routes[keyof typeof routes]>(
     route: T,
     callback: FirstParam<T["listen"]>,
+) {
+    // if system mod descendant of players
+    routesData.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
+}
+
+
+// use route 2
+export function useRoute2<T extends Messages>(
+    route: T,
+    callback: (data: MessageData[T] | undefined, player: Player) => void,
 ) {
     // if system mod descendant of players
     routesData.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
