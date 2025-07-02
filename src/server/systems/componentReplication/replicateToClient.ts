@@ -22,7 +22,7 @@ import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
-import { Messages, messaging, routes } from "shared/data/network"
+import { routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
@@ -110,7 +110,7 @@ export default {
             // for each entity whose component just changed
             for (const [_, serverEntity, changed] of world.query(TargetEntity, Changed(component as Entity))) {
                 const route = routes[componentName]
-                const messageEnum = Messages[componentName]
+                // const messageEnum = Messages[componentName]
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 const players = (targetReplication && targetReplication[component]) || Players.GetPlayers()
 
@@ -128,8 +128,8 @@ export default {
 
                             // send the serialized payload to all target players
                             printTS($line, `Replicating ${componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
-                            print(messageEnum)
-                            messaging.client.emit(players, messageEnum)
+                            // print(messageEnum)
+                            // messaging.client.emit(players, messageEnum)
                             // route.sendToList({ serverEntity, data: changed.new as never }, players)
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)

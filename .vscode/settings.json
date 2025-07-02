@@ -1,0 +1,33 @@
+{
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"cSpell.enabled": false,
+	"files.eol": "\n",
+	"[typescript]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features",
+		"editor.formatOnSave": true
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features",
+		"editor.formatOnSave": true
+	},
+	"files.exclude": {
+		// "**.vscode": false,
+		// ".editorconfig": true,
+		// "*.toml": true,
+		// "out": true,
+		// // "node_modules": true,
+		// "include": true,
+		// // "**.sh": true,
+		// ".gitignore": false,
+		// "README.md": false,
+		// "**.yml": true,
+		// "**.json": true,
+		// ".eslintrc": true,
+		// ".gitmodules": true,
+		// ".prettierrc": true,
+		// "wally.lock": true,
+	},
+	"eslint.run": "onType",
+	"eslint.format.enable": true,
+	"eslint.enable": false
+}

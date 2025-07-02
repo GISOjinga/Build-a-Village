@@ -1,8 +1,4 @@
-# Ignore everything
-out/
-*.json
-*.toml
-
-# Un-ignore directories (src and types)
-!src/
-!types/
+/node_modules
+/out
+/include
+*.tsbuildinfo

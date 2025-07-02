@@ -1,6 +1,4 @@
 import ByteNet, { defineNamespace, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
-import { MessageEmitter } from "@rbxts/tether";
-import { Serializer, type Packed, type u8, } from "@rbxts/serio";
 import { Entity } from "@rbxts/jecs";
 import { EventLike } from "@rbxts/planck/out/types";
 import { RunService } from "@rbxts/services";
@@ -65,33 +63,33 @@ const definePacket = <T extends ByteNetType<any>>(packetProps: {
 
 
 
-export const messaging = MessageEmitter.create<MessageData>();
-export enum Messages {
-    // components
-    Body,
-    Villager,
-    Data,
-    ModelDebugger,
-    ConfirmationPrompt,
+// export const messaging = MessageEmitter.create<MessageData>();
+// export enum Messages {
+//     // components
+//     Body,
+//     Villager,
+//     Data,
+//     ModelDebugger,
+//     ConfirmationPrompt,
 
-    // route to get replicated components
-    getReplicatedComponents,
-    deleteReplicatedEntity,
-    jecsSetup,
-}
-export interface MessageData {
-    // components
-    [Messages.Body]: Packed<typeof Body>,
-    [Messages.Villager]: Packed<typeof Villager>,
-    [Messages.Data]: Packed<typeof Data>,
-    [Messages.ModelDebugger]: Packed<typeof ModelDebugger>,
-    [Messages.ConfirmationPrompt]: Packed<typeof ConfirmationPrompt>,
+//     // route to get replicated components
+//     getReplicatedComponents,
+//     deleteReplicatedEntity,
+//     jecsSetup,
+// }
+// export interface MessageData {
+//     // components
+//     [Messages.Body]: Packed<typeof Body>,
+//     [Messages.Villager]: Packed<typeof Villager>,
+//     [Messages.Data]: Packed<typeof Data>,
+//     [Messages.ModelDebugger]: Packed<typeof ModelDebugger>,
+//     [Messages.ConfirmationPrompt]: Packed<typeof ConfirmationPrompt>,
 
-    // messages
-    [Messages.getReplicatedComponents]: undefined;
-    [Messages.deleteReplicatedEntity]: Packed<Entity>;
-    [Messages.jecsSetup]: undefined;
-}
+//     // messages
+//     [Messages.getReplicatedComponents]: undefined;
+//     [Messages.deleteReplicatedEntity]: Packed<Entity>;
+//     [Messages.jecsSetup]: undefined;
+// }
 
 
 // Define namespace and packets
@@ -329,7 +327,7 @@ const packets = defineNamespace("gameEvents", () => {
                         Equipped: bool,
                     })),
                 })),
-            }),
+            }) as never,
 
             // confirmation prompt
             ConfirmationPrompt: definePacket({

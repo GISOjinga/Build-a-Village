@@ -1,3 +1,4 @@
+
 --!optimize 2
 --!native
 --!strict
@@ -94,29 +95,31 @@ type ecs_world_t = {
 	observable: Map<i53, Map<i53, { ecs_observer_t }>>,
 }
 
-local HI_COMPONENT_ID = _G.__JECS_HI_COMPONENT_ID or 256
 -- stylua: ignore start
-local EcsOnAdd =                    HI_COMPONENT_ID +  1
-local EcsOnRemove =                 HI_COMPONENT_ID +  2
-local EcsOnChange =                 HI_COMPONENT_ID +  3
-local EcsWildcard =                 HI_COMPONENT_ID +  4
-local EcsChildOf =                  HI_COMPONENT_ID +  5
-local EcsComponent =                HI_COMPONENT_ID +  6
-local EcsOnDelete =                 HI_COMPONENT_ID +  7
-local EcsOnDeleteTarget =           HI_COMPONENT_ID +  8
-local EcsDelete =                   HI_COMPONENT_ID +  9
-local EcsRemove =                   HI_COMPONENT_ID + 10
-local EcsName =                     HI_COMPONENT_ID + 11
-local EcsOnArchetypeCreate =        HI_COMPONENT_ID + 12
-local EcsOnArchetypeDelete =        HI_COMPONENT_ID + 13
-local EcsRest =                     HI_COMPONENT_ID + 14
 
-local ECS_ID_DELETE =                        	    0b01
-local ECS_ID_IS_TAG =                        	    0b10
-local ECS_ID_MASK =                          	    0b00
+local ECS_ENTITY_MASK =       bit32.lshift(1, 24)
+local ECS_GENERATION_MASK =   bit32.lshift(1, 16)
+local ECS_PAIR_OFFSET = 	                 2^48
 
-local ECS_ENTITY_MASK =              bit32.lshift(1, 24)
-local ECS_GENERATION_MASK =          bit32.lshift(1, 16)
+local ECS_ID_DELETE =                 	     0b01
+local ECS_ID_IS_TAG =                 	     0b10
+local ECS_ID_MASK =                   	     0b00
+
+local HI_COMPONENT_ID =                       256
+local EcsOnAdd =             HI_COMPONENT_ID +  1
+local EcsOnRemove =          HI_COMPONENT_ID +  2
+local EcsOnChange =          HI_COMPONENT_ID +  3
+local EcsWildcard =          HI_COMPONENT_ID +  4
+local EcsChildOf =           HI_COMPONENT_ID +  5
+local EcsComponent =         HI_COMPONENT_ID +  6
+local EcsOnDelete =          HI_COMPONENT_ID +  7
+local EcsOnDeleteTarget =    HI_COMPONENT_ID +  8
+local EcsDelete =            HI_COMPONENT_ID +  9
+local EcsRemove =            HI_COMPONENT_ID + 10
+local EcsName =              HI_COMPONENT_ID + 11
+local EcsOnArchetypeCreate = HI_COMPONENT_ID + 12
+local EcsOnArchetypeDelete = HI_COMPONENT_ID + 13
+local EcsRest =              HI_COMPONENT_ID + 14
 
 local NULL_ARRAY = table.freeze({}) :: Column
 local NULL = newproxy(false)
@@ -168,7 +171,6 @@ end
 local function ECS_COMBINE(id: number, generation: number): i53
 	return id + (generation * ECS_ENTITY_MASK)
 end
-local ECS_PAIR_OFFSET = 2^48
 
 local function ECS_IS_PAIR(e: number): boolean
 	return e > ECS_PAIR_OFFSET
@@ -824,7 +826,7 @@ local function world_entity(world: ecs_world_t, entity: i53?): i53
 			return entity
 		end
 	end
-	return entity_index_new_id(entity_index, entity)
+	return entity_index_new_id(entity_index)
 end
 
 local function world_parent(world: ecs_world_t, entity: i53)
@@ -1050,7 +1052,7 @@ local function world_remove(world: ecs_world_t, entity: i53, id: i53)
 	end
 end
 
-local function archetype_fast_delete_last(columns: { Column }, column_count: number, types: { i53 }, entity: i53)
+local function archetype_fast_delete_last(columns: { Column }, column_count: number)
 	for i, column in columns do
 		if column ~= NULL_ARRAY then
 			column[column_count] = nil
@@ -1058,7 +1060,7 @@ local function archetype_fast_delete_last(columns: { Column }, column_count: num
 	end
 end
 
-local function archetype_fast_delete(columns: { Column }, column_count: number, row, types, entity)
+local function archetype_fast_delete(columns: { Column }, column_count: number, row: number)
 	for i, column in columns do
 		if column ~= NULL_ARRAY then
 			column[row] = column[column_count]
@@ -1100,9 +1102,9 @@ local function archetype_delete(world: ecs_world_t, archetype: ecs_archetype_t, 
 	entities[last] = nil :: any
 
 	if row == last then
-		archetype_fast_delete_last(columns, column_count, id_types, delete)
+		archetype_fast_delete_last(columns, column_count)
 	else
-		archetype_fast_delete(columns, column_count, row, id_types, delete)
+		archetype_fast_delete(columns, column_count, row)
 	end
 end
 
@@ -1408,14 +1410,14 @@ local function world_delete(world: ecs_world_t, entity: i53)
 				local tr = idr_r_archetype.records[rel]
 				local tr_count = idr_r_archetype.counts[rel]
 				local types = idr_r_archetype.types
-				for i = tr, tr_count do
-					ids[types[tr]] = true
+				for i = tr, tr + tr_count - 1 do
+					ids[types[i]] = true
 				end
+
 				local n = #entities
 				table.move(entities, 1, n, count + 1, children)
 				count += n
 			end
-
 			for _, child in children do
 				for id in ids do
 					world_remove(world, child, id)
@@ -1933,6 +1935,9 @@ local function query_cached(query: ecs_query_data_t)
 
 	local function on_delete_callback(archetype)
 		local i = table.find(archetypes, archetype) :: number
+		if i == nil then
+			return
+		end
 		local n = #archetypes
 		archetypes[i] = archetypes[n]
 		archetypes[n] = nil
@@ -2521,8 +2526,8 @@ end
 
 World.new = world_new
 
-export type Entity<T = any> = { __T: T }
-export type Id<T = any> = { __T: T }
+export type Entity<T = any> = number | { __T: T }
+export type Id<T = any> = number | { __T: T }
 export type Pair<P, O> = Id<P>
 type ecs_id_t<T=unknown> = Id<T> | Pair<T, "Tag"> | Pair<"Tag", T>
 export type Item<T...> = (self: Query<T...>) -> (Entity, T...)
@@ -2570,46 +2575,46 @@ export type World = {
 	range: (self: World, range_begin: number, range_end: number?) -> (),
 
 	--- Creates a new entity
-	entity: (self: World, id: Entity?) -> Entity,
+	entity: <T>(self: World, id: Entity<T>?) -> Entity<T>,
 	--- Creates a new entity located in the first 256 ids.
 	--- These should be used for static components for fast access.
 	component: <T>(self: World) -> Entity<T>,
 	--- Gets the target of an relationship. For example, when a user calls
 	--- `world:target(id, ChildOf(parent), 0)`, you will obtain the parent entity.
-	target: <T>(self: World, id: Entity, relation: Id<T>, index: number?) -> Entity?,
+	target: <T, a>(self: World, id: Entity<T>, relation: Id<a>, index: number?) -> Entity?,
 	--- Deletes an entity and all it's related components and relationships.
-	delete: (self: World, id: Entity) -> (),
+	delete: <T>(self: World, id: Entity<T>) -> (),
 
 	--- Adds a component to the entity with no value
-	add: <T>(self: World, id: Entity, component: Id<T>) -> (),
+	add: <T, a>(self: World, id: Entity<T>, component: Id<a>) -> (),
 	--- Assigns a value to a component on the given entity
-	set: <T>(self: World, id: Entity, component: Id<T>, data: T) -> (),
+	set: <T, a>(self: World, id: Entity<T>, component: Id<a>, data: a) -> (),
 
 	cleanup: (self: World) -> (),
 	-- Clears an entity from the world
-	clear: <T>(self: World, id: Id<T>) -> (),
+	clear: <a>(self: World, id: Id<a>) -> (),
 	--- Removes a component from the given entity
-	remove: <T>(self: World, id: Entity, component: Id<T>) -> (),
+	remove: <T, a>(self: World, id: Entity<T>, component: Id<a>) -> (),
 	--- Retrieves the value of up to 4 components. These values may be nil.
-	get: (<A>(self: World, id: Entity, Id<A>) -> A?)
-		& (<A, B>(self: World, id: Entity, Id<A>, Id<B>) -> (A?, B?))
-		& (<A, B, C>(self: World, id: Entity, Id<A>, Id<B>, Id<C>) -> (A?, B?, C?))
-		& <A, B, C, D>(self: World, id: Entity, Id<A>, Id<B>, Id<C>, Id<D>) -> (A?, B?, C?, D?),
+	get: & (<T, a>(World, Entity<T>, Id<a>) -> a?)
+		& (<T, a, b>(World, Entity<T>, Id<a>, Id<b>) -> (a?, b?))
+		& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> (a?, b?, c?))
+		& (<T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> (a?, b?, c?, d?)),
 
 	--- Returns whether the entity has the ID.
-	has: (<A>(World, Entity, A) -> boolean)
-		& (<A, B>(World, Entity, A, B) -> boolean)
-		& (<A, B, C>(World, Entity, A, B, C) -> boolean)
-		& <A, B, C, D>(World, Entity, A, B, C, D) -> boolean,
+	has: (<T, a>(World, Entity<T>, Id<a>) -> boolean)
+		& (<T, a, b >(World, Entity<T>, Id<a>, Id<a>) -> boolean)
+		& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> boolean)
+		& <T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> boolean,
 
 	--- Get parent (target of ChildOf relationship) for entity. If there is no ChildOf relationship pair, it will return nil.
-	parent:(self: World, entity: Entity) -> Entity,
+	parent: <T>(self: World, entity: Entity<T>) -> Entity,
 
 	--- Checks if the world contains the given entity
-	contains:(self: World, entity: Entity) -> boolean,
+	contains: <T>(self: World, entity: Entity<T>) -> boolean,
 
 	--- Checks if the entity exists
-	exists: (self: World, entity: Entity) -> boolean,
+	exists: <T>(self: World, entity: Entity<T>) -> boolean,
 
 	each: <T>(self: World, id: Id<T>) -> () -> Entity,
 
@@ -2651,19 +2656,19 @@ return {
 	meta = (ECS_META :: any) :: <T>(id: Entity, id: Id<T>, value: T) -> Entity<T>,
 	is_tag = (ecs_is_tag :: any) :: <T>(World, Id<T>) -> boolean,
 
-	OnAdd = EcsOnAdd :: Entity<(entity: Entity) -> ()>,
-	OnRemove = EcsOnRemove :: Entity<(entity: Entity) -> ()>,
-	OnChange = EcsOnChange :: Entity<(entity: Entity, data: any) -> ()>,
-	ChildOf = EcsChildOf :: Entity,
-	Component = EcsComponent :: Entity,
-	Wildcard = EcsWildcard :: Entity,
-	w = EcsWildcard :: Entity,
-	OnDelete = EcsOnDelete :: Entity,
-	OnDeleteTarget = EcsOnDeleteTarget :: Entity,
-	Delete = EcsDelete :: Entity,
-	Remove = EcsRemove :: Entity,
-	Name = EcsName :: Entity<string>,
-	Rest = EcsRest :: Entity,
+    OnAdd = (EcsOnAdd :: any) :: Entity<<T>(entity: Entity, id: Id<T>, data: T) -> ()>,
+	OnRemove = (EcsOnRemove :: any) :: Entity<(entity: Entity, id: Id) -> ()>,
+	OnChange = (EcsOnChange :: any) :: Entity<<T>(entity: Entity, id: Id<T>, data: T) -> ()>,
+	ChildOf = (EcsChildOf :: any) :: Entity,
+	Component = (EcsComponent :: any) :: Entity,
+	Wildcard = (EcsWildcard :: any) :: Entity,
+	w = (EcsWildcard :: any) :: Entity,
+	OnDelete = (EcsOnDelete :: any) :: Entity,
+	OnDeleteTarget = (EcsOnDeleteTarget :: any) :: Entity,
+	Delete = (EcsDelete :: any) :: Entity,
+	Remove = (EcsRemove :: any) :: Entity,
+	Name = (EcsName :: any) :: Entity<string>,
+	Rest = (EcsRest :: any) :: Entity,
 
 	pair = (ECS_PAIR :: any) :: <P, O>(first: Id<P>, second: Id<O>) -> Pair<P, O>,
 
