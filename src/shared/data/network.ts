@@ -10,6 +10,7 @@ import { Body, componentsToReplicate, ConfirmationPrompt, Data, ModelDebugger, V
 import * as components from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
 import robuxStoreData from "./robuxStoreData";
+import Squash from "@rbxts/squash";
 
 
 const byteNetEntityInstance = ByteNet.unknown as ByteNetType<Instance>
@@ -57,8 +58,6 @@ const definePacket = <T extends ByteNetType<any>>(packetProps: {
         ["wait"]: () => { },
     })) as unknown as packet<T>;
 }
-
-
 
 
 
