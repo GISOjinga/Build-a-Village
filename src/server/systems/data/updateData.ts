@@ -5,7 +5,7 @@ import { getPlayerData, setPlayerData } from "../player/extra/playersData";
 import { deepCopy, deepEquals } from "@rbxts/object-utils";
 import defaultData, { PlayerData } from "shared/data/defaultData";
 import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import Net from "@rbxts/yetanothernet";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";

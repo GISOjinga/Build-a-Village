@@ -1,7 +1,7 @@
 import { effect } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
 import UIUtilities from "shared/utils/Animations/uiUtilities";

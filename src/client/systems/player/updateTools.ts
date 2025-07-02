@@ -4,7 +4,7 @@ import { deepEquals } from "@rbxts/object-utils";
 import { Players, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { useChange, useEffect, useEvent, useMemo, useState, useThrottle } from "shared/Plugin-Hook";
 import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";

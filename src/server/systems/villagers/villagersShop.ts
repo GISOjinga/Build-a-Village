@@ -1,5 +1,5 @@
 import { World } from "@rbxts/jecs";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { useEvent, useMemo } from "shared/Plugin-Hook";
 import ShopData from "./ShopData";
 import { Added, Body, ConfirmationPrompt, Data, FriendsBonus, GiftTo, Player, ProduceAll, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";

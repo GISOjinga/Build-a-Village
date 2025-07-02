@@ -2,7 +2,7 @@ import ByteNet from "@rbxts/bytenet-fixed";
 import { Entity, pair, World } from "@rbxts/jecs";
 import { useMemo } from "@rbxts/react";
 import { Debris, Players, Workspace } from "@rbxts/services";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getCharacterParts } from "shared/utils/functions/characterFunctions";

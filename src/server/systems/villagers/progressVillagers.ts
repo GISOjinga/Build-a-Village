@@ -10,7 +10,7 @@ import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, P
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 

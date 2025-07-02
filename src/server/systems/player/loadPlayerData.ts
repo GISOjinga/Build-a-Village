@@ -7,7 +7,7 @@ import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 

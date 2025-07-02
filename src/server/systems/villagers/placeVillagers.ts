@@ -1,5 +1,5 @@
 import { pair, World } from "@rbxts/jecs";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { isVillagersOverlapping } from "shared/utils/functions/villagerFunctions";

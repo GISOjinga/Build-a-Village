@@ -1,6 +1,6 @@
 import { Entity, World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { Added, FriendsBonus, Player, Removed } from "shared/utils/jecs/jecsComponents";
 import { addComponent, getEntity, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 

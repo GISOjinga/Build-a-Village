@@ -1,6 +1,6 @@
 import { World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { useChange, useEffect, useMemo, useThrottle } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import robuxStoreData from "shared/data/robuxStoreData";

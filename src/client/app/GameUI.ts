@@ -11,14 +11,14 @@ import IntroTextPage from "./pages/IntroTextPage";
 import PlacementPage from "./pages/PlacementPage";
 import PromoPage from "./pages/PromoPage";
 import InviteIncentivePage from "./pages/InviteIncentivePage";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import pageStates from "shared/utils/Animations/pageStates";
 import ConfirmationPage from "./pages/ConfirmationPage";
 
 
 
 export default (pagePaths: PagePaths) => {
-	const trash = new Janitor();
+        const trash = new Janitor();
         const pages = [
                 HudPage,
                 OpenPage,
@@ -33,18 +33,18 @@ export default (pagePaths: PagePaths) => {
                 InviteIncentivePage,
         ]
 
-	// listen to page changes
-	trash.Add(routes.togglePage.listen(pageStates.openPage));
+        // listen to page changes
+        trash.Add(routes.togglePage.listen(pageStates.openPage));
 
-	// renders the hud page
-	pages.forEach((page) => trash.Add(page(pagePaths)));
+        // renders the hud page
+        pages.forEach((page) => trash.Add(page(pagePaths)));
 
-	// when trash gets cleaned up
-	trash.Add(() => {
-		ReplicatedStorage.FindFirstChild("BytenetStorage")?.Destroy();
-		ReplicatedStorage.FindFirstChild("ByteNetReliable")?.Destroy();
-		ReplicatedStorage.FindFirstChild("ByteNetUnreliable")?.Destroy();
-	})
+        // when trash gets cleaned up
+        trash.Add(() => {
+                ReplicatedStorage.FindFirstChild("BytenetStorage")?.Destroy();
+                ReplicatedStorage.FindFirstChild("ByteNetReliable")?.Destroy();
+                ReplicatedStorage.FindFirstChild("ByteNetUnreliable")?.Destroy();
+        })
 
-	return trash
+        return trash
 }

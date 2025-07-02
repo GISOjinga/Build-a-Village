@@ -2,7 +2,7 @@ import { Entity, World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent } from "shared/Plugin-Hook";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { getEntity, printJecs, warnJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { ReplicatedComponent, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";

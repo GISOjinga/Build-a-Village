@@ -8,7 +8,7 @@ import { RunService } from "@rbxts/services"
 import { useMemo, useState } from "shared/Plugin-Hook"
 import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
 import { appendJecs } from "./append"
-import { Network, routes } from "shared/data/network"
+import { Network, sharedRoutes } from "shared/data/network"
 
 
 // export const routesData = new Map<packet<ByteNetType<unknown>>, (unknown[])[]>()
@@ -29,7 +29,7 @@ export default {
 
 
         // loops through all the routes to listen to them
-        for (const [routeName, route] of Object.entries(routes)) {
+        for (const [routeName, route] of Object.entries(sharedRoutes)) {
             const dataCalled = [] as (unknown[])[]
 
             // if route data doesnt have the route then adds it

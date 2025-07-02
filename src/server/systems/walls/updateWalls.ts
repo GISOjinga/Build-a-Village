@@ -2,7 +2,7 @@ import { Entity, pair, World } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { PlayerData } from "shared/data/defaultData";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import wallsData from "shared/data/wallsData";
 import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";

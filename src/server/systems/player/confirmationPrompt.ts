@@ -1,6 +1,6 @@
 import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { addComponent, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { ConfirmationPrompt, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";

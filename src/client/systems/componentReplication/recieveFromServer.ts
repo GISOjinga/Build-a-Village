@@ -21,12 +21,12 @@ import { ComponentValue, createEntity, getEntity, warnJecs, warnTS } from "share
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
-import { routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { deepCopy } from "@rbxts/object-utils"
 import { appendJecs } from "shared/systems/hooks/append"
 import { getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions"
+import routes from "client/routes"
 
 
 
@@ -124,7 +124,7 @@ export default {
             }
 
             // when ever data gets updated it updates the server entity
-            useRoute(routes[componentName], replicate)
+            useRoute(routes[componentName], replicate as never)
         }
 
         // when the deleteReplicatedEntity is called

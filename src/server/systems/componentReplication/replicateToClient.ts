@@ -22,11 +22,12 @@ import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
-import { routes } from "shared/data/network"
+
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
 import { appendJecs } from "shared/systems/hooks/append"
+import routes from "server/routes"
 
 
 // sets up a instance with a unique id path

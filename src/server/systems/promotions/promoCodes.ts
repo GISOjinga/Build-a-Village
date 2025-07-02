@@ -1,5 +1,5 @@
 import { World } from "@rbxts/jecs";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import promoCodes from "shared/data/promoCodes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";

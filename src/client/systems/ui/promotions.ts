@@ -1,6 +1,6 @@
 import { World } from "@rbxts/jecs";
 import { StarterGui } from "@rbxts/services";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
 

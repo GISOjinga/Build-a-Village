@@ -3,7 +3,6 @@ import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { Body, LoadedAnimations, SetAnimation, systemQueue, Changed, StopAnimationsExcept } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { savedAnimationTracks } from "./loadAnimations";
-import { routes } from "shared/data/network";
 import Net from "@rbxts/yetanothernet";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 

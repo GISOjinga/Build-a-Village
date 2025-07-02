@@ -1,7 +1,7 @@
 import { World } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import robuxStoreData, { RobuxStoreData } from "shared/data/robuxStoreData";
 import paths from "shared/utils/paths";
 import ShopData from "../villagers/ShopData";
@@ -59,7 +59,7 @@ export default (world: World) => {
             VillagerNames
         ];
         robuxStoreData.StarterPack.Coins = starterRng.NextInteger(1000, 5000);
-        routes.updateRobuxStore.sendToAll(robuxStoreData);
+        routes.updateRobuxStore.sendToAll(robuxStoreData as never);
     }
 
     for (const [_, player] of world.query(Added(Player))) {
@@ -68,7 +68,7 @@ export default (world: World) => {
 
     // handle client requests to buy a pack
     useRoute(routes.buyRobuxPack, ({ purchase }, player) => {
-        const purchaseData = robuxStoreData[purchase];
+        const purchaseData = robuxStoreData[purchase as keyof RobuxStoreData];
         if (purchaseData) MarketplaceService.PromptProductPurchase(player, purchaseData.ProductId);
     });
 

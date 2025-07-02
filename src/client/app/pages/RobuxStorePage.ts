@@ -6,7 +6,7 @@ import robuxStoreData, { WEEK_LENGTH } from "shared/data/robuxStoreData";
 import { Janitor } from "@rbxts/janitor";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import pageStates from "shared/utils/Animations/pageStates";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import paths from "shared/utils/paths";
 
 

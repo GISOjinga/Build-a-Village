@@ -1,6 +1,6 @@
 import { World } from "@rbxts/jecs";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "server/routes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { GiftTo, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";

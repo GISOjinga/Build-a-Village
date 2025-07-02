@@ -2,7 +2,7 @@ import { World } from "@rbxts/jecs";
 import { Players } from "@rbxts/services";
 import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
-import { routes } from "shared/data/network";
+import routes from "client/routes";
 import { useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
 import { getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast } from "shared/utils/functions/rayFunctions";

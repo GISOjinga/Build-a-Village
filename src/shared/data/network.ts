@@ -22,7 +22,7 @@ const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes"
 
 type JingaNetType<T> =
     T extends (...args: any[]) => any ? T :
-    T extends Array<infer U> ? SerDes<Array<JingaNetType<U>>> :
+    T extends Array<infer U> ? JingaNetType<Array<JingaNetType<U>>> :
     T extends Record<string, unknown> ? { [K in keyof T]: JingaNetType<T[K]> } :
     T extends CFrame ? SerDes<CFrame> :
     T extends Vector3 ? SerDes<Vector3> :
@@ -64,7 +64,15 @@ export const compInst = record({
 }) as unknown as JingaNetType<Instances[keyof Instances]>;
 
 
-type ExtractSerDes<T> = T extends SerDes<infer U> ? U : never;
+
+export type ClientRoute<T extends Network<any>> = Pick<T, "send" | "listen" | "wait">;
+export type ServerRoute<T extends Network<any>> = Pick<T, "listen" | "sendTo" | "sendToAll" | "sendToAllExcept" | "sendToList" | "wait">;
+type UnwrapJingaNetType<T> =
+    T extends SerDes<infer U> ? U :
+    T extends OptionalSerDes<infer U> ? UnwrapJingaNetType<U> | undefined :
+    T extends Array<infer U> ? Array<UnwrapJingaNetType<U>> :
+    T extends Record<string, unknown> ? { [K in keyof T]: UnwrapJingaNetType<T[K]> } :
+    T;
 
 // === Remote Type Wrapper (fixed) === //
 export class Network<J extends JingaNetType<any>> {
@@ -75,12 +83,12 @@ export class Network<J extends JingaNetType<any>> {
     ) { }
 
 
-    public listen(callback: (data: ExtractSerDes<J>, player: Player) => void) {
+    public listen(callback: (data: UnwrapJingaNetType<J>, player: Player) => void) {
         if (RunService.IsClient()) {
             // Client side, listen to the server event
             return jingaRemote.OnClientEvent.Connect((name: unknown, returnedBuffer: unknown) => {
                 if (name !== this.name) return;
-                let realData: ExtractSerDes<J> | undefined = undefined;
+                let realData: UnwrapJingaNetType<J> | undefined = undefined;
                 if (returnedBuffer) {
                     realData = this.deepDeserialize(returnedBuffer as buffer);
                     print(name, "GOT THE DATA", realData, returnedBuffer)
@@ -93,7 +101,7 @@ export class Network<J extends JingaNetType<any>> {
             return jingaRemote.OnServerEvent.Connect((player, name: unknown, returnedBuffer: unknown) => {
                 print(name)
                 if (name !== this.name) return;
-                let realData: ExtractSerDes<J> | undefined = undefined;
+                let realData: UnwrapJingaNetType<J> | undefined = undefined;
                 if (returnedBuffer) {
                     realData = this.deepDeserialize(returnedBuffer as buffer);
                     print(name, "GOT THE DATA", realData, returnedBuffer)
@@ -107,7 +115,7 @@ export class Network<J extends JingaNetType<any>> {
     }
 
     /** Serialize arbitrary data into a Squash buffer using deep serialization */
-    private serializeToBuffer(data: ExtractSerDes<J>): buffer {
+    private serializeToBuffer(data: UnwrapJingaNetType<J>): buffer {
         return this.deepSerialize(data);
     }
 
@@ -116,7 +124,7 @@ export class Network<J extends JingaNetType<any>> {
      * This walks nested objects and array descriptors, using any SerDes
      * implementations found in the schema to write primitive values.
      */
-    private deepSerialize(data: ExtractSerDes<J>): buffer {
+    private deepSerialize(data: UnwrapJingaNetType<J>): buffer {
         const cursor = Squash.cursor();
 
         const serialize = (schema: unknown, value: unknown) => {
@@ -158,7 +166,7 @@ export class Network<J extends JingaNetType<any>> {
      * Reconstruct data from a buffer using the same schema used for sending.
      * Supports nested objects and dynamically sized arrays.
      */
-    private deepDeserialize(buffer: buffer): ExtractSerDes<J> {
+    private deepDeserialize(buffer: buffer): UnwrapJingaNetType<J> {
         const cursor = Squash.frombuffer(buffer);
 
         const deserialize = (schema: unknown): unknown => {
@@ -178,7 +186,7 @@ export class Network<J extends JingaNetType<any>> {
                 } else {
                     const out = {} as Record<string, unknown>;
                     for (const [key, child] of pairs(schema as never)) {
-                        out[key as string] = deserialize(child);
+                        out[key as any] = deserialize(child);
                     }
                     return out;
                 }
@@ -186,29 +194,29 @@ export class Network<J extends JingaNetType<any>> {
             return undefined;
         };
 
-        return deserialize(this.packet) as ExtractSerDes<J>;
+        return deserialize(this.packet) as UnwrapJingaNetType<J>;
     }
 
-    public sendToAll(data: ExtractSerDes<J>) {
+    public sendToAll(data: UnwrapJingaNetType<J>) {
         jingaRemote.FireAllClients(this.name, this.serializeToBuffer(data));
     }
 
-    public sendToAllExcept(data: ExtractSerDes<J>, exception: Player) {
+    public sendToAllExcept(data: UnwrapJingaNetType<J>, exception: Player) {
         Players.GetPlayers().forEach((player) => {
             if (player !== exception) jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
         })
     }
 
-    public sendTo(data: ExtractSerDes<J>, player: Player) {
+    public sendTo(data: UnwrapJingaNetType<J>, player: Player) {
         jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
     }
 
-    public sendToList(data: ExtractSerDes<J>, players: Player[]) {
+    public sendToList(data: UnwrapJingaNetType<J>, players: Player[]) {
         // print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
         players.forEach((player) => jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data)));
     }
 
-    public wait(): ExtractSerDes<J> {
+    public wait(): UnwrapJingaNetType<J> {
         do {
             const [name, returnedBuffer] = jingaRemote.OnClientEvent.Wait() as unknown as [string, buffer];
 
@@ -219,7 +227,7 @@ export class Network<J extends JingaNetType<any>> {
         } while (true)
     }
 
-    public send(data: ExtractSerDes<J> = undefined as ExtractSerDes<J>) {
+    public send(data: UnwrapJingaNetType<J> = undefined as UnwrapJingaNetType<J>) {
         print("Sending", this.name, "with data", data);
         jingaRemote.FireServer(this.name, this.serializeToBuffer(data));
     }
@@ -228,7 +236,7 @@ export class Network<J extends JingaNetType<any>> {
 
 
 
-export const anotherNewRoute = (() => {
+export const sharedRoutes = (() => {
     const componentRecord = <T>(data: T) => ({
         serverEntity: entity as JingaNetType<Entity>,
         data: optional(data as never) as unknown as Optional<T>,
@@ -330,7 +338,7 @@ export const anotherNewRoute = (() => {
             currency: str,
         } as JingaNetType<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
 
-        placeVillager: cframe as SerDes<CFrame>,
+        placeVillager: cframe as JingaNetType<CFrame>,
 
         digVillager: entity,
 
@@ -343,26 +351,26 @@ export const anotherNewRoute = (() => {
 
         teleportToVillage: nothing as JingaNetType<undefined>,
 
-        teleportToShop: str as SerDes<"Buy" | "Sell" | "Wall">,
+        teleportToShop: str as JingaNetType<"Buy" | "Sell" | "Wall">,
 
         updateRestockTime: uint32,
 
-        updateVillagersShop: unknown as SerDes<Array<VillagerInfo>>,
+        updateVillagersShop: unknown as JingaNetType<Array<VillagerInfo>>,
 
-        redeemPromo: str as SerDes<string>,
+        redeemPromo: str as JingaNetType<string>,
 
         promoResult: {
             success: bool,
             message: str,
         } as JingaNetType<{ success: boolean; message: string }>,
 
-        confirmSellOptions: str as SerDes<"Option1" | "Option2" | "Option3" | "Option4">,
+        confirmSellOptions: str as JingaNetType<"Option1" | "Option2" | "Option3" | "Option4">,
 
         toggleSellMenuOpen: bool,
 
         confirmPrompt: bool,
 
-        updateFriendsBonus: bool as SerDes<boolean>,
+        updateFriendsBonus: bool as JingaNetType<boolean>,
 
         sendFriendRequest: instance as JingaNetType<Player>,
 
@@ -386,7 +394,7 @@ export const anotherNewRoute = (() => {
             equip: bool,
         } as JingaNetType<{ wallName: string; equip: boolean }>,
 
-        togglePage: str as SerDes<ReturnType<typeof pageStates.openPage>>,
+        togglePage: str as JingaNetType<ReturnType<typeof pageStates.openPage>>,
 
         giftToPlayer: {
             playerToGift: instance,
@@ -408,7 +416,7 @@ export const anotherNewRoute = (() => {
 
         getReplicatedComponents: nothing as JingaNetType<undefined>,
 
-        deleteReplicatedEntity: entity,
+        deleteReplicatedEntity: entity as unknown as Entity,
     }
 
 

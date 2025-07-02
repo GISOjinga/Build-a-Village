@@ -4,7 +4,6 @@ import { RunService, ReplicatedStorage, CollectionService, Players } from "@rbxt
 import { hotReloader, JecsTagged, ModelDebugger, Phases, systemQueue, world } from "./jecsComponents";
 import Object from "@rbxts/object-utils";
 import Net from "@rbxts/yetanothernet";
-import { routes } from "shared/data/network";
 import jabby from "@rbxts/jabby";
 import { Plugin, System, SystemFn, SystemTable } from "@rbxts/planck/out/types";
 import PlankJabbyPlugin from "@rbxts/planck-jabby";
@@ -12,6 +11,7 @@ import { PlanckHooksPlugin } from "shared/Plugin-Hook";
 import { Phase } from "@rbxts/planck";
 import { getInstanceByName } from "../functions/instanceFunctions";
 import { createDebugger } from "../functions/jecsHelpFunctions";
+import { sharedRoutes } from "shared/data/network";
 
 
 
@@ -69,7 +69,7 @@ function hotReload(systems: Array<SystemTable<[World]>>) {
                     // adds the system
                     systemQueue.addSystem(toInput)
                     systemToRemove = toInput
-                    if (oldSystem) routes.getReplicatedComponents.send()
+                    if (oldSystem) sharedRoutes.getReplicatedComponents.send()
                     // systemQueue.addSystem(systemStruct.system, systemStruct.phase || Phase.Update)
                 }, (oldSystemMod) => {
                     if (!oldSystemMod.IsA("ModuleScript")) return
@@ -164,7 +164,7 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
     hotReload(systems)
 
 
-    if (RunService.IsClient()) routes.jecsSetup.send()
+    if (RunService.IsClient()) sharedRoutes.jecsSetup.send()
 
     // return the debugger
     return debug

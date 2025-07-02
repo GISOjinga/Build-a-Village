@@ -1,4 +1,3 @@
-import { routes } from "shared/data/network";
 import { useHookState } from "../topo";
 import { useChange } from "./use-change";
 import { useEffect } from "./use-effect";
@@ -7,6 +6,7 @@ import { Changed, Trash, world } from "shared/utils/jecs/jecsComponents";
 import { Janitor } from "@rbxts/janitor";
 import { RunService } from "@rbxts/services";
 import { routesData } from "shared/systems/hooks/watchRoutes";
+import { ClientRoute, Network, ServerRoute, sharedRoutes } from "shared/data/network";
 
 
 
@@ -36,10 +36,11 @@ function getInstanceByName(fullName: string): Instance | undefined {
     return currentInstance;
 }
 
-export function useRoute<T extends typeof routes[keyof typeof routes]>(
+type ExtractT<T> = T extends (Network<any> | ClientRoute<any> | ServerRoute<any>) ? FirstParam<T["listen"]> : never;
+export function useRoute<T extends (Network<any> | ClientRoute<any> | ServerRoute<any>)>(
     route: T,
-    callback: FirstParam<T["listen"]>,
+    callback: ExtractT<T>,
 ) {
     // if system mod descendant of players
-    routesData.get(route as never)?.forEach(([data, player]) => callback(data as never, player as Player))
+    routesData.get(route as never)?.forEach(([data, player]) => (callback as unknown as (data: any, player: Player) => void)(data as never, player as Player))
 }
