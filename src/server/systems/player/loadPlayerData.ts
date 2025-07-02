@@ -6,9 +6,10 @@ import defaultData, { decodePlayerData, PlayerData } from "../../../shared/data/
 import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
-import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import { useRoute, useRoute2 } from "shared/Plugin-Hook/hooks/use-route";
 import { routes } from "shared/data/network";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
+import { remotes } from "shared/data/newNetwork";
 
 
 
@@ -31,7 +32,7 @@ function migrateData(playerData: PlayerData): PlayerData {
 
 // loads the players data
 export default (world: World) => {
-    useRoute(routes.jecsSetup, (_, player) => player.SetAttribute("JecsLoaded", true))
+    useRoute2(remotes.jecsSetup, (_, player) => player.SetAttribute("JecsLoaded", true))
     Players.GetPlayers().forEach(player => {
         if (!player.GetAttribute("JecsLoaded")) return;
         if (!player.GetAttribute("DataLoaded")) {

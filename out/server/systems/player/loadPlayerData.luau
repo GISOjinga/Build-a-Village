@@ -9,11 +9,11 @@ local _playersData = TS.import(script, game:GetService("ServerScriptService"), "
 local dataStore = _playersData.dataStore
 local setPlayerData = _playersData.setPlayerData
 local migrations = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "player", "extra", "migrations").default
-local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local useRoute2 = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute2
 local _analytics = TS.import(script, game:GetService("ServerScriptService"), "TS", "utils", "analytics")
 local logTutorialStep = _analytics.logTutorialStep
 local TutorialStep = _analytics.TutorialStep
+local remotes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "newNetwork").remotes
 -- migrates the players data
 local function migrateData(playerData)
 	local function update(newData)
@@ -31,7 +31,7 @@ local function migrateData(playerData)
 end
 -- loads the players data
 local default = function(world)
-	useRoute(routes.jecsSetup, function(_, player)
+	useRoute2(remotes.jecsSetup, function(_, player)
 		return player:SetAttribute("JecsLoaded", true)
 	end)
 	local _exp = Players:GetPlayers()

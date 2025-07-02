@@ -15,6 +15,7 @@ local jabby = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_inc
 local PlankJabbyPlugin = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "planck-jabby", "out")
 local PlanckHooksPlugin = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook").PlanckHooksPlugin
 local getInstanceByName = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "instanceFunctions").getInstanceByName
+local remotes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "newNetwork").remotes
 -- tags
 local matterTag = function(tag, world, callback)
 	local allInstancesTagged = CollectionService:GetTagged(tag)
@@ -212,7 +213,7 @@ local setupMatter = function(systems, tags)
 	-- adds the rest of the systems
 	hotReload(systems)
 	if RunService:IsClient() then
-		routes.jecsSetup.send()
+		remotes.jecsSetup.client.send()
 	end
 	-- return the debugger
 	return debug

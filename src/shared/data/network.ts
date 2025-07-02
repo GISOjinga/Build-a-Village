@@ -1,7 +1,7 @@
 import ByteNet, { defineNamespace, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
 import { Entity } from "@rbxts/jecs";
 import { EventLike } from "@rbxts/planck/out/types";
-import { RunService } from "@rbxts/services";
+import { ReplicatedStorage, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import pageStates, { PageStates } from "shared/utils/Animations/pageStates";
 import { camshake } from "shared/utils/functions/camShakeFunctions";

@@ -21,12 +21,13 @@ import { useEvent } from "shared/Plugin-Hook"
 import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
-import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
+import { useRoute, useRoute2 } from "shared/Plugin-Hook/hooks/use-route"
 import { routes } from "shared/data/network"
 import { Phase } from "@rbxts/planck"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { Players } from "@rbxts/services"
 import { appendJecs } from "shared/systems/hooks/append"
+import { remotes } from "shared/data/newNetwork"
 
 
 // sets up a instance with a unique id path
@@ -143,6 +144,6 @@ export default {
         useRoute(routes.getReplicatedComponents, (_, player) => replicateAllToPlayer(world, player))
 
         // when ever player gets added
-        useRoute(routes.jecsSetup, (_, player) => replicateAllToPlayer(world, player))
+        useRoute2(remotes.jecsSetup, (_, player) => replicateAllToPlayer(world, player))
     }
 } as SystemTable<[World]>

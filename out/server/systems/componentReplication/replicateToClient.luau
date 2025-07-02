@@ -22,9 +22,12 @@ local TargetReplication = _jecsComponents.TargetReplication
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local printTS = _jecsHelpFunctions.printTS
 local warnTS = _jecsHelpFunctions.warnTS
-local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
+local _use_route = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route")
+local useRoute = _use_route.useRoute
+local useRoute2 = _use_route.useRoute2
 local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local Players = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Players
+local remotes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "newNetwork").remotes
 -- sets up a instance with a unique id path
 local registeredInstance = setmetatable({}, {
 	__mode = "k",
@@ -152,12 +155,12 @@ local default = {
 							-- Use our serializer for ANY data shape
 							-- const payload = serializeForReplication(changed.new)
 							-- send the serialized payload to all target players
-							printTS(130, `Replicating {componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
+							printTS(131, `Replicating {componentName} for serverEntity:`, serverEntity, "to players:", players, "as", changed.new)
 							-- print(messageEnum)
 							-- messaging.client.emit(players, messageEnum)
 							-- route.sendToList({ serverEntity, data: changed.new as never }, players)
 						end):catch(function(err)
-							warnTS(135, `Replication error for {componentName} at line {135}: {tostring(err)}`)
+							warnTS(136, `Replication error for {componentName} at line {136}: {tostring(err)}`)
 						end)
 					end
 				end
@@ -168,7 +171,7 @@ local default = {
 			return replicateAllToPlayer(world, player)
 		end)
 		-- when ever player gets added
-		useRoute(routes.jecsSetup, function(_, player)
+		useRoute2(remotes.jecsSetup, function(_, player)
 			return replicateAllToPlayer(world, player)
 		end)
 	end,

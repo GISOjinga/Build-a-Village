@@ -196,9 +196,6 @@ local packets = defineNamespace("gameEvents", function()
 		deleteReplicatedEntity = definePacket({
 			value = ByteNet.unknown,
 		}),
-		jecsSetup = definePacket({
-			value = ByteNet.nothing,
-		}),
 	}
 	for _k, _v in {
 		Body = definePacket({

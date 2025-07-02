@@ -6,8 +6,9 @@ local RunService = TS.import(script, game:GetService("ReplicatedStorage"), "rbxt
 local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local Phases = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "jecs", "jecsComponents").Phases
 local appendJecs = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").appendJecs
+local remotes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "newNetwork").remotes
 local routesData = {}
--- export const routesData2 = new Map<Messages, (unknown[])[]>()
+local routesData2 = {}
 -- for change
 local default = {
 	phase = Phases.PreStartup,
@@ -29,30 +30,36 @@ local default = {
 			return nil
 		end)
 		-- loops through all messages
-		-- for (const [messageName, messageEnum] of pairs(Messages)) {
-		--     const dataCalled = [] as (unknown[])[]
-		--     // gets the route
-		--     routesData2.get(Messages.Body)
-		--     routesData2.set(messageEnum, dataCalled)
-		--     print("Watching", messageEnum, messageName)
-		--     // if (RunService.IsServer()) {
-		--     //     messaging.server.on(messageEnum, (player, data) => {
-		--     //         print("Just Recieved route data", messageName, data, player)
-		--     //         appendJecs(() => {
-		--     //             dataCalled.push([data, player])
-		--     //             appendJecs(() => dataCalled.shift())
-		--     //         })
-		--     //     })
-		--     // } else {
-		--     //     messaging.client.on(messageEnum, (data) => {
-		--     //         print("Just Recieved route data", messageName, data)
-		--     //         appendJecs(() => {
-		--     //             dataCalled.push([data])
-		--     //             appendJecs(() => dataCalled.shift())
-		--     //         })
-		--     //     })
-		--     // }
-		-- }
+		for remoteName, remote in pairs(remotes) do
+			local dataCalled = {}
+			-- gets the route
+			local _ = routesData2[remote]
+			routesData2[remote] = dataCalled
+			print("Watching", remote, remoteName)
+			if RunService:IsServer() then
+				remote.server.listen(function(player, data)
+					print("Just Recieved route data", remoteName, data, player)
+					appendJecs(function()
+						local _arg0 = { data, player }
+						table.insert(dataCalled, _arg0)
+						appendJecs(function()
+							return table.remove(dataCalled, 1)
+						end)
+					end)
+				end)
+			else
+				remote.client.listen(function(data)
+					print("Just Recieved route data", remoteName, data)
+					appendJecs(function()
+						local _arg0 = { data }
+						table.insert(dataCalled, _arg0)
+						appendJecs(function()
+							return table.remove(dataCalled, 1)
+						end)
+					end)
+				end)
+			end
+		end
 		-- loops through all the routes to listen to them
 		if RunService:IsServer() then
 			for _, _binding in Object.entries(routes) do
@@ -78,5 +85,6 @@ local default = {
 }
 return {
 	routesData = routesData,
+	routesData2 = routesData2,
 	default = default,
 }
