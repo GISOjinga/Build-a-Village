@@ -1,391 +1,213 @@
-import ByteNet, { defineNamespace, struct, inst, vec3, int8, int16, bool, optional, array, map, nothing } from "@rbxts/bytenet-fixed";
-import { Entity } from "@rbxts/jecs";
-import { EventLike } from "@rbxts/planck/out/types";
-import { ReplicatedStorage, RunService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
-import pageStates, { PageStates } from "shared/utils/Animations/pageStates";
-import { camshake } from "shared/utils/functions/camShakeFunctions";
-import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
-import { Body, componentsToReplicate, ConfirmationPrompt, Data, ModelDebugger, Villager } from "shared/utils/jecs/jecsComponents";
-import * as components from "shared/utils/jecs/jecsComponents";
+import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import Squash, { Cursor, SerDes, OptionalSerDes, record } from "@rbxts/squash";
+import { getUniqueIdPathFromInstance, getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions";
+import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { PlayerState } from "shared/utils/PlayerState";
 import robuxStoreData from "./robuxStoreData";
-import Squash from "@rbxts/squash";
+
+// Core remote setup
+const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes") ||
+    ((RunService.IsClient() && RunService.IsRunning())
+        ? ReplicatedStorage.WaitForChild<RemoteEvent>("JingaRemotes")
+        : (() => {
+            const inst = new Instance("RemoteEvent");
+            inst.Name = "JingaRemotes";
+            inst.Parent = ReplicatedStorage;
+            return inst;
+        })());
 
 
-const byteNetEntityInstance = ByteNet.unknown as ByteNetType<Instance>
-type packet<T extends ByteNetType<any>> = ReturnType<typeof ByteNet.definePacket<T>>
-type ByteNetType<T> = {
-    value: T;
-};
+// === Base JingaNet Type === //
+export type JingaNetType<T> = SerDes<T>;
 
 
-type MapTableToByteNet<T> =
-    T extends Entity ? ByteNetType<Entity> :
-    T extends Instance ? ByteNetType<T> :
-    T extends Vector3 ? ByteNetType<Vector3> :
-    T extends Map<infer G, infer V> ? ByteNetType<Map<G, MapTableToByteNet<V>["value"]>> :
-    T extends (...args: any[]) => any ? ByteNetType<T> :
-    T extends object
-    ? struct<{
-        [K in keyof T]-?: undefined extends T[K]
-        ? optional<MapTableToByteNet<NonNullable<T[K]>>>
-        : MapTableToByteNet<T[K]>
-    }> // 👈 this entire mapped object gets wrapped in `struct<>`
-    : ByteNetType<T>;
+// === Primitive Types === //
+export const int8 = Squash.int(1)
+export const int16 = Squash.int(2);
+export const int32 = Squash.int(4);
+export const uint8 = Squash.uint(1);
+export const uint16 = Squash.uint(2);
+export const uint32 = Squash.uint(4);
+export const float32 = Squash.number(4);
+export const float64 = Squash.number(8);
+export const str = Squash.string();
+export const bool = Squash.boolean();
+export const cframe = Squash.CFrame(Squash.number(4));
+export const vec3 = Squash.Vector3(Squash.number(4));
+export const vec2 = Squash.Vector2(Squash.number(4));
+export const nothing = {
+    ser(this: void): void { },
+    des(this: void): void { },
+} as unknown as SerDes<undefined>;
+
+export const inst = {
+    ser(cursor: Cursor, instance: Instance) {
+        const path = getUniqueIdPathFromInstance(instance).join("/");
+        str.ser(cursor, path);
+    },
+    des(cursor: Cursor) {
+        const path = str.des(cursor);
+        return getInstanceByUniqueIdPath(path === "" ? [] : path.split("/")) as Instance;
+    },
+} as SerDes<Instance>;
 
 
-// function to give a jecs component struct
-function componentStruct<T extends ByteNetType<unknown>>(data: T) {
-    return struct({
-        serverEntity: ByteNet.unknown as ByteNetType<Entity>,
-        data: optional(data),
-    })
+
+
+// === Remote Type Wrapper (fixed) === //
+export class Network<J extends SerDes<any>> {
+    private cursor = Squash.cursor()
+    constructor(
+        private readonly name: string,
+        private readonly packet: J,
+        private readonly reliabilityType: "reliable" | "unreliable" = "reliable",
+    ) { }
+
+    public server = {
+        listen: (callback: (data: ReturnType<J['des']>, player: Player) => void) => {
+            return jingaRemote.OnServerEvent.Connect((player, name: unknown, returnedBuffer: unknown) => {
+                if (name !== this.name) return;
+                const newCursor = Squash.frombuffer(returnedBuffer as buffer);
+                const realData = this.packet.des(newCursor);
+
+                // calls the call back
+                print(realData)
+                callback(realData, player);
+            })
+        },
+        sendToAll: (data: ReturnType<J['des']>) => {
+            this.packet.ser(this.cursor, data)
+            jingaRemote.FireAllClients(this.name, Squash.tobuffer(this.cursor));
+        },
+        sendToAllExcept: (data: ReturnType<J['des']>, exception: Player) => {
+            this.packet.ser(this.cursor, data)
+            Players.GetPlayers().forEach((player) => {
+                if (player !== exception) jingaRemote.FireClient(player, this.name, Squash.tobuffer(this.cursor));
+            })
+        },
+        sendTo: (data: ReturnType<J['des']>, player: Player) => {
+            this.packet.ser(this.cursor, data)
+            jingaRemote.FireClient(player, this.name, Squash.tobuffer(this.cursor));
+        },
+        sendToList: (data: ReturnType<J['des']>, players: Player[]) => {
+            this.packet.ser(this.cursor, data)
+            players.forEach((player) => jingaRemote.FireClient(player, this.name, Squash.tobuffer(this.cursor)));
+        },
+    }
+
+    public client = {
+        listen: (callback: (data: ReturnType<J['des']>) => void) => {
+            return jingaRemote.OnClientEvent.Connect((name: unknown, returnedBuffer: unknown) => {
+                if (name !== this.name) return;
+                const newCursor = Squash.frombuffer(returnedBuffer as buffer);
+                const realData = this.packet.des(newCursor);
+
+                // calls the call back
+                callback(realData as never);
+            })
+        },
+        wait: (): ReturnType<J['des']> => {
+            do {
+                const [name, returnedBuffer] = jingaRemote.OnClientEvent.Wait() as unknown as [string, buffer];
+
+                // If the name matches, we can safely deserialize
+                if (name === this.name) {
+                    const newCursor = Squash.frombuffer(returnedBuffer as buffer);
+                    return this.packet.des(newCursor);
+                };
+            } while (true)
+        },
+        send: (data: ReturnType<J['des']> = undefined as ReturnType<J['des']>) => {
+            this.packet.ser(this.cursor, data as never)
+            jingaRemote.FireServer(this.name, Squash.tobuffer(this.cursor));
+        },
+    }
 }
 
-// for ui
-const definePacket = <T extends ByteNetType<any>>(packetProps: {
-    value: T;
-    reliabilityType?: "reliable" | "unreliable";
-}) => {
-    return RunService.IsRunning() ? ByteNet.definePacket(packetProps) : (() => ({
-        ["listen"]: () => { },
-        ["sendTo"]: () => { },
-        ["send"]: () => { },
-        ["sendToAll"]: () => { },
-        ["sendToAllExcept"]: () => { },
-        ["sendToList"]: () => { },
-        ["wait"]: () => { },
-    })) as unknown as packet<T>;
-}
 
+// === Example Remote Bindings === //
+export const remotes = (() => {
+    const componentRecord = <T extends SerDes<any>>(data: T) =>
+        record({
+            serverEntity: uint32,
+            data: OptionalSerDes(data),
+        });
 
+    const villagerData = record({}) as SerDes<VillagerData>;
 
-
-// export const messaging = MessageEmitter.create<MessageData>();
-// export enum Messages {
-//     // components
-//     Body,
-//     Villager,
-//     Data,
-//     ModelDebugger,
-//     ConfirmationPrompt,
-
-//     // route to get replicated components
-//     getReplicatedComponents,
-//     deleteReplicatedEntity,
-//     jecsSetup,
-// }
-// export interface MessageData {
-//     // components
-//     [Messages.Body]: Packed<typeof Body>,
-//     [Messages.Villager]: Packed<typeof Villager>,
-//     [Messages.Data]: Packed<typeof Data>,
-//     [Messages.ModelDebugger]: Packed<typeof ModelDebugger>,
-//     [Messages.ConfirmationPrompt]: Packed<typeof ConfirmationPrompt>,
-
-//     // messages
-//     [Messages.getReplicatedComponents]: undefined;
-//     [Messages.deleteReplicatedEntity]: Packed<Entity>;
-//     [Messages.jecsSetup]: undefined;
-// }
-
-
-// Define namespace and packets
-const packets = defineNamespace("gameEvents", () => {
-    type T = ByteNetType<AllComponentNames>
-    const villagerStruct = ByteNet.struct({
-        Name: ByteNet.string as ByteNetType<VillagerNames>,
-        UniqueId: ByteNet.unknown as ByteNetType<number>,
-        RelativeLocation: optional(ByteNet.cframe),
-        Progress: struct({
-            Produce: ByteNet.string as ByteNetType<ProduceNames>,
-            Required: optional(struct({
-                Produce: ByteNet.string as ByteNetType<ProduceNames>,
-                Amount: ByteNet.unknown as ByteNetType<number>,
-                Max: ByteNet.unknown as ByteNetType<number>,
-            })),
-            Progression: struct({
-                Time: struct({
-                    RequiredTimePerResource: ByteNet.uint16,
-                    StartTime: ByteNet.unknown as ByteNetType<number>,
-                }),
-                Resources: array(ByteNet.string as ByteNetType<ProduceVariant>),
-            }),
-            Building: struct({
-                StartTime: ByteNet.unknown as ByteNetType<number>,
-                TotalTime: ByteNet.unknown as ByteNetType<number>,
-            }),
+    const events = {
+        jecsSetup: nothing,
+        Jump: record({
+            position: record({ x: float32, y: float32, z: float32 }),
         }),
-    }) satisfies ByteNetType<VillagerData> as ByteNetType<VillagerData>;
+        buyVillager: record({ villagerIndex: int16, currency: str }),
+        placeVillager: cframe,
+        digVillager: uint32,
+        supplyVillager: uint32,
+        collectVillagerProduce: record({
+            villagerEntity: uint32,
+            resourceModelName: str,
+        }),
+        teleportToVillage: nothing,
+        teleportToShop: str,
+        updateRestockTime: uint32,
+        updateVillagersShop: str,
+        redeemPromo: str,
+        promoResult: record({ success: bool, message: str }),
+        confirmSellOptions: str,
+        toggleSellMenuOpen: bool,
+        confirmPrompt: bool,
+        updateFriendsBonus: bool,
+        sendFriendRequest: inst,
+        notify: record({ text: str, duration: uint8 }),
+        npcDialogue: record({ target: str, text: str }),
+        buyWall: record({ wallName: str, currency: str }),
+        equipWall: record({ wallName: str, equip: bool }),
+        togglePage: str,
+        giftToPlayer: record({ playerToGift: inst, produceTool: inst }),
+        playSound: record({ sound: inst, position: OptionalSerDes(vec3) }),
+        shopGiftTo: inst,
+        updateRobuxStore: str,
+        buyRobuxPack: record({ purchase: str }),
 
-    return {
-        // confirm prompt
-        confirmPrompt: definePacket({
-            value: bool,
-        }),
+        getReplicatedComponents: nothing,
+        deleteReplicatedEntity: uint32,
 
-        // hand to player as gift
-        giftToPlayer: definePacket({
-            value: struct({
-                playerToGift: ByteNet.inst as ByteNetType<Player>,
-                produceTool: ByteNet.inst as ByteNetType<Tool>
-            }),
-        }),
-
-        // plays sounds
-        playSound: definePacket({
-            value: struct({
-                sound: ByteNet.inst as ByteNetType<Sound>,
-                position: optional(ByteNet.vec3),
-            }),
-        }),
-
-        // update robux store
-        updateRobuxStore: definePacket({
-            value: ByteNet.unknown as ByteNetType<typeof robuxStoreData>,
-        }),
-
-        // request to buy robux pack
-        buyRobuxPack: definePacket({
-            value: struct({
-                purchase: ByteNet.string as ByteNetType<keyof typeof robuxStoreData>,
-            }),
-        }),
-
-        // to buy wall
-        buyWall: definePacket({
-            value: struct({
-                wallName: ByteNet.string as ByteNetType<WallNames>,
-                currency: ByteNet.string as ByteNetType<"Coins" | "Robux">,
-            }),
-        }),
-
-        // equip wall
-        equipWall: definePacket({
-            value: struct({
-                wallName: ByteNet.string as ByteNetType<WallNames>,
-                equip: bool,
-            }),
-        }),
-
-        // to toggle pages
-        togglePage: definePacket({
-            value: ByteNet.string as ByteNetType<ReturnType<typeof pageStates.openPage>>,
-        }),
-
-        // closes out the sell menu
-        toggleSellMenuOpen: definePacket({
-            value: ByteNet.bool
-        }),
-
-        // sell options
-        confirmSellOptions: definePacket({
-            value: ByteNet.string as ByteNetType<"Option1" | "Option2" | "Option3" | "Option4">,
-        }),
-
-        // notification
-        notify: definePacket({
-            value: struct({
-                text: ByteNet.string,
-                duration: ByteNet.uint8,
-            }),
-        }),
-
-        // npc dialogue
-        npcDialogue: definePacket({
-            value: struct({
-                target: ByteNet.string as ByteNetType<"Buy" | "Sell" | "None">,
-                text: ByteNet.string,
-            }),
-        }),
-
-        // promotions
-        updateFriendsBonus: definePacket({
-            value: ByteNet.bool,
-        }),
-        sendFriendRequest: definePacket({
-            value: ByteNet.inst as ByteNetType<Player>,
-        }),
-        // requestAddFriend: definePacket({
-        //     value: ByteNet.inst as ByteNetType<Player>,
-        // }),
-        redeemPromo: definePacket({
-            value: ByteNet.string,
-        }),
-        promoResult: definePacket({
-            value: struct({ success: bool, message: ByteNet.string }),
-        }),
-
-        // to gift your next robux purchace to a player
-        shopGiftTo: definePacket({
-            value: ByteNet.inst as ByteNetType<Player>,
-        }),
-
-        // place villager
-        placeVillager: definePacket({
-            value: ByteNet.cframe,
-        }),
-
-        // dig villager
-        digVillager: definePacket({
-            value: ByteNet.unknown as ByteNetType<Entity>,
-        }),
-
-        // collect villager produce
-        collectVillagerProduce: definePacket({
-            value: struct({
-                villagerEntity: ByteNet.unknown as ByteNetType<Entity>,
-                resourceModelName: ByteNet.string,
-            }),
-        }),
-
-        // give required items to villager
-        supplyVillager: definePacket({
-            value: ByteNet.unknown as ByteNetType<Entity>,
-        }),
-
-        // request to buy villager
-        buyVillager: definePacket({
-            value: struct({
-                villagerIndex: ByteNet.int16,
-                currency: ByteNet.string as ByteNetType<"Coins" | "Robux">,
-            }),
-        }),
-
-        // update restock time
-        updateRestockTime: definePacket({
-            value: ByteNet.uint32,
-        }),
-
-        // update shop villagers
-        updateVillagersShop: definePacket({
-            value: ByteNet.unknown as ByteNetType<Array<VillagerInfo>>,
-        }),
-
-        // teleport to your village
-        teleportToVillage: definePacket({
-            value: ByteNet.nothing
-        }),
-
-        // teleport to buy or sell
-        teleportToShop: definePacket({
-            value: ByteNet.string as ByteNetType<"Buy" | "Sell" | "Wall">
-        }),
-
-        // route to get replicated components
-        getReplicatedComponents: definePacket({ value: ByteNet.nothing }),
-        deleteReplicatedEntity: definePacket({ value: ByteNet.unknown as ByteNetType<Entity> }),
-        jecsSetup: definePacket({ value: ByteNet.nothing }),
-
-        // for replicating components
         ...{
-            Body: definePacket({
-                value: componentStruct(struct({
-                    model: byteNetEntityInstance as ByteNetType<Model>,
-                    head: byteNetEntityInstance as ByteNetType<BasePart>,
-                    humanoid: byteNetEntityInstance as ByteNetType<Humanoid>,
-                    rootPart: byteNetEntityInstance as ByteNetType<BasePart>,
-                    animator: byteNetEntityInstance as ByteNetType<Animator>,
-                    rootAttachment: byteNetEntityInstance as ByteNetType<Attachment>,
-                    platform: optional(byteNetEntityInstance as ByteNetType<PlatformExample>),
-                })),
-            }),
+            Body: componentRecord(record({
+                model: inst,
+                head: inst,
+                humanoid: inst,
+                rootPart: inst,
+                animator: inst,
+                rootAttachment: inst,
+                platform: OptionalSerDes(inst),
+            })),
+            Villager: componentRecord(record({
+                villagerModel: inst,
+                playerEntity: uint32,
+                villagerData: villagerData,
+            })),
+            Data: componentRecord(record({
+                Version: str,
+                Coins: uint32,
+            })),
+            ConfirmationPrompt: componentRecord(record({
+                title: str,
+                message: str,
+                confirmation: OptionalSerDes(bool),
+            })),
+            ModelDebugger: componentRecord(inst),
+        } satisfies { [K in keyof typeof componentsToReplicate]: SerDes<any> },
 
-            // for replicating villager
-            Villager: definePacket({
-                value: componentStruct(struct({
-                    villagerModel: byteNetEntityInstance as ByteNetType<VillagerModel>,
-                    playerEntity: ByteNet.unknown as ByteNetType<Entity>,
-                    villagerData: villagerStruct,
-                })),
-            }),
-
-            // data
-            Data: definePacket({
-                value: componentStruct(struct({
-                    Version: ByteNet.string,
-                    Coins: ByteNet.uint32,
-                    Villagers: array(villagerStruct),
-                    PromoCodesRedeemed: array(ByteNet.string),
-                    Tutorial: ByteNet.unknown as ByteNetType<"Done" | number>,
-                    Produce: array(struct({
-                        Name: ByteNet.string as ByteNetType<ProduceNames>,
-                        Amount: ByteNet.unknown as ByteNetType<number>,
-                        Variant: ByteNet.string as ByteNetType<ProduceVariant>
-                    })),
-                    Walls: array(struct({
-                        Name: ByteNet.string as ByteNetType<WallNames>,
-                        Description: ByteNet.string,
-                        Image: ByteNet.string,
-                        Price: ByteNet.unknown as ByteNetType<number>,
-                        GamePassId: ByteNet.unknown as ByteNetType<number>,
-                        CashMultiplier: ByteNet.unknown as ByteNetType<number>,
-                        Rarity: ByteNet.string as ByteNetType<WallRarity>,
-                        Owned: bool,
-                        Equipped: bool,
-                    })),
-                })),
-            }) as never,
-
-            // confirmation prompt
-            ConfirmationPrompt: definePacket({
-                value: componentStruct(struct({
-                    title: ByteNet.string,
-                    message: ByteNet.string,
-                    confirmation: optional(ByteNet.bool),
-                    onConfirm: ByteNet.unknown as ByteNetType<() => void>,
-                    onDecline: optional(ByteNet.unknown as ByteNetType<() => void>),
-                })),
-            }),
-
-            // for replicating player state
-            ModelDebugger: definePacket({
-                value: componentStruct(byteNetEntityInstance as ByteNetType<Model | BasePart>),
-            }),
-        } satisfies {
-            [k in keyof typeof componentsToReplicate]: packet<struct<{
-                serverEntity: ByteNetType<Entity>,
-                data: optional<MapTableToByteNet<ComponentValue<MappedComponents[k]>>>
-            }>>
-        },
-
-        // for replicating player state
-        replicatePlayerState: definePacket({
-            value: struct({
-                serverEntity: ByteNet.unknown as ByteNetType<Entity>,
-                data: ByteNet.unknown as ByteNetType<PlayerState>,
-            }),
+        replicatePlayerState: record({
+            serverEntity: uint32,
+            data: record({}) as SerDes<PlayerState>,
         }),
     };
-});
 
-
-export const routes = {} as { [key in keyof typeof packets]: typeof packets[key] }
-
-// loops through routes and makes a signal
-for (const [key, packet] of pairs(packets)) {
-    const toBeCalled = new Set<FirstParam<typeof packet["listen"]>>()
-    const routeFaked = (routes as unknown as Record<any, any>)
-
-
-    // adds the fake route
-    routeFaked[key] = {
-        wait: packet.wait,
-        send: packet.send,
-        sendToAll: packet.sendToAll,
-        sendTo: packet.sendTo,
-        sendToList: packet.sendToList,
-        sendToAllExcept: packet.sendToAllExcept,
-        listen: (callback: FirstParam<typeof packet["listen"]>) => {
-            toBeCalled.add(callback)
-            return () => toBeCalled.delete(callback);
-        },
-    };
-
-    // the actual listner
-    packet.listen((...T: unknown[]) => {
-        // if (RunService.IsClient()) print("Recieved", key, T, toBeCalled)
-        toBeCalled.forEach((callback: Callback) => callback(...T))
-    });
-}
+    const realRemotes = {} as { [K in keyof typeof events]: Network<typeof events[K]> };
+    for (const [name, packet] of pairs(events))
+        realRemotes[name] = new Network(name as string, packet as SerDes<any>, "reliable");
+    return realRemotes;
+})();

@@ -9,7 +9,7 @@ import { routes } from "shared/data/network"
 import { useMemo, useState } from "shared/Plugin-Hook"
 import { Added, addedQuery, Changed, changedQuery, Phases, Removed, removedQuery, TargetEntity, world } from "shared/utils/jecs/jecsComponents"
 import { appendJecs } from "./append"
-import { Network, remotes } from "shared/data/newNetwork"
+import { Network, remotes } from "shared/data/network"
 
 
 // export const routesData = new Map<packet<ByteNetType<unknown>>, (unknown[])[]>()

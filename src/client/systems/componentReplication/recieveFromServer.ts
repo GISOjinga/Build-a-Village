@@ -30,14 +30,14 @@ import { getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFuncti
 
 
 
-// checks data for __ByteNetInstancePath to make sure it has all the instances replicated
+// checks data for __JingaNetInstancePath to make sure it has all the instances replicated
 function checkData(data?: unknown) {
     // recursive check/fix
     function check(path: object, index: never, value: unknown): [boolean, object] {
         // if data is a table then check each value
         if (typeIs(value, "table")) {
-            if ("__ByteNetInstancePath" in value) {
-                const instance = value.__ByteNetInstancePath//getInstanceByUniqueIdPath(value.__ByteNetInstancePath as string[])
+            if ("__JingaNetInstancePath" in value) {
+                const instance = getInstanceByUniqueIdPath(value.__JingaNetInstancePath as string[])
 
                 if (!instance) {
                     return [false, path]
@@ -65,10 +65,10 @@ function checkData(data?: unknown) {
         return [true, path]
     }
 
-    // if data is a table and has __ByteNetInstancePath then return true
+    // if data is a table and has __JingaNetInstancePath then return true
     if (typeIs(data, "table")) {
-        if ("__ByteNetInstancePath" in data) {
-            const instance = data.__ByteNetInstancePath// getInstanceByUniqueIdPath(data.__ByteNetInstancePath as string[])
+        if ("__JingaNetInstancePath" in data) {
+            const instance = getInstanceByUniqueIdPath(data.__JingaNetInstancePath as string[])
 
             // if instance is not in the world then return false
             if (!instance) {

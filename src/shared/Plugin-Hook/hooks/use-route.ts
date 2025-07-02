@@ -7,7 +7,7 @@ import { Changed, Trash, world } from "shared/utils/jecs/jecsComponents";
 import { Janitor } from "@rbxts/janitor";
 import { RunService } from "@rbxts/services";
 import { routesData, routesData2 } from "shared/systems/hooks/watchRoutes";
-import { remotes } from "shared/data/newNetwork";
+import { remotes } from "shared/data/network";
 
 
 // get instance by full name
