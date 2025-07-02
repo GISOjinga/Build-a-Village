@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
-import Squash, { Cursor, SerDes, OptionalSerDes, record, array, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack, Optional } from "@rbxts/squash";
+import Squash, { SerDes, OptionalSerDes, record, array, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack, Optional } from "@rbxts/squash";
 import { getUniqueIdPathFromInstance, getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
 import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
@@ -82,9 +82,8 @@ export class Network<J extends JingaNetType<any>> {
                 if (name !== this.name) return;
                 let realData: ExtractSerDes<J> | undefined = undefined;
                 if (returnedBuffer) {
-                    const newCursor = Squash.frombuffer(returnedBuffer as buffer);
-                    realData = this.packet.des(newCursor) as ExtractSerDes<J>;
-                    print(name, "GOT THE DATA", realData, returnedBuffer, newCursor)
+                    realData = this.deepDeserialize(returnedBuffer as buffer);
+                    print(name, "GOT THE DATA", realData, returnedBuffer)
                 }
 
                 // calls the call back
@@ -96,9 +95,8 @@ export class Network<J extends JingaNetType<any>> {
                 if (name !== this.name) return;
                 let realData: ExtractSerDes<J> | undefined = undefined;
                 if (returnedBuffer) {
-                    const newCursor = Squash.frombuffer(returnedBuffer as buffer);
-                    realData = this.packet.des(newCursor) as ExtractSerDes<J>;
-                    print(name, "GOT THE DATA", realData, returnedBuffer, newCursor)
+                    realData = this.deepDeserialize(returnedBuffer as buffer);
+                    print(name, "GOT THE DATA", realData, returnedBuffer)
                 }
 
                 // calls the call back
@@ -108,29 +106,106 @@ export class Network<J extends JingaNetType<any>> {
         }
     }
 
-    private searlizeToBuffer(data: ExtractSerDes<J>): buffer {
+    /** Serialize arbitrary data into a Squash buffer using deep serialization */
+    private serializeToBuffer(data: ExtractSerDes<J>): buffer {
+        return this.deepSerialize(data);
+    }
+
+    /**
+     * Recursively serialize `data` according to `this.packet` schema.
+     * This walks nested objects and array descriptors, using any SerDes
+     * implementations found in the schema to write primitive values.
+     */
+    private deepSerialize(data: ExtractSerDes<J>): buffer {
         const cursor = Squash.cursor();
-        this.packet.ser(cursor, data);
+
+        const serialize = (schema: unknown, value: unknown) => {
+            // If schema is a SerDes table, use it directly
+            if (typeIs(schema, "table") && typeIs((schema as never)["ser"], "function")) {
+                (schema as SerDes<unknown>).ser(cursor, value);
+                return;
+            }
+
+            // For tables without a direct serializer, recurse into each key
+            if (typeIs(schema, "table") && typeIs(value, "table")) {
+                const serField = (schema as never)["ser"];
+                // Dynamic array support when schema describes an array shape
+                if (!typeIs(serField, "function") && (schema as never)[1] !== undefined) {
+                    const arr = value as Array<unknown>;
+                    uint16.ser(cursor, arr.size() as never);
+                    for (const v of arr) {
+                        serialize((schema as never)[1], v);
+                    }
+                } else {
+                    for (const [key, child] of pairs(schema as never)) {
+                        serialize(child, (value as never)[key]);
+                    }
+                }
+                return;
+            }
+
+            // Fallback for primitives/undefined
+            if (typeIs(schema, "table") && typeIs((schema as never)["des"], "function")) {
+                (schema as SerDes<unknown>).ser(cursor, value);
+            }
+        };
+
+        serialize(this.packet, data);
         return Squash.tobuffer(cursor);
     }
 
+    /**
+     * Reconstruct data from a buffer using the same schema used for sending.
+     * Supports nested objects and dynamically sized arrays.
+     */
+    private deepDeserialize(buffer: buffer): ExtractSerDes<J> {
+        const cursor = Squash.frombuffer(buffer);
+
+        const deserialize = (schema: unknown): unknown => {
+            if (typeIs(schema, "table") && typeIs((schema as never)["des"], "function")) {
+                return (schema as SerDes<unknown>).des(cursor);
+            }
+
+            if (typeIs(schema, "table")) {
+                const desField = (schema as never)["des"];
+                if (!typeIs(desField, "function") && (schema as never)[1] !== undefined) {
+                    const arrLength = uint16.des(cursor) as number;
+                    const arr = [] as Array<unknown>;
+                    for (let i = 1; i <= arrLength; i++) {
+                        arr[i - 1] = deserialize((schema as never)[1]);
+                    }
+                    return arr;
+                } else {
+                    const out = {} as Record<string, unknown>;
+                    for (const [key, child] of pairs(schema as never)) {
+                        out[key as string] = deserialize(child);
+                    }
+                    return out;
+                }
+            }
+            return undefined;
+        };
+
+        return deserialize(this.packet) as ExtractSerDes<J>;
+    }
+
     public sendToAll(data: ExtractSerDes<J>) {
-        jingaRemote.FireAllClients(this.name, this.searlizeToBuffer(data));
+        jingaRemote.FireAllClients(this.name, this.serializeToBuffer(data));
     }
 
     public sendToAllExcept(data: ExtractSerDes<J>, exception: Player) {
         Players.GetPlayers().forEach((player) => {
-            if (player !== exception) jingaRemote.FireClient(player, this.name, this.searlizeToBuffer(data));
+            if (player !== exception) jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
         })
     }
 
     public sendTo(data: ExtractSerDes<J>, player: Player) {
-        jingaRemote.FireClient(player, this.name, this.searlizeToBuffer(data));
+        jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
     }
 
     public sendToList(data: ExtractSerDes<J>, players: Player[]) {
         // print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
-        players.forEach((player) => jingaRemote.FireClient(player, this.name, this.searlizeToBuffer(data)));
+        players.forEach((player) => jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data)));
     }
 
     public wait(): ExtractSerDes<J> {
@@ -139,15 +214,14 @@ export class Network<J extends JingaNetType<any>> {
 
             // If the name matches, we can safely deserialize
             if (name === this.name) {
-                const newCursor = Squash.frombuffer(returnedBuffer as buffer);
-                return this.packet.des(newCursor);
+                return this.deepDeserialize(returnedBuffer as buffer);
             };
         } while (true)
     }
 
     public send(data: ExtractSerDes<J> = undefined as ExtractSerDes<J>) {
         print("Sending", this.name, "with data", data);
-        jingaRemote.FireServer(this.name, this.searlizeToBuffer(data));
+        jingaRemote.FireServer(this.name, this.serializeToBuffer(data));
     }
 }
 
