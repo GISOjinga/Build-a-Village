@@ -2,8 +2,10 @@ import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import Squash, { Cursor, SerDes, OptionalSerDes, record } from "@rbxts/squash";
 import { getUniqueIdPathFromInstance, getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
+import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
 import { PlayerState } from "shared/utils/PlayerState";
 import robuxStoreData from "./robuxStoreData";
+import { Entity } from "@rbxts/jecs";
 
 // Core remote setup
 const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes") ||
@@ -31,10 +33,11 @@ export const uint32 = Squash.uint(4);
 export const float32 = Squash.number(4);
 export const float64 = Squash.number(8);
 export const str = Squash.string();
-export const bool = Squash.boolean();
+export const bool = Squash.boolean() as unknown as SerDes<boolean>;
 export const cframe = Squash.CFrame(Squash.number(4));
 export const vec3 = Squash.Vector3(Squash.number(4));
 export const vec2 = Squash.Vector2(Squash.number(4));
+const optional = Squash.opt;
 export const nothing = {
     ser(this: void): void { },
     des(this: void): void { },
@@ -124,14 +127,20 @@ export class Network<J extends SerDes<any>> {
     }
 }
 
+type MapTableToJingaNet<T> =
+    T extends Instance ? SerDes<Instance> :
+    T extends object ? { [K in keyof T]: T[K] extends Squash.Optional<infer J> ? T[K] : MapTableToJingaNet<T[K]> } :
+    SerDes<T>;
 
 // === Example Remote Bindings === //
-export const remotes = (() => {
-    const componentRecord = <T extends SerDes<any>>(data: T) =>
-        record({
-            serverEntity: uint32,
-            data: OptionalSerDes(data),
-        });
+export const routes = (() => {
+    const componentRecord = <T extends unknown>(data: MapTableToJingaNet<T>) => record({
+        serverEntity: uint32,
+        data: optional(data as never),
+    }) as unknown as SerDes<{
+        serverEntity: SerDes<Entity>,
+        data: Squash.Optional<MapTableToJingaNet<T>>;
+    }>
 
     const villagerData = record({}) as SerDes<VillagerData>;
 
@@ -165,7 +174,7 @@ export const remotes = (() => {
         equipWall: record({ wallName: str, equip: bool }),
         togglePage: str,
         giftToPlayer: record({ playerToGift: inst, produceTool: inst }),
-        playSound: record({ sound: inst, position: OptionalSerDes(vec3) }),
+        playSound: record({ sound: inst, position: optional(vec3) }),
         shopGiftTo: inst,
         updateRobuxStore: str,
         buyRobuxPack: record({ purchase: str }),
@@ -181,7 +190,7 @@ export const remotes = (() => {
                 rootPart: inst,
                 animator: inst,
                 rootAttachment: inst,
-                platform: OptionalSerDes(inst),
+                platform: optional(inst),
             })),
             Villager: componentRecord(record({
                 villagerModel: inst,
@@ -195,19 +204,19 @@ export const remotes = (() => {
             ConfirmationPrompt: componentRecord(record({
                 title: str,
                 message: str,
-                confirmation: OptionalSerDes(bool),
+                confirmation: optional(bool),
             })),
             ModelDebugger: componentRecord(inst),
-        } satisfies { [K in keyof typeof componentsToReplicate]: SerDes<any> },
-
-        replicatePlayerState: record({
-            serverEntity: uint32,
-            data: record({}) as SerDes<PlayerState>,
-        }),
+        } satisfies {
+            [k in keyof typeof componentsToReplicate]: SerDes<{
+                serverEntity: SerDes<Entity>,
+                data: Squash.Optional<MapTableToJingaNet<ComponentValue<MappedComponents[k]>>>;
+            }>;
+        },
     };
 
-    const realRemotes = {} as { [K in keyof typeof events]: Network<typeof events[K]> };
-    for (const [name, packet] of pairs(events))
-        realRemotes[name] = new Network(name as string, packet as SerDes<any>, "reliable");
+    type events = typeof events;
+    const realRemotes = {} as { [K in keyof events]: Network<events[K]> };
+    for (const [name, packet] of pairs(events)) realRemotes[name] = new Network(name as string, packet as SerDes<any>, "reliable");
     return realRemotes;
 })();
