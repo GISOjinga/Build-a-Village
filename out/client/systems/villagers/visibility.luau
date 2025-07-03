@@ -45,15 +45,17 @@ local function cacheVillagerParts(villagerModel)
 	local _villagerModel = villagerModel
 	local cache = villagerPartCaches[_villagerModel]
 	if not cache then
+		local station = villagerModel:WaitForChild("Station")
+		local parts = station:WaitForChild("Parts")
 		local _object = {
-			resourcesGroup = villagerModel.Station.Parts.Resources:GetDescendants(),
-			progressFull = villagerModel.Station.Parts.ProgressFull:GetDescendants(),
-			stationParts = villagerModel.Station.Parts.StationParts:GetDescendants(),
-			npc = villagerModel.Npc:GetDescendants(),
-			accessories = villagerModel.Accessories:GetDescendants(),
+			resourcesGroup = station:WaitForChild("Parts"):WaitForChild("Resources"):GetDescendants(),
+			progressFull = parts:WaitForChild("ProgressFull"):GetDescendants(),
+			stationParts = parts:WaitForChild("StationParts"):GetDescendants(),
+			npc = villagerModel:WaitForChild("Npc"):GetDescendants(),
+			accessories = villagerModel:WaitForChild("Accessories"):GetDescendants(),
 		}
 		local _left = "inProgress"
-		local _exp = villagerModel.Station.Parts.InProgress:GetChildren()
+		local _exp = parts:WaitForChild("InProgress"):GetChildren()
 		-- ▼ ReadonlyArray.map ▼
 		local _newValue = table.create(#_exp)
 		local _callback = function(child)
@@ -73,7 +75,7 @@ local function cacheVillagerParts(villagerModel)
 		-- ▲ ReadonlyArray.map ▲
 		_object[_left] = _newValue
 		local _left_1 = "resourceModels"
-		local _exp_1 = villagerModel.Station.Parts.Resources:GetChildren()
+		local _exp_1 = parts:WaitForChild("Resources"):GetChildren()
 		-- ▼ ReadonlyArray.map ▼
 		local _newValue_1 = table.create(#_exp_1)
 		local _callback_1 = function(model)
@@ -103,6 +105,7 @@ local function updateVillagerState(villagerModel, newState)
 		_condition = not deepEquals(villageModelStates[_villagerModel_1], newState)
 	end
 	if _condition then
+		-- print(newState, villageModelStates.get(villagerModel))
 		local parts = cacheVillagerParts(villagerModel)
 		local _exp = parts.resourcesGroup
 		-- ▼ ReadonlyArray.forEach ▼
@@ -348,7 +351,7 @@ local default = function(world)
 			-- ▲ ReadonlyArray.forEach ▲
 			cacheVillagerParts(villagerModel)
 		end):catch(function(err)
-			return warnJecs(168, "Villager", "Error setting up villager model particles", err)
+			return warnJecs(171, "Villager", "Error setting up villager model particles", err)
 		end)
 	end
 	-- when vilalger animator gets added
@@ -376,7 +379,7 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(187, "Villager", "Error setting up villager animator", err)
+			return warnJecs(190, "Villager", "Error setting up villager animator", err)
 		end)
 	end
 	-- controls the animations
@@ -428,7 +431,7 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(230, "Villager", "Error setting up villager animations", err)
+			return warnJecs(233, "Villager", "Error setting up villager animations", err)
 		end)
 	end
 	-- watches for changes
@@ -472,7 +475,7 @@ local default = function(world)
 				})
 			end
 		end):catch(function(err)
-			return warnTS(268, "Villager", "Error updating villager state", err)
+			return warnTS(271, "Villager", "Error updating villager state", err)
 		end)
 	end
 end

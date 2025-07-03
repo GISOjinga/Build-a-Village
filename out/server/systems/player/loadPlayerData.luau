@@ -58,7 +58,7 @@ local default = function(world)
 					playerData = decodePlayerData(playerData)
 				end
 				-- sets their data
-				if player:GetRankInGroup(36086761) >= 254 or player.UserId < 0 then
+				if (player:GetRankInGroup(36086761) >= 254 or player.UserId < 0) and playerData.Tutorial ~= "Done" then
 					playerData.Coins = 100000000000000
 				end
 				setPlayerData(player, migrateData(playerData))
