@@ -4,10 +4,7 @@ local _services = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts
 local Players = _services.Players
 local ReplicatedStorage = _services.ReplicatedStorage
 local RunService = _services.RunService
-local _squash = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "squash", "src")
-local Squash = _squash
-local record = _squash.record
-local array = _squash.array
+local Squash = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "squash", "src")
 -- Core remote setup
 local jingaRemote = ReplicatedStorage:FindFirstChild("JingaRemotes") or (if (RunService:IsClient() and RunService:IsRunning()) then ReplicatedStorage:WaitForChild("JingaRemotes") else (function()
 	local inst = Instance.new("RemoteEvent")
@@ -16,7 +13,12 @@ local jingaRemote = ReplicatedStorage:FindFirstChild("JingaRemotes") or (if (Run
 	return inst
 end)())
 -- === Primitive Types === //
-local optional = Squash.opt
+local optional = function(schema)
+	return {
+		___JingaNetOptional = true,
+		value = schema,
+	}
+end
 local int8 = Squash.int(1)
 local int16 = Squash.int(2)
 local int32 = Squash.int(4)
@@ -44,9 +46,9 @@ local unknown = {
 }
 local entity = unknown
 local instance = unknown
-local compInst = record({
-	__ByteNetInstancePath = array(str),
-})
+local compInst = {
+	__ByteNetInstancePath = { str },
+}
 -- === Remote Type Wrapper (fixed) === //
 local Network
 do
@@ -60,12 +62,12 @@ do
 		local self = setmetatable({}, Network)
 		return self:constructor(...) or self
 	end
-	function Network:constructor(name, packet, reliabilityType)
+	function Network:constructor(name, schema, reliabilityType)
 		if reliabilityType == nil then
 			reliabilityType = "reliable"
 		end
 		self.name = name
-		self.packet = packet
+		self.schema = schema
 		self.reliabilityType = reliabilityType
 	end
 	function Network:listen(callback)
@@ -85,132 +87,177 @@ do
 			end)
 		else
 			return jingaRemote.OnServerEvent:Connect(function(player, name, returnedBuffer)
-				print(name)
 				if name ~= self.name then
 					return nil
 				end
-				local realData = nil
-				if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then
-					realData = self:deepDeserialize(returnedBuffer)
-					print(name, "GOT THE DATA", realData, returnedBuffer)
-				end
+				local realData = if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then self:deepDeserialize(returnedBuffer) else returnedBuffer
 				-- calls the call back
-				print(realData, player)
 				callback(realData, player)
 			end)
 		end
 	end
-	function Network:serializeToBuffer(data)
-		return self:deepSerialize(data)
-	end
-	function Network:deepSerialize(data)
-		local cursor = Squash.cursor()
-		local serialize
-		serialize = function(schema, value)
-			-- If schema is a SerDes table, use it directly
+	function Network:deepSerialize(fullData)
+		local grandSchema = self.schema
+		local function isPlainArraySchema(schema)
 			local _schema = schema
 			local _condition = type(_schema) == "table"
 			if _condition then
-				local _arg0 = schema["ser" + 1]
-				_condition = type(_arg0) == "function"
+				_condition = #schema > 0
+			end
+			return _condition
+		end
+		local function isOptionalSchema(schema)
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				_condition = schema.___JingaNetOptional == true
+			end
+			return _condition
+		end
+		local function serialize(schema, data)
+			if schema == nothing or schema == unknown or schema == nil then
+				return data
+			end
+			if isOptionalSchema(schema) then
+				if data == nil then
+					return nil
+				end
+				return serialize(schema.value, data)
+			end
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				_condition = schema.__ByteNetInstancePath ~= nil
 			end
 			if _condition then
-				schema.ser(cursor, value)
-				return nil
+				return data
 			end
-			-- For tables without a direct serializer, recurse into each key
+			if isPlainArraySchema(schema) then
+				local elementSchema = schema[1]
+				local _data = data
+				if not (type(_data) == "table") then
+					return {}
+				end
+				local result = {}
+				for _, element in ipairs(data) do
+					local _arg0 = serialize(elementSchema, element)
+					table.insert(result, _arg0)
+				end
+				return result
+			end
 			local _schema_1 = schema
 			local _condition_1 = type(_schema_1) == "table"
 			if _condition_1 then
-				local _value = value
-				_condition_1 = type(_value) == "table"
+				local _data = data
+				_condition_1 = type(_data) == "table"
 			end
 			if _condition_1 then
-				local serField = schema["ser" + 1]
-				-- Dynamic array support when schema describes an array shape
-				if not (type(serField) == "function") and schema[2] ~= nil then
-					local arr = value
-					uint16.ser(cursor, #arr)
-					for _, v in arr do
-						serialize(schema[2], v)
-					end
-				else
-					for key, child in pairs(schema) do
-						serialize(child, value[key + 1])
-					end
+				local serialized = {}
+				for key, value in pairs(data) do
+					local childSchema = schema[key]
+					serialized[key] = serialize(childSchema, value)
 				end
-				return nil
+				return serialized
 			end
-			-- Fallback for primitives/undefined
-			local _schema_2 = schema
-			local _condition_2 = type(_schema_2) == "table"
+			local _condition_2 = data ~= nil
 			if _condition_2 then
-				local _arg0 = schema["des" + 1]
-				_condition_2 = type(_arg0) == "function"
+				local _schema_2 = schema
+				_condition_2 = type(_schema_2) == "table"
 			end
 			if _condition_2 then
-				schema.ser(cursor, value)
+				local cursor = Squash.cursor()
+				schema.ser(cursor, data)
+				return Squash.tobuffer(cursor)
 			end
 		end
-		serialize(self.packet, data)
-		return Squash.tobuffer(cursor)
+		return serialize(grandSchema, fullData)
 	end
 	function Network:deepDeserialize(buffer)
 		local cursor = Squash.frombuffer(buffer)
-		local deserialize
-		deserialize = function(schema)
+		local schema = self.schema
+		local function isPlainArraySchema(schema)
 			local _schema = schema
 			local _condition = type(_schema) == "table"
 			if _condition then
-				local _arg0 = schema["des" + 1]
-				_condition = type(_arg0) == "function"
+				_condition = #schema > 0
+			end
+			return _condition
+		end
+		local function isOptionalSchema(schema)
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				_condition = schema.___JingaNetOptional == true
+			end
+			return _condition
+		end
+		local function deserialize(schema)
+			if schema == nothing or schema == unknown or schema == nil then
+				return nil
+			end
+			if isOptionalSchema(schema) then
+				return deserialize(schema.value)
+			end
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				_condition = schema.__ByteNetInstancePath ~= nil
 			end
 			if _condition then
-				return schema.des(cursor)
+				return nil
+			end
+			if isPlainArraySchema(schema) then
+				local elementSchema = schema[1]
+				local length = uint16.des(cursor)
+				local result = {}
+				do
+					local i = 0
+					local _shouldIncrement = false
+					while true do
+						if _shouldIncrement then
+							i += 1
+						else
+							_shouldIncrement = true
+						end
+						if not (i < length) then
+							break
+						end
+						result[i + 1] = deserialize(elementSchema)
+					end
+				end
+				return result
 			end
 			local _schema_1 = schema
-			if type(_schema_1) == "table" then
-				local desField = schema["des" + 1]
-				if not (type(desField) == "function") and schema[2] ~= nil then
-					local arrLength = uint16.des(cursor)
-					local arr = {}
-					do
-						local i = 1
-						local _shouldIncrement = false
-						while true do
-							if _shouldIncrement then
-								i += 1
-							else
-								_shouldIncrement = true
-							end
-							if not (i <= arrLength) then
-								break
-							end
-							arr[i] = deserialize(schema[2])
-						end
-					end
-					return arr
-				else
-					local out = {}
-					for key, child in pairs(schema) do
-						out[key] = deserialize(child)
-					end
-					return out
+			local _condition_1 = type(_schema_1) == "table"
+			if _condition_1 then
+				local _des = schema.des
+				_condition_1 = type(_des) == "function"
+			end
+			if _condition_1 then
+				return schema.des(cursor)
+			end
+			local _schema_2 = schema
+			if type(_schema_2) == "table" then
+				local out = {}
+				for key, value in pairs(schema) do
+					out[key] = deserialize(value)
 				end
+				return out
 			end
 			return nil
 		end
-		return deserialize(self.packet)
+		return deserialize(schema)
 	end
 	function Network:sendToAll(data)
-		jingaRemote:FireAllClients(self.name, self:serializeToBuffer(data))
+		print(data, (self:deepSerialize(data)))
+		jingaRemote:FireAllClients(self.name, (self:deepSerialize(data)))
 	end
 	function Network:sendToAllExcept(data, exception)
 		local _exp = Players:GetPlayers()
 		-- ▼ ReadonlyArray.forEach ▼
 		local _callback = function(player)
 			if player ~= exception then
-				jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
+				jingaRemote:FireClient(player, self.name, (self:deepSerialize(data)))
 			end
 		end
 		for _k, _v in _exp do
@@ -219,13 +266,13 @@ do
 		-- ▲ ReadonlyArray.forEach ▲
 	end
 	function Network:sendTo(data, player)
-		jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
+		jingaRemote:FireClient(player, self.name, (self:deepSerialize(data)))
 	end
 	function Network:sendToList(data, players)
 		-- print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
 		-- ▼ ReadonlyArray.forEach ▼
 		local _callback = function(player)
-			return jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
+			return jingaRemote:FireClient(player, self.name, (self:deepSerialize(data)))
 		end
 		for _k, _v in players do
 			_callback(_v, _k - 1, players)
@@ -250,7 +297,7 @@ do
 			data = nil
 		end
 		print("Sending", self.name, "with data", data)
-		jingaRemote:FireServer(self.name, self:serializeToBuffer(data))
+		jingaRemote:FireServer(self.name, (self:deepSerialize(data)))
 	end
 end
 local sharedRoutes = (function()
@@ -262,25 +309,25 @@ local sharedRoutes = (function()
 	end
 	local villagerStruct = {
 		Name = str,
-		UniqueId = unknown,
+		UniqueId = uint16,
 		RelativeLocation = optional(cframe),
 		Progress = {
 			Produce = str,
 			Required = optional({
 				Produce = str,
-				Amount = unknown,
-				Max = unknown,
+				Amount = uint8,
+				Max = uint8,
 			}),
 			Progression = {
 				Time = {
 					RequiredTimePerResource = uint16,
-					StartTime = unknown,
+					StartTime = uint32,
 				},
-				Resources = array(str),
+				Resources = { str },
 			},
 			Building = {
-				StartTime = unknown,
-				TotalTime = unknown,
+				StartTime = uint32,
+				TotalTime = uint16,
 			},
 		},
 	}
@@ -303,13 +350,13 @@ local sharedRoutes = (function()
 			Version = str,
 			Coins = uint32,
 			Villagers = { villagerStruct },
-			Produce = array(record({
+			Produce = { {
 				Name = str,
 				Amount = unknown,
 				Variant = str,
-			})),
+			} },
 			Tutorial = unknown,
-			Walls = array(record({
+			Walls = { {
 				Name = str,
 				Description = str,
 				Image = str,
@@ -319,8 +366,8 @@ local sharedRoutes = (function()
 				Rarity = str,
 				Owned = bool,
 				Equipped = bool,
-			})),
-			PromoCodesRedeemed = array(str),
+			} },
+			PromoCodesRedeemed = { str },
 		}),
 		ModelDebugger = componentRecord(compInst),
 		ConfirmationPrompt = componentRecord({

@@ -1,12 +1,13 @@
 import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
-import Squash, { SerDes, OptionalSerDes, record, array, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack, Optional } from "@rbxts/squash";
+import Squash, { SerDes, OptionalSerDes, AnySerDesType, NonVariadicSerDesType, InferValueType, Unpack, Cursor, Input } from "@rbxts/squash";
 import { getUniqueIdPathFromInstance, getInstanceByUniqueIdPath } from "shared/utils/functions/instanceFunctions";
 import { componentsToReplicate } from "shared/utils/jecs/jecsComponents";
-import { AllComponentNames, ComponentValue, MappedComponents } from "shared/utils/functions/jecsHelpFunctions";
+import { AllComponentNames, ComponentValue, MappedComponents, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { PlayerState } from "shared/utils/PlayerState";
 import robuxStoreData from "./robuxStoreData";
 import { Entity } from "@rbxts/jecs";
 import pageStates from "shared/utils/Animations/pageStates";
+import { $line } from "rbxts-transformer-inline";
 
 // Core remote setup
 const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes") ||
@@ -35,7 +36,8 @@ type JingaNetType<T> =
 
 
 // === Primitive Types === //
-const optional = Squash.opt as <SerDesType extends AnySerDesType>(serdes: SerDesType) => OptionalSerDes<SerDesType>;
+const optional = (schema: AnySerDesType) => ({ ___JingaNetOptional: true, value: schema })
+type Optional<T> = JingaNetType<T | undefined> & { ___JingaNetOptional: true, value: AnySerDesType };
 export const int8 = Squash.int(1) as JingaNetType<number>;
 export const int16 = Squash.int(2) as JingaNetType<number>;
 export const int32 = Squash.int(4) as JingaNetType<number>;
@@ -59,9 +61,9 @@ export const unknown = {
 } as unknown as JingaNetType<unknown>;
 export const entity = unknown as unknown as JingaNetType<Entity>;
 export const instance = unknown as JingaNetType<Instances[keyof Instances]>;
-export const compInst = record({
-    __ByteNetInstancePath: array(str),
-}) as unknown as JingaNetType<Instances[keyof Instances]>;
+export const compInst = {
+    __ByteNetInstancePath: [str],
+} as unknown as JingaNetType<Instances[keyof Instances]>;
 
 
 
@@ -78,7 +80,7 @@ type UnwrapJingaNetType<T> =
 export class Network<J extends JingaNetType<any>> {
     constructor(
         private readonly name: string,
-        private readonly packet: J,
+        private readonly schema: J,
         private readonly reliabilityType: "reliable" | "unreliable" = "reliable",
     ) { }
 
@@ -88,132 +90,154 @@ export class Network<J extends JingaNetType<any>> {
             // Client side, listen to the server event
             return jingaRemote.OnClientEvent.Connect((name: unknown, returnedBuffer: unknown) => {
                 if (name !== this.name) return;
-                let realData: UnwrapJingaNetType<J> | undefined = undefined;
-                if (returnedBuffer) {
-                    realData = this.deepDeserialize(returnedBuffer as buffer);
-                    print(name, "GOT THE DATA", realData, returnedBuffer)
-                }
+                let realData = returnedBuffer ? this.deepDeserialize(returnedBuffer as buffer) : returnedBuffer;
 
                 // calls the call back
                 callback(realData as never, Players.LocalPlayer as Player);
             });
         } else {
             return jingaRemote.OnServerEvent.Connect((player, name: unknown, returnedBuffer: unknown) => {
-                print(name)
                 if (name !== this.name) return;
-                let realData: UnwrapJingaNetType<J> | undefined = undefined;
-                if (returnedBuffer) {
-                    realData = this.deepDeserialize(returnedBuffer as buffer);
-                    print(name, "GOT THE DATA", realData, returnedBuffer)
-                }
+                let realData = returnedBuffer ? this.deepDeserialize(returnedBuffer as buffer) : returnedBuffer;
 
                 // calls the call back
-                print(realData, player)
                 callback(realData as never, player);
             });
         }
     }
 
-    /** Serialize arbitrary data into a Squash buffer using deep serialization */
-    private serializeToBuffer(data: UnwrapJingaNetType<J>): buffer {
-        return this.deepSerialize(data);
-    }
 
     /**
-     * Recursively serialize `data` according to `this.packet` schema.
-     * This walks nested objects and array descriptors, using any SerDes
-     * implementations found in the schema to write primitive values.
-     */
-    private deepSerialize(data: UnwrapJingaNetType<J>): buffer {
-        const cursor = Squash.cursor();
+ * Recursively serialize `data` according to `this.packet` schema.
+ * Handles primitives, tables, arrays, and optional values.
+ */
+    private deepSerialize(fullData: UnwrapJingaNetType<J>) {
+        const grandSchema = this.schema as SerDes<unknown> | undefined;
 
-        const serialize = (schema: unknown, value: unknown) => {
-            // If schema is a SerDes table, use it directly
-            if (typeIs(schema, "table") && typeIs((schema as never)["ser"], "function")) {
-                (schema as SerDes<unknown>).ser(cursor, value);
-                return;
+        function isPlainArraySchema(schema: unknown): schema is Array<unknown> {
+            return typeIs(schema, "table") && (schema as Array<unknown>).size() > 0;
+        }
+
+        function isOptionalSchema(schema: unknown): schema is Optional<unknown> {
+            return typeIs(schema, "table") && (schema as Optional<unknown>).___JingaNetOptional === true;
+        }
+
+        function serialize(schema: unknown, data: unknown): buffer | unknown {
+            if (schema === nothing || schema === unknown || schema === undefined) {
+                return data;
             }
 
-            // For tables without a direct serializer, recurse into each key
-            if (typeIs(schema, "table") && typeIs(value, "table")) {
-                const serField = (schema as never)["ser"];
-                // Dynamic array support when schema describes an array shape
-                if (!typeIs(serField, "function") && (schema as never)[1] !== undefined) {
-                    const arr = value as Array<unknown>;
-                    uint16.ser(cursor, arr.size() as never);
-                    for (const v of arr) {
-                        serialize((schema as never)[1], v);
-                    }
-                } else {
-                    for (const [key, child] of pairs(schema as never)) {
-                        serialize(child, (value as never)[key]);
-                    }
+            if (isOptionalSchema(schema)) {
+                if (data === undefined) return undefined;
+                return serialize(schema.value, data);
+            }
+
+            if (typeIs(schema, "table") && (schema as Record<string, unknown>).__ByteNetInstancePath !== undefined) {
+                return data;
+            }
+
+            if (isPlainArraySchema(schema)) {
+                const elementSchema = (schema as Array<unknown>)[0] as SerDes<unknown>;
+                if (!typeIs(data, "table")) return [];
+
+                const result = [] as Array<never>;
+                for (const [_, element] of ipairs(data as Array<unknown>)) result.push(serialize(elementSchema, element) as never);
+                return result;
+            }
+
+            if (typeIs(schema, "table") && typeIs(data, "table")) {
+                const serialized = {} as Record<string, unknown>;
+                for (const [key, value] of pairs(data)) {
+                    const childSchema = (schema as Record<string, unknown>)[key as string] as unknown;
+                    serialized[key as string] = serialize(childSchema, value);
                 }
-                return;
+                return serialized;
             }
 
-            // Fallback for primitives/undefined
-            if (typeIs(schema, "table") && typeIs((schema as never)["des"], "function")) {
-                (schema as SerDes<unknown>).ser(cursor, value);
+            if (data !== undefined && typeIs(schema, "table")) {
+                const cursor = Squash.cursor();
+                (schema as SerDes<unknown>).ser(cursor, data);
+                return Squash.tobuffer(cursor);
             }
-        };
+        }
 
-        serialize(this.packet, data);
-        return Squash.tobuffer(cursor);
+        return serialize(grandSchema, fullData);
     }
 
     /**
      * Reconstruct data from a buffer using the same schema used for sending.
      * Supports nested objects and dynamically sized arrays.
      */
-    private deepDeserialize(buffer: buffer): UnwrapJingaNetType<J> {
-        const cursor = Squash.frombuffer(buffer);
+    private deepDeserialize(seralizedData: buffer | unknown): UnwrapJingaNetType<J> {
+        const schema = this.schema as unknown;
 
-        const deserialize = (schema: unknown): unknown => {
-            if (typeIs(schema, "table") && typeIs((schema as never)["des"], "function")) {
+        function isPlainArraySchema(schema: unknown): schema is Array<unknown> {
+            return typeIs(schema, "table") && (schema as Array<unknown>).size() > 0;
+        }
+
+        function isOptionalSchema(schema: unknown): schema is Optional<unknown> {
+            return typeIs(schema, "table") && (schema as Optional<unknown>).___JingaNetOptional === true;
+        }
+
+        function deserialize(schema: unknown): unknown {
+            if (schema === nothing || schema === unknown || schema === undefined) {
+                return undefined;
+            }
+
+            if (isOptionalSchema(schema)) {
+                return deserialize(schema.value);
+            }
+
+            if (typeIs(schema, "table") && (schema as Record<string, unknown>).__ByteNetInstancePath !== undefined) {
+                return undefined;
+            }
+
+            if (isPlainArraySchema(schema)) {
+                const elementSchema = (schema as Array<unknown>)[0] as unknown;
+                const length = uint16.des(cursor) as number;
+                const result: unknown[] = [];
+                for (let i = 0; i < length; i++) {
+                    result[i] = deserialize(elementSchema);
+                }
+                return result;
+            }
+
+            if (typeIs(schema, "table") && typeIs((schema as SerDes<unknown>).des, "function")) {
                 return (schema as SerDes<unknown>).des(cursor);
             }
 
             if (typeIs(schema, "table")) {
-                const desField = (schema as never)["des"];
-                if (!typeIs(desField, "function") && (schema as never)[1] !== undefined) {
-                    const arrLength = uint16.des(cursor) as number;
-                    const arr = [] as Array<unknown>;
-                    for (let i = 1; i <= arrLength; i++) {
-                        arr[i - 1] = deserialize((schema as never)[1]);
-                    }
-                    return arr;
-                } else {
-                    const out = {} as Record<string, unknown>;
-                    for (const [key, child] of pairs(schema as never)) {
-                        out[key as any] = deserialize(child);
-                    }
-                    return out;
+                const out: Record<string, unknown> = {};
+                for (const [key, value] of pairs(schema as Record<string, unknown>)) {
+                    out[key] = deserialize(value);
                 }
+                return out;
             }
-            return undefined;
-        };
 
-        return deserialize(this.packet) as UnwrapJingaNetType<J>;
+            return undefined;
+        }
+
+        return deserialize(schema) as UnwrapJingaNetType<J>;
     }
 
     public sendToAll(data: UnwrapJingaNetType<J>) {
-        jingaRemote.FireAllClients(this.name, this.serializeToBuffer(data));
+        print(data, this.deepSerialize(data))
+        jingaRemote.FireAllClients(this.name, this.deepSerialize(data));
     }
 
     public sendToAllExcept(data: UnwrapJingaNetType<J>, exception: Player) {
         Players.GetPlayers().forEach((player) => {
-            if (player !== exception) jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
+            if (player !== exception) jingaRemote.FireClient(player, this.name, this.deepSerialize(data));
         })
     }
 
     public sendTo(data: UnwrapJingaNetType<J>, player: Player) {
-        jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data));
+        jingaRemote.FireClient(player, this.name, this.deepSerialize(data));
     }
 
     public sendToList(data: UnwrapJingaNetType<J>, players: Player[]) {
         // print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
-        players.forEach((player) => jingaRemote.FireClient(player, this.name, this.serializeToBuffer(data)));
+        players.forEach((player) => jingaRemote.FireClient(player, this.name, this.deepSerialize(data)));
     }
 
     public wait(): UnwrapJingaNetType<J> {
@@ -221,15 +245,13 @@ export class Network<J extends JingaNetType<any>> {
             const [name, returnedBuffer] = jingaRemote.OnClientEvent.Wait() as unknown as [string, buffer];
 
             // If the name matches, we can safely deserialize
-            if (name === this.name) {
-                return this.deepDeserialize(returnedBuffer as buffer);
-            };
+            if (name === this.name) return returnedBuffer ? this.deepDeserialize(returnedBuffer as buffer) : returnedBuffer
         } while (true)
     }
 
     public send(data: UnwrapJingaNetType<J> = undefined as UnwrapJingaNetType<J>) {
         print("Sending", this.name, "with data", data);
-        jingaRemote.FireServer(this.name, this.serializeToBuffer(data));
+        jingaRemote.FireServer(this.name, this.deepSerialize(data));
     }
 }
 
@@ -244,25 +266,25 @@ export const sharedRoutes = (() => {
 
     const villagerStruct = {
         Name: str as JingaNetType<VillagerNames>,
-        UniqueId: unknown as JingaNetType<number>,
+        UniqueId: uint16 as JingaNetType<number>,
         RelativeLocation: optional(cframe) as unknown as JingaNetType<CFrame | undefined>,
         Progress: {
             Produce: str as JingaNetType<ProduceNames>,
             Required: optional({
                 Produce: str as JingaNetType<ProduceNames>,
-                Amount: unknown as JingaNetType<number>,
-                Max: unknown as JingaNetType<number>,
+                Amount: uint8 as JingaNetType<number>,
+                Max: uint8 as JingaNetType<number>,
             } as never) as never,
             Progression: {
                 Time: {
                     RequiredTimePerResource: uint16,
-                    StartTime: unknown as JingaNetType<number>,
+                    StartTime: uint32 as JingaNetType<number>,
                 },
-                Resources: array(str as JingaNetType<ProduceVariant>) as unknown as JingaNetType<ProduceVariant[]>,
+                Resources: [str as JingaNetType<ProduceVariant>] as unknown as JingaNetType<ProduceVariant[]>,
             },
             Building: {
-                StartTime: unknown as JingaNetType<number>,
-                TotalTime: unknown as JingaNetType<number>,
+                StartTime: uint32 as JingaNetType<number>,
+                TotalTime: uint16 as JingaNetType<number>,
             },
         },
     } as JingaNetType<VillagerData>
@@ -276,7 +298,7 @@ export const sharedRoutes = (() => {
             rootPart: compInst as JingaNetType<BasePart>,
             animator: compInst as JingaNetType<Animator>,
             rootAttachment: compInst as JingaNetType<Attachment>,
-            platform: optional(compInst) as unknown as JingaNetType<PlatformExample | undefined>,
+            platform: optional(compInst) as unknown as Optional<PlatformExample | undefined>,
         }),
 
         // villager
@@ -291,13 +313,13 @@ export const sharedRoutes = (() => {
             Version: str as JingaNetType<string>,
             Coins: uint32,
             Villagers: [villagerStruct] as JingaNetType<VillagerData>[],
-            Produce: array(record({
+            Produce: [{
                 Name: str as JingaNetType<ProduceNames>,
                 Amount: unknown as JingaNetType<number>,
                 Variant: str as JingaNetType<ProduceVariant>,
-            })) as unknown as JingaNetType<ProduceData[]>,
+            }] as unknown as JingaNetType<ProduceData[]>,
             Tutorial: unknown as JingaNetType<"Done" | number>,
-            Walls: array(record({
+            Walls: [{
                 Name: str as JingaNetType<WallNames>,
                 Description: str,
                 Image: str,
@@ -307,8 +329,8 @@ export const sharedRoutes = (() => {
                 Rarity: str as JingaNetType<WallRarity>,
                 Owned: bool,
                 Equipped: bool,
-            })) as unknown as JingaNetType<WallInfo[]>,
-            PromoCodesRedeemed: array(str),
+            }] as unknown as JingaNetType<WallInfo[]>,
+            PromoCodesRedeemed: [str],
         }),
 
         // model debugger
