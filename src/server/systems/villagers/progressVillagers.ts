@@ -47,6 +47,7 @@ export default (world: World) => {
                         }
                         return oldData;
                     });
+                    routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined }, playerWhoTriggered);
                     removeComponent(villagerEntity as Entity, MaxedOut);
                 } else {
                     printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);

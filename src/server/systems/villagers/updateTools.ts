@@ -25,61 +25,83 @@ export default (world: World) => {
             const alltools = backpack && body && [...backpack.GetChildren(), ...body.model.GetChildren()].filter((v) => v.IsA("Tool")).filterUndefined();
 
             if (alltools) {
-                const digTool = new Instance("Tool");
+                // organize existing tools
+                const villagerTools = new Map<number, Tool>();
+                const produceTools = new Map<string, Tool>();
+                let digTool = undefined as Tool | undefined;
 
-                // deletes all tools
-                alltools.forEach((tool) => tool.Destroy());
+                alltools.forEach((invTool) => {
+                    const attrType = invTool.GetAttribute("ItemType") as any as "Villager" | "Commodity" | "DigTool" | undefined;
+                    if (attrType === "Villager") {
+                        const id = invTool.GetAttribute<number>("UniqueId");
+                        if (id !== undefined) villagerTools.set(id, invTool);
+                    } else if (attrType === "Commodity") {
+                        const name = invTool.GetAttribute<string>("ItemName") || "";
+                        const variant = invTool.GetAttribute<string>("ItemVariant") || "";
+                        produceTools.set(`${name}|${variant}`, invTool);
+                    } else if (attrType === "DigTool") {
+                        digTool = invTool;
+                    }
+                });
 
-                // sets up the dig tool
-                printJecs($line, "Adding Dig Tool to Backpack");
-                digTool.Name = "Dig Tool";
-                digTool.SetAttribute("ItemType", "DigTool");
-                digTool.SetAttribute("ItemName", "DigTool");
-                digTool.RequiresHandle = false;
-                digTool.Parent = backpack;
+                // ensure dig tool exists
+                if (!digTool) {
+                    digTool = new Instance("Tool");
+                    printJecs($line, "Adding Dig Tool to Backpack");
+                    digTool.Name = "Dig Tool";
+                    digTool.SetAttribute("ItemType", "DigTool");
+                    digTool.SetAttribute("ItemName", "DigTool");
+                    digTool.RequiresHandle = false;
+                    digTool.Parent = backpack;
+                }
 
-                // adds all the villager tools
+                // sync villager tools
+                const validVillagers = new Set<number>();
                 data.Villagers.forEach((villagerData) => {
-                    if (villagerData.RelativeLocation) return; // skip if the villager is placed
-                    const villagerName = villagerData.Name
-                    const tool = new Instance("Tool");
+                    if (villagerData.RelativeLocation) return;
+                    const id = villagerData.UniqueId;
+                    validVillagers.add(id);
+                    if (!villagerTools.has(id)) {
+                        const tool = new Instance("Tool");
+                        tool.RequiresHandle = false;
+                        tool.Name = villagerData.Name;
+                        tool.SetAttribute("ItemType", "Villager");
+                        tool.SetAttribute("ItemName", villagerData.Name);
+                        tool.SetAttribute("UniqueId", id);
+                        tool.Parent = backpack;
+                        tool.Activated.Connect(() => {});
+                    }
+                });
+                villagerTools.forEach((tool, id) => {
+                    if (!validVillagers.has(id)) tool.Destroy();
+                });
 
-                    // set up and parenting
-                    tool.RequiresHandle = false
-                    tool.Name = villagerName;
-                    tool.SetAttribute("ItemType", "Villager");
-                    tool.SetAttribute("ItemName", villagerName);
-                    tool.SetAttribute("UniqueId", villagerData.UniqueId);
-                    tool.Parent = backpack
-
-                    // when the tool is activated
-                    tool.Activated.Connect(() => {
-                        // printTS($line, "Activated")
-                    })
-                })
-
-                // for all produce
+                // sync produce tools
+                const validProduce = new Set<string>();
                 data.Produce.forEach((produceData) => {
-                    const produceName = produceData.Name;
-                    const realTool = paths.Assets.Tools.Produce.FindFirstChild<Tool>(produceName);
-                    const tool = realTool ? realTool.Clone() : new Instance("Tool");
-                    const variantParticles = paths.Assets.Particles.FindFirstChild(produceData.Variant)?.Clone()
-                    const partToplaceIn = tool.FindFirstChildOfClass("Part");
-
-                    // set up and parenting
-                    tool.RequiresHandle = realTool ? realTool.RequiresHandle : false;
-                    tool.Name = `${produceData.Variant === 'Normal' ? produceName : produceData.Variant + ' ' + produceName} (${produceData.Amount})`;
-                    tool.SetAttribute("ItemType", "Commodity");
-                    tool.SetAttribute("ItemVariant", produceData.Variant);
-                    tool.SetAttribute("ItemName", produceName);
-                    if (variantParticles && partToplaceIn) variantParticles.Parent = partToplaceIn
-                    tool.Parent = backpack
-
-                    // when the tool is activated
-                    tool.Activated.Connect(() => {
-                        // printTS($line, "Activated")
-                    })
-                })
+                    const key = `${produceData.Name}|${produceData.Variant}`;
+                    validProduce.add(key);
+                    const existing = produceTools.get(key);
+                    const realTool = paths.Assets.Tools.Produce.FindFirstChild<Tool>(produceData.Name);
+                    if (existing) {
+                        existing.Name = `${produceData.Variant === 'Normal' ? produceData.Name : produceData.Variant + ' ' + produceData.Name} (${produceData.Amount})`;
+                    } else {
+                        const tool = realTool ? realTool.Clone() : new Instance("Tool");
+                        const variantParticles = paths.Assets.Particles.FindFirstChild(produceData.Variant)?.Clone();
+                        const partToplaceIn = tool.FindFirstChildOfClass("Part");
+                        tool.RequiresHandle = realTool ? realTool.RequiresHandle : false;
+                        tool.Name = `${produceData.Variant === 'Normal' ? produceData.Name : produceData.Variant + ' ' + produceData.Name} (${produceData.Amount})`;
+                        tool.SetAttribute("ItemType", "Commodity");
+                        tool.SetAttribute("ItemVariant", produceData.Variant);
+                        tool.SetAttribute("ItemName", produceData.Name);
+                        if (variantParticles && partToplaceIn) variantParticles.Parent = partToplaceIn;
+                        tool.Parent = backpack;
+                        tool.Activated.Connect(() => {});
+                    }
+                });
+                produceTools.forEach((tool, key) => {
+                    if (!validProduce.has(key)) tool.Destroy();
+                });
             }
         }
     }

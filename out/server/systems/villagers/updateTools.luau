@@ -93,80 +93,133 @@ local default = function(world)
 			end
 			local alltools = _condition_1
 			if alltools then
-				local digTool = Instance.new("Tool")
-				-- deletes all tools
+				-- organize existing tools
+				local villagerTools = {}
+				local produceTools = {}
+				local digTool = nil
 				-- ▼ ReadonlyArray.forEach ▼
-				local _callback = function(tool)
-					return tool:Destroy()
+				local _callback = function(invTool)
+					local attrType = invTool:GetAttribute("ItemType")
+					if attrType == "Villager" then
+						local id = invTool:GetAttribute("UniqueId")
+						if id ~= nil then
+							local _invTool = invTool
+							villagerTools[id] = _invTool
+						end
+					elseif attrType == "Commodity" then
+						local _condition_2 = invTool:GetAttribute("ItemName")
+						if not (_condition_2 ~= "" and _condition_2) then
+							_condition_2 = ""
+						end
+						local name = _condition_2
+						local _condition_3 = invTool:GetAttribute("ItemVariant")
+						if not (_condition_3 ~= "" and _condition_3) then
+							_condition_3 = ""
+						end
+						local variant = _condition_3
+						local _arg0 = `{name}|{variant}`
+						local _invTool = invTool
+						produceTools[_arg0] = _invTool
+					elseif attrType == "DigTool" then
+						digTool = invTool
+					end
 				end
 				for _k, _v in alltools do
 					_callback(_v, _k - 1, alltools)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				-- sets up the dig tool
-				printJecs(34, "Adding Dig Tool to Backpack")
-				digTool.Name = "Dig Tool"
-				digTool:SetAttribute("ItemType", "DigTool")
-				digTool:SetAttribute("ItemName", "DigTool")
-				digTool.RequiresHandle = false
-				digTool.Parent = backpack
-				-- adds all the villager tools
+				-- ensure dig tool exists
+				if not digTool then
+					digTool = Instance.new("Tool")
+					printJecs(50, "Adding Dig Tool to Backpack")
+					digTool.Name = "Dig Tool"
+					digTool:SetAttribute("ItemType", "DigTool")
+					digTool:SetAttribute("ItemName", "DigTool")
+					digTool.RequiresHandle = false
+					digTool.Parent = backpack
+				end
+				-- sync villager tools
+				local validVillagers = {}
 				local _exp = data.Villagers
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_1 = function(villagerData)
 					if villagerData.RelativeLocation then
 						return nil
 					end
-					local villagerName = villagerData.Name
-					local tool = Instance.new("Tool")
-					-- set up and parenting
-					tool.RequiresHandle = false
-					tool.Name = villagerName
-					tool:SetAttribute("ItemType", "Villager")
-					tool:SetAttribute("ItemName", villagerName)
-					tool:SetAttribute("UniqueId", villagerData.UniqueId)
-					tool.Parent = backpack
-					-- when the tool is activated
-					tool.Activated:Connect(function()
-						-- printTS($line, "Activated")
-					end)
+					local id = villagerData.UniqueId
+					validVillagers[id] = true
+					if not (villagerTools[id] ~= nil) then
+						local tool = Instance.new("Tool")
+						tool.RequiresHandle = false
+						tool.Name = villagerData.Name
+						tool:SetAttribute("ItemType", "Villager")
+						tool:SetAttribute("ItemName", villagerData.Name)
+						tool:SetAttribute("UniqueId", id)
+						tool.Parent = backpack
+						tool.Activated:Connect(function() end)
+					end
 				end
 				for _k, _v in _exp do
 					_callback_1(_v, _k - 1, _exp)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				-- for all produce
+				-- ▼ ReadonlyMap.forEach ▼
+				local _callback_2 = function(tool, id)
+					local _id = id
+					if not (validVillagers[_id] ~= nil) then
+						tool:Destroy()
+					end
+				end
+				for _k, _v in villagerTools do
+					_callback_2(_v, _k, villagerTools)
+				end
+				-- ▲ ReadonlyMap.forEach ▲
+				-- sync produce tools
+				local validProduce = {}
 				local _exp_1 = data.Produce
 				-- ▼ ReadonlyArray.forEach ▼
-				local _callback_2 = function(produceData)
-					local produceName = produceData.Name
-					local realTool = paths.Assets.Tools.Produce:FindFirstChild(produceName)
-					local tool = if realTool then realTool:Clone() else Instance.new("Tool")
-					local _variantParticles = paths.Assets.Particles:FindFirstChild(produceData.Variant)
-					if _variantParticles ~= nil then
-						_variantParticles = _variantParticles:Clone()
+				local _callback_3 = function(produceData)
+					local key = `{produceData.Name}|{produceData.Variant}`
+					validProduce[key] = true
+					local existing = produceTools[key]
+					local realTool = paths.Assets.Tools.Produce:FindFirstChild(produceData.Name)
+					if existing then
+						existing.Name = `{if produceData.Variant == "Normal" then produceData.Name else produceData.Variant .. " " .. produceData.Name} ({produceData.Amount})`
+					else
+						local tool = if realTool then realTool:Clone() else Instance.new("Tool")
+						local _variantParticles = paths.Assets.Particles:FindFirstChild(produceData.Variant)
+						if _variantParticles ~= nil then
+							_variantParticles = _variantParticles:Clone()
+						end
+						local variantParticles = _variantParticles
+						local partToplaceIn = tool:FindFirstChildOfClass("Part")
+						tool.RequiresHandle = if realTool then realTool.RequiresHandle else false
+						tool.Name = `{if produceData.Variant == "Normal" then produceData.Name else produceData.Variant .. " " .. produceData.Name} ({produceData.Amount})`
+						tool:SetAttribute("ItemType", "Commodity")
+						tool:SetAttribute("ItemVariant", produceData.Variant)
+						tool:SetAttribute("ItemName", produceData.Name)
+						if variantParticles and partToplaceIn then
+							variantParticles.Parent = partToplaceIn
+						end
+						tool.Parent = backpack
+						tool.Activated:Connect(function() end)
 					end
-					local variantParticles = _variantParticles
-					local partToplaceIn = tool:FindFirstChildOfClass("Part")
-					-- set up and parenting
-					tool.RequiresHandle = if realTool then realTool.RequiresHandle else false
-					tool.Name = `{if produceData.Variant == "Normal" then produceName else produceData.Variant .. " " .. produceName} ({produceData.Amount})`
-					tool:SetAttribute("ItemType", "Commodity")
-					tool:SetAttribute("ItemVariant", produceData.Variant)
-					tool:SetAttribute("ItemName", produceName)
-					if variantParticles and partToplaceIn then
-						variantParticles.Parent = partToplaceIn
-					end
-					tool.Parent = backpack
-					-- when the tool is activated
-					tool.Activated:Connect(function()
-						-- printTS($line, "Activated")
-					end)
 				end
 				for _k, _v in _exp_1 do
-					_callback_2(_v, _k - 1, _exp_1)
+					_callback_3(_v, _k - 1, _exp_1)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
+				-- ▼ ReadonlyMap.forEach ▼
+				local _callback_4 = function(tool, key)
+					local _key = key
+					if not (validProduce[_key] ~= nil) then
+						tool:Destroy()
+					end
+				end
+				for _k, _v in produceTools do
+					_callback_4(_v, _k, produceTools)
+				end
+				-- ▲ ReadonlyMap.forEach ▲
 			end
 		end
 	end

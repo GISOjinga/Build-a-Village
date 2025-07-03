@@ -24,6 +24,7 @@ local pageStates = {
 		visible = false,
 		info = "",
 	}),
+	queueInfo = atom(""),
 	introText = atom({
 		text = "Welcome to the game!",
 		duration = 2,
