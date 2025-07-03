@@ -102,15 +102,15 @@ local debug = setupMatter({ {
 }, {
 	system = updateWallsForSale,
 }, {
-	system = visibility,
-}, {
-	system = promptHandlers,
-}, {
 	system = tutorial,
 }, {
 	system = confirmationPrompt,
 }, {
 	system = promotions,
+}, {
+	system = visibility,
+}, {
+	system = promptHandlers,
 } }, {
 	exampleTag = exampleTag,
 	resourcePromptTag = resourcePromptTag,

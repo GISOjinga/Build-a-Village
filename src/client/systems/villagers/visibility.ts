@@ -35,7 +35,7 @@ const villageModelStates = new WeakMap<Instance, VillagerProgressState>();
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
         // print("Update", villagerModel, villageModelStates.get(villagerModel), newState)
-        task.delay(.1, () => {
+        task.defer(() => {
             villagerModel.Station.Parts.Resources.GetDescendants().forEach((child) => toggleTransparency(child, false))
             villagerModel.Station.Parts.InProgress.GetDescendants().forEach((child) => toggleTransparency(child, false))
             villagerModel.Station.Parts.ProgressFull.GetDescendants().forEach((child) => toggleTransparency(child, false))
@@ -187,38 +187,40 @@ export default (world: World) => {
         }
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
 
-    // watches for changes
-    for (const [villagerClientEntity, villagerInfo] of world.query(Villager)) Promise.try(() => {
-        const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
-        // const oldChange = changedVillager.old
-        // const newChange = changedVillager.new
-        // const villagerInfo = newChange || oldChange;
+    if (useThrottle(.1)) {
+        // watches for changes
+        for (const [villagerClientEntity, villagerInfo] of world.query(Villager)) Promise.try(() => {
+            const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
+            // const oldChange = changedVillager.old
+            // const newChange = changedVillager.new
+            // const villagerInfo = newChange || oldChange;
 
-        // if one of the changes
-        if (villagerInfo && villagerEntity) {
-            const { villagerData, villagerModel, playerEntity } = villagerInfo;
-            const progress = villagerData.Progress
-            const progression = progress.Progression
-            const buildingTimes = progress.Building
-            const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
-            const resources = progression.Resources
-            const totalResourcesSoFar = resources.size()
-            const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-            const hasMaxedResources = totalResourcesSoFar >= maxResources;
-            const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
-            const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
-            const requiredTimePerResource = progression.Time.RequiredTimePerResource
-            const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
-            const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
+            // if one of the changes
+            if (villagerInfo && villagerEntity) {
+                const { villagerData, villagerModel, playerEntity } = villagerInfo;
+                const progress = villagerData.Progress
+                const progression = progress.Progression
+                const buildingTimes = progress.Building
+                const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
+                const resources = progression.Resources
+                const totalResourcesSoFar = resources.size()
+                const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
+                const hasMaxedResources = totalResourcesSoFar >= maxResources;
+                const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
+                const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
+                const requiredTimePerResource = progression.Time.RequiredTimePerResource
+                const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
+                const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
 
 
-            updateVillagerState(villagerModel, {
-                isBeingBuilt,
-                hasMaxedResources,
-                currentInProgressPhase,
-                resources: progression.Resources,
-                produce: villagerData.Progress.Produce
-            })
-        }
-    }).catch((err) => warnJecs($line, "Villager", "Error updating villager state", err));
+                updateVillagerState(villagerModel, {
+                    isBeingBuilt,
+                    hasMaxedResources,
+                    currentInProgressPhase: hasMaxedResources ? 1 : currentInProgressPhase,
+                    resources: progression.Resources,
+                    produce: villagerData.Progress.Produce
+                })
+            }
+        }).catch((err) => warnTS($line, "Villager", "Error updating villager state", err));
+    }
 }

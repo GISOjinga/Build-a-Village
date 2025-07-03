@@ -89,7 +89,7 @@ setupMatter([
     // villagers
     { system: villagersShop },
     { system: progressVillagers },
-    { system: placeVillagers }, // tag added
+    { system: placeVillagers },
     { system: updateTools },
 
     // walls

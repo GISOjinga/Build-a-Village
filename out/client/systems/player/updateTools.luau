@@ -291,12 +291,13 @@ local default = function(world)
 				hitBox.Transparency = 1
 				hitBox.Anchored = true
 				hitBox.CanCollide = false
+				hitBox.CanQuery = false
 				hitBox.Size = fakeModel:GetExtentsSize()
 				hitBox.CFrame = fakeModel:GetPivot()
 				hitBox.Name = "HitBox"
 				hitBox.Parent = fakeModel
 			elseif ToolType == "DigTool" then
-				printJecs(242, "Creating highlight for DigTool", ItemName)
+				printJecs(243, "Creating highlight for DigTool", ItemName)
 				-- sets up highlight
 				makeHighlight(Workspace.Camera)
 			end

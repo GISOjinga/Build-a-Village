@@ -1,8 +1,11 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local deepEquals = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils").deepEquals
+local useThrottle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook").useThrottle
 local getAnimation = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "animator", "loadAnimations").getAnimation
-local warnJecs = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions").warnJecs
+local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
+local warnJecs = _jecsHelpFunctions.warnJecs
+local warnTS = _jecsHelpFunctions.warnTS
 local _particlesFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "particlesFunctions")
 local particlesEmit = _particlesFunctions.particlesEmit
 local particlesToggle = _particlesFunctions.particlesToggle
@@ -47,7 +50,7 @@ local function updateVillagerState(villagerModel, newState)
 	end
 	if _condition then
 		-- print("Update", villagerModel, villageModelStates.get(villagerModel), newState)
-		task.delay(.1, function()
+		task.defer(function()
 			local _exp = villagerModel.Station.Parts.Resources:GetDescendants()
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(child)
@@ -361,44 +364,46 @@ local default = function(world)
 			return warnJecs(188, "Villager", "Error setting up villager animations", err)
 		end)
 	end
-	-- watches for changes
-	for villagerClientEntity, villagerInfo in world:query(Villager) do
-		TS.Promise.try(function()
-			local villagerEntity = world:get(villagerClientEntity, ReplicatedComponent)
-			-- const oldChange = changedVillager.old
-			-- const newChange = changedVillager.new
-			-- const villagerInfo = newChange || oldChange;
-			-- if one of the changes
-			local _value = villagerInfo and villagerEntity
-			if _value ~= 0 and _value == _value and _value then
-				local _binding = villagerInfo
-				local villagerData = _binding.villagerData
-				local villagerModel = _binding.villagerModel
-				local playerEntity = _binding.playerEntity
-				local progress = villagerData.Progress
-				local progression = progress.Progression
-				local buildingTimes = progress.Building
-				local isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time()
-				local resources = progression.Resources
-				local totalResourcesSoFar = #resources
-				local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
-				local hasMaxedResources = totalResourcesSoFar >= maxResources
-				local maxInProgressPhases = #villagerModel.Station.Parts.InProgress:GetChildren()
-				local totalTimeSinceLastResource = os.time() - progression.Time.StartTime
-				local requiredTimePerResource = progression.Time.RequiredTimePerResource
-				local inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
-				local currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile))
-				updateVillagerState(villagerModel, {
-					isBeingBuilt = isBeingBuilt,
-					hasMaxedResources = hasMaxedResources,
-					currentInProgressPhase = currentInProgressPhase,
-					resources = progression.Resources,
-					produce = villagerData.Progress.Produce,
-				})
-			end
-		end):catch(function(err)
-			return warnJecs(223, "Villager", "Error updating villager state", err)
-		end)
+	if useThrottle(.1) then
+		-- watches for changes
+		for villagerClientEntity, villagerInfo in world:query(Villager) do
+			TS.Promise.try(function()
+				local villagerEntity = world:get(villagerClientEntity, ReplicatedComponent)
+				-- const oldChange = changedVillager.old
+				-- const newChange = changedVillager.new
+				-- const villagerInfo = newChange || oldChange;
+				-- if one of the changes
+				local _value = villagerInfo and villagerEntity
+				if _value ~= 0 and _value == _value and _value then
+					local _binding = villagerInfo
+					local villagerData = _binding.villagerData
+					local villagerModel = _binding.villagerModel
+					local playerEntity = _binding.playerEntity
+					local progress = villagerData.Progress
+					local progression = progress.Progression
+					local buildingTimes = progress.Building
+					local isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time()
+					local resources = progression.Resources
+					local totalResourcesSoFar = #resources
+					local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
+					local hasMaxedResources = totalResourcesSoFar >= maxResources
+					local maxInProgressPhases = #villagerModel.Station.Parts.InProgress:GetChildren()
+					local totalTimeSinceLastResource = os.time() - progression.Time.StartTime
+					local requiredTimePerResource = progression.Time.RequiredTimePerResource
+					local inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
+					local currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile))
+					updateVillagerState(villagerModel, {
+						isBeingBuilt = isBeingBuilt,
+						hasMaxedResources = hasMaxedResources,
+						currentInProgressPhase = if hasMaxedResources then 1 else currentInProgressPhase,
+						resources = progression.Resources,
+						produce = villagerData.Progress.Produce,
+					})
+				end
+			end):catch(function(err)
+				return warnTS(224, "Villager", "Error updating villager state", err)
+			end)
+		end
 	end
 end
 return {

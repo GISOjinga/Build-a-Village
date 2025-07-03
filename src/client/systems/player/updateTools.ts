@@ -234,6 +234,7 @@ export default (world: World) => {
                 hitBox.Transparency = 1;
                 hitBox.Anchored = true;
                 hitBox.CanCollide = false
+                hitBox.CanQuery = false;
                 hitBox.Size = fakeModel.GetExtentsSize()
                 hitBox.CFrame = fakeModel.GetPivot();
                 hitBox.Name = "HitBox";

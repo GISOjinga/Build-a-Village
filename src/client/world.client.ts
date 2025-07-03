@@ -124,11 +124,13 @@ const debug = setupMatter([
     { system: playerDataUpdate },
     { system: shopDataUpdate },
     { system: updateWallsForSale },
-    { system: visibility },
-    { system: promptHandlers },
     { system: tutorial },
     { system: confirmationPrompt },
-    { system: promotions }
+    { system: promotions },
+
+    // villagers
+    { system: visibility },
+    { system: promptHandlers },
 ], { // on added && removed
     // "Character": characterAdded,
     exampleTag,
