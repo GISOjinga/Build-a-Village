@@ -15,6 +15,7 @@ const pageStates = {
     buyButtonFocus: atom({ visible: false, selectedVillagerIndex: -1 }),
     totalTimeForNewVillager: atom(0),
     hoverInfo: atom({ visible: false, info: "" }),
+    queueInfo: atom(""),
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
     npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "None", text: "" }),
     coins: atom(0),

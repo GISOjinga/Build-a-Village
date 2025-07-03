@@ -160,7 +160,7 @@ local default = function(world)
 				_condition_11 = totalProduce == maxProduce
 			end
 			if _condition_11 then
-				-- printTS($line, "Villager is fully built: ", villagerEntity, "Produce: ", produce, "Total Produce: ", totalProduce, "Max Produce: ", maxProduce);
+				pageStates.queueInfo(`({totalProduce}/{maxProduce}) {produce} in queue`)
 				pageStates.hoverInfo({
 					visible = true,
 					info = `({totalProduce}/{maxProduce}) {produce} ready.`,
@@ -174,6 +174,7 @@ local default = function(world)
 					end
 				end
 				if _condition_12 ~= 0 and _condition_12 == _condition_12 and _condition_12 then
+					pageStates.queueInfo(`({totalProduce}/{maxProduce}) {produce} in queue`)
 					-- printTS($line, "Villager is building: ", villagerEntity, "Produce: ", produce, "Time Till Fully Built: ", timeTillFullyBuilt);
 					pageStates.hoverInfo({
 						visible = true,
@@ -188,6 +189,7 @@ local default = function(world)
 						end
 					end
 					if _condition_13 ~= "" and _condition_13 then
+						pageStates.queueInfo(`({totalProduce}/{maxProduce}) {produce} in queue`)
 						-- printTS($line, "Villager is waiting for produce: ", villagerEntity, "Required Produce: ", requiredProduceName);
 						pageStates.hoverInfo({
 							visible = true,
@@ -199,12 +201,14 @@ local default = function(world)
 							_condition_14 = timeTillNextProduce > 0
 						end
 						if _condition_14 then
+							pageStates.queueInfo(`({totalProduce}/{maxProduce}) {produce} in queue`)
 							-- printTS($line, "Villager is producing: ", villagerEntity, "Produce: ", produce, "Time Till Next Produce: ", timeTillNextProduce);
 							pageStates.hoverInfo({
 								visible = true,
 								info = `({totalProduce}/{maxProduce}) {produce} in {formatToMMSS(timeTillNextProduce)}.`,
 							})
 						elseif not (villagerEntity ~= 0 and villagerEntity == villagerEntity and villagerEntity) then
+							pageStates.queueInfo("")
 							-- print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
 							pageStates.hoverInfo({
 								visible = false,
@@ -215,7 +219,7 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(88, "Error in hoverBoxUpdate system:", err)
+			return warnJecs(92, "Error in hoverBoxUpdate system:", err)
 		end)
 	end
 	-- prints all villagers changed

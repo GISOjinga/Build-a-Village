@@ -76,9 +76,13 @@ local default = function(world)
 						end
 						return oldData
 					end)
+					routes.playSound:sendTo({
+						sound = paths.SFX.UI.purchasepass,
+						position = nil,
+					}, playerWhoTriggered)
 					removeComponent(villagerEntity, MaxedOut)
 				else
-					printTS(52, `Player {playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
+					printTS(53, `Player {playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
 					addComponent(playerEntityWhoTriggered, TakeFromVillager, {
 						villagerEntityToStealFrom = villagerEntity,
 						resourceModelName = model.Name,
@@ -241,7 +245,7 @@ local default = function(world)
 				setmetatable(_object, nil)
 				addComponent(_exp, Villager, _object)
 				-- adds the produce to the data
-				printJecs(168, `{player.Name} took {takeFromVillager.produceName} with varaint {variant} from villager {villagerEntity}`)
+				printJecs(169, `{player.Name} took {takeFromVillager.produceName} with varaint {variant} from villager {villagerEntity}`)
 				createEntity.insertProduce(playerEntity, produceName, variant)
 				removeComponent(villagerEntity, MaxedOut)
 				-- reduces the item by 1 

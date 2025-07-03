@@ -15,11 +15,29 @@ import useEffect from "../hooks/useEffect";
 
 export default (hoverBoxUI: HoverBoxUI) => {
     const trash = new Janitor();
+    const queueLabel = hoverBoxUI.Frame.FindFirstChild("QueueLabel") as TextLabel | undefined;
+
+    // if queue label does not exist create a small one under the main text label
+    if (!queueLabel) {
+        const newLabel = new Instance("TextLabel");
+        newLabel.Name = "QueueLabel";
+        newLabel.Size = UDim2.fromScale(1, 0.4);
+        newLabel.Position = UDim2.fromScale(0, 1);
+        newLabel.BackgroundTransparency = 1;
+        newLabel.TextScaled = true;
+        newLabel.Font = hoverBoxUI.Frame.TextLabel.Font;
+        newLabel.TextColor3 = hoverBoxUI.Frame.TextLabel.TextColor3;
+        newLabel.TextStrokeTransparency = hoverBoxUI.Frame.TextLabel.TextStrokeTransparency;
+        newLabel.Parent = hoverBoxUI.Frame;
+    }
+    const queue = (queueLabel || hoverBoxUI.Frame.FindFirstChild("QueueLabel") as TextLabel);
 
     // loops through all the options and when one is pressed then
     trash.Add(useEffect(() => {
         hoverBoxUI.Enabled = pageStates.hoverInfo().visible
         hoverBoxUI.Frame.TextLabel.Text = pageStates.hoverInfo().info;
+        queue.Text = pageStates.queueInfo();
+        queue.Visible = pageStates.queueInfo() !== "";
     }))
 
     return trash
