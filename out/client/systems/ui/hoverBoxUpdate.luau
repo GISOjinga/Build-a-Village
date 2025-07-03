@@ -128,6 +128,7 @@ local default = function(world)
 	local totalProduce = resources and #resources
 	local maxProduce = villagerModel and #villagerModel.Station.Parts.Resources:GetChildren()
 	-- when the mouse moves
+	hoverAttachment.Name = "HoverBoxAttachment"
 	local _result_1 = target
 	if _result_1 ~= nil then
 		_result_1 = _result_1.hit
@@ -142,8 +143,8 @@ local default = function(world)
 	end
 	hoverAttachment.Position = _condition_10
 	-- when ever platform updates then
-	if useChange({ platform }) and platform then
-		hoverAttachment.Position = platform.Floor.Position
+	if useChange({ platform }) and body and platform then
+		hoverAttachment.Position = body.rootPart.Position
 	end
 	-- when the mouse hovers over a villager and sets the time till built
 	-- print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)

@@ -13,7 +13,7 @@
 import { Entity, OnRemove, World } from "@rbxts/jecs" // Matter framework functions and types.
 import { useMemo } from "@rbxts/react" // React hooks for state management.
 import { $line } from "rbxts-transformer-inline" // Inline transformer for debug line numbers.
-import { _changedComponent, Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetReplication } from "shared/utils/jecs/jecsComponents" // Matter components.
+import { Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetReplication } from "shared/utils/jecs/jecsComponents" // Matter components.
 
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
@@ -121,6 +121,10 @@ export default {
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 const players = (targetReplication && targetReplication[component]) || Players.GetPlayers()
 
+                // if (componentName === "Body") {
+                //     print("Replicating BODY", changed.new)
+                // }
+
                 // if the component is not a table then replicate to all players
                 if (!route) {
                     error(`Missing route for component replication: ${componentName}`)
@@ -131,14 +135,12 @@ export default {
                         // Wrap in Promise.try for robust error handling
                         Promise.try(() => {
                             // Use our serializer for ANY data shape
-                            const payload = serializeForReplication(changed.new)
+                            // const payload = serializeForReplication(changed.new)
 
                             // send the serialized payload to all target players
                             // printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
                             route.sendToList({ serverEntity, data: changed.new as never } as never, players)
-                            if (componentName === "Villager") {
-                                // print("Replicating", changeEntity)
-                            }
+
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
                         })

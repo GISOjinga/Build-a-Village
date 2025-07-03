@@ -37,38 +37,37 @@ function createChangeSave(world: World, target: Entity, comp: Entity, oldValue?:
     })
 }
 
-function hasChanged(changed: { old: unknown, new: unknown }): boolean {
-    // does a deep comparision telling whats different
-    const oldData = changed.old as Record<string, unknown>
-    const newData = changed.new as Record<string, unknown>
-    const differences = new Array<string>()
+// function hasChanged(changed: { old: unknown, new: unknown }): boolean {
+//     // does a deep comparision telling whats different
+//     const oldData = changed.old as Record<string, unknown>
+//     const newData = changed.new as Record<string, unknown>
+//     const differences = new Array<string>()
 
-    function recursiveCheck(tabl1: unknown, tabl2: unknown, path = "", differences: string[] = []) {
-        if (typeIs(tabl1, "table") && typeIs(tabl2, "table")) {
-            for (const [key, value1] of pairs(tabl1)) {
-                const value2 = (tabl2 as Record<string, unknown>)[key as string];
-                const fullPath = path === "" ? `${key}` : `${path}.${key}`;
+//     function recursiveCheck(tabl1: unknown, tabl2: unknown, path = "", differences: string[] = []) {
+//         if (typeIs(tabl1, "table") && typeIs(tabl2, "table")) {
+//             for (const [key, value1] of pairs(tabl1)) {
+//                 const value2 = (tabl2 as Record<string, unknown>)[key as string];
+//                 const fullPath = path === "" ? `${key}` : `${path}.${key}`;
 
-                if (typeIs(value1, "table") && typeIs(value2, "table")) {
-                    recursiveCheck(value1, value2, fullPath, differences);
-                } else if (value1 !== value2) {
-                    differences.push(`Changed: ${fullPath} from ${value1} to ${value2}`);
-                }
-            }
-        } else {
-            // If they are not both tables, we compare directly
-            if (tabl1 !== tabl2) {
-                differences.push(`Changed: ${path} from ${tabl1} to ${tabl2}`);
-            }
-        }
+//                 if (typeIs(value1, "table") && typeIs(value2, "table")) {
+//                     recursiveCheck(value1, value2, fullPath, differences);
+//                 } else if (value1 !== value2) {
+//                     differences.push(`Changed: ${fullPath} from ${value1} to ${value2}`);
+//                 }
+//             }
+//         } else {
+//             // If they are not both tables, we compare directly
+//             if (tabl1 !== tabl2) {
+//                 differences.push(`Changed: ${path} from ${tabl1} to ${tabl2}`);
+//             }
+//         }
 
-        return differences;
-    }
+//         return differences;
+//     }
 
-    recursiveCheck(oldData, newData, "", differences)
-    print(differences)
-    return differences.size() > 0
-}
+//     recursiveCheck(oldData, newData, "", differences)
+//     return differences.size() > 0
+// }
 
 
 // for change
@@ -83,7 +82,6 @@ export default {
         // for all added query
         addedQuery.forEach((comp) => {
             world.set(comp, OnAdd, (entity) => {
-                print("Changing1")
                 const pairing = pair(entity, comp)
                 const value = world.get(entity, comp)
                 const entityAdded = world.entity()
@@ -107,24 +105,22 @@ export default {
         // for all changed query
         changedQuery.forEach((comp) => {
             world.set(comp, OnChange, (entity, comp, newValue) => {
-                print("Changing")
                 const pairing = pair(entity, comp)
                 const oldValue = previousValue.get(pairing)
 
-                if (hasChanged({ old: oldValue, new: newValue })) {
-                    // sets the new value
-                    previousValue.set(pairing, typeIs(newValue, "table") ? deepCopy(newValue) : newValue)
+                // if (hasChanged({ old: oldValue, new: newValue })) {
+                // sets the new value
+                previousValue.set(pairing, typeIs(newValue, "table") ? deepCopy(newValue) : newValue)
 
-                    // calls it
-                    createChangeSave(world, entity, comp, oldValue, newValue)
-                }
+                // calls it
+                createChangeSave(world, entity, comp, oldValue, newValue)
+                // }
             })
         })
 
         // for all removed query
         removedQuery.forEach((comp) => {
             world.set(comp, OnRemove, (entity) => {
-                print("Changing2")
                 const pairing = pair(entity, comp)
                 const oldValue = world.get(entity, comp)
 

@@ -23,6 +23,7 @@ local MaxedOut = _jecsComponents.MaxedOut
 local ModelDebugger = _jecsComponents.ModelDebugger
 local Player = _jecsComponents.Player
 local ProduceAll = _jecsComponents.ProduceAll
+local Removed = _jecsComponents.Removed
 local TakeFromVillager = _jecsComponents.TakeFromVillager
 local TargetEntity = _jecsComponents.TargetEntity
 local Villager = _jecsComponents.Villager
@@ -261,6 +262,19 @@ local default = function(world)
 			end
 		end
 	end
+	-- when maxed out is removed set the start time
+	for _, villagerEntity in world:query(TargetEntity):with(Removed(MaxedOut)) do
+		local villagerComp = world:get(villagerEntity, Villager)
+		if villagerComp then
+			local _binding = villagerComp
+			local villagerData = _binding.villagerData
+			local progression = villagerData.Progress.Progression
+			-- sets the start time to os.time
+			progression.Time.StartTime = os.time()
+			-- updates the villager component
+			addComponent(villagerEntity, Villager, villagerComp)
+		end
+	end
 	-- takes the villager through its transitions
 	if useThrottle(.1) then
 		for villagerEntity, villagerComp, animator in world:query(Villager, VillagerAnimator):without(MaxedOut) do
@@ -375,16 +389,6 @@ local default = function(world)
 		-- removes its self
 		addComponent(villagerEntity, Villager, villagerComp)
 		removeComponent(villagerEntity, ProduceAll)
-	end
-	-- for the villagers with maxed out sets their progression start time to os.time
-	for villagerEntity, villagerComp in world:query(Villager, MaxedOut) do
-		local _binding = villagerComp
-		local villagerData = _binding.villagerData
-		local progression = villagerData.Progress.Progression
-		-- sets the start time to os.time
-		progression.Time.StartTime = os.time()
-		-- updates the villager component
-		addComponent(villagerEntity, Villager, villagerComp)
 	end
 	-- when ever player has produce all
 	for playerEntity, villagers in world:query(ActiveVillagers, ProduceAll) do

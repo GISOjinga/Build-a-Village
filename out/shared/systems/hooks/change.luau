@@ -46,50 +46,33 @@ local function createChangeSave(world, target, comp, oldValue, newValue)
 		end)
 	end)
 end
-local function hasChanged(changed)
-	-- does a deep comparision telling whats different
-	local oldData = changed.old
-	local newData = changed.new
-	local differences = {}
-	local function recursiveCheck(tabl1, tabl2, path, differences)
-		if path == nil then
-			path = ""
-		end
-		if differences == nil then
-			differences = {}
-		end
-		local _tabl1 = tabl1
-		local _condition = type(_tabl1) == "table"
-		if _condition then
-			local _tabl2 = tabl2
-			_condition = type(_tabl2) == "table"
-		end
-		if _condition then
-			for key, value1 in pairs(tabl1) do
-				local value2 = tabl2[key]
-				local fullPath = if path == "" then `{key}` else `{path}.{key}`
-				if type(value1) == "table" and type(value2) == "table" then
-					recursiveCheck(value1, value2, fullPath, differences)
-				elseif value1 ~= value2 then
-					local _differences = differences
-					local _arg0 = `Changed: {fullPath} from {value1} to {value2}`
-					table.insert(_differences, _arg0)
-				end
-			end
-		else
-			-- If they are not both tables, we compare directly
-			if tabl1 ~= tabl2 then
-				local _differences = differences
-				local _arg0 = `Changed: {path} from {tabl1} to {tabl2}`
-				table.insert(_differences, _arg0)
-			end
-		end
-		return differences
-	end
-	recursiveCheck(oldData, newData, "", differences)
-	print(differences)
-	return #differences > 0
-end
+-- function hasChanged(changed: { old: unknown, new: unknown }): boolean {
+--     // does a deep comparision telling whats different
+--     const oldData = changed.old as Record<string, unknown>
+--     const newData = changed.new as Record<string, unknown>
+--     const differences = new Array<string>()
+--     function recursiveCheck(tabl1: unknown, tabl2: unknown, path = "", differences: string[] = []) {
+--         if (typeIs(tabl1, "table") && typeIs(tabl2, "table")) {
+--             for (const [key, value1] of pairs(tabl1)) {
+--                 const value2 = (tabl2 as Record<string, unknown>)[key as string];
+--                 const fullPath = path === "" ? `${key}` : `${path}.${key}`;
+--                 if (typeIs(value1, "table") && typeIs(value2, "table")) {
+--                     recursiveCheck(value1, value2, fullPath, differences);
+--                 } else if (value1 !== value2) {
+--                     differences.push(`Changed: ${fullPath} from ${value1} to ${value2}`);
+--                 }
+--             }
+--         } else {
+--             // If they are not both tables, we compare directly
+--             if (tabl1 !== tabl2) {
+--                 differences.push(`Changed: ${path} from ${tabl1} to ${tabl2}`);
+--             }
+--         }
+--         return differences;
+--     }
+--     recursiveCheck(oldData, newData, "", differences)
+--     return differences.size() > 0
+-- }
 -- for change
 local default = {
 	phase = Phases.ChangeHook,
@@ -108,7 +91,6 @@ local default = {
 		-- ▼ ReadonlySet.forEach ▼
 		local _callback = function(comp)
 			world:set(comp, OnAdd, function(entity)
-				print("Changing1")
 				local pairing = pair(entity, comp)
 				local value = world:get(entity, comp)
 				local entityAdded = world:entity()
@@ -136,20 +118,16 @@ local default = {
 		-- ▼ ReadonlySet.forEach ▼
 		local _callback_1 = function(comp)
 			world:set(comp, OnChange, function(entity, comp, newValue)
-				print("Changing")
 				local pairing = pair(entity, comp)
 				local oldValue = previousValue[pairing]
-				if hasChanged({
-					old = oldValue,
-					new = newValue,
-				}) then
-					-- sets the new value
-					local _newValue = newValue
-					local _arg1 = if type(_newValue) == "table" then deepCopy(newValue) else newValue
-					previousValue[pairing] = _arg1
-					-- calls it
-					createChangeSave(world, entity, comp, oldValue, newValue)
-				end
+				-- if (hasChanged({ old: oldValue, new: newValue })) {
+				-- sets the new value
+				local _newValue = newValue
+				local _arg1 = if type(_newValue) == "table" then deepCopy(newValue) else newValue
+				previousValue[pairing] = _arg1
+				-- calls it
+				createChangeSave(world, entity, comp, oldValue, newValue)
+				-- }
 			end)
 		end
 		for _v in changedQuery do
@@ -160,7 +138,6 @@ local default = {
 		-- ▼ ReadonlySet.forEach ▼
 		local _callback_2 = function(comp)
 			world:set(comp, OnRemove, function(entity)
-				print("Changing2")
 				local pairing = pair(entity, comp)
 				local oldValue = world:get(entity, comp)
 				-- destroys the previous value

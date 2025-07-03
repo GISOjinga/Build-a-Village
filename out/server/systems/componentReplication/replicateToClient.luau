@@ -146,6 +146,9 @@ local default = {
 					_condition_1 = Players:GetPlayers()
 				end
 				local players = _condition_1
+				-- if (componentName === "Body") {
+				--     print("Replicating BODY", changed.new)
+				-- }
 				-- if the component is not a table then replicate to all players
 				if not route then
 					error(`Missing route for component replication: {componentName}`)
@@ -156,18 +159,15 @@ local default = {
 						-- Wrap in Promise.try for robust error handling
 						TS.Promise.try(function()
 							-- Use our serializer for ANY data shape
-							local payload = serializeForReplication(changed.new)
+							-- const payload = serializeForReplication(changed.new)
 							-- send the serialized payload to all target players
 							-- printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
 							route:sendToList({
 								serverEntity = serverEntity,
 								data = changed.new,
 							}, players)
-							if componentName == "Villager" then
-								-- print("Replicating", changeEntity)
-							end
 						end):catch(function(err)
-							warnTS(143, `Replication error for {componentName} at line {143}: {tostring(err)}`)
+							warnTS(145, `Replication error for {componentName} at line {145}: {tostring(err)}`)
 						end)
 					end
 				end

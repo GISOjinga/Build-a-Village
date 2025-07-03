@@ -73,9 +73,9 @@ export const ExampleSetting = createSetting<number>("ExampleSetting", 20);
 
 
 // hooks
-export const _changedComponent = component<Changed<unknown>>("Changed")
-export const _addedComponent = component<Entity>("Added")
-export const _removedComponent = component<Entity>("Removed")
+const _changedComponent = component<Changed<unknown>>("Changed")
+const _addedComponent = component<Entity>("Added")
+const _removedComponent = component<Entity>("Removed")
 
 // for changes
 type Changed<T> = { readonly old?: T, readonly new?: T }

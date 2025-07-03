@@ -43,10 +43,11 @@ export default (world: World) => {
     const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
 
     // when the mouse moves
+    hoverAttachment.Name = "HoverBoxAttachment"
     hoverAttachment.Position = (target?.hit && hoverAttachment.Position.Lerp(target.hit.Position, 0.2)) || hoverAttachment.Position
 
     // when ever platform updates then
-    if (useChange([platform]) && platform) hoverAttachment.Position = platform.Floor.Position
+    if (useChange([platform]) && body && platform) hoverAttachment.Position = body.rootPart.Position
 
     // when the mouse hovers over a villager and sets the time till built
     // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)

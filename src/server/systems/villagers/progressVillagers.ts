@@ -6,7 +6,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -179,6 +179,21 @@ export default (world: World) => {
         }
     }
 
+    // when maxed out is removed set the start time
+    for (const [_, villagerEntity] of world.query(TargetEntity).with(Removed(MaxedOut))) {
+        const villagerComp = world.get(villagerEntity as Entity, Villager);
+        if (villagerComp) {
+            const { villagerData } = villagerComp;
+            const progression = villagerData.Progress.Progression;
+
+            // sets the start time to os.time
+            progression.Time.StartTime = os.time();
+
+            // updates the villager component
+            addComponent(villagerEntity as Entity, Villager, villagerComp);
+        }
+    }
+
     // takes the villager through its transitions
     if (useThrottle(.1)) {
         for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).without(MaxedOut)) {
@@ -258,18 +273,6 @@ export default (world: World) => {
         // removes its self
         addComponent(villagerEntity as Entity, Villager, villagerComp);
         removeComponent(villagerEntity as Entity, ProduceAll);
-    }
-
-    // for the villagers with maxed out sets their progression start time to os.time
-    for (const [villagerEntity, villagerComp] of world.query(Villager, MaxedOut)) {
-        const { villagerData } = villagerComp;
-        const progression = villagerData.Progress.Progression;
-
-        // sets the start time to os.time
-        progression.Time.StartTime = os.time();
-
-        // updates the villager component
-        addComponent(villagerEntity as Entity, Villager, villagerComp);
     }
 
     // when ever player has produce all
