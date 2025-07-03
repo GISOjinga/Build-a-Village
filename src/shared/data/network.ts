@@ -36,8 +36,8 @@ type JingaNetType<T> =
 
 
 // === Primitive Types === //
-const optional = (schema: AnySerDesType) => ({ ___JingaNetOptional: true, value: schema })
-type Optional<T> = JingaNetType<T | undefined> & { ___JingaNetOptional: true, value: AnySerDesType };
+const optional = <V extends AnySerDesType>(schema: V) => ({ ___JingaNetOptional: true, value: schema }) as never as JingaNetType<V | undefined>;
+type Optional<T> = { ___JingaNetOptional: true, value: JingaNetType<T | undefined> };
 export const int8 = Squash.int(1) as JingaNetType<number>;
 export const int16 = Squash.int(2) as JingaNetType<number>;
 export const int32 = Squash.int(4) as JingaNetType<number>;
@@ -48,9 +48,9 @@ export const float32 = Squash.number(4) as JingaNetType<number>;
 export const float64 = Squash.number(8) as JingaNetType<number>;
 export const str = Squash.string() as JingaNetType<string>;
 export const bool = Squash.boolean() as unknown as JingaNetType<boolean>;
-export const cframe = Squash.CFrame(Squash.number(4)) as unknown as JingaNetType<CFrame>;
-export const vec3 = Squash.Vector3(Squash.number(4)) as unknown as JingaNetType<Vector3>;
-export const vec2 = Squash.Vector2(Squash.number(4)) as unknown as JingaNetType<Vector2>;
+export const cframe = Squash.CFrame(Squash.number(8)) as unknown as JingaNetType<CFrame>;
+export const vec3 = Squash.Vector3(Squash.number(8)) as unknown as JingaNetType<Vector3>;
+export const vec2 = Squash.Vector2(Squash.number(8)) as unknown as JingaNetType<Vector2>;
 export const nothing = {
     ser(this: void): void { },
     des(this: void): void { },
@@ -165,10 +165,14 @@ export class Network<J extends JingaNetType<any>> {
     }
 
     /**
-     * Reconstruct data from a buffer using the same schema used for sending.
-     * Supports nested objects and dynamically sized arrays.
-     */
-    private deepDeserialize(seralizedData: buffer | unknown): UnwrapJingaNetType<J> {
+ * Reconstruct data from a serialized structure (buffers or nested objects).
+ * Traverses the schema and applies deserialization per field.
+ */
+    /**
+ * Reconstruct data from a serialized structure (buffers or nested objects).
+ * Traverses the schema and applies deserialization per field.
+ */
+    private deepDeserialize(serialized: unknown): UnwrapJingaNetType<J> {
         const schema = this.schema as unknown;
 
         function isPlainArraySchema(schema: unknown): schema is Array<unknown> {
@@ -179,49 +183,54 @@ export class Network<J extends JingaNetType<any>> {
             return typeIs(schema, "table") && (schema as Optional<unknown>).___JingaNetOptional === true;
         }
 
-        function deserialize(schema: unknown): unknown {
-            if (schema === nothing || schema === unknown || schema === undefined) {
-                return undefined;
-            }
+        function deserialize(schema: unknown, data: unknown): unknown {
+            if (schema === nothing || schema === unknown || schema === undefined) return data;
 
+            // Handle Optional
             if (isOptionalSchema(schema)) {
-                return deserialize(schema.value);
+                if (data === undefined) return undefined;
+                return deserialize(schema.value, data);
             }
 
+            // Handle Instance schema passthrough
             if (typeIs(schema, "table") && (schema as Record<string, unknown>).__ByteNetInstancePath !== undefined) {
-                return undefined;
+                return data;
             }
 
+            // Handle Array schema
             if (isPlainArraySchema(schema)) {
-                const elementSchema = (schema as Array<unknown>)[0] as unknown;
-                const length = uint16.des(cursor) as number;
-                const result: unknown[] = [];
-                for (let i = 0; i < length; i++) {
-                    result[i] = deserialize(elementSchema);
+                const elementSchema = (schema as Array<unknown>)[0];
+                if (!typeIs(data, "table")) return [];
+
+                return (data as Array<never>).map((item) => deserialize(elementSchema, item));
+            }
+
+            // Handle buffer using SerDes
+            if (typeIs(schema, "table") && typeIs((schema as SerDes<unknown>).des, "function")) {
+                if (typeIs(data, "userdata") || typeIs(data, "buffer")) {
+                    const cursor = Squash.frombuffer(data as buffer);
+                    return (schema as SerDes<unknown>).des(cursor);
+                }
+            }
+
+            // Handle object traversal
+            if (typeIs(schema, "table") && typeIs(data, "table")) {
+                const result: Record<string, unknown> = {};
+                for (const [key, childSchema] of pairs(schema as Record<string, unknown>)) {
+                    result[key] = deserialize(childSchema, (data as Record<string, unknown>)[key]);
                 }
                 return result;
-            }
-
-            if (typeIs(schema, "table") && typeIs((schema as SerDes<unknown>).des, "function")) {
-                return (schema as SerDes<unknown>).des(cursor);
-            }
-
-            if (typeIs(schema, "table")) {
-                const out: Record<string, unknown> = {};
-                for (const [key, value] of pairs(schema as Record<string, unknown>)) {
-                    out[key] = deserialize(value);
-                }
-                return out;
             }
 
             return undefined;
         }
 
-        return deserialize(schema) as UnwrapJingaNetType<J>;
+        return deserialize(schema, serialized) as UnwrapJingaNetType<J>;
     }
 
+
+
     public sendToAll(data: UnwrapJingaNetType<J>) {
-        print(data, this.deepSerialize(data))
         jingaRemote.FireAllClients(this.name, this.deepSerialize(data));
     }
 
@@ -250,7 +259,6 @@ export class Network<J extends JingaNetType<any>> {
     }
 
     public send(data: UnwrapJingaNetType<J> = undefined as UnwrapJingaNetType<J>) {
-        print("Sending", this.name, "with data", data);
         jingaRemote.FireServer(this.name, this.deepSerialize(data));
     }
 }
@@ -267,7 +275,7 @@ export const sharedRoutes = (() => {
     const villagerStruct = {
         Name: str as JingaNetType<VillagerNames>,
         UniqueId: uint16 as JingaNetType<number>,
-        RelativeLocation: optional(cframe) as unknown as JingaNetType<CFrame | undefined>,
+        RelativeLocation: unknown as unknown as JingaNetType<CFrame | undefined>,
         Progress: {
             Produce: str as JingaNetType<ProduceNames>,
             Required: optional({
@@ -298,7 +306,7 @@ export const sharedRoutes = (() => {
             rootPart: compInst as JingaNetType<BasePart>,
             animator: compInst as JingaNetType<Animator>,
             rootAttachment: compInst as JingaNetType<Attachment>,
-            platform: optional(compInst) as unknown as Optional<PlatformExample | undefined>,
+            platform: optional(compInst as JingaNetType<BasePart>),
         }),
 
         // villager
@@ -360,7 +368,7 @@ export const sharedRoutes = (() => {
             currency: str,
         } as JingaNetType<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
 
-        placeVillager: cframe as JingaNetType<CFrame>,
+        placeVillager: unknown as JingaNetType<CFrame>,
 
         digVillager: entity,
 

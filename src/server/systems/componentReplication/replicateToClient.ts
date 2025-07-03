@@ -13,7 +13,7 @@
 import { Entity, OnRemove, World } from "@rbxts/jecs" // Matter framework functions and types.
 import { useMemo } from "@rbxts/react" // React hooks for state management.
 import { $line } from "rbxts-transformer-inline" // Inline transformer for debug line numbers.
-import { Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetReplication } from "shared/utils/jecs/jecsComponents" // Matter components.
+import { _changedComponent, Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetReplication } from "shared/utils/jecs/jecsComponents" // Matter components.
 
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
@@ -116,7 +116,7 @@ export default {
         for (const [componentName, component] of pairs(componentsToReplicate)) {
 
             // for each entity whose component just changed
-            for (const [_, serverEntity, changed] of world.query(TargetEntity, Changed(component as Entity))) {
+            for (const [changeEntity, serverEntity, changed] of world.query(TargetEntity, Changed(component as Entity))) {
                 const route = routes[componentName]
                 const targetReplication = world.get(serverEntity, TargetReplication)
                 const players = (targetReplication && targetReplication[component]) || Players.GetPlayers()
@@ -135,7 +135,10 @@ export default {
 
                             // send the serialized payload to all target players
                             // printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
-                            route.sendToList({ serverEntity, data: payload as never } as never, players)
+                            route.sendToList({ serverEntity, data: changed.new as never } as never, players)
+                            if (componentName === "Villager") {
+                                // print("Replicating", changeEntity)
+                            }
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
                         })

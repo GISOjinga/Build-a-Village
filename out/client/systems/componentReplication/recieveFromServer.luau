@@ -20,6 +20,7 @@ local useMemo = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "P
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local createEntity = _jecsHelpFunctions.createEntity
 local getEntity = _jecsHelpFunctions.getEntity
+local printJecs = _jecsHelpFunctions.printJecs
 local warnTS = _jecsHelpFunctions.warnTS
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
 local deepCopy = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils").deepCopy
@@ -114,7 +115,7 @@ local default = {
 					if not (newData ~= 0 and newData == newData and newData ~= "" and newData) then
 						world:remove(clientEntity, component)
 					else
-						print(`Replicating {componentName} for {serverEntity}: {newData}`)
+						printJecs(117, `Replicating {componentName} for {serverEntity}: {newData}`)
 						world:set(clientEntity, component, newData)
 					end
 				else

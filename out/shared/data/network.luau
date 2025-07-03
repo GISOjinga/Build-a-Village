@@ -29,9 +29,9 @@ local float32 = Squash.number(4)
 local float64 = Squash.number(8)
 local str = Squash.string()
 local bool = Squash.boolean()
-local cframe = Squash.CFrame(Squash.number(4))
-local vec3 = Squash.Vector3(Squash.number(4))
-local vec2 = Squash.Vector2(Squash.number(4))
+local cframe = Squash.CFrame(Squash.number(8))
+local vec3 = Squash.Vector3(Squash.number(8))
+local vec2 = Squash.Vector2(Squash.number(8))
 local nothing = {
 	ser = function() end,
 	des = function() end,
@@ -77,11 +77,7 @@ do
 				if name ~= self.name then
 					return nil
 				end
-				local realData = nil
-				if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then
-					realData = self:deepDeserialize(returnedBuffer)
-					print(name, "GOT THE DATA", realData, returnedBuffer)
-				end
+				local realData = if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then self:deepDeserialize(returnedBuffer) else returnedBuffer
 				-- calls the call back
 				callback(realData, Players.LocalPlayer)
 			end)
@@ -172,8 +168,7 @@ do
 		end
 		return serialize(grandSchema, fullData)
 	end
-	function Network:deepDeserialize(buffer)
-		local cursor = Squash.frombuffer(buffer)
+	function Network:deepDeserialize(serialized)
 		local schema = self.schema
 		local function isPlainArraySchema(schema)
 			local _schema = schema
@@ -191,42 +186,45 @@ do
 			end
 			return _condition
 		end
-		local function deserialize(schema)
+		local function deserialize(schema, data)
 			if schema == nothing or schema == unknown or schema == nil then
-				return nil
+				return data
 			end
+			-- Handle Optional
 			if isOptionalSchema(schema) then
-				return deserialize(schema.value)
+				if data == nil then
+					return nil
+				end
+				return deserialize(schema.value, data)
 			end
+			-- Handle Instance schema passthrough
 			local _schema = schema
 			local _condition = type(_schema) == "table"
 			if _condition then
 				_condition = schema.__ByteNetInstancePath ~= nil
 			end
 			if _condition then
-				return nil
+				return data
 			end
+			-- Handle Array schema
 			if isPlainArraySchema(schema) then
 				local elementSchema = schema[1]
-				local length = uint16.des(cursor)
-				local result = {}
-				do
-					local i = 0
-					local _shouldIncrement = false
-					while true do
-						if _shouldIncrement then
-							i += 1
-						else
-							_shouldIncrement = true
-						end
-						if not (i < length) then
-							break
-						end
-						result[i + 1] = deserialize(elementSchema)
-					end
+				local _data = data
+				if not (type(_data) == "table") then
+					return {}
 				end
-				return result
+				-- ▼ ReadonlyArray.map ▼
+				local _newValue = table.create(#data)
+				local _callback = function(item)
+					return deserialize(elementSchema, item)
+				end
+				for _k, _v in data do
+					_newValue[_k] = _callback(_v, _k - 1, data)
+				end
+				-- ▲ ReadonlyArray.map ▲
+				return _newValue
 			end
+			-- Handle buffer using SerDes
 			local _schema_1 = schema
 			local _condition_1 = type(_schema_1) == "table"
 			if _condition_1 then
@@ -234,22 +232,36 @@ do
 				_condition_1 = type(_des) == "function"
 			end
 			if _condition_1 then
-				return schema.des(cursor)
-			end
-			local _schema_2 = schema
-			if type(_schema_2) == "table" then
-				local out = {}
-				for key, value in pairs(schema) do
-					out[key] = deserialize(value)
+				local _data = data
+				local _condition_2 = type(_data) == "userdata"
+				if not _condition_2 then
+					local _data_1 = data
+					_condition_2 = type(_data_1) == "buffer"
 				end
-				return out
+				if _condition_2 then
+					local cursor = Squash.frombuffer(data)
+					return schema.des(cursor)
+				end
+			end
+			-- Handle object traversal
+			local _schema_2 = schema
+			local _condition_2 = type(_schema_2) == "table"
+			if _condition_2 then
+				local _data = data
+				_condition_2 = type(_data) == "table"
+			end
+			if _condition_2 then
+				local result = {}
+				for key, childSchema in pairs(schema) do
+					result[key] = deserialize(childSchema, data[key])
+				end
+				return result
 			end
 			return nil
 		end
-		return deserialize(schema)
+		return deserialize(schema, serialized)
 	end
 	function Network:sendToAll(data)
-		print(data, (self:deepSerialize(data)))
 		jingaRemote:FireAllClients(self.name, (self:deepSerialize(data)))
 	end
 	function Network:sendToAllExcept(data, exception)
@@ -287,7 +299,7 @@ do
 				local returnedBuffer = _binding[2]
 				-- If the name matches, we can safely deserialize
 				if name == self.name then
-					return self:deepDeserialize(returnedBuffer)
+					return if returnedBuffer then self:deepDeserialize(returnedBuffer) else returnedBuffer
 				end
 			end
 		until not true
@@ -296,7 +308,6 @@ do
 		if data == nil then
 			data = nil
 		end
-		print("Sending", self.name, "with data", data)
 		jingaRemote:FireServer(self.name, (self:deepSerialize(data)))
 	end
 end
@@ -310,7 +321,7 @@ local sharedRoutes = (function()
 	local villagerStruct = {
 		Name = str,
 		UniqueId = uint16,
-		RelativeLocation = optional(cframe),
+		RelativeLocation = unknown,
 		Progress = {
 			Produce = str,
 			Required = optional({
@@ -385,7 +396,7 @@ local sharedRoutes = (function()
 			villagerIndex = int16,
 			currency = str,
 		},
-		placeVillager = cframe,
+		placeVillager = unknown,
 		digVillager = entity,
 		supplyVillager = entity,
 		collectVillagerProduce = {

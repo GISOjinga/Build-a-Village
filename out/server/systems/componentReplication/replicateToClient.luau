@@ -134,7 +134,7 @@ local default = {
 		-- loops through each component that needs replication
 		for componentName, component in pairs(componentsToReplicate) do
 			-- for each entity whose component just changed
-			for _, serverEntity, changed in world:query(TargetEntity, Changed(component)) do
+			for changeEntity, serverEntity, changed in world:query(TargetEntity, Changed(component)) do
 				local route = routes[componentName]
 				local targetReplication = world:get(serverEntity, TargetReplication)
 				local _condition = targetReplication
@@ -161,10 +161,13 @@ local default = {
 							-- printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
 							route:sendToList({
 								serverEntity = serverEntity,
-								data = payload,
+								data = changed.new,
 							}, players)
+							if componentName == "Villager" then
+								-- print("Replicating", changeEntity)
+							end
 						end):catch(function(err)
-							warnTS(140, `Replication error for {componentName} at line {140}: {tostring(err)}`)
+							warnTS(143, `Replication error for {componentName} at line {143}: {tostring(err)}`)
 						end)
 					end
 				end
