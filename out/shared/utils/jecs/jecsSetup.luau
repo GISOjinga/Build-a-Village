@@ -10,11 +10,11 @@ local ModelDebugger = _jecsComponents.ModelDebugger
 local Phases = _jecsComponents.Phases
 local systemQueue = _jecsComponents.systemQueue
 local world = _jecsComponents.world
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local jabby = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "jabby", "out")
 local PlankJabbyPlugin = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "planck-jabby", "out")
 local PlanckHooksPlugin = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook").PlanckHooksPlugin
 local getInstanceByName = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "instanceFunctions").getInstanceByName
+local sharedRoutes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").sharedRoutes
 -- tags
 local matterTag = function(tag, world, callback)
 	local allInstancesTagged = CollectionService:GetTagged(tag)
@@ -79,7 +79,7 @@ local function hotReload(systems)
 					systemQueue:addSystem(toInput)
 					systemToRemove = toInput
 					if oldSystem then
-						routes.getReplicatedComponents:send()
+						sharedRoutes.getReplicatedComponents:send()
 					end
 					-- systemQueue.addSystem(systemStruct.system, systemStruct.phase || Phase.Update)
 				end, function(oldSystemMod)
@@ -212,7 +212,7 @@ local setupMatter = function(systems, tags)
 	-- adds the rest of the systems
 	hotReload(systems)
 	if RunService:IsClient() then
-		routes.jecsSetup:send()
+		sharedRoutes.jecsSetup:send()
 	end
 	-- return the debugger
 	return debug

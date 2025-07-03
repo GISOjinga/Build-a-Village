@@ -3,7 +3,7 @@ local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_incl
 local _services = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services")
 local SoundService = _services.SoundService
 local Workspace = _services.Workspace
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, script.Parent.Parent.Parent, "routes").default
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
 local default = function(world)
 	-- when ever sounds is called to play

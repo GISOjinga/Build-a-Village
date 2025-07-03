@@ -2,7 +2,7 @@
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local Janitor = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "janitor", "src").Janitor
 local SoundService = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").SoundService
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, script.Parent.Parent.Parent, "routes").default
 local pageStates = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "Animations", "pageStates").default
 local useEffect = TS.import(script, script.Parent.Parent, "hooks", "useEffect").default
 local createMotion = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "ripple", "src").createMotion

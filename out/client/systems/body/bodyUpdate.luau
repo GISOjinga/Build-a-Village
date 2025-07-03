@@ -2,7 +2,7 @@
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local Players = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Players
 local Tracer = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "tracer", "out").Tracer
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, script.Parent.Parent.Parent, "routes").default
 local _Plugin_Hook = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook")
 local useEvent = _Plugin_Hook.useEvent
 local useMemo = _Plugin_Hook.useMemo

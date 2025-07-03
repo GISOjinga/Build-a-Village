@@ -15,7 +15,6 @@ local jingaRemote = ReplicatedStorage:FindFirstChild("JingaRemotes") or (if (Run
 	inst.Parent = ReplicatedStorage
 	return inst
 end)())
--- === Base JingaNet Type === //
 -- === Primitive Types === //
 local optional = Squash.opt
 local int8 = Squash.int(1)
@@ -43,8 +42,9 @@ local unknown = {
 		return idk
 	end,
 }
-local entity = Squash.uint(8)
-local inst = record({
+local entity = unknown
+local instance = unknown
+local compInst = record({
 	__ByteNetInstancePath = array(str),
 })
 -- === Remote Type Wrapper (fixed) === //
@@ -77,9 +77,8 @@ do
 				end
 				local realData = nil
 				if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then
-					local newCursor = Squash.frombuffer(returnedBuffer)
-					realData = self.packet.des(newCursor)
-					print(name, "GOT THE DATA", realData, returnedBuffer, newCursor)
+					realData = self:deepDeserialize(returnedBuffer)
+					print(name, "GOT THE DATA", realData, returnedBuffer)
 				end
 				-- calls the call back
 				callback(realData, Players.LocalPlayer)
@@ -92,9 +91,8 @@ do
 				end
 				local realData = nil
 				if returnedBuffer ~= 0 and returnedBuffer == returnedBuffer and returnedBuffer ~= "" and returnedBuffer then
-					local newCursor = Squash.frombuffer(returnedBuffer)
-					realData = self.packet.des(newCursor)
-					print(name, "GOT THE DATA", realData, returnedBuffer, newCursor)
+					realData = self:deepDeserialize(returnedBuffer)
+					print(name, "GOT THE DATA", realData, returnedBuffer)
 				end
 				-- calls the call back
 				print(realData, player)
@@ -102,20 +100,117 @@ do
 			end)
 		end
 	end
-	function Network:searlizeToBuffer(data)
+	function Network:serializeToBuffer(data)
+		return self:deepSerialize(data)
+	end
+	function Network:deepSerialize(data)
 		local cursor = Squash.cursor()
-		self.packet.ser(cursor, data)
+		local serialize
+		serialize = function(schema, value)
+			-- If schema is a SerDes table, use it directly
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				local _arg0 = schema["ser" + 1]
+				_condition = type(_arg0) == "function"
+			end
+			if _condition then
+				schema.ser(cursor, value)
+				return nil
+			end
+			-- For tables without a direct serializer, recurse into each key
+			local _schema_1 = schema
+			local _condition_1 = type(_schema_1) == "table"
+			if _condition_1 then
+				local _value = value
+				_condition_1 = type(_value) == "table"
+			end
+			if _condition_1 then
+				local serField = schema["ser" + 1]
+				-- Dynamic array support when schema describes an array shape
+				if not (type(serField) == "function") and schema[2] ~= nil then
+					local arr = value
+					uint16.ser(cursor, #arr)
+					for _, v in arr do
+						serialize(schema[2], v)
+					end
+				else
+					for key, child in pairs(schema) do
+						serialize(child, value[key + 1])
+					end
+				end
+				return nil
+			end
+			-- Fallback for primitives/undefined
+			local _schema_2 = schema
+			local _condition_2 = type(_schema_2) == "table"
+			if _condition_2 then
+				local _arg0 = schema["des" + 1]
+				_condition_2 = type(_arg0) == "function"
+			end
+			if _condition_2 then
+				schema.ser(cursor, value)
+			end
+		end
+		serialize(self.packet, data)
 		return Squash.tobuffer(cursor)
 	end
+	function Network:deepDeserialize(buffer)
+		local cursor = Squash.frombuffer(buffer)
+		local deserialize
+		deserialize = function(schema)
+			local _schema = schema
+			local _condition = type(_schema) == "table"
+			if _condition then
+				local _arg0 = schema["des" + 1]
+				_condition = type(_arg0) == "function"
+			end
+			if _condition then
+				return schema.des(cursor)
+			end
+			local _schema_1 = schema
+			if type(_schema_1) == "table" then
+				local desField = schema["des" + 1]
+				if not (type(desField) == "function") and schema[2] ~= nil then
+					local arrLength = uint16.des(cursor)
+					local arr = {}
+					do
+						local i = 1
+						local _shouldIncrement = false
+						while true do
+							if _shouldIncrement then
+								i += 1
+							else
+								_shouldIncrement = true
+							end
+							if not (i <= arrLength) then
+								break
+							end
+							arr[i] = deserialize(schema[2])
+						end
+					end
+					return arr
+				else
+					local out = {}
+					for key, child in pairs(schema) do
+						out[key] = deserialize(child)
+					end
+					return out
+				end
+			end
+			return nil
+		end
+		return deserialize(self.packet)
+	end
 	function Network:sendToAll(data)
-		jingaRemote:FireAllClients(self.name, self:searlizeToBuffer(data))
+		jingaRemote:FireAllClients(self.name, self:serializeToBuffer(data))
 	end
 	function Network:sendToAllExcept(data, exception)
 		local _exp = Players:GetPlayers()
 		-- ▼ ReadonlyArray.forEach ▼
 		local _callback = function(player)
 			if player ~= exception then
-				jingaRemote:FireClient(player, self.name, self:searlizeToBuffer(data))
+				jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
 			end
 		end
 		for _k, _v in _exp do
@@ -124,13 +219,13 @@ do
 		-- ▲ ReadonlyArray.forEach ▲
 	end
 	function Network:sendTo(data, player)
-		jingaRemote:FireClient(player, self.name, self:searlizeToBuffer(data))
+		jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
 	end
 	function Network:sendToList(data, players)
 		-- print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
 		-- ▼ ReadonlyArray.forEach ▼
 		local _callback = function(player)
-			return jingaRemote:FireClient(player, self.name, self:searlizeToBuffer(data))
+			return jingaRemote:FireClient(player, self.name, self:serializeToBuffer(data))
 		end
 		for _k, _v in players do
 			_callback(_v, _k - 1, players)
@@ -145,8 +240,7 @@ do
 				local returnedBuffer = _binding[2]
 				-- If the name matches, we can safely deserialize
 				if name == self.name then
-					local newCursor = Squash.frombuffer(returnedBuffer)
-					return self.packet.des(newCursor)
+					return self:deepDeserialize(returnedBuffer)
 				end
 			end
 		until not true
@@ -156,128 +250,59 @@ do
 			data = nil
 		end
 		print("Sending", self.name, "with data", data)
-		jingaRemote:FireServer(self.name, self:searlizeToBuffer(data))
+		jingaRemote:FireServer(self.name, self:serializeToBuffer(data))
 	end
 end
-local anotherNewRoute = (function() end)()
--- === Example Remote Bindings === //
-local routes = (function()
+local sharedRoutes = (function()
 	local componentRecord = function(data)
-		return record({
+		return {
 			serverEntity = entity,
 			data = optional(data),
-		})
+		}
 	end
-	local villagerStruct = record({
+	local villagerStruct = {
 		Name = str,
 		UniqueId = unknown,
 		RelativeLocation = optional(cframe),
-		Progress = record({
+		Progress = {
 			Produce = str,
-			Required = optional(record({
+			Required = optional({
 				Produce = str,
 				Amount = unknown,
 				Max = unknown,
-			})),
-			Progression = record({
-				Time = record({
+			}),
+			Progression = {
+				Time = {
 					RequiredTimePerResource = uint16,
 					StartTime = unknown,
-				}),
+				},
 				Resources = array(str),
-			}),
-			Building = record({
+			},
+			Building = {
 				StartTime = unknown,
 				TotalTime = unknown,
-			}),
-		}),
-	})
-	local _object = {
-		jecsSetup = nothing,
-		Jump = record({
-			position = record({
-				x = float32,
-				y = float32,
-				z = float32,
-			}),
-		}),
-		buyVillager = record({
-			villagerIndex = int16,
-			currency = str,
-		}),
-		placeVillager = cframe,
-		digVillager = entity,
-		supplyVillager = entity,
-		collectVillagerProduce = record({
-			villagerEntity = entity,
-			resourceModelName = str,
-		}),
-		teleportToVillage = nothing,
-		teleportToShop = str,
-		updateRestockTime = uint32,
-		updateVillagersShop = unknown,
-		redeemPromo = str,
-		promoResult = record({
-			success = bool,
-			message = str,
-		}),
-		confirmSellOptions = str,
-		toggleSellMenuOpen = bool,
-		confirmPrompt = bool,
-		updateFriendsBonus = bool,
-		sendFriendRequest = inst,
-		notify = record({
-			text = str,
-			duration = uint8,
-		}),
-		npcDialogue = record({
-			target = str,
-			text = str,
-		}),
-		buyWall = record({
-			wallName = str,
-			currency = str,
-		}),
-		equipWall = record({
-			wallName = str,
-			equip = bool,
-		}),
-		togglePage = str,
-		giftToPlayer = record({
-			playerToGift = inst,
-			produceTool = inst,
-		}),
-		playSound = record({
-			sound = inst,
-			position = optional(vec3),
-		}),
-		shopGiftTo = inst,
-		updateRobuxStore = unknown,
-		buyRobuxPack = record({
-			purchase = str,
-		}),
-		getReplicatedComponents = nothing,
-		deleteReplicatedEntity = entity,
+			},
+		},
 	}
-	for _k, _v in {
-		Body = componentRecord(record({
-			model = inst,
-			head = inst,
-			humanoid = inst,
-			rootPart = inst,
-			animator = inst,
-			rootAttachment = inst,
-			platform = optional(inst),
-		})),
-		Villager = componentRecord(record({
-			villagerModel = inst,
+	local componentRoutes = {
+		Body = componentRecord({
+			model = compInst,
+			head = compInst,
+			humanoid = compInst,
+			rootPart = compInst,
+			animator = compInst,
+			rootAttachment = compInst,
+			platform = optional(compInst),
+		}),
+		Villager = componentRecord({
+			villagerModel = compInst,
 			playerEntity = entity,
 			villagerData = villagerStruct,
-		})),
-		Data = componentRecord(record({
+		}),
+		Data = componentRecord({
 			Version = str,
 			Coins = uint32,
-			Villagers = array(villagerStruct),
+			Villagers = { villagerStruct },
 			Produce = array(record({
 				Name = str,
 				Amount = unknown,
@@ -296,24 +321,86 @@ local routes = (function()
 				Equipped = bool,
 			})),
 			PromoCodesRedeemed = array(str),
-		})),
-		ConfirmationPrompt = componentRecord(record({
+		}),
+		ModelDebugger = componentRecord(compInst),
+		ConfirmationPrompt = componentRecord({
 			title = str,
 			message = str,
 			confirmation = optional(bool),
 			onConfirm = unknown,
-			onDecline = optional(unknown),
-		})),
-		ModelDebugger = componentRecord(inst),
-	} do
-		_object[_k] = _v
+			onDecline = nil,
+		}),
+	}
+	-- real routes
+	local realRoutes = {
+		jecsSetup = nothing,
+		buyVillager = {
+			villagerIndex = int16,
+			currency = str,
+		},
+		placeVillager = cframe,
+		digVillager = entity,
+		supplyVillager = entity,
+		collectVillagerProduce = {
+			villagerEntity = entity,
+			resourceModelName = str,
+		},
+		teleportToVillage = nothing,
+		teleportToShop = str,
+		updateRestockTime = uint32,
+		updateVillagersShop = unknown,
+		redeemPromo = str,
+		promoResult = {
+			success = bool,
+			message = str,
+		},
+		confirmSellOptions = str,
+		toggleSellMenuOpen = bool,
+		confirmPrompt = bool,
+		updateFriendsBonus = bool,
+		sendFriendRequest = instance,
+		notify = {
+			text = str,
+			duration = uint8,
+		},
+		npcDialogue = {
+			target = str,
+			text = str,
+		},
+		buyWall = {
+			wallName = str,
+			currency = str,
+		},
+		equipWall = {
+			wallName = str,
+			equip = bool,
+		},
+		togglePage = str,
+		giftToPlayer = {
+			playerToGift = instance,
+			produceTool = instance,
+		},
+		playSound = {
+			sound = instance,
+			position = optional(vec3),
+		},
+		shopGiftTo = instance,
+		updateRobuxStore = unknown,
+		buyRobuxPack = {
+			purchase = str,
+		},
+		getReplicatedComponents = nothing,
+		deleteReplicatedEntity = entity,
+	}
+	-- transforms the routes into a network component
+	local routes = {}
+	for name, packet in pairs(realRoutes) do
+		routes[name] = Network.new(name, packet, "reliable")
 	end
-	local events = _object
-	local realRemotes = {}
-	for name, packet in pairs(events) do
-		realRemotes[name] = Network.new(name, packet, "reliable")
+	for name, packet in pairs(componentRoutes) do
+		routes[name] = Network.new(name, packet, "reliable")
 	end
-	return realRemotes
+	return routes
 end)()
 return {
 	int8 = int8,
@@ -332,8 +419,8 @@ return {
 	nothing = nothing,
 	unknown = unknown,
 	entity = entity,
-	inst = inst,
+	instance = instance,
+	compInst = compInst,
 	Network = Network,
-	anotherNewRoute = anotherNewRoute,
-	routes = routes,
+	sharedRoutes = sharedRoutes,
 }

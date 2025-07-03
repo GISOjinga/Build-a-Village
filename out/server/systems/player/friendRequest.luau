@@ -1,6 +1,6 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, game:GetService("ServerScriptService"), "TS", "routes").default
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local createEntity = _jecsHelpFunctions.createEntity
 local getEntity = _jecsHelpFunctions.getEntity

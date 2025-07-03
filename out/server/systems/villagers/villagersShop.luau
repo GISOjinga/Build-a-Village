@@ -1,6 +1,6 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, game:GetService("ServerScriptService"), "TS", "routes").default
 local useEvent = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook").useEvent
 local ShopData = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "villagers", "ShopData").default
 local _jecsComponents = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "jecs", "jecsComponents")

@@ -21,8 +21,8 @@ local TargetEntity = _jecsComponents.TargetEntity
 local TargetReplication = _jecsComponents.TargetReplication
 local warnTS = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions").warnTS
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local Players = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Players
+local routes = TS.import(script, game:GetService("ServerScriptService"), "TS", "routes").default
 -- sets up a instance with a unique id path
 local registeredInstance = setmetatable({}, {
 	__mode = "k",
@@ -164,7 +164,7 @@ local default = {
 								data = payload,
 							}, players)
 						end):catch(function(err)
-							warnTS(139, `Replication error for {componentName} at line {139}: {tostring(err)}`)
+							warnTS(140, `Replication error for {componentName} at line {140}: {tostring(err)}`)
 						end)
 					end
 				end

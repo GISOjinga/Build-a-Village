@@ -22,10 +22,10 @@ local createEntity = _jecsHelpFunctions.createEntity
 local getEntity = _jecsHelpFunctions.getEntity
 local warnTS = _jecsHelpFunctions.warnTS
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
 local deepCopy = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils").deepCopy
 local appendJecs = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").appendJecs
 local getInstanceByUniqueIdPath = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "instanceFunctions").getInstanceByUniqueIdPath
+local routes = TS.import(script, script.Parent.Parent.Parent, "routes").default
 -- checks data for __ByteNetInstancePath to make sure it has all the instances replicated
 local function checkData(data)
 	-- recursive check/fix

@@ -4,7 +4,7 @@ local Janitor = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_i
 local Object = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils")
 local Phases = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "jecs", "jecsComponents").Phases
 local appendJecs = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").appendJecs
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local sharedRoutes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").sharedRoutes
 -- export const routesData = new Map<packet<ByteNetType<unknown>>, (unknown[])[]>()
 local routesData = {}
 -- for change
@@ -28,7 +28,7 @@ local default = {
 			return nil
 		end)
 		-- loops through all the routes to listen to them
-		for _, _binding in Object.entries(routes) do
+		for _, _binding in Object.entries(sharedRoutes) do
 			local routeName = _binding[1]
 			local route = _binding[2]
 			local dataCalled = {}

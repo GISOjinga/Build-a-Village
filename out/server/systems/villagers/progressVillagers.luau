@@ -29,7 +29,7 @@ local Villager = _jecsComponents.Villager
 local VillagerAnimator = _jecsComponents.VillagerAnimator
 local paths = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "paths").default
 local villagersProgressData = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "villagersProgressData").default
-local routes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "data", "network").routes
+local routes = TS.import(script, game:GetService("ServerScriptService"), "TS", "routes").default
 local _analytics = TS.import(script, game:GetService("ServerScriptService"), "TS", "utils", "analytics")
 local logTutorialStep = _analytics.logTutorialStep
 local TutorialStep = _analytics.TutorialStep
@@ -64,9 +64,10 @@ local default = function(world)
 			if variant then
 				if playerWhoTriggered == player then
 					table.remove(villagerInfo.villagerData.Progress.Progression.Resources, resourceIndex + 1)
+					local _exp = villagerEntity
 					local _object = table.clone(villagerInfo)
 					setmetatable(_object, nil)
-					addComponent(villagerEntity, Villager, _object)
+					addComponent(_exp, Villager, _object)
 					createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant)
 					createEntity.updateData(playerEntityWhoTriggered, function(oldData)
 						if villagerInfo.villagerData.Name == "Farmer" and oldData.Tutorial == 2 then
@@ -235,9 +236,10 @@ local default = function(world)
 				local produceName = takeFromVillager.produceName
 				-- removes the produce from the data
 				table.remove(progression.Resources, resourceIndex + 1)
+				local _exp = villagerEntity
 				local _object = table.clone(villagerInfo)
 				setmetatable(_object, nil)
-				addComponent(villagerEntity, Villager, _object)
+				addComponent(_exp, Villager, _object)
 				-- adds the produce to the data
 				printJecs(169, `{player.Name} took {takeFromVillager.produceName} with varaint {variant} from villager {villagerEntity}`)
 				createEntity.insertProduce(playerEntity, produceName, variant)
