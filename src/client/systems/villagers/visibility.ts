@@ -47,6 +47,10 @@ interface VillagerPartCache {
 
 const villagerPartCaches = new WeakMap<VillagerModel, VillagerPartCache>();
 
+type GroupVisibility = { visible: boolean; invis: number };
+type GroupVisibilityMap = Record<string, GroupVisibility>;
+const groupVisibilityCache = new WeakMap<VillagerModel, GroupVisibilityMap>();
+
 function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
     let cache = villagerPartCaches.get(villagerModel);
     if (!cache) {
@@ -72,60 +76,73 @@ function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
     return cache;
 }
 
+function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts: CachedPartList, visible: boolean, invis: number = 1) {
+    let cache = groupVisibilityCache.get(villagerModel);
+    if (!cache) {
+        cache = {};
+        groupVisibilityCache.set(villagerModel, cache);
+    }
+    const current = cache[group];
+    if (!current || current.visible !== visible || current.invis !== invis) {
+        parts.forEach((child) => toggleTransparency(child, visible, invis));
+        cache[group] = { visible, invis };
+    }
+}
+
 // change village model state
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
         // print(newState, villageModelStates.get(villagerModel))
         const parts = cacheVillagerParts(villagerModel);
 
-        parts.resourcesGroup.forEach((child) => toggleTransparency(child, false));
-        parts.inProgress.forEach((cache) => cache.parts.forEach((child) => toggleTransparency(child, false)));
-        parts.progressFull.forEach((child) => toggleTransparency(child, false));
-        parts.stationParts.forEach((child) => toggleTransparency(child, false));
-        parts.npc.forEach((child) => toggleTransparency(child, false));
-        parts.accessories.forEach((child) => toggleTransparency(child, false));
+        applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, false);
+        parts.inProgress.forEach((cache) => applyGroupVisibility(villagerModel, `inProgress_${cache.phase}`, cache.parts, false));
+        applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
+        applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
+        applyGroupVisibility(villagerModel, "npc", parts.npc, false);
+        applyGroupVisibility(villagerModel, "accessories", parts.accessories, false);
 
         // if maxed then
         if (newState.isBeingBuilt) {
-            parts.progressFull.forEach((child) => toggleTransparency(child, false, .5));
-            parts.stationParts.forEach((child) => toggleTransparency(child, false, .5));
-            parts.resourcesGroup.forEach((child) => toggleTransparency(child, false, .5));
+            applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false, .5);
+            applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false, .5);
+            applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, false, .5);
 
         } else {
-            parts.npc.forEach((child) => toggleTransparency(child, true));
-            parts.accessories.forEach((child) => toggleTransparency(child, true));
-            parts.stationParts.forEach((child) => toggleTransparency(child, true));
+            applyGroupVisibility(villagerModel, "npc", parts.npc, true);
+            applyGroupVisibility(villagerModel, "accessories", parts.accessories, true);
+            applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, true);
 
             if (newState.hasMaxedResources) {
-                parts.progressFull.forEach((child) => toggleTransparency(child, true));
-                parts.resourcesGroup.forEach((child) => toggleTransparency(child, true));
+                applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, true);
+                applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, true);
             } else {
                 // toggles the in progress parts
                 parts.inProgress.forEach(({ phase, parts: phaseParts }) => {
                     const visible = phase <= newState.currentInProgressPhase;
-                    phaseParts.forEach((descendant) => toggleTransparency(descendant, visible));
+                    applyGroupVisibility(villagerModel, `inProgress_${phase}`, phaseParts, visible);
                 });
             }
 
             // toggles the station parts
             parts.resourceModels.forEach(({ model: resourceModel, parts: resParts }) => {
                 const modelIndex = (tonumber(resourceModel.Name) || 0) - 1;
-                const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__")
-                const variant = newState.resources[modelIndex]
+                const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__");
+                const variant = newState.resources[modelIndex];
 
                 resourceModel.SetAttribute("Ready", variant ? true : false);
                 resourceModel.SetAttribute("ProduceName", newState.produce);
                 resourceModel.SetAttribute("Variant", variant);
                 if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
 
+                const groupName = `resource_${modelIndex}`;
                 if (modelIndex > -1 && resourcePartParticles && variant) {
                     const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
 
-                    // if the resource particles data exists then
-                    resParts.forEach((child) => toggleTransparency(child, true));
-
-                    // toggles the particles
+                    applyGroupVisibility(villagerModel, groupName, resParts, true);
                     if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");
+                } else {
+                    applyGroupVisibility(villagerModel, groupName, resParts, false);
                 }
             })
         }
