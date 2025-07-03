@@ -1,6 +1,7 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local deepEquals = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "object-utils").deepEquals
+local Workspace = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Workspace
 local getAnimation = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "animator", "loadAnimations").getAnimation
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local warnJecs = _jecsHelpFunctions.warnJecs
@@ -312,6 +313,7 @@ local function updateVillagerState(villagerModel, newState)
 	end
 end
 local default = function(world)
+	local camera = Workspace.Camera
 	-- when villager is added but not fully built then
 	for _, _binding in world:query(Added(Villager)) do
 		local villagerModel = _binding.villagerModel
@@ -346,7 +348,7 @@ local default = function(world)
 			-- ▲ ReadonlyArray.forEach ▲
 			cacheVillagerParts(villagerModel)
 		end):catch(function(err)
-			return warnJecs(167, "Villager", "Error setting up villager model particles", err)
+			return warnJecs(168, "Villager", "Error setting up villager model particles", err)
 		end)
 	end
 	-- when vilalger animator gets added
@@ -374,7 +376,7 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(186, "Villager", "Error setting up villager animator", err)
+			return warnJecs(187, "Villager", "Error setting up villager animator", err)
 		end)
 	end
 	-- controls the animations
@@ -399,6 +401,12 @@ local default = function(world)
 			local totalResourcesSoFar = #resources
 			local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
 			local forceSleep = (maxResources == totalResourcesSoFar) or (requiredResource and requiredResource.Amount < 1)
+			-- if the villager is not being built and the camera is too far away then
+			local _position = camera.CFrame.Position
+			local _position_1 = villagerModel:GetPivot().Position
+			if (_position - _position_1).Magnitude > 250 then
+				return nil
+			end
 			-- plays the idle animation
 			if productionTrack and sleepTrack then
 				productionTrack.Looped = true
@@ -420,19 +428,24 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(226, "Villager", "Error setting up villager animations", err)
+			return warnJecs(230, "Villager", "Error setting up villager animations", err)
 		end)
 	end
 	-- watches for changes
 	for villagerClientEntity, villagerInfo in world:query(Villager):with(CanQuery(Villager)) do
 		TS.Promise.try(function()
 			local villagerEntity = world:get(villagerClientEntity, ReplicatedComponent)
+			-- if the villager is not being built and the camera is too far away then
+			local _position = camera.CFrame.Position
+			local _position_1 = villagerInfo.villagerModel:GetPivot().Position
+			if (_position - _position_1).Magnitude > 250 then
+				return nil
+			end
 			-- const oldChange = changedVillager.old
 			-- const newChange = changedVillager.new
 			-- const villagerInfo = newChange || oldChange;
 			-- if one of the changes
-			local _value = villagerInfo and villagerEntity
-			if _value ~= 0 and _value == _value and _value then
+			if villagerEntity ~= 0 and villagerEntity == villagerEntity and villagerEntity then
 				local _binding = villagerInfo
 				local villagerData = _binding.villagerData
 				local villagerModel = _binding.villagerModel
@@ -459,7 +472,7 @@ local default = function(world)
 				})
 			end
 		end):catch(function(err)
-			return warnTS(261, "Villager", "Error updating villager state", err)
+			return warnTS(268, "Villager", "Error updating villager state", err)
 		end)
 	end
 end

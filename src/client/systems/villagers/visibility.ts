@@ -137,6 +137,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
 
 
 export default (world: World) => {
+    const camera = Workspace.Camera;
     // when villager is added but not fully built then
     for (const [_, { villagerModel }] of world.query(Added(Villager))) Promise.try(() => {
         // loops through all the resource models and add their attachments
@@ -202,6 +203,9 @@ export default (world: World) => {
         const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
         const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
 
+        // if the villager is not being built and the camera is too far away then
+        if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) return;
+
         // plays the idle animation
         if (productionTrack && sleepTrack) {
             productionTrack.Looped = true;
@@ -228,12 +232,15 @@ export default (world: World) => {
     // watches for changes
     for (const [villagerClientEntity, villagerInfo] of world.query(Villager).with(CanQuery(Villager))) Promise.try(() => {
         const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
+
+        // if the villager is not being built and the camera is too far away then
+        if ((camera.CFrame.Position.sub(villagerInfo.villagerModel.GetPivot().Position)).Magnitude > 250) return;
         // const oldChange = changedVillager.old
         // const newChange = changedVillager.new
         // const villagerInfo = newChange || oldChange;
 
         // if one of the changes
-        if (villagerInfo && villagerEntity) {
+        if (villagerEntity) {
             const { villagerData, villagerModel, playerEntity } = villagerInfo;
             const progress = villagerData.Progress
             const progression = progress.Progression
