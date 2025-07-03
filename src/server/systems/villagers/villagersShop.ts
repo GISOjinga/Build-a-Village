@@ -96,7 +96,7 @@ export default (world: World) => {
 
         // if data then
         if (playerEntity) {
-            addComponent(playerEntity, GiftTo, { target: playerToGiftTo, gifted: false })
+            addComponent(playerEntity, GiftTo, { target: playerToGiftTo as Player, gifted: false })
             printJecs($line, player.Name + " is gifting through shop to", playerToGiftTo.Name)
         };
     })
@@ -105,7 +105,7 @@ export default (world: World) => {
     // when handToolToPlayer is called
     useRoute(routes.giftToPlayer, ({ playerToGift, produceTool }, playerGifting) => {
         const playerEntity = getEntity.fromInstance(playerGifting);
-        const playerToGiftToEntity = getEntity.fromInstance(playerToGift);
+        const playerToGiftToEntity = getEntity.fromInstance(playerToGift as Player);
         const tooType = produceTool?.GetAttribute<ToolType>("ItemType")
         const itemName = produceTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
         const itemVariant = produceTool?.GetAttribute<ProduceVariant>("ItemVariant");
@@ -129,7 +129,7 @@ export default (world: World) => {
                             routes.notify.sendTo({
                                 text: `${playerGifting.Name} tried to gift you ${itemName} but they don't have it.`,
                                 duration: 5,
-                            }, playerToGift);
+                            }, playerToGift as Player);
                             return oldData;
                         } else {
                             // retuces it by 1
@@ -147,15 +147,15 @@ export default (world: World) => {
                             routes.notify.sendTo({
                                 text: `${playerGifting.Name} gifted you ${itemName} (${itemVariant})`,
                                 duration: 5,
-                            }, playerToGift);
+                            }, playerToGift as Player);
 
                             // another prompt to become friends only if they arent already friends
                             Promise.try(() => {
-                                if (!playerToGift.IsFriendsWith(playerGifting.UserId)) {
+                                if (!(playerToGift as Player).IsFriendsWith(playerGifting.UserId)) {
                                     createEntity.confirmationPrompt(playerToGiftToEntity, `Accept Friend Request?`, `Friend Request From @${playerGifting.Name}`, () => {
                                         printJecs($line, `Adding friend: ${playerGifting.Name}`);
-                                        routes.sendFriendRequest.sendTo(playerGifting, playerToGift);
-                                        routes.sendFriendRequest.sendTo(playerToGift, playerGifting);
+                                        routes.sendFriendRequest.sendTo(playerGifting, playerToGift as Player);
+                                        routes.sendFriendRequest.sendTo(playerToGift as Player, playerGifting);
                                     });
                                 }
                             }).catch((err) => warnTS($line, "Error adding friend:", err));
@@ -173,7 +173,7 @@ export default (world: World) => {
                 routes.notify.sendTo({
                     text: `You declined the gift from ${playerGifting.Name}.`,
                     duration: 5,
-                }, playerToGift)
+                }, playerToGift as Player)
             }
             );
         }

@@ -1,4 +1,4 @@
-import { World } from "@rbxts/jecs";
+import { World, Entity } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent, useThrottle } from "shared/Plugin-Hook";
@@ -26,7 +26,7 @@ export default (world: World) => {
     // handle client requests
     useRoute(routes.collectVillagerProduce, ({ villagerEntity, resourceModelName }, playerWhoTriggered) => {
         const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
-        const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager);
+        const villagerInfo = world.contains(villagerEntity as Entity) && world.get(villagerEntity as Entity, Villager);
         const model = villagerInfo ? villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(resourceModelName) : undefined;
         const resourceIndex = ((model && tonumber(resourceModelName)) || 0) - 1;
         // const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
@@ -38,7 +38,7 @@ export default (world: World) => {
             if (variant) {
                 if (playerWhoTriggered === player) {
                     villagerInfo.villagerData.Progress.Progression.Resources.remove(resourceIndex);
-                    addComponent(villagerEntity, Villager, { ...villagerInfo });
+                    addComponent(villagerEntity as Entity, Villager, { ...villagerInfo });
 
                     createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant);
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
@@ -48,10 +48,10 @@ export default (world: World) => {
                         }
                         return oldData;
                     });
-                    removeComponent(villagerEntity, MaxedOut);
+                    removeComponent(villagerEntity as Entity, MaxedOut);
                 } else {
                     printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);
-                    addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity, resourceModelName: model.Name, produceName: villagerInfo.villagerData.Progress.Produce, variant });
+                    addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity as Entity, resourceModelName: model.Name, produceName: villagerInfo.villagerData.Progress.Produce, variant });
                     MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3315996934);
                 }
             }
@@ -60,7 +60,7 @@ export default (world: World) => {
 
     useRoute(routes.supplyVillager, (villagerEntity, playerWhoTriggered) => {
         const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
-        const villagerInfo = world.contains(villagerEntity) && world.get(villagerEntity, Villager);
+        const villagerInfo = world.contains(villagerEntity as Entity) && world.get(villagerEntity as Entity, Villager);
         if (villagerInfo && playerEntityWhoTriggered === villagerInfo.playerEntity) {
             const body = world.get(playerEntityWhoTriggered, Body);
             const requiredResource = villagerInfo.villagerData.Progress.Required;
@@ -76,7 +76,7 @@ export default (world: World) => {
                         const produce = oldData.Produce[produceIndex];
                         const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);
                         produce.Amount -= amountToTakeAway;
-                        addComponent(villagerEntity, Villager, {
+                        addComponent(villagerEntity as Entity, Villager, {
                             villagerData: {
                                 ...villagerInfo.villagerData,
                                 Progress: {
@@ -137,7 +137,7 @@ export default (world: World) => {
         })
 
         // adds model debugger
-        addComponent(villagerEntity, ModelDebugger, villagerModel)
+        addComponent(villagerEntity as Entity, ModelDebugger, villagerModel)
     }
 
 
@@ -147,7 +147,7 @@ export default (world: World) => {
         const playerEntity = player && getEntity.fromInstance(player);
         const takeFromVillager = playerEntity && world.get(playerEntity, TakeFromVillager);
         const villagerEntity = takeFromVillager && takeFromVillager.villagerEntityToStealFrom
-        const villagerInfo = villagerEntity && world.get(villagerEntity, Villager);
+        const villagerInfo = villagerEntity && world.get(villagerEntity as Entity, Villager);
         const model = villagerInfo && villagerInfo.villagerModel.Station.Parts.Resources.FindFirstChild(takeFromVillager.resourceModelName);
         const resourceIndex = ((model && tonumber(takeFromVillager.resourceModelName)) || 0) - 1
 
@@ -163,12 +163,12 @@ export default (world: World) => {
 
                 // removes the produce from the data
                 progression.Resources.remove(resourceIndex);
-                addComponent(villagerEntity, Villager, { ...villagerInfo })
+                addComponent(villagerEntity as Entity, Villager, { ...villagerInfo })
 
                 // adds the produce to the data
                 printJecs($line, `${player.Name} took ${takeFromVillager.produceName} with varaint ${variant} from villager ${villagerEntity}`)
                 createEntity.insertProduce(playerEntity, produceName, variant)
-                removeComponent(villagerEntity, MaxedOut);
+                removeComponent(villagerEntity as Entity, MaxedOut);
 
                 // reduces the item by 1 
                 routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined }, player);
@@ -210,7 +210,7 @@ export default (world: World) => {
 
                 // if has maxed resources then
                 if (hasMaxedResources) {
-                    addComponent(villagerEntity, MaxedOut);
+                    addComponent(villagerEntity as Entity, MaxedOut);
                 } else {
 
                     // if has met required time then
@@ -234,7 +234,7 @@ export default (world: World) => {
             }
 
             // updates the component
-            addComponent(villagerEntity, Villager, villagerComp);
+            addComponent(villagerEntity as Entity, Villager, villagerComp);
         }
     }
 
@@ -256,8 +256,8 @@ export default (world: World) => {
         }
 
         // removes its self
-        addComponent(villagerEntity, Villager, villagerComp);
-        removeComponent(villagerEntity, ProduceAll);
+        addComponent(villagerEntity as Entity, Villager, villagerComp);
+        removeComponent(villagerEntity as Entity, ProduceAll);
     }
 
     // for the villagers with maxed out sets their progression start time to os.time
@@ -269,7 +269,7 @@ export default (world: World) => {
         progression.Time.StartTime = os.time();
 
         // updates the villager component
-        addComponent(villagerEntity, Villager, villagerComp);
+        addComponent(villagerEntity as Entity, Villager, villagerComp);
     }
 
     // when ever player has produce all

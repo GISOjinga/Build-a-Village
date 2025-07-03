@@ -22,7 +22,7 @@ const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes"
 
 type JingaNetType<T> =
     T extends (...args: any[]) => any ? T :
-    T extends Array<infer U> ? JingaNetType<Array<JingaNetType<U>>> :
+    T extends Array<infer U> ? JingaNetType<U>[] :
     T extends Record<string, unknown> ? { [K in keyof T]: JingaNetType<T[K]> } :
     T extends CFrame ? SerDes<CFrame> :
     T extends Vector3 ? SerDes<Vector3> :
@@ -382,7 +382,7 @@ export const sharedRoutes = (() => {
         npcDialogue: {
             target: str,
             text: str,
-        } as JingaNetType<{ target: "Buy" | "Sell" | "None"; text: string }>,
+        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "None"; text: string }>,
 
         buyWall: {
             wallName: str,
