@@ -7,7 +7,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent, warnJecs, warnTS } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, ReplicatedComponent, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, ReplicatedComponent, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -20,7 +20,8 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 
     // if the instance is a BasePart or Decal then
     if (instance.IsA("BasePart") || instance.IsA("Decal")) {
-        const trueTransparency = instance.GetAttribute<number>("Transparency") ?? instance.Transparency;
+        const realTransparency = instance.GetAttribute<number>("Transparency")
+        const trueTransparency = realTransparency !== undefined ? realTransparency : instance.Transparency;
 
         // set up
         instance.SetAttribute("Transparency", trueTransparency);
@@ -73,60 +74,59 @@ function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
         const parts = cacheVillagerParts(villagerModel);
-        task.defer(() => {
-            parts.resourcesGroup.forEach((child) => toggleTransparency(child, false));
-            parts.inProgress.forEach((cache) => cache.parts.forEach((child) => toggleTransparency(child, false)));
-            parts.progressFull.forEach((child) => toggleTransparency(child, false));
-            parts.stationParts.forEach((child) => toggleTransparency(child, false));
-            parts.npc.forEach((child) => toggleTransparency(child, false));
-            parts.accessories.forEach((child) => toggleTransparency(child, false));
 
-            // if maxed then
-            if (newState.isBeingBuilt) {
-                parts.progressFull.forEach((child) => toggleTransparency(child, false, .5));
-                parts.stationParts.forEach((child) => toggleTransparency(child, false, .5));
-                parts.resourcesGroup.forEach((child) => toggleTransparency(child, false, .5));
+        parts.resourcesGroup.forEach((child) => toggleTransparency(child, false));
+        parts.inProgress.forEach((cache) => cache.parts.forEach((child) => toggleTransparency(child, false)));
+        parts.progressFull.forEach((child) => toggleTransparency(child, false));
+        parts.stationParts.forEach((child) => toggleTransparency(child, false));
+        parts.npc.forEach((child) => toggleTransparency(child, false));
+        parts.accessories.forEach((child) => toggleTransparency(child, false));
 
+        // if maxed then
+        if (newState.isBeingBuilt) {
+            parts.progressFull.forEach((child) => toggleTransparency(child, false, .5));
+            parts.stationParts.forEach((child) => toggleTransparency(child, false, .5));
+            parts.resourcesGroup.forEach((child) => toggleTransparency(child, false, .5));
+
+        } else {
+            parts.npc.forEach((child) => toggleTransparency(child, true));
+            parts.accessories.forEach((child) => toggleTransparency(child, true));
+            parts.stationParts.forEach((child) => toggleTransparency(child, true));
+
+            if (newState.hasMaxedResources) {
+                parts.progressFull.forEach((child) => toggleTransparency(child, true));
+                parts.resourcesGroup.forEach((child) => toggleTransparency(child, true));
             } else {
-                parts.npc.forEach((child) => toggleTransparency(child, true));
-                parts.accessories.forEach((child) => toggleTransparency(child, true));
-                parts.stationParts.forEach((child) => toggleTransparency(child, true));
-
-                if (newState.hasMaxedResources) {
-                    parts.progressFull.forEach((child) => toggleTransparency(child, true));
-                    parts.resourcesGroup.forEach((child) => toggleTransparency(child, true));
-                } else {
-                    // toggles the in progress parts
-                    parts.inProgress.forEach(({ phase, parts: phaseParts }) => {
-                        const visible = phase <= newState.currentInProgressPhase;
-                        phaseParts.forEach((descendant) => toggleTransparency(descendant, visible));
-                    });
-                }
-
-                // toggles the station parts
-                parts.resourceModels.forEach(({ model: resourceModel, parts: resParts }) => {
-                    const modelIndex = (tonumber(resourceModel.Name) || 0) - 1;
-                    const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__")
-                    const variant = newState.resources[modelIndex]
-
-                    resourceModel.SetAttribute("Ready", variant ? true : false);
-                    resourceModel.SetAttribute("ProduceName", newState.produce);
-                    resourceModel.SetAttribute("Variant", variant);
-                    if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
-
-                    if (modelIndex > -1 && resourcePartParticles && variant) {
-                        const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
-
-                        // if the resource particles data exists then
-                        resParts.forEach((child) => toggleTransparency(child, true));
-
-                        // toggles the particles
-                        if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");
-                    }
-                })
+                // toggles the in progress parts
+                parts.inProgress.forEach(({ phase, parts: phaseParts }) => {
+                    const visible = phase <= newState.currentInProgressPhase;
+                    phaseParts.forEach((descendant) => toggleTransparency(descendant, visible));
+                });
             }
 
-        })
+            // toggles the station parts
+            parts.resourceModels.forEach(({ model: resourceModel, parts: resParts }) => {
+                const modelIndex = (tonumber(resourceModel.Name) || 0) - 1;
+                const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__")
+                const variant = newState.resources[modelIndex]
+
+                resourceModel.SetAttribute("Ready", variant ? true : false);
+                resourceModel.SetAttribute("ProduceName", newState.produce);
+                resourceModel.SetAttribute("Variant", variant);
+                if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
+
+                if (modelIndex > -1 && resourcePartParticles && variant) {
+                    const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
+
+                    // if the resource particles data exists then
+                    resParts.forEach((child) => toggleTransparency(child, true));
+
+                    // toggles the particles
+                    if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");
+                }
+            })
+        }
+
 
 
         // where the transparancey changes
@@ -185,79 +185,79 @@ export default (world: World) => {
         }
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
-    if (useThrottle(.3)) {
-        // controls the animations
-        for (const [_, { villagerData, villagerModel }, animator] of world.query(Villager, VillagerAnimator)) Promise.try(() => {
-            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
-            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
-            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
-            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+
+    // controls the animations
+    for (const [_, { villagerData, villagerModel }, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager))) Promise.try(() => {
+        const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+        const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+        const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
+        const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+        const progress = villagerData.Progress
+        const progression = progress.Progression
+        const buildingTimes = progress.Building
+        const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
+        const requiredResource = progress.Required
+        const resources = progression.Resources
+        const totalResourcesSoFar = resources.size()
+        const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
+        const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
+
+        // plays the idle animation
+        if (productionTrack && sleepTrack) {
+            productionTrack.Looped = true;
+            sleepTrack.Looped = true;
+
+            // plays the idle animation
+            if (isBeingBuilt) {
+                sleepTrack.Stop(.1);
+                productionTrack.Stop(.1);
+            } else if (forceSleep) {
+                if (!sleepTrack.IsPlaying) {
+                    sleepTrack.Play(.1);
+                    productionTrack.Stop(.1);
+                }
+            } else {
+                if (!productionTrack.IsPlaying) {
+                    productionTrack.Play(.1);
+                    sleepTrack.Stop(.1);
+                }
+            }
+        }
+    }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
+
+    // watches for changes
+    for (const [villagerClientEntity, villagerInfo] of world.query(Villager).with(CanQuery(Villager))) Promise.try(() => {
+        const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
+        // const oldChange = changedVillager.old
+        // const newChange = changedVillager.new
+        // const villagerInfo = newChange || oldChange;
+
+        // if one of the changes
+        if (villagerInfo && villagerEntity) {
+            const { villagerData, villagerModel, playerEntity } = villagerInfo;
             const progress = villagerData.Progress
             const progression = progress.Progression
             const buildingTimes = progress.Building
             const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
-            const requiredResource = progress.Required
             const resources = progression.Resources
             const totalResourcesSoFar = resources.size()
             const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-            const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
-
-            // plays the idle animation
-            if (productionTrack && sleepTrack) {
-                productionTrack.Looped = true;
-                sleepTrack.Looped = true;
-
-                // plays the idle animation
-                if (isBeingBuilt) {
-                    sleepTrack.Stop(.1);
-                    productionTrack.Stop(.1);
-                } else if (forceSleep) {
-                    if (!sleepTrack.IsPlaying) {
-                        sleepTrack.Play(.1);
-                        productionTrack.Stop(.1);
-                    }
-                } else {
-                    if (!productionTrack.IsPlaying) {
-                        productionTrack.Play(.1);
-                        sleepTrack.Stop(.1);
-                    }
-                }
-            }
-        }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
-
-        // watches for changes
-        for (const [villagerClientEntity, villagerInfo] of world.query(Villager)) Promise.try(() => {
-            const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
-            // const oldChange = changedVillager.old
-            // const newChange = changedVillager.new
-            // const villagerInfo = newChange || oldChange;
-
-            // if one of the changes
-            if (villagerInfo && villagerEntity) {
-                const { villagerData, villagerModel, playerEntity } = villagerInfo;
-                const progress = villagerData.Progress
-                const progression = progress.Progression
-                const buildingTimes = progress.Building
-                const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
-                const resources = progression.Resources
-                const totalResourcesSoFar = resources.size()
-                const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-                const hasMaxedResources = totalResourcesSoFar >= maxResources;
-                const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
-                const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
-                const requiredTimePerResource = progression.Time.RequiredTimePerResource
-                const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
-                const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
+            const hasMaxedResources = totalResourcesSoFar >= maxResources;
+            const maxInProgressPhases = villagerModel.Station.Parts.InProgress.GetChildren().size();
+            const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
+            const requiredTimePerResource = progression.Time.RequiredTimePerResource
+            const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
+            const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
 
 
-                updateVillagerState(villagerModel, {
-                    isBeingBuilt,
-                    hasMaxedResources,
-                    currentInProgressPhase: hasMaxedResources ? 1 : currentInProgressPhase,
-                    resources: progression.Resources,
-                    produce: villagerData.Progress.Produce
-                })
-            }
-        }).catch((err) => warnTS($line, "Villager", "Error updating villager state", err));
-    }
+            updateVillagerState(villagerModel, {
+                isBeingBuilt,
+                hasMaxedResources,
+                currentInProgressPhase: hasMaxedResources ? 1 : currentInProgressPhase,
+                resources: progression.Resources,
+                produce: villagerData.Progress.Produce
+            })
+        }
+    }).catch((err) => warnTS($line, "Villager", "Error updating villager state", err));
+
 }

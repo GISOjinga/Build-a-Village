@@ -17,6 +17,7 @@ local change = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "sy
 local replicateToClient = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "componentReplication", "replicateToClient").default
 local watchRoutes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "watchRoutes").default
 local append = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").default
+local pending = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "canQuery").default
 local platform = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "builds", "platform").default
 local villagersShop = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "villagers", "villagersShop").default
 local progressVillagers = TS.import(script, game:GetService("ServerScriptService"), "TS", "systems", "villagers", "progressVillagers").default
@@ -41,7 +42,7 @@ setupMatter({ {
 	system = updateCooldown,
 }, {
 	system = updateMovers,
-}, debuggerHook, replicateToClient, change, watchRoutes, append, {
+}, debuggerHook, replicateToClient, change, watchRoutes, append, pending, {
 	system = disableAutoRotate,
 }, {
 	system = updateBody,

@@ -16,7 +16,7 @@ import React, { StrictMode } from "@rbxts/react"
 import { ReflexProvider } from "@rbxts/react-reflex"
 import watchRoutes from "shared/systems/hooks/watchRoutes";
 import append from "shared/systems/hooks/append";
-import pending from "shared/systems/hooks/pending";
+import pending from "shared/systems/hooks/canQuery";
 import bodyUpdate from "./systems/body/bodyUpdate";
 import setAnimation from "shared/systems/animator/setAnimation";
 import loadAnimations from "shared/systems/animator/loadAnimations";

@@ -6,7 +6,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -19,7 +19,6 @@ import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 const randomVariant = () => {
     return math.random(1, 200) <= 1 ? "Rainbow" : math.random(1, 20) <= 1 ? "Gold" : "Normal"
 }
-
 
 
 export default (world: World) => {
@@ -195,64 +194,61 @@ export default (world: World) => {
     }
 
     // takes the villager through its transitions
-    if (useThrottle(.1)) {
-        for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).without(MaxedOut)) {
-            const playerData = world.get(villagerComp.playerEntity, Data);
-            const { villagerData, villagerModel } = villagerComp;
-            const requiredResource = villagerData.Progress.Required
-            const buildingTimes = villagerData.Progress.Building
-            const timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
-            const resources = villagerData.Progress.Progression.Resources
-            const progression = villagerData.Progress.Progression
-            const totalResourcesSoFar = resources.size()
-            const requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
-            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
-            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+    for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager)).without(MaxedOut)) {
+        const playerData = world.get(villagerComp.playerEntity, Data);
+        const { villagerData, villagerModel } = villagerComp;
+        const requiredResource = villagerData.Progress.Required
+        const buildingTimes = villagerData.Progress.Building
+        const timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
+        const resources = villagerData.Progress.Progression.Resources
+        const progression = villagerData.Progress.Progression
+        const totalResourcesSoFar = resources.size()
+        const requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+        const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+        const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
 
-            // toggles the interaction visiblity
-            requiredProximityPrompt.ActionText = (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "";
-            // requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
+        // toggles the interaction visiblity
+        requiredProximityPrompt.ActionText = (requiredResource && requiredResource.Amount < requiredResource.Max) ? `Requires ${requiredResource.Produce}` : "";
+        // requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
 
-            // if fully built then start progressing the foods
-            if (timeTillFullyBuilt < 0) {
-                const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-                const hasMaxedResources = totalResourcesSoFar >= maxResources;
-                const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
-                const requiredTimePerResource = progression.Time.RequiredTimePerResource
-                const hasMetRequiredTime = totalTimeSinceLastResource >= requiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
+        // if fully built then start progressing the foods
+        if (timeTillFullyBuilt < 0) {
+            const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
+            const hasMaxedResources = totalResourcesSoFar >= maxResources;
+            const totalTimeSinceLastResource = os.time() - progression.Time.StartTime;
+            const requiredTimePerResource = progression.Time.RequiredTimePerResource
+            const hasMetRequiredTime = totalTimeSinceLastResource >= requiredTimePerResource && (!requiredResource || requiredResource.Amount > 0);
 
-                progression.Time.RequiredTimePerResource = (playerData?.Tutorial === 2 && villagerData.Name === "Farmer") ? 5 : villagersProgressData.get(villagerData.Name)?.Progression.Time.RequiredTimePerResource || 0
+            progression.Time.RequiredTimePerResource = (playerData?.Tutorial === 2 && villagerData.Name === "Farmer") ? 5 : villagersProgressData.get(villagerData.Name)?.Progression.Time.RequiredTimePerResource || 0
 
-                // if has maxed resources then
-                if (hasMaxedResources) {
-                    addComponent(villagerEntity as Entity, MaxedOut);
-                } else {
-
-                    // if has met required time then
-                    if (hasMetRequiredTime) {
-
-                        // takes the resource spot
-                        progression.Resources.push(randomVariant());
-
-                        // takes away from required
-                        if (requiredResource) requiredResource.Amount -= 1
-
-                        // updates the start time
-                        progression.Time.StartTime = os.time() + math.max((totalTimeSinceLastResource - requiredTimePerResource), 0);
-                    } else if (requiredResource && requiredResource.Amount <= 0) {
-                        // if has not met required time and has no resources then
-                        progression.Time.StartTime = os.time(); // resets the start time
-                    }
-                }
+            // if has maxed resources then
+            if (hasMaxedResources) {
+                addComponent(villagerEntity as Entity, MaxedOut);
             } else {
-                progression.Time.StartTime = os.time(); // resets the start time
+
+                // if has met required time then
+                if (hasMetRequiredTime) {
+
+                    // takes the resource spot
+                    progression.Resources.push(randomVariant());
+
+                    // takes away from required
+                    if (requiredResource) requiredResource.Amount -= 1
+
+                    // updates the start time
+                    progression.Time.StartTime = os.time() + math.max((totalTimeSinceLastResource - requiredTimePerResource), 0);
+                } else if (requiredResource && requiredResource.Amount <= 0) {
+                    // if has not met required time and has no resources then
+                    progression.Time.StartTime = os.time(); // resets the start time
+                }
             }
-
-            // updates the component
-            addComponent(villagerEntity as Entity, Villager, villagerComp);
+        } else {
+            progression.Time.StartTime = os.time(); // resets the start time
         }
-    }
 
+        // updates the component
+        addComponent(villagerEntity as Entity, Villager, villagerComp);
+    }
 
     // if a player has a produce all component then take their villagers and set their resources amount to the max
     for (const [villagerEntity, villagerComp] of world.query(Villager, ProduceAll).without(MaxedOut)) {

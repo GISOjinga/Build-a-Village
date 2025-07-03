@@ -15,6 +15,7 @@ local recieveFromServer = TS.import(script, script.Parent, "systems", "component
 local Players = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services").Players
 local watchRoutes = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "watchRoutes").default
 local append = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "append").default
+local pending = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "hooks", "canQuery").default
 local bodyUpdate = TS.import(script, script.Parent, "systems", "body", "bodyUpdate").default
 local setAnimation = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "animator", "setAnimation").default
 local loadAnimations = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "systems", "animator", "loadAnimations").default
@@ -77,7 +78,7 @@ local debug = setupMatter({ {
 	system = updateCooldown,
 }, {
 	system = updateMovers,
-}, debuggerHook, recieveFromServer, change, watchRoutes, append, {
+}, debuggerHook, recieveFromServer, change, watchRoutes, append, pending, {
 	system = bodyUpdate,
 }, {
 	system = commandarClient,

@@ -62,6 +62,7 @@ local ExampleSetting = createSetting("ExampleSetting", 20)
 local _changedComponent = component("Changed")
 local _addedComponent = component("Added")
 local _removedComponent = component("Removed")
+local Pending = component("_CanQuery_")
 -- for changes
 local changedQuery, addedQuery, removedQuery = {}, {}, {}
 local Added, Removed
@@ -81,6 +82,12 @@ Removed = function(comp)
 	local _comp = comp
 	removedQuery[_comp] = true
 	return pair(_removedComponent, comp)
+end
+local pendingQuery = {}
+local CanQuery = function(comp)
+	local _comp = comp
+	pendingQuery[_comp] = true
+	return pair(Pending, comp)
 end
 --*********************** Player ***********************
 -- Player data
@@ -239,12 +246,15 @@ exports.PlatformOccupied = PlatformOccupied
 exports.RouteEntities = RouteEntities
 exports.Settings = Settings
 exports.ExampleSetting = ExampleSetting
+exports.Pending = Pending
 exports.changedQuery = changedQuery
 exports.addedQuery = addedQuery
 exports.removedQuery = removedQuery
 exports.Changed = Changed
 exports.Added = Added
 exports.Removed = Removed
+exports.pendingQuery = pendingQuery
+exports.CanQuery = CanQuery
 exports.Data = Data
 exports.UpdateData = UpdateData
 exports.PlayerState = PlayerState

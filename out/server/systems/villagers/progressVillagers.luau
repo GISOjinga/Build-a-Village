@@ -3,9 +3,7 @@ local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_incl
 local _services = TS.import(script, game:GetService("ReplicatedStorage"), "rbxts_include", "node_modules", "@rbxts", "services")
 local MarketplaceService = _services.MarketplaceService
 local Players = _services.Players
-local _Plugin_Hook = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook")
-local useEvent = _Plugin_Hook.useEvent
-local useThrottle = _Plugin_Hook.useThrottle
+local useEvent = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook").useEvent
 local useRoute = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Plugin-Hook", "hooks", "use-route").useRoute
 local _jecsHelpFunctions = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "utils", "functions", "jecsHelpFunctions")
 local addComponent = _jecsHelpFunctions.addComponent
@@ -18,6 +16,7 @@ local _jecsComponents = TS.import(script, game:GetService("ReplicatedStorage"), 
 local ActiveVillagers = _jecsComponents.ActiveVillagers
 local Added = _jecsComponents.Added
 local Body = _jecsComponents.Body
+local CanQuery = _jecsComponents.CanQuery
 local Data = _jecsComponents.Data
 local MaxedOut = _jecsComponents.MaxedOut
 local ModelDebugger = _jecsComponents.ModelDebugger
@@ -79,7 +78,7 @@ local default = function(world)
 					end)
 					removeComponent(villagerEntity, MaxedOut)
 				else
-					printTS(53, `Player {playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
+					printTS(52, `Player {playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`)
 					addComponent(playerEntityWhoTriggered, TakeFromVillager, {
 						villagerEntityToStealFrom = villagerEntity,
 						resourceModelName = model.Name,
@@ -242,7 +241,7 @@ local default = function(world)
 				setmetatable(_object, nil)
 				addComponent(_exp, Villager, _object)
 				-- adds the produce to the data
-				printJecs(169, `{player.Name} took {takeFromVillager.produceName} with varaint {variant} from villager {villagerEntity}`)
+				printJecs(168, `{player.Name} took {takeFromVillager.produceName} with varaint {variant} from villager {villagerEntity}`)
 				createEntity.insertProduce(playerEntity, produceName, variant)
 				removeComponent(villagerEntity, MaxedOut)
 				-- reduces the item by 1 
@@ -276,86 +275,84 @@ local default = function(world)
 		end
 	end
 	-- takes the villager through its transitions
-	if useThrottle(.1) then
-		for villagerEntity, villagerComp, animator in world:query(Villager, VillagerAnimator):without(MaxedOut) do
-			local playerData = world:get(villagerComp.playerEntity, Data)
-			local _binding = villagerComp
-			local villagerData = _binding.villagerData
-			local villagerModel = _binding.villagerModel
-			local requiredResource = villagerData.Progress.Required
-			local buildingTimes = villagerData.Progress.Building
-			local timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time()
-			local resources = villagerData.Progress.Progression.Resources
-			local progression = villagerData.Progress.Progression
-			local totalResourcesSoFar = #resources
-			local requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
-			local villagerAnimationFolder = paths.Assets.Animations.Villager:FindFirstChild(villagerData.Name)
-			local _productionAnimation = villagerAnimationFolder
-			if _productionAnimation ~= nil then
-				_productionAnimation = _productionAnimation:FindFirstChild("Production")
-			end
-			local productionAnimation = _productionAnimation
-			-- toggles the interaction visiblity
-			requiredProximityPrompt.ActionText = if (requiredResource and requiredResource.Amount < requiredResource.Max) then `Requires {requiredResource.Produce}` else ""
-			-- requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
-			-- if fully built then start progressing the foods
-			if timeTillFullyBuilt < 0 then
-				local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
-				local hasMaxedResources = totalResourcesSoFar >= maxResources
-				local totalTimeSinceLastResource = os.time() - progression.Time.StartTime
-				local requiredTimePerResource = progression.Time.RequiredTimePerResource
-				local hasMetRequiredTime = totalTimeSinceLastResource >= requiredTimePerResource and (not requiredResource or requiredResource.Amount > 0)
-				local _result = playerData
-				if _result ~= nil then
-					_result = _result.Tutorial
-				end
-				local _condition = _result == 2
-				if _condition then
-					_condition = villagerData.Name == "Farmer"
-				end
-				local _result_1
-				if _condition then
-					_result_1 = 5
-				else
-					local _name = villagerData.Name
-					local _result_2 = villagersProgressData[_name]
-					if _result_2 ~= nil then
-						_result_2 = _result_2.Progression.Time.RequiredTimePerResource
-					end
-					local _condition_1 = _result_2
-					if not (_condition_1 ~= 0 and _condition_1 == _condition_1 and _condition_1) then
-						_condition_1 = 0
-					end
-					_result_1 = _condition_1
-				end
-				progression.Time.RequiredTimePerResource = _result_1
-				-- if has maxed resources then
-				if hasMaxedResources then
-					addComponent(villagerEntity, MaxedOut)
-				else
-					-- if has met required time then
-					if hasMetRequiredTime then
-						-- takes the resource spot
-						local _resources = progression.Resources
-						local _arg0 = randomVariant()
-						table.insert(_resources, _arg0)
-						-- takes away from required
-						if requiredResource then
-							requiredResource.Amount -= 1
-						end
-						-- updates the start time
-						progression.Time.StartTime = os.time() + math.max((totalTimeSinceLastResource - requiredTimePerResource), 0)
-					elseif requiredResource and requiredResource.Amount <= 0 then
-						-- if has not met required time and has no resources then
-						progression.Time.StartTime = os.time()
-					end
-				end
-			else
-				progression.Time.StartTime = os.time()
-			end
-			-- updates the component
-			addComponent(villagerEntity, Villager, villagerComp)
+	for villagerEntity, villagerComp, animator in world:query(Villager, VillagerAnimator):with(CanQuery(Villager)):without(MaxedOut) do
+		local playerData = world:get(villagerComp.playerEntity, Data)
+		local _binding = villagerComp
+		local villagerData = _binding.villagerData
+		local villagerModel = _binding.villagerModel
+		local requiredResource = villagerData.Progress.Required
+		local buildingTimes = villagerData.Progress.Building
+		local timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time()
+		local resources = villagerData.Progress.Progression.Resources
+		local progression = villagerData.Progress.Progression
+		local totalResourcesSoFar = #resources
+		local requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+		local villagerAnimationFolder = paths.Assets.Animations.Villager:FindFirstChild(villagerData.Name)
+		local _productionAnimation = villagerAnimationFolder
+		if _productionAnimation ~= nil then
+			_productionAnimation = _productionAnimation:FindFirstChild("Production")
 		end
+		local productionAnimation = _productionAnimation
+		-- toggles the interaction visiblity
+		requiredProximityPrompt.ActionText = if (requiredResource and requiredResource.Amount < requiredResource.Max) then `Requires {requiredResource.Produce}` else ""
+		-- requiredProximityPrompt.Enabled = requiredResource ? requiredResource.Amount < requiredResource.Max : false;
+		-- if fully built then start progressing the foods
+		if timeTillFullyBuilt < 0 then
+			local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
+			local hasMaxedResources = totalResourcesSoFar >= maxResources
+			local totalTimeSinceLastResource = os.time() - progression.Time.StartTime
+			local requiredTimePerResource = progression.Time.RequiredTimePerResource
+			local hasMetRequiredTime = totalTimeSinceLastResource >= requiredTimePerResource and (not requiredResource or requiredResource.Amount > 0)
+			local _result = playerData
+			if _result ~= nil then
+				_result = _result.Tutorial
+			end
+			local _condition = _result == 2
+			if _condition then
+				_condition = villagerData.Name == "Farmer"
+			end
+			local _result_1
+			if _condition then
+				_result_1 = 5
+			else
+				local _name = villagerData.Name
+				local _result_2 = villagersProgressData[_name]
+				if _result_2 ~= nil then
+					_result_2 = _result_2.Progression.Time.RequiredTimePerResource
+				end
+				local _condition_1 = _result_2
+				if not (_condition_1 ~= 0 and _condition_1 == _condition_1 and _condition_1) then
+					_condition_1 = 0
+				end
+				_result_1 = _condition_1
+			end
+			progression.Time.RequiredTimePerResource = _result_1
+			-- if has maxed resources then
+			if hasMaxedResources then
+				addComponent(villagerEntity, MaxedOut)
+			else
+				-- if has met required time then
+				if hasMetRequiredTime then
+					-- takes the resource spot
+					local _resources = progression.Resources
+					local _arg0 = randomVariant()
+					table.insert(_resources, _arg0)
+					-- takes away from required
+					if requiredResource then
+						requiredResource.Amount -= 1
+					end
+					-- updates the start time
+					progression.Time.StartTime = os.time() + math.max((totalTimeSinceLastResource - requiredTimePerResource), 0)
+				elseif requiredResource and requiredResource.Amount <= 0 then
+					-- if has not met required time and has no resources then
+					progression.Time.StartTime = os.time()
+				end
+			end
+		else
+			progression.Time.StartTime = os.time()
+		end
+		-- updates the component
+		addComponent(villagerEntity, Villager, villagerComp)
 	end
 	-- if a player has a produce all component then take their villagers and set their resources amount to the max
 	for villagerEntity, villagerComp in world:query(Villager, ProduceAll):without(MaxedOut) do

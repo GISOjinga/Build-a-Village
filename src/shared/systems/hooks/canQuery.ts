@@ -1,9 +1,13 @@
 import { Entity, World, pair } from "@rbxts/jecs"
 import { SystemTable } from "@rbxts/planck/out/types"
 import { appendJecs } from "./append"
-import { Phases, Pending, pendingQuery } from "shared/utils/jecs/jecsComponents"
+import { Phases, Pending, pendingQuery, Villager } from "shared/utils/jecs/jecsComponents"
 
-const MAX_PER_QUERY = 10
+const defaultMax = 5
+
+const componentsMax = {
+    [Villager]: defaultMax,
+}
 
 const queryData = new Map<Entity<unknown>, { queue: Entity[]; current: Entity[] }>()
 
@@ -32,9 +36,9 @@ export default {
             }
 
             let processed = 0
-            while (processed < MAX_PER_QUERY && data.queue.size() > 0) {
+            while (processed < (componentsMax[component] || defaultMax) && data.queue.size() > 0) {
                 const entity = data.queue.shift()!
-                appendJecs(() => world.set(entity, pair(Pending, component), true))
+                appendJecs(() => world.add(entity, pair(Pending, component) as never))
                 data.current.push(entity)
                 data.queue.push(entity)
                 processed++
