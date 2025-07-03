@@ -3,7 +3,7 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { appendJecs } from "./append"
 import { Phases, Pending, pendingQuery, Villager } from "shared/utils/jecs/jecsComponents"
 
-const defaultMax = 5
+const defaultMax = 2
 
 const componentsMax = {
     [Villager]: defaultMax,

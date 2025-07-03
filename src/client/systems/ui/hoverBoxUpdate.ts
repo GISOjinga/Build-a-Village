@@ -46,7 +46,7 @@ export default (world: World) => {
 
             // when the mouse moves
             hoverAttachment.Name = "HoverBoxAttachment"
-            hoverAttachment.Position = (target?.hit && hoverAttachment.Position.Lerp(target.hit.Position, 0.2)) || hoverAttachment.Position
+            hoverAttachment.Position = (target?.hit && hoverAttachment.Position.Lerp(target.position, 0.2)) || hoverAttachment.Position
 
             // when ever platform updates then
             if (useChange([platform]) && body && platform) hoverAttachment.Position = body.rootPart.Position

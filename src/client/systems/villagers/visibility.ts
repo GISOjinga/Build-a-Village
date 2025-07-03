@@ -92,7 +92,6 @@ function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts
 // change village model state
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
-        // print(newState, villageModelStates.get(villagerModel))
         const parts = cacheVillagerParts(villagerModel);
 
         applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, false);
@@ -207,50 +206,9 @@ export default (world: World) => {
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
 
-    // controls the animations
-    for (const [_, { villagerData, villagerModel }, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager))) Promise.try(() => {
-        const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
-        const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
-        const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
-        const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
-        const progress = villagerData.Progress
-        const progression = progress.Progression
-        const buildingTimes = progress.Building
-        const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
-        const requiredResource = progress.Required
-        const resources = progression.Resources
-        const totalResourcesSoFar = resources.size()
-        const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-        const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
-
-        // if the villager is not being built and the camera is too far away then
-        if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) return;
-
-        // plays the idle animation
-        if (productionTrack && sleepTrack) {
-            productionTrack.Looped = true;
-            sleepTrack.Looped = true;
-
-            // plays the idle animation
-            if (isBeingBuilt) {
-                sleepTrack.Stop(.1);
-                productionTrack.Stop(.1);
-            } else if (forceSleep) {
-                if (!sleepTrack.IsPlaying) {
-                    sleepTrack.Play(.1);
-                    productionTrack.Stop(.1);
-                }
-            } else {
-                if (!productionTrack.IsPlaying) {
-                    productionTrack.Play(.1);
-                    sleepTrack.Stop(.1);
-                }
-            }
-        }
-    }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
 
     // watches for changes
-    for (const [villagerClientEntity, villagerInfo] of world.query(Villager).with(CanQuery(Villager))) Promise.try(() => {
+    for (const [villagerClientEntity, villagerInfo, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager))) Promise.try(() => {
         const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
 
         // if the villager is not being built and the camera is too far away then
@@ -275,6 +233,37 @@ export default (world: World) => {
             const requiredTimePerResource = progression.Time.RequiredTimePerResource
             const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
             const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
+            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
+            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+            const requiredResource = progress.Required
+            const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
+
+            // if the villager is not being built and the camera is too far away then
+            if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) return;
+
+            // plays the idle animation
+            if (productionTrack && sleepTrack) {
+                productionTrack.Looped = true;
+                sleepTrack.Looped = true;
+
+                // plays the idle animation
+                if (isBeingBuilt) {
+                    sleepTrack.Stop(.1);
+                    productionTrack.Stop(.1);
+                } else if (forceSleep) {
+                    if (!sleepTrack.IsPlaying) {
+                        sleepTrack.Play(.1);
+                        productionTrack.Stop(.1);
+                    }
+                } else {
+                    if (!productionTrack.IsPlaying) {
+                        productionTrack.Play(.1);
+                        sleepTrack.Stop(.1);
+                    }
+                }
+            }
 
 
             updateVillagerState(villagerModel, {
