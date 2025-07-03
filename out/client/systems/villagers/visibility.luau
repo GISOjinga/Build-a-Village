@@ -40,6 +40,62 @@ end
 local villageModelStates = setmetatable({}, {
 	__mode = "k",
 })
+local villagerPartCaches = setmetatable({}, {
+	__mode = "k",
+})
+local function cacheVillagerParts(villagerModel)
+	local _villagerModel = villagerModel
+	local cache = villagerPartCaches[_villagerModel]
+	if not cache then
+		local _object = {
+			resourcesGroup = villagerModel.Station.Parts.Resources:GetDescendants(),
+			progressFull = villagerModel.Station.Parts.ProgressFull:GetDescendants(),
+			stationParts = villagerModel.Station.Parts.StationParts:GetDescendants(),
+			npc = villagerModel.Npc:GetDescendants(),
+			accessories = villagerModel.Accessories:GetDescendants(),
+		}
+		local _left = "inProgress"
+		local _exp = villagerModel.Station.Parts.InProgress:GetChildren()
+		-- ▼ ReadonlyArray.map ▼
+		local _newValue = table.create(#_exp)
+		local _callback = function(child)
+			local _object_1 = {}
+			local _left_1 = "phase"
+			local _condition = tonumber(child.Name)
+			if not (_condition ~= 0 and _condition == _condition and _condition) then
+				_condition = 1
+			end
+			_object_1[_left_1] = _condition
+			_object_1.parts = child:GetDescendants()
+			return _object_1
+		end
+		for _k, _v in _exp do
+			_newValue[_k] = _callback(_v, _k - 1, _exp)
+		end
+		-- ▲ ReadonlyArray.map ▲
+		_object[_left] = _newValue
+		local _left_1 = "resourceModels"
+		local _exp_1 = villagerModel.Station.Parts.Resources:GetChildren()
+		-- ▼ ReadonlyArray.map ▼
+		local _newValue_1 = table.create(#_exp_1)
+		local _callback_1 = function(model)
+			return {
+				model = model,
+				parts = model:GetDescendants(),
+			}
+		end
+		for _k, _v in _exp_1 do
+			_newValue_1[_k] = _callback_1(_v, _k - 1, _exp_1)
+		end
+		-- ▲ ReadonlyArray.map ▲
+		_object[_left_1] = _newValue_1
+		cache = _object
+		local _villagerModel_1 = villagerModel
+		local _cache = cache
+		villagerPartCaches[_villagerModel_1] = _cache
+	end
+	return cache
+end
 -- change village model state
 local function updateVillagerState(villagerModel, newState)
 	local _villagerModel = villagerModel
@@ -49,9 +105,9 @@ local function updateVillagerState(villagerModel, newState)
 		_condition = not deepEquals(villageModelStates[_villagerModel_1], newState)
 	end
 	if _condition then
-		-- print("Update", villagerModel, villageModelStates.get(villagerModel), newState)
+		local parts = cacheVillagerParts(villagerModel)
 		task.defer(function()
-			local _exp = villagerModel.Station.Parts.Resources:GetDescendants()
+			local _exp = parts.resourcesGroup
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(child)
 				return toggleTransparency(child, false)
@@ -60,16 +116,25 @@ local function updateVillagerState(villagerModel, newState)
 				_callback(_v, _k - 1, _exp)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			local _exp_1 = villagerModel.Station.Parts.InProgress:GetDescendants()
+			local _exp_1 = parts.inProgress
 			-- ▼ ReadonlyArray.forEach ▼
-			local _callback_1 = function(child)
-				return toggleTransparency(child, false)
+			local _callback_1 = function(cache)
+				local _exp_2 = cache.parts
+				-- ▼ ReadonlyArray.forEach ▼
+				local _callback_2 = function(child)
+					return toggleTransparency(child, false)
+				end
+				for _k, _v in _exp_2 do
+					_callback_2(_v, _k - 1, _exp_2)
+				end
+				-- ▲ ReadonlyArray.forEach ▲
+				return nil
 			end
 			for _k, _v in _exp_1 do
 				_callback_1(_v, _k - 1, _exp_1)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			local _exp_2 = villagerModel.Station.Parts.ProgressFull:GetDescendants()
+			local _exp_2 = parts.progressFull
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_2 = function(child)
 				return toggleTransparency(child, false)
@@ -78,7 +143,7 @@ local function updateVillagerState(villagerModel, newState)
 				_callback_2(_v, _k - 1, _exp_2)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			local _exp_3 = villagerModel.Station.Parts.StationParts:GetDescendants()
+			local _exp_3 = parts.stationParts
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_3 = function(child)
 				return toggleTransparency(child, false)
@@ -87,7 +152,7 @@ local function updateVillagerState(villagerModel, newState)
 				_callback_3(_v, _k - 1, _exp_3)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			local _exp_4 = villagerModel.Npc:GetDescendants()
+			local _exp_4 = parts.npc
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_4 = function(child)
 				return toggleTransparency(child, false)
@@ -96,7 +161,7 @@ local function updateVillagerState(villagerModel, newState)
 				_callback_4(_v, _k - 1, _exp_4)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			local _exp_5 = villagerModel.Accessories:GetDescendants()
+			local _exp_5 = parts.accessories
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_5 = function(child)
 				return toggleTransparency(child, false)
@@ -107,7 +172,7 @@ local function updateVillagerState(villagerModel, newState)
 			-- ▲ ReadonlyArray.forEach ▲
 			-- if maxed then
 			if newState.isBeingBuilt then
-				local _exp_6 = villagerModel.Station.Parts.ProgressFull:GetDescendants()
+				local _exp_6 = parts.progressFull
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_6 = function(child)
 					return toggleTransparency(child, false, .5)
@@ -116,7 +181,7 @@ local function updateVillagerState(villagerModel, newState)
 					_callback_6(_v, _k - 1, _exp_6)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				local _exp_7 = villagerModel.Station.Parts.StationParts:GetDescendants()
+				local _exp_7 = parts.stationParts
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_7 = function(child)
 					return toggleTransparency(child, false, .5)
@@ -125,7 +190,7 @@ local function updateVillagerState(villagerModel, newState)
 					_callback_7(_v, _k - 1, _exp_7)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				local _exp_8 = villagerModel.Station.Parts.Resources:GetDescendants()
+				local _exp_8 = parts.resourcesGroup
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_8 = function(child)
 					return toggleTransparency(child, false, .5)
@@ -135,7 +200,7 @@ local function updateVillagerState(villagerModel, newState)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
 			else
-				local _exp_6 = villagerModel.Npc:GetDescendants()
+				local _exp_6 = parts.npc
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_6 = function(child)
 					return toggleTransparency(child, true)
@@ -144,7 +209,7 @@ local function updateVillagerState(villagerModel, newState)
 					_callback_6(_v, _k - 1, _exp_6)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				local _exp_7 = villagerModel.Accessories:GetDescendants()
+				local _exp_7 = parts.accessories
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_7 = function(child)
 					return toggleTransparency(child, true)
@@ -153,7 +218,7 @@ local function updateVillagerState(villagerModel, newState)
 					_callback_7(_v, _k - 1, _exp_7)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				local _exp_8 = villagerModel.Station.Parts.StationParts:GetDescendants()
+				local _exp_8 = parts.stationParts
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_8 = function(child)
 					return toggleTransparency(child, true)
@@ -163,7 +228,7 @@ local function updateVillagerState(villagerModel, newState)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
 				if newState.hasMaxedResources then
-					local _exp_9 = villagerModel.Station.Parts.ProgressFull:GetDescendants()
+					local _exp_9 = parts.progressFull
 					-- ▼ ReadonlyArray.forEach ▼
 					local _callback_9 = function(child)
 						return toggleTransparency(child, true)
@@ -172,7 +237,7 @@ local function updateVillagerState(villagerModel, newState)
 						_callback_9(_v, _k - 1, _exp_9)
 					end
 					-- ▲ ReadonlyArray.forEach ▲
-					local _exp_10 = villagerModel.Station.Parts.Resources:GetDescendants()
+					local _exp_10 = parts.resourcesGroup
 					-- ▼ ReadonlyArray.forEach ▼
 					local _callback_10 = function(child)
 						return toggleTransparency(child, true)
@@ -183,21 +248,18 @@ local function updateVillagerState(villagerModel, newState)
 					-- ▲ ReadonlyArray.forEach ▲
 				else
 					-- toggles the in progress parts
-					local _exp_9 = villagerModel.Station.Parts.InProgress:GetChildren()
+					local _exp_9 = parts.inProgress
 					-- ▼ ReadonlyArray.forEach ▼
-					local _callback_9 = function(child)
-						local _exp_10 = child:GetDescendants()
+					local _callback_9 = function(_param)
+						local phase = _param.phase
+						local phaseParts = _param.parts
+						local visible = phase <= newState.currentInProgressPhase
 						-- ▼ ReadonlyArray.forEach ▼
 						local _callback_10 = function(descendant)
-							local _exp_11 = descendant
-							local _condition_1 = tonumber(child.Name)
-							if not (_condition_1 ~= 0 and _condition_1 == _condition_1 and _condition_1) then
-								_condition_1 = 1
-							end
-							toggleTransparency(_exp_11, _condition_1 <= newState.currentInProgressPhase)
+							return toggleTransparency(descendant, visible)
 						end
-						for _k, _v in _exp_10 do
-							_callback_10(_v, _k - 1, _exp_10)
+						for _k, _v in phaseParts do
+							_callback_10(_v, _k - 1, phaseParts)
 						end
 						-- ▲ ReadonlyArray.forEach ▲
 					end
@@ -207,9 +269,11 @@ local function updateVillagerState(villagerModel, newState)
 					-- ▲ ReadonlyArray.forEach ▲
 				end
 				-- toggles the station parts
-				local _exp_9 = villagerModel.Station.Parts.Resources:GetChildren()
+				local _exp_9 = parts.resourceModels
 				-- ▼ ReadonlyArray.forEach ▼
-				local _callback_9 = function(resourceModel)
+				local _callback_9 = function(_param)
+					local resourceModel = _param.model
+					local resParts = _param.parts
 					local _condition_1 = tonumber(resourceModel.Name)
 					if not (_condition_1 ~= 0 and _condition_1 == _condition_1 and _condition_1) then
 						_condition_1 = 0
@@ -226,13 +290,12 @@ local function updateVillagerState(villagerModel, newState)
 					if modelIndex > -1 and resourcePartParticles and variant then
 						local particleAttachment = resourcePartParticles:FindFirstChild(variant)
 						-- if the resource particles data exists then
-						local _exp_10 = resourceModel:GetDescendants()
 						-- ▼ ReadonlyArray.forEach ▼
 						local _callback_10 = function(child)
 							return toggleTransparency(child, true)
 						end
-						for _k, _v in _exp_10 do
-							_callback_10(_v, _k - 1, _exp_10)
+						for _k, _v in resParts do
+							_callback_10(_v, _k - 1, resParts)
 						end
 						-- ▲ ReadonlyArray.forEach ▲
 						-- toggles the particles
@@ -286,8 +349,9 @@ local default = function(world)
 				_callback(_v, _k - 1, _exp)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
+			cacheVillagerParts(villagerModel)
 		end):catch(function(err)
-			return warnJecs(129, "Villager", "Error setting up villager model particles", err)
+			return warnJecs(167, "Villager", "Error setting up villager model particles", err)
 		end)
 	end
 	-- when vilalger animator gets added
@@ -315,7 +379,7 @@ local default = function(world)
 				end
 			end
 		end):catch(function(err)
-			return warnJecs(148, "Villager", "Error setting up villager animator", err)
+			return warnJecs(186, "Villager", "Error setting up villager animator", err)
 		end)
 	end
 	if useThrottle(.3) then
@@ -362,7 +426,7 @@ local default = function(world)
 					end
 				end
 			end):catch(function(err)
-				return warnJecs(188, "Villager", "Error setting up villager animations", err)
+				return warnJecs(226, "Villager", "Error setting up villager animations", err)
 			end)
 		end
 		-- watches for changes
@@ -401,7 +465,7 @@ local default = function(world)
 					})
 				end
 			end):catch(function(err)
-				return warnTS(223, "Villager", "Error updating villager state", err)
+				return warnTS(261, "Villager", "Error updating villager state", err)
 			end)
 		end
 	end

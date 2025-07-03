@@ -13,6 +13,7 @@ import paths from "shared/utils/paths";
 
 
 
+
 // function to togggle transparency
 const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: number = 1) => {
     const instance: BasePart | Decal = _instance as BasePart | Decal;
@@ -31,43 +32,79 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 type VillagerProgressState = { isBeingBuilt: boolean, hasMaxedResources: boolean, currentInProgressPhase: number, resources: Array<ProduceVariant>, produce: ProduceNames }
 const villageModelStates = new WeakMap<Instance, VillagerProgressState>();
 
+type CachedPartList = Instance[];
+type InProgressCache = { phase: number; parts: CachedPartList };
+interface VillagerPartCache {
+    resourcesGroup: CachedPartList;
+    progressFull: CachedPartList;
+    stationParts: CachedPartList;
+    npc: CachedPartList;
+    accessories: CachedPartList;
+    inProgress: InProgressCache[];
+    resourceModels: { model: Model; parts: CachedPartList }[];
+}
+
+const villagerPartCaches = new WeakMap<VillagerModel, VillagerPartCache>();
+
+function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
+    let cache = villagerPartCaches.get(villagerModel);
+    if (!cache) {
+        cache = {
+            resourcesGroup: villagerModel.Station.Parts.Resources.GetDescendants(),
+            progressFull: villagerModel.Station.Parts.ProgressFull.GetDescendants(),
+            stationParts: villagerModel.Station.Parts.StationParts.GetDescendants(),
+            npc: villagerModel.Npc.GetDescendants(),
+            accessories: villagerModel.Accessories.GetDescendants(),
+            inProgress: villagerModel.Station.Parts.InProgress.GetChildren().map((child) => ({
+                phase: tonumber(child.Name) || 1,
+                parts: child.GetDescendants(),
+            })),
+            resourceModels: villagerModel.Station.Parts.Resources.GetChildren<Model>().map((model) => ({
+                model,
+                parts: model.GetDescendants(),
+            })),
+        };
+        villagerPartCaches.set(villagerModel, cache);
+    }
+    return cache;
+}
+
 // change village model state
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
-        // print("Update", villagerModel, villageModelStates.get(villagerModel), newState)
+        const parts = cacheVillagerParts(villagerModel);
         task.defer(() => {
-            villagerModel.Station.Parts.Resources.GetDescendants().forEach((child) => toggleTransparency(child, false))
-            villagerModel.Station.Parts.InProgress.GetDescendants().forEach((child) => toggleTransparency(child, false))
-            villagerModel.Station.Parts.ProgressFull.GetDescendants().forEach((child) => toggleTransparency(child, false))
-            villagerModel.Station.Parts.StationParts.GetDescendants().forEach((child) => toggleTransparency(child, false));
-            villagerModel.Npc.GetDescendants().forEach((child) => toggleTransparency(child, false));
-            villagerModel.Accessories.GetDescendants().forEach((child) => toggleTransparency(child, false));
+            parts.resourcesGroup.forEach((child) => toggleTransparency(child, false));
+            parts.inProgress.forEach((cache) => cache.parts.forEach((child) => toggleTransparency(child, false)));
+            parts.progressFull.forEach((child) => toggleTransparency(child, false));
+            parts.stationParts.forEach((child) => toggleTransparency(child, false));
+            parts.npc.forEach((child) => toggleTransparency(child, false));
+            parts.accessories.forEach((child) => toggleTransparency(child, false));
 
             // if maxed then
             if (newState.isBeingBuilt) {
-                villagerModel.Station.Parts.ProgressFull.GetDescendants().forEach((child) => toggleTransparency(child, false, .5))
-                villagerModel.Station.Parts.StationParts.GetDescendants().forEach((child) => toggleTransparency(child, false, .5));
-                villagerModel.Station.Parts.Resources.GetDescendants().forEach((child) => toggleTransparency(child, false, .5));
+                parts.progressFull.forEach((child) => toggleTransparency(child, false, .5));
+                parts.stationParts.forEach((child) => toggleTransparency(child, false, .5));
+                parts.resourcesGroup.forEach((child) => toggleTransparency(child, false, .5));
 
             } else {
-                villagerModel.Npc.GetDescendants().forEach((child) => toggleTransparency(child, true));
-                villagerModel.Accessories.GetDescendants().forEach((child) => toggleTransparency(child, true));
-                villagerModel.Station.Parts.StationParts.GetDescendants().forEach((child) => toggleTransparency(child, true));
+                parts.npc.forEach((child) => toggleTransparency(child, true));
+                parts.accessories.forEach((child) => toggleTransparency(child, true));
+                parts.stationParts.forEach((child) => toggleTransparency(child, true));
 
                 if (newState.hasMaxedResources) {
-                    villagerModel.Station.Parts.ProgressFull.GetDescendants().forEach((child) => toggleTransparency(child, true))
-                    villagerModel.Station.Parts.Resources.GetDescendants().forEach((child) => toggleTransparency(child, true));
+                    parts.progressFull.forEach((child) => toggleTransparency(child, true));
+                    parts.resourcesGroup.forEach((child) => toggleTransparency(child, true));
                 } else {
                     // toggles the in progress parts
-                    villagerModel.Station.Parts.InProgress.GetChildren().forEach((child) => {
-                        child.GetDescendants().forEach((descendant) => {
-                            toggleTransparency(descendant, (tonumber(child.Name) || 1) <= newState.currentInProgressPhase);
-                        })
+                    parts.inProgress.forEach(({ phase, parts: phaseParts }) => {
+                        const visible = phase <= newState.currentInProgressPhase;
+                        phaseParts.forEach((descendant) => toggleTransparency(descendant, visible));
                     });
                 }
 
                 // toggles the station parts
-                villagerModel.Station.Parts.Resources.GetChildren<Model>().forEach((resourceModel) => {
+                parts.resourceModels.forEach(({ model: resourceModel, parts: resParts }) => {
                     const modelIndex = (tonumber(resourceModel.Name) || 0) - 1;
                     const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__")
                     const variant = newState.resources[modelIndex]
@@ -81,7 +118,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
                         const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
 
                         // if the resource particles data exists then
-                        resourceModel.GetDescendants().forEach((child) => toggleTransparency(child, true))
+                        resParts.forEach((child) => toggleTransparency(child, true));
 
                         // toggles the particles
                         if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");
@@ -126,6 +163,7 @@ export default (world: World) => {
             particlesToggle(goldAttachment, false);
             particlesToggle(rainbowAttachment, false);
         })
+        cacheVillagerParts(villagerModel);
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager model particles", err));
 
     // when vilalger animator gets added
