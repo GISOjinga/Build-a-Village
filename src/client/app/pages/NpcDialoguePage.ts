@@ -126,7 +126,9 @@ export default (dialoguePage: NpcDialogues) => {
     }))
 
     // watches for route calls
-    trash.Add(routes.npcDialogue.listen((newDialogue) => pageStates.npcDialogue(newDialogue)));
+    trash.Add(routes.npcDialogue.listen((newDialogue) =>
+        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "None"; text: string })
+    ));
 
     // when the buy button is clicked
     trash.Add(paths.Map.Shops.King.Npc.HumanoidRootPart.ProximityPrompt.Triggered.Connect(() => {

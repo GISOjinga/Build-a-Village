@@ -1,4 +1,4 @@
-import { pair, World } from "@rbxts/jecs";
+import { pair, World, Entity } from "@rbxts/jecs";
 import routes from "server/routes";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
@@ -58,7 +58,7 @@ export default (world: World) => {
     // when requesting to dig villager it will remove the relative cframe by updating the data
     useRoute(routes.digVillager, (villagerEntity, player) => {
         const playerEntity = getEntity.fromInstance(player);
-        const villager = world.get(villagerEntity, Villager);
+        const villager = world.get(villagerEntity as Entity, Villager);
         const uniqueId = villager?.villagerData.UniqueId
 
         // prints the villager and player trying to dig
@@ -75,7 +75,7 @@ export default (world: World) => {
 
                 // sets up the vilalger to be ready to load in
                 villagerData.RelativeLocation = undefined;
-                world.delete(villagerEntity); // deletes the villager entity
+                world.delete(villagerEntity as Entity); // deletes the villager entity
                 printJecs($line, "Removed Relative Location from: ", villagerData);
                 return oldData
             })

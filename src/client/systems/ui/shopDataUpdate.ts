@@ -23,7 +23,7 @@ export default (world: World) => {
 
     // updates the villager shop data
     useRoute(routes.updateVillagersShop, (Villagers) => {
-        pageStates.villagersShop(Villagers);
+        pageStates.villagersShop(Villagers as unknown as VillagerInfo[]);
     })
 
     // update restock time
@@ -33,8 +33,8 @@ export default (world: World) => {
 
     // updates the walls shop data
     useRoute(routes.updateRobuxStore, (data) => {
-        robuxStore = data;
-        pageStates.robuxStore(data);
+        robuxStore = data as typeof robuxStoreData;
+        pageStates.robuxStore(data as typeof robuxStoreData);
     })
 
     // updates the totalTimeForNewVillager

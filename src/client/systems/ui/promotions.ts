@@ -7,6 +7,6 @@ import pageStates from "shared/utils/Animations/pageStates";
 export default (world: World) => {
     useRoute(routes.updateFriendsBonus, pageStates.friendsBonus);
     useRoute(routes.sendFriendRequest, (otherPlayer) => {
-        StarterGui.SetCore("PromptSendFriendRequest", otherPlayer);
+        StarterGui.SetCore("PromptSendFriendRequest", otherPlayer as Player);
     });
 };
