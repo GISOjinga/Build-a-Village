@@ -50,17 +50,19 @@ const villagerPartCaches = new WeakMap<VillagerModel, VillagerPartCache>();
 function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
     let cache = villagerPartCaches.get(villagerModel);
     if (!cache) {
+        const station = villagerModel.WaitForChild("Station")
+        const parts = station.WaitForChild("Parts");
         cache = {
-            resourcesGroup: villagerModel.Station.Parts.Resources.GetDescendants(),
-            progressFull: villagerModel.Station.Parts.ProgressFull.GetDescendants(),
-            stationParts: villagerModel.Station.Parts.StationParts.GetDescendants(),
-            npc: villagerModel.Npc.GetDescendants(),
-            accessories: villagerModel.Accessories.GetDescendants(),
-            inProgress: villagerModel.Station.Parts.InProgress.GetChildren().map((child) => ({
+            resourcesGroup: station.WaitForChild("Parts").WaitForChild("Resources").GetDescendants(),
+            progressFull: parts.WaitForChild("ProgressFull").GetDescendants(),
+            stationParts: parts.WaitForChild("StationParts").GetDescendants(),
+            npc: villagerModel.WaitForChild("Npc").GetDescendants(),
+            accessories: villagerModel.WaitForChild("Accessories").GetDescendants(),
+            inProgress: parts.WaitForChild("InProgress").GetChildren().map((child) => ({
                 phase: tonumber(child.Name) || 1,
                 parts: child.GetDescendants(),
             })),
-            resourceModels: villagerModel.Station.Parts.Resources.GetChildren<Model>().map((model) => ({
+            resourceModels: parts.WaitForChild("Resources").GetChildren<Model>().map((model) => ({
                 model,
                 parts: model.GetDescendants(),
             })),
@@ -73,6 +75,7 @@ function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
 // change village model state
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
+        // print(newState, villageModelStates.get(villagerModel))
         const parts = cacheVillagerParts(villagerModel);
 
         parts.resourcesGroup.forEach((child) => toggleTransparency(child, false));
