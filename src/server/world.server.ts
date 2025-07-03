@@ -16,6 +16,7 @@ import { Phases, systemQueue } from "shared/utils/jecs/jecsComponents";
 import replicateToClient from "./systems/componentReplication/replicateToClient";
 import watchRoutes from "shared/systems/hooks/watchRoutes";
 import append from "shared/systems/hooks/append";
+import pending from "shared/systems/hooks/pending";
 import platform from "./systems/builds/platform";
 import villagersShop from "./systems/villagers/villagersShop";
 import progressVillagers from "./systems/villagers/progressVillagers";
@@ -55,6 +56,7 @@ setupMatter([
     change,
     watchRoutes,
     append,
+    pending,
 
     // * server
 

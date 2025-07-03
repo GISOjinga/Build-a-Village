@@ -76,6 +76,8 @@ export const ExampleSetting = createSetting<number>("ExampleSetting", 20);
 const _changedComponent = component<Changed<unknown>>("Changed")
 const _addedComponent = component<Entity>("Added")
 const _removedComponent = component<Entity>("Removed")
+const _pendingComponent = component<Entity>("Pending")
+export const Pending = _pendingComponent
 
 // for changes
 type Changed<T> = { readonly old?: T, readonly new?: T }
@@ -83,6 +85,8 @@ export const [changedQuery, addedQuery, removedQuery] = [new Set<Entity>(), new 
 export const Changed = <T>(comp: Entity<T>) => { changedQuery.add(comp); Added(comp); Removed(comp); return pair<Changed<T>, T>(_changedComponent as unknown as Entity<Changed<T>>, comp as unknown as Entity<T>) }
 export const Added = <T>(comp: Entity<T>) => { addedQuery.add(comp); return pair<T, undefined>(_addedComponent as unknown as Entity<T>, comp as unknown as Entity<undefined>) }
 export const Removed = <T>(comp: Entity<T>) => { removedQuery.add(comp); return pair<T, undefined>(_removedComponent as unknown as Entity<T>, comp as unknown as Entity<undefined>) }
+export const pendingQuery = new Set<Entity>()
+export const CanQuery = <T>(comp: Entity<T>) => { pendingQuery.add(comp); return pair<T, undefined>(_pendingComponent as unknown as Entity<T>, comp as unknown as Entity<undefined>) }
 
 
 /************************ Player ************************/
