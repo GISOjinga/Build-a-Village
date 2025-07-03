@@ -147,47 +147,46 @@ export default (world: World) => {
         }
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
-
-    // controls the animations
-    for (const [_, { villagerData, villagerModel }, animator] of world.query(Villager, VillagerAnimator)) Promise.try(() => {
-        const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
-        const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
-        const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
-        const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
-        const progress = villagerData.Progress
-        const progression = progress.Progression
-        const buildingTimes = progress.Building
-        const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
-        const requiredResource = progress.Required
-        const resources = progression.Resources
-        const totalResourcesSoFar = resources.size()
-        const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
-        const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
-
-        // plays the idle animation
-        if (productionTrack && sleepTrack) {
-            productionTrack.Looped = true;
-            sleepTrack.Looped = true;
+    if (useThrottle(.3)) {
+        // controls the animations
+        for (const [_, { villagerData, villagerModel }, animator] of world.query(Villager, VillagerAnimator)) Promise.try(() => {
+            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
+            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+            const progress = villagerData.Progress
+            const progression = progress.Progression
+            const buildingTimes = progress.Building
+            const isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time();
+            const requiredResource = progress.Required
+            const resources = progression.Resources
+            const totalResourcesSoFar = resources.size()
+            const maxResources = villagerModel.Station.Parts.Resources.GetChildren().size();
+            const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
 
             // plays the idle animation
-            if (isBeingBuilt) {
-                sleepTrack.Stop(.1);
-                productionTrack.Stop(.1);
-            } else if (forceSleep) {
-                if (!sleepTrack.IsPlaying) {
-                    sleepTrack.Play(.1);
-                    productionTrack.Stop(.1);
-                }
-            } else {
-                if (!productionTrack.IsPlaying) {
-                    productionTrack.Play(.1);
+            if (productionTrack && sleepTrack) {
+                productionTrack.Looped = true;
+                sleepTrack.Looped = true;
+
+                // plays the idle animation
+                if (isBeingBuilt) {
                     sleepTrack.Stop(.1);
+                    productionTrack.Stop(.1);
+                } else if (forceSleep) {
+                    if (!sleepTrack.IsPlaying) {
+                        sleepTrack.Play(.1);
+                        productionTrack.Stop(.1);
+                    }
+                } else {
+                    if (!productionTrack.IsPlaying) {
+                        productionTrack.Play(.1);
+                        sleepTrack.Stop(.1);
+                    }
                 }
             }
-        }
-    }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
+        }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animations", err));
 
-    if (useThrottle(.1)) {
         // watches for changes
         for (const [villagerClientEntity, villagerInfo] of world.query(Villager)) Promise.try(() => {
             const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);

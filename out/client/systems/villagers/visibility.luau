@@ -318,53 +318,53 @@ local default = function(world)
 			return warnJecs(148, "Villager", "Error setting up villager animator", err)
 		end)
 	end
-	-- controls the animations
-	for _, _binding, animator in world:query(Villager, VillagerAnimator) do
-		local villagerData = _binding.villagerData
-		local villagerModel = _binding.villagerModel
-		TS.Promise.try(function()
-			local villagerAnimationFolder = paths.Assets.Animations.Villager:FindFirstChild(villagerData.Name)
-			local _productionAnimation = villagerAnimationFolder
-			if _productionAnimation ~= nil then
-				_productionAnimation = _productionAnimation:FindFirstChild("Production")
-			end
-			local productionAnimation = _productionAnimation
-			local productionTrack = productionAnimation and getAnimation(animator, productionAnimation)
-			local sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
-			local progress = villagerData.Progress
-			local progression = progress.Progression
-			local buildingTimes = progress.Building
-			local isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time()
-			local requiredResource = progress.Required
-			local resources = progression.Resources
-			local totalResourcesSoFar = #resources
-			local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
-			local forceSleep = (maxResources == totalResourcesSoFar) or (requiredResource and requiredResource.Amount < 1)
-			-- plays the idle animation
-			if productionTrack and sleepTrack then
-				productionTrack.Looped = true
-				sleepTrack.Looped = true
+	if useThrottle(.3) then
+		-- controls the animations
+		for _, _binding, animator in world:query(Villager, VillagerAnimator) do
+			local villagerData = _binding.villagerData
+			local villagerModel = _binding.villagerModel
+			TS.Promise.try(function()
+				local villagerAnimationFolder = paths.Assets.Animations.Villager:FindFirstChild(villagerData.Name)
+				local _productionAnimation = villagerAnimationFolder
+				if _productionAnimation ~= nil then
+					_productionAnimation = _productionAnimation:FindFirstChild("Production")
+				end
+				local productionAnimation = _productionAnimation
+				local productionTrack = productionAnimation and getAnimation(animator, productionAnimation)
+				local sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+				local progress = villagerData.Progress
+				local progression = progress.Progression
+				local buildingTimes = progress.Building
+				local isBeingBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) > os.time()
+				local requiredResource = progress.Required
+				local resources = progression.Resources
+				local totalResourcesSoFar = #resources
+				local maxResources = #villagerModel.Station.Parts.Resources:GetChildren()
+				local forceSleep = (maxResources == totalResourcesSoFar) or (requiredResource and requiredResource.Amount < 1)
 				-- plays the idle animation
-				if isBeingBuilt then
-					sleepTrack:Stop(.1)
-					productionTrack:Stop(.1)
-				elseif forceSleep then
-					if not sleepTrack.IsPlaying then
-						sleepTrack:Play(.1)
-						productionTrack:Stop(.1)
-					end
-				else
-					if not productionTrack.IsPlaying then
-						productionTrack:Play(.1)
+				if productionTrack and sleepTrack then
+					productionTrack.Looped = true
+					sleepTrack.Looped = true
+					-- plays the idle animation
+					if isBeingBuilt then
 						sleepTrack:Stop(.1)
+						productionTrack:Stop(.1)
+					elseif forceSleep then
+						if not sleepTrack.IsPlaying then
+							sleepTrack:Play(.1)
+							productionTrack:Stop(.1)
+						end
+					else
+						if not productionTrack.IsPlaying then
+							productionTrack:Play(.1)
+							sleepTrack:Stop(.1)
+						end
 					end
 				end
-			end
-		end):catch(function(err)
-			return warnJecs(188, "Villager", "Error setting up villager animations", err)
-		end)
-	end
-	if useThrottle(.1) then
+			end):catch(function(err)
+				return warnJecs(188, "Villager", "Error setting up villager animations", err)
+			end)
+		end
 		-- watches for changes
 		for villagerClientEntity, villagerInfo in world:query(Villager) do
 			TS.Promise.try(function()
@@ -401,7 +401,7 @@ local default = function(world)
 					})
 				end
 			end):catch(function(err)
-				return warnTS(224, "Villager", "Error updating villager state", err)
+				return warnTS(223, "Villager", "Error updating villager state", err)
 			end)
 		end
 	end
