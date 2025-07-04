@@ -2,9 +2,7 @@ import { setupMatter } from "shared/utils/jecs/jecsSetup";
 import { ContextActionService } from "@rbxts/services";
 import modelDebugger from "shared/systems/modelDebugger";
 import commandarClient from "./systems/commands/commandarClient";
-import emitParticles from "./systems/particles/emitParticles";
 import updateCooldown from "shared/systems/cooldown/updateCountDown";
-import increaseParticlesSize from "./systems/particles/increaseParticlesSize";
 import followInstance from "./systems/physics/followInstance";
 import updateMovers from "shared/systems/movers/updateMovers";
 import jabby from "@rbxts/jabby";
@@ -42,6 +40,7 @@ import promotions from "./systems/ui/promotions";
 import tutorial from "./systems/tutorial/tutorial";
 import promptHandlers from "./systems/villagers/promptHandlers";
 import visibility from "./systems/villagers/visibility";
+import particles from "./systems/effects/particles";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -110,9 +109,8 @@ const debug = setupMatter([
     // instance
     { system: followInstance },
 
-    // particles
-    { system: emitParticles },
-    { system: increaseParticlesSize },
+    // effects
+    { system: particles },
 
     // player
     { system: updateTools },
