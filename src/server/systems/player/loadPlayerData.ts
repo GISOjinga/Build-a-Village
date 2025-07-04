@@ -9,6 +9,8 @@ import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import routes from "server/routes";
 import { logTutorialStep, TutorialStep, logGameEvent, GameEvent } from "../../utils/analytics";
+import dailyRewards from "../../../shared/data/dailyRewards";
+import dailyQuests from "../../../shared/data/dailyQuests";
 
 
 
