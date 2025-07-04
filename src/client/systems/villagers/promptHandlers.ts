@@ -21,6 +21,9 @@ export default (world: World) => {
                 const owner = villagerComp.playerEntity === playerEntity;
                 const requirementPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt;
 
+                // changes the binmdings
+                requirementPrompt.KeyboardKeyCode = Enum.KeyCode.R;
+
                 // for collecting
                 villagerModel.Station.Parts.Resources.GetChildren().forEach((model, index) => {
                     const proximityPromptPart = model.WaitForChild("ProximityPromptPart");
