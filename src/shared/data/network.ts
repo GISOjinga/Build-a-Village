@@ -320,6 +320,8 @@ export const sharedRoutes = (() => {
         Data: componentRecord({
             Version: str as JingaNetType<string>,
             Coins: uint32,
+            LastLogin: uint32 as JingaNetType<number>,
+            Sessions: uint32 as JingaNetType<number>,
             Villagers: [villagerStruct] as JingaNetType<VillagerData>[],
             Produce: [{
                 Name: str as JingaNetType<ProduceNames>,

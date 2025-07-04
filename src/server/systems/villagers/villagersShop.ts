@@ -138,7 +138,7 @@ export default (world: World) => {
 
                             // gives the player the produce
                             createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1);
-                            logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: playerToGift.UserId })
+                            logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
                             routes.notify.sendTo({
@@ -331,10 +331,10 @@ export default (world: World) => {
 
                     // prints the sell message
                     printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
+                    logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
 
                     return oldData;
                 });
-                logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
