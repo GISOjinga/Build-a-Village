@@ -30,21 +30,34 @@ export default (isTagged: boolean, resourcePrompt: ProximityPrompt, world: World
         produceInfo.Adornee = resourcePromptPart;
         produceInfo.Parent = resourcePromptPart
 
-        // when the prompt is activated
-        resourcePrompt.PromptShown.Connect(() => {
-            task.wait()
+        // updates the icon
+        const updateLabel = () => {
             const produceName = model.GetAttribute("ProduceName") as ProduceNames;
-            const produceVariant = model.GetAttribute("Variant") as ProduceVariant;
+            const produceVariant = model.GetAttribute<ProduceVariant>("Variant") || "Normal";
 
-            // sets up the ui
+            // updates the icon
             produceInfo.Frame.ProduceName.GetChildren().forEach((child) => { if (child.IsA("UIGradient")) { child.Enabled = child.Name === produceVariant } })
             produceInfo.Frame.Rarity.GetChildren().forEach((child) => { if (child.IsA("UIGradient")) { child.Enabled = child.Name === produceVariant } })
             produceInfo.Frame.ProduceName.Visible = true;
             produceInfo.Frame.Rarity.Visible = produceVariant === "Gold" || produceVariant === "Rainbow";
             produceInfo.Frame.ProduceName.Text = produceName;
             produceInfo.Frame.Rarity.Text = produceVariant;
+        }
+
+        // when ever variant changes then updates the label
+        model.GetAttributeChangedSignal("Variant").Connect(updateLabel);
+
+        // when ever ready changes and if not ready disables prompt
+        model.GetAttributeChangedSignal("Ready").Connect(() => resourcePrompt.Enabled = model.GetAttribute("Ready") || false)
+
+        // when the prompt is activated
+        resourcePrompt.PromptShown.Connect(() => {
+            // sets up the ui
             produceInfo.Enabled = true;
             highlight.Adornee = model;
+
+            // updates the label
+            updateLabel();
         })
 
         // when the prompt is hidden

@@ -76,7 +76,7 @@ function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
     return cache;
 }
 
-function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts: CachedPartList, visible: boolean, invis: number = 1) {
+function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts: CachedPartList, visible: boolean, invis?: number) {
     let cache = groupVisibilityCache.get(villagerModel);
     if (!cache) {
         cache = {};
@@ -85,7 +85,7 @@ function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts
     const current = cache[group];
     if (!current || current.visible !== visible || current.invis !== invis) {
         parts.forEach((child) => toggleTransparency(child, visible, invis));
-        cache[group] = { visible, invis };
+        cache[group] = { visible, invis: invis !== undefined ? invis : 1 };
     }
 }
 
@@ -124,8 +124,9 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
             }
 
             // toggles the station parts
-            parts.resourceModels.forEach(({ model: resourceModel, parts: resParts }) => {
-                const modelIndex = (tonumber(resourceModel.Name) || 0) - 1;
+            parts.resourceModels.forEach(({ parts: resParts, model: resourceModel }) => {
+                const groupName = `resource_${resourceModel.Name}`;
+                const modelIndex = (tonumber(resourceModel.Name) || 0) - 1; // Assuming model names are numeric strings
                 const resourcePartParticles = resourceModel.FindFirstChild<Part>("__ResourceParticles__");
                 const variant = newState.resources[modelIndex];
 
@@ -134,12 +135,10 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
                 resourceModel.SetAttribute("Variant", variant);
                 if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
 
-                const groupName = `resource_${modelIndex}`;
                 if (modelIndex > -1 && resourcePartParticles && variant) {
                     const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
-
-                    applyGroupVisibility(villagerModel, groupName, resParts, true);
                     if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");
+                    applyGroupVisibility(villagerModel, groupName, resParts, true);
                 } else {
                     applyGroupVisibility(villagerModel, groupName, resParts, false);
                 }
