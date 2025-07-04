@@ -65,13 +65,13 @@ export default (world: World) => {
             const body = world.get(playerEntityWhoTriggered, Body);
             const requiredResource = villagerInfo.villagerData.Progress.Required;
             const villagerModel = villagerInfo.villagerModel;
-            if (body && requiredResource && requiredResource.Amount < requiredResource.Max) {
+            if (body && requiredResource && requiredResource.Amount < (requiredResource.Max - villagerInfo.villagerData.Progress.Progression.Resources.size())) {
                 const toolInHand = body.model.FindFirstChildOfClass("Tool");
                 const toolType = toolInHand && toolInHand.GetAttribute<ToolType>("ItemType");
                 const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
                 if (toolType === "Commodity" && toolName === requiredResource.Produce) {
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
-                        const amountNeededToBeMaxedOut = (requiredResource.Max - requiredResource.Amount) - oldData.Produce.size();
+                        const amountNeededToBeMaxedOut = ((requiredResource.Max - villagerInfo.villagerData.Progress.Progression.Resources.size()) - requiredResource.Amount);
                         const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
                         const produce = oldData.Produce[produceIndex];
                         const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);

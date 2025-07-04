@@ -32,18 +32,18 @@ export default (world: World) => {
             const villagerInfo = villagerEntity && world.get(villagerEntity, Villager);
             const buildingTimes = villagerInfo && villagerInfo.villagerData.Progress.Building
             const timeTillFullyBuilt = buildingTimes && (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
+            const produceName = villagerInfo && villagerInfo.villagerData.Progress.Produce
             const progressionInfo = villagerInfo && villagerInfo.villagerData.Progress
-            const produce = progressionInfo && progressionInfo.Produce;
+            const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
             const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
             const requiredProduceTime = progressionInfo && ((playerData?.Tutorial === 2 && villagerInfo.villagerData.Name === "Farmer") ? 5 : progressionInfo.Progression.Time.RequiredTimePerResource);
             const totalRequireResources = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Amount : undefined;
             const requiredProduceName = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Produce : undefined;
-            const maxRequiredProduceAmount = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Max : undefined
+            const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
+            const maxRequiredProduceAmount = (progressionInfo && maxProduce && resources && resources.size() < maxProduce && progressionInfo.Required) ? (progressionInfo.Required.Max - resources.size()) : undefined
             const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
             const timeTillNextProduce = progressionInfo && produceEndTime && produceEndTime - os.time() > 0 ? produceEndTime - os.time() : 0;
-            const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
             const totalProduce = resources && resources.size();
-            const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
 
             // when the mouse moves
             hoverAttachment.Name = "HoverBoxAttachment"
@@ -55,12 +55,12 @@ export default (world: World) => {
             // when the mouse hovers over a villager and sets the time till built
             // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
             // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
-            pageStates.queueInfo(totalRequireResources !== undefined ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
+            pageStates.queueInfo((totalRequireResources !== undefined && maxRequiredProduceAmount !== undefined && maxRequiredProduceAmount > totalRequireResources) ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
 
             if (villagerEntity && totalProduce === maxProduce) {
                 pageStates.hoverInfo({
                     visible: true,
-                    info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
+                    info: `(${totalProduce}/${maxProduce}) ${produceName} ready.`,
                 });
             } else if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
                 // printTS($line, "Villager is building: ", villagerEntity, "Produce: ", produce, "Time Till Fully Built: ", timeTillFullyBuilt);
@@ -78,7 +78,7 @@ export default (world: World) => {
                 // printTS($line, "Villager is producing: ", villagerEntity, "Produce: ", produce, "Time Till Next Produce: ", timeTillNextProduce);
                 pageStates.hoverInfo({
                     visible: true,
-                    info: `(${totalProduce}/${maxProduce}) ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
+                    info: `(${totalProduce}/${maxProduce}) ${produceName} in ${formatToMMSS(timeTillNextProduce)}.`,
                 })
             } else if (!villagerEntity) {
                 // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
