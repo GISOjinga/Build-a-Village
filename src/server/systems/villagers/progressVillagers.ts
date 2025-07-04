@@ -37,6 +37,7 @@ export default (world: World) => {
             if (variant) {
                 if (playerWhoTriggered === player) {
                     villagerInfo.villagerData.Progress.Progression.Resources.remove(resourceIndex);
+                    villagerInfo.villagerData.Progress.Progression.Time.StartTime = os.time()
                     addComponent(villagerEntity as Entity, Villager, { ...villagerInfo });
 
                     createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant);
@@ -90,6 +91,7 @@ export default (world: World) => {
                             villagerModel,
                             playerEntity: villagerInfo.playerEntity,
                         });
+                        removeComponent(villagerEntity as Entity, MaxedOut);
                         if (produce.Amount <= 0) oldData.Produce.remove(produceIndex);
                         return oldData;
                     });
@@ -163,6 +165,7 @@ export default (world: World) => {
 
                 // removes the produce from the data
                 progression.Resources.remove(resourceIndex);
+                villagerInfo.villagerData.Progress.Progression.Time.StartTime = os.time()
                 addComponent(villagerEntity as Entity, Villager, { ...villagerInfo })
 
                 // adds the produce to the data
@@ -188,6 +191,7 @@ export default (world: World) => {
 
             // sets the start time to os.time
             progression.Time.StartTime = os.time();
+            print("Fixed start time for villager: ", villagerEntity, " with villager data: ", villagerData);
 
             // updates the villager component
             addComponent(villagerEntity as Entity, Villager, villagerComp);
@@ -223,7 +227,7 @@ export default (world: World) => {
             progression.Time.RequiredTimePerResource = (playerData?.Tutorial === 2 && villagerData.Name === "Farmer") ? 5 : villagersProgressData.get(villagerData.Name)?.Progression.Time.RequiredTimePerResource || 0
 
             // if has maxed resources then
-            if (hasMaxedResources) {
+            if (hasMaxedResources || (requiredResource && requiredResource.Amount <= 0)) {
                 addComponent(villagerEntity as Entity, MaxedOut);
             } else {
 

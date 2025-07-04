@@ -3,10 +3,10 @@ import { SystemTable } from "@rbxts/planck/out/types"
 import { appendJecs } from "./append"
 import { Phases, Pending, pendingQuery, Villager } from "shared/utils/jecs/jecsComponents"
 
-const defaultMax = 2
+const defaultMax = 10
 
 const componentsMax = {
-    [Villager]: defaultMax,
+    [Villager]: 5,
 }
 
 const queryData = new Map<Entity<unknown>, { queue: Entity[]; current: Entity[] }>()
