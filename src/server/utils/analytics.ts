@@ -57,6 +57,6 @@ export enum GameEvent {
 
 
 export function logGameEvent(player: Player, event: GameEvent, data?: unknown) {
-    printTS($line, `Logging event: ${event} for player: ${player.Name}`);
-    AnalyticsService.LogCustomEvent(player, event, undefined, data);
+    // printTS($line, `Logging event: ${event} for player: ${player.Name}`);
+    AnalyticsService.LogCustomEvent(player, event, undefined, data as object);
 }

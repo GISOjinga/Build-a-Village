@@ -332,10 +332,8 @@ export default (world: World) => {
                     // prints the sell message
                     printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
-
                     return oldData;
                 });
-                logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
