@@ -44,10 +44,13 @@ export default (world: World) => {
                         if (owner) {
                             const resourceIndex = (tonumber(model.Name) || 0) - 1;
                             if (resourceIndex > -1) {
-                                villagerComp.villagerData.Progress.Progression.Resources.remove(resourceIndex);
-                                model.SetAttribute("Ready", false);
-                                addComponent(clientVillagerEntity, Villager, { ...villagerComp });
-                                prompt.Enabled = false;
+                                const villagerComp = world.get(clientVillagerEntity, Villager);
+                                if (villagerComp) {
+                                    villagerComp.villagerData.Progress.Progression.Resources.remove(resourceIndex);
+                                    model.SetAttribute("Ready", false);
+                                    addComponent(clientVillagerEntity, Villager, { ...villagerComp });
+                                    prompt.Enabled = false;
+                                }
                             }
                         }
                         printJecs($line, `Collecting ${model.Name} from villager: `, villagerEntity);

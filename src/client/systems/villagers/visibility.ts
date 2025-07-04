@@ -94,7 +94,6 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
     if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
         const parts = cacheVillagerParts(villagerModel);
 
-        applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, false);
         parts.inProgress.forEach((cache) => applyGroupVisibility(villagerModel, `inProgress_${cache.phase}`, cache.parts, false));
         applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
         applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
@@ -134,7 +133,6 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
                 resourceModel.SetAttribute("ProduceName", newState.produce);
                 resourceModel.SetAttribute("Variant", variant);
                 if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
-
                 if (modelIndex > -1 && resourcePartParticles && variant) {
                     const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
                     if (particleAttachment) particlesToggle(particleAttachment, variant === "Gold" || variant === "Rainbow");

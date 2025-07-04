@@ -137,8 +137,8 @@ export default (world: World) => {
                             if (oldData.Produce[produceIndex].Amount <= 0) oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
 
                             // gives the player the produce
-                            createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1);
-                            logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: playerToGift.UserId })
+                            createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1)
+                            logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
                             routes.notify.sendTo({
@@ -331,6 +331,7 @@ export default (world: World) => {
 
                     // prints the sell message
                     printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
+                    logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
 
                     return oldData;
                 });
