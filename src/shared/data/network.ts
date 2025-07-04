@@ -435,7 +435,8 @@ export const sharedRoutes = (() => {
         playSound: {
             sound: instance as JingaNetType<Sound>,
             position: optional(vec3) as unknown as JingaNetType<Vector3 | undefined>,
-        } as JingaNetType<{ sound: Sound; position?: JingaNetType<Vector3 | undefined> }>,
+            pitch: optional(float32) as JingaNetType<number | undefined>,
+        } as JingaNetType<{ sound: Sound; position?: JingaNetType<Vector3 | undefined>; pitch?: number }>,
 
         shopGiftTo: instance as JingaNetType<Player>,
 

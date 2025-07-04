@@ -30,6 +30,22 @@ export default (world: World) => {
 
         // parents and plays it
         sound.Parent = goalParent
+
+        if (data.pitch !== undefined) {
+            let remainingPitch = data.pitch
+            while (remainingPitch > 2) {
+                const shift = new Instance("PitchShiftSoundEffect")
+                shift.Octave = 2
+                shift.Parent = sound
+                remainingPitch /= 2
+            }
+            if (remainingPitch !== 1) {
+                const shift = new Instance("PitchShiftSoundEffect")
+                shift.Octave = remainingPitch
+                shift.Parent = sound
+            }
+        }
+
         sound.Play()
         sound.Stopped.Connect(() => sound.Destroy())
     })

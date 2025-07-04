@@ -6,7 +6,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, CanQuery, Changed, CollectStreak, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -48,7 +48,17 @@ export default (world: World) => {
                         }
                         return oldData;
                     });
-                    routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined }, playerWhoTriggered);
+                    const now = os.clock();
+                    let streak = playerEntityWhoTriggered && world.get(playerEntityWhoTriggered, CollectStreak);
+                    if (streak && now - streak.lastTime <= 2) {
+                        streak.count += 1;
+                        streak.lastTime = now;
+                    } else {
+                        streak = { count: 1, lastTime: now };
+                    }
+                    if (playerEntityWhoTriggered) addComponent(playerEntityWhoTriggered, CollectStreak, streak);
+                    const pitch = math.clamp(1 + (streak.count - 1) * 0.1, 1, 2);
+                    routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined, pitch }, playerWhoTriggered);
                     removeComponent(villagerEntity as Entity, MaxedOut);
                 } else {
                     printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);
