@@ -215,7 +215,7 @@ export default (world: World) => {
 
         // if the villager is not being built and the camera is too far away then
         // if the villager is not being built and the camera is too far away then
-        if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) {
+        if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 200) {
             sleepTrack?.Stop(.1);
             productionTrack?.Stop(.1);
             return

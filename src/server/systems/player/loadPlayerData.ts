@@ -9,15 +9,13 @@ import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import routes from "server/routes";
 import { logTutorialStep, TutorialStep, logGameEvent, GameEvent } from "../../utils/analytics";
-import dailyRewards from "../../../shared/data/dailyRewards";
-import dailyQuests from "../../../shared/data/dailyQuests";
 
 
 
 // migrates the players data
 function migrateData(playerData: PlayerData): PlayerData {
     function update(newData: PlayerData): PlayerData {
-        const funcToUpdateData = migrations.get(playerData.Version)
+        const funcToUpdateData = migrations.get(newData.Version)
 
         // repeats the update until no more func
         if (funcToUpdateData) {
@@ -28,7 +26,7 @@ function migrateData(playerData: PlayerData): PlayerData {
     }
 
     // returns the update
-    return update(playerData)
+    return update(deepCopy(playerData) as PlayerData);
 }
 
 // loads the players data
@@ -44,7 +42,7 @@ export default (world: World) => {
             task.spawn(() => {
                 print("Loading Player Data for", player.Name)
                 let [playerData] = dataStore.GetAsync<PlayerData>(`${player.UserId}`)
-                
+
                 // if not player data then creates one
                 if (!playerData) {
                     playerData = deepCopy(defaultData)
@@ -67,7 +65,7 @@ export default (world: World) => {
                 logGameEvent(player, GameEvent.SessionStart, { session: sessions })
 
                 // sets their data
-                if ((player.GetRankInGroup(36086761) >= 254 || player.UserId < 0) && playerData.Tutorial !== "Done") playerData.Coins = 100000000000000
+                // if ((player.GetRankInGroup(36086761) >= 254 || player.UserId < 0) && playerData.Tutorial !== "Done") playerData.Coins = 1000
                 setPlayerData(player, migrateData(playerData))
                 print("Player Data Loaded for", player.Name)
             })

@@ -2,7 +2,7 @@ import wallsData from "./wallsData"
 import paths from "shared/utils/paths"
 
 const defaultData = {
-    Version: "0.0.3",
+    Version: "0.0.0",
     Coins: paths.Assets.Villagers.Farmer.GetAttribute<number>("Price") || 0,
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,

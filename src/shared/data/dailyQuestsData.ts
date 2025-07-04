@@ -6,7 +6,7 @@ export type DailyQuestInfo = {
     reward: number;
 };
 
-const dailyQuests: Array<DailyQuestInfo> = [
+export default [
     { id: 1, description: "Collect 3 wheat from a Farmer", target: 3, action: "collect", reward: 50 },
     { id: 2, description: "Deliver 2 wheat to a Baker", target: 2, action: "supply", reward: 60 },
     { id: 3, description: "Collect 4 ore from a Miner", target: 4, action: "collect", reward: 70 },
@@ -30,14 +30,12 @@ const dailyQuests: Array<DailyQuestInfo> = [
     { id: 21, description: "Gift a tool to another player", target: 1, action: "gift", reward: 190 },
     { id: 22, description: "Receive a gifted villager", target: 1, action: "misc", reward: 190 },
     { id: 23, description: "Visit a friend's village", target: 1, action: "misc", reward: 200 },
-    { id: 24, description: "Trade a Tier 1 produce item", target: 1, action: "gift", reward: 210 },
+    { id: 24, description: "Gift a Tier 1 produce item", target: 1, action: "gift", reward: 210 },
     { id: 25, description: "Help a friend by supplying their station", target: 1, action: "supply", reward: 210 },
     { id: 26, description: "Use the E key 20 times", target: 20, action: "collect", reward: 220 },
     { id: 27, description: "Claim 3 daily rewards in a row", target: 3, action: "misc", reward: 230 },
     { id: 28, description: "Be in a server with 3+ players", target: 3, action: "misc", reward: 230 },
     { id: 29, description: "Sell an item worth over $300", target: 1, action: "sell", reward: 240 },
     { id: 30, description: "Fully fill a Tier 2 station queue", target: 1, action: "supply", reward: 250 },
-];
-
-export default dailyQuests;
+] as Array<DailyQuestInfo>
 export type DailyQuest = DailyQuestInfo;

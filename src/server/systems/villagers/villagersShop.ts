@@ -326,6 +326,7 @@ export default (world: World) => {
                     if (oldData.Tutorial === 3 && soldWheat) {
                         oldData.Coins += 25;
                         oldData.Tutorial = "Done";
+                        print("Set Done")
                         logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                     }
 
@@ -366,6 +367,7 @@ export default (world: World) => {
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
                                     oldData.Coins += 25;
                                     oldData.Tutorial = "Done";
+                                    print("Set Donw")
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
                             }

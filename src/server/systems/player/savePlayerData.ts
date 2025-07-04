@@ -38,9 +38,7 @@ export default (world: World) => {
         }
         print(playerData)
         if (playerData) {
-            if (playerData.Tutorial !== "Done") {
-                logGameEvent(player, GameEvent.TutorialAbandoned, { step: playerData.Tutorial })
-            }
+            if (playerData.Tutorial !== "Done") logGameEvent(player, GameEvent.TutorialAbandoned, { step: playerData.Tutorial })
             task.spawn(() => dataStore.SetAsync(`${player.UserId}`, encodePlayerData(playerData)))
         }
     }

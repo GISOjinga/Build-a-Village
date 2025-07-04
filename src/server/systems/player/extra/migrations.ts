@@ -1,4 +1,5 @@
-import { PlayerData } from "shared/data/defaultData";
+import { deepCopy } from "@rbxts/object-utils";
+import defaultData, { PlayerData } from "shared/data/defaultData";
 
 export default new Map<string, (oldData: PlayerData) => PlayerData>([
     ["0.0.0", (oldData: PlayerData) => {
@@ -16,5 +17,5 @@ export default new Map<string, (oldData: PlayerData) => PlayerData>([
         oldData.DailyQuests = []
         oldData.QuestHistory = []
         return oldData
-    }]
+    }],
 ])

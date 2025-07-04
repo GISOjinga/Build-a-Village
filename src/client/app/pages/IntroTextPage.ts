@@ -54,13 +54,16 @@ export default (pagePaths: PagePaths) => {
         }))
 
         // when the intro text page is visible
-        newTrash.Add(tween.onComplete(() => {
+        const cleanUp = tween.onComplete(() => {
+            cleanUp()
             // tweens to the goal
             newTrash.Add(task.delay(introText.duration, () => {
                 tween.tween(0, { time: textToArray.size() * 0.02, style: Enum.EasingStyle.Linear })
-                newTrash.Add(tween.onComplete(() => newTrash.Destroy()))
+                newTrash.Add(() => pageStates.introText({ text: "", duration: 0 }))
+                newTrash.Add(tween.onComplete(() => pcall(() => newTrash.Destroy())))
             }));
-        }))
+        })
+        newTrash.Add(cleanUp)
     }))
 
     return trash

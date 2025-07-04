@@ -31,7 +31,8 @@ import friendRequest from "./systems/player/friendRequest";
 import friendsBonus from "./systems/promotions/friendsBonus";
 import freeRewardChest from "./systems/promotions/freeRewardChest";
 import updateLeaderboard from "./systems/leaderboard/updateLeaderboard";
-import dailyQuests from "./systems/player/dailyQuests";
+import dailyQuests from "./systems/dailyEvents/dailyQuests";
+import dailyRewards from "./systems/dailyEvents/dailyRewards";
 
 
 
@@ -72,6 +73,10 @@ setupMatter([
     // commands
     { system: commanderServer },
 
+    // daily events
+    { system: dailyQuests },
+    { system: dailyRewards },
+
     // data
     { system: updateData },
 
@@ -82,7 +87,6 @@ setupMatter([
     { system: loadCharacter },
     { system: loadPlayerData },
     { system: savePlayerData },
-    { system: dailyQuests },
     { system: confirmationPrompt },
     { system: friendRequest },
     { system: friendsBonus },

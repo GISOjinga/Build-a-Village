@@ -3,7 +3,8 @@ export type DailyReward =
     | { type: "Villager"; name: VillagerNames }
     | { type: "Produce"; name: ProduceNames };
 
-const dailyRewards: Array<DailyReward> = [
+
+export default [
     { type: "Coins", amount: 50 },
     { type: "Produce", name: "Wheat" },
     { type: "Coins", amount: 100 },
@@ -34,6 +35,4 @@ const dailyRewards: Array<DailyReward> = [
     { type: "Villager", name: "Alchemist" },
     { type: "Produce", name: "Potion" },
     { type: "Coins", amount: 1000 },
-];
-
-export default dailyRewards;
+] as Array<DailyReward>;
