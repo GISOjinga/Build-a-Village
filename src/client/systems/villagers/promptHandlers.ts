@@ -19,7 +19,7 @@ export default (world: World) => {
             if (villagerEntity) {
                 const villagerModel = villagerComp.villagerModel;
                 const owner = villagerComp.playerEntity === playerEntity;
-                const requirementPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt;
+                const requirementPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt;
 
                 // for collecting
                 villagerModel.Station.Parts.Resources.GetChildren().forEach((model, index) => {
@@ -61,7 +61,7 @@ export default (world: World) => {
                 const villagerModel = villagerComp.villagerModel;
                 const owner = villagerComp.playerEntity === playerEntity;
                 const required = villagerComp.villagerData.Progress.Required;
-                const requirementPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt;
+                const requirementPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt;
                 const totalResources = villagerComp.villagerData.Progress.Progression.Resources.size();
 
                 requirementPrompt.ActionText = (owner && required && required.Amount < required.Max)

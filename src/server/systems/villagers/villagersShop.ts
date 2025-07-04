@@ -320,7 +320,7 @@ export default (world: World) => {
                     oldData.Produce.clear();
 
                     if (oldData.Tutorial === 3 && soldWheat) {
-                        oldData.Coins += 50;
+                        oldData.Coins += 25;
                         oldData.Tutorial = "Done";
                         logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                     }
@@ -357,7 +357,7 @@ export default (world: World) => {
                                     oldData.Produce.remove(produceIndex); // removes the produce if the amount is 0
                                 }
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
-                                    oldData.Coins += 50;
+                                    oldData.Coins += 25;
                                     oldData.Tutorial = "Done";
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }

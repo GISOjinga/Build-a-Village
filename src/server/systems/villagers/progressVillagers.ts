@@ -71,7 +71,7 @@ export default (world: World) => {
                 const toolName = toolInHand && toolInHand.GetAttribute<ItemName>("ItemName");
                 if (toolType === "Commodity" && toolName === requiredResource.Produce) {
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
-                        const amountNeededToBeMaxedOut = requiredResource.Max - requiredResource.Amount;
+                        const amountNeededToBeMaxedOut = (requiredResource.Max - requiredResource.Amount) - oldData.Produce.size();
                         const produceIndex = oldData.Produce.findIndex((produce) => produce.Name === requiredResource.Produce);
                         const produce = oldData.Produce[produceIndex];
                         const amountToTakeAway = math.min(produce.Amount, amountNeededToBeMaxedOut);
@@ -105,7 +105,7 @@ export default (world: World) => {
         const buildingTimes = villagerData.Progress.Building
         const timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
         const hitBox = new Instance("Part")
-        const tier2ProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+        const tier2ProximityPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt
         const requiredResource = villagerData.Progress.Required
         const produceName = villagerData.Progress.Produce
 
@@ -204,7 +204,7 @@ export default (world: World) => {
         const resources = villagerData.Progress.Progression.Resources
         const progression = villagerData.Progress.Progression
         const totalResourcesSoFar = resources.size()
-        const requiredProximityPrompt = villagerModel.Station.Interaction.Collect.ProximityPrompt
+        const requiredProximityPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt
         const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
         const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
 

@@ -36,8 +36,9 @@ export default (world: World) => {
             const produce = progressionInfo && progressionInfo.Produce;
             const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
             const requiredProduceTime = progressionInfo && ((playerData?.Tutorial === 2 && villagerInfo.villagerData.Name === "Farmer") ? 5 : progressionInfo.Progression.Time.RequiredTimePerResource);
-            const totalRequireResources = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Amount) || 0
-            const requiredProduceName = (progressionInfo && progressionInfo.Required && progressionInfo.Required.Produce) || "";
+            const totalRequireResources = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Amount : undefined;
+            const requiredProduceName = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Produce : undefined;
+            const maxRequiredProduceAmount = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Max : undefined
             const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
             const timeTillNextProduce = progressionInfo && produceEndTime && produceEndTime - os.time() > 0 ? produceEndTime - os.time() : 0;
             const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
@@ -54,35 +55,32 @@ export default (world: World) => {
             // when the mouse hovers over a villager and sets the time till built
             // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
             // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
+            pageStates.queueInfo(totalRequireResources !== undefined ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
+
             if (villagerEntity && totalProduce === maxProduce) {
-                pageStates.queueInfo(`(${totalProduce}/${maxProduce}) ${produce} in queue`);
                 pageStates.hoverInfo({
                     visible: true,
                     info: `(${totalProduce}/${maxProduce}) ${produce} ready.`,
                 });
             } else if (timeTillFullyBuilt && villagerEntity && villagerInfo && timeTillFullyBuilt > 0) {
-                pageStates.queueInfo(`(${totalProduce}/${maxProduce}) ${produce} in queue`);
                 // printTS($line, "Villager is building: ", villagerEntity, "Produce: ", produce, "Time Till Fully Built: ", timeTillFullyBuilt);
                 pageStates.hoverInfo({
                     visible: true,
                     info: `Ready In ${formatToHHMMSS(timeTillFullyBuilt)}.`,
                 })
-            } else if (villagerEntity && requiredProduceName && totalRequireResources <= 0) {
-                pageStates.queueInfo(`(${totalProduce}/${maxProduce}) ${produce} in queue`);
+            } else if (totalRequireResources !== undefined && villagerEntity && requiredProduceName && totalRequireResources <= 0) {
                 // printTS($line, "Villager is waiting for produce: ", villagerEntity, "Required Produce: ", requiredProduceName);
                 pageStates.hoverInfo({
                     visible: true,
                     info: `Waiting on ${requiredProduceName}`,
                 })
             } else if (villagerEntity && timeTillNextProduce > 0) {
-                pageStates.queueInfo(`(${totalProduce}/${maxProduce}) ${produce} in queue`);
                 // printTS($line, "Villager is producing: ", villagerEntity, "Produce: ", produce, "Time Till Next Produce: ", timeTillNextProduce);
                 pageStates.hoverInfo({
                     visible: true,
                     info: `(${totalProduce}/${maxProduce}) ${produce} in ${formatToMMSS(timeTillNextProduce)}.`,
                 })
             } else if (!villagerEntity) {
-                pageStates.queueInfo("");
                 // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
                 pageStates.hoverInfo({
                     visible: false,

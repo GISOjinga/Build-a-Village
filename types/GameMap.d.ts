@@ -1,12 +1,364 @@
 type GameMap = Folder & {
 	Paths: Model;
-	Shops: Folder & {
-		Extra: Folder & {
-			["grass:2"]: Part;
-			Model: Model;
-			["grass:3"]: Part;
-			["grass:1"]: Part;
+	Floor: Part;
+	Platforms: Folder & {
+		Platform3: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
 		};
+		Platform6: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform5: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform4: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform1: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform2: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+	};
+	Shops: Folder & {
+		Extra: Folder;
 		King: Model & {
 			SpawnLocation: SpawnLocation;
 			Accessories: Model & {
@@ -252,361 +604,13 @@ type GameMap = Folder & {
 			};
 		};
 	};
-	Floor: Part;
-	Platforms: Folder & {
-		Platform3: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
+	FreeRewardChest: Folder & {
+		Chest: Model & {
+			Model: Model;
 		};
-		Platform6: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
+		ProximityHolder: Part & {
+			ClaimProximityPrompt: ProximityPrompt;
 		};
-		Platform5: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
-		};
-		Platform4: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
-		};
-		Platform1: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
-		};
-		Platform2: Folder & {
-			Earth: Model;
-			Fences: Model & {
-				["Evil Wall"]: Model;
-				["Castle Wall"]: Model;
-				["Wooden Fence"]: Model;
-				["Stone Wall"]: Model;
-				["Log Wall"]: Model;
-				["Ironwood Fence"]: Model;
-			};
-			Floor: Part;
-			Villagers: Folder;
-			BuySign: Model & {
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						Price: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						SubTitle: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-						None: TextLabel & {
-							UIStroke: UIStroke;
-						};
-					};
-				};
-			};
-			SpawnLocation: SpawnLocation & {
-				Texture: Texture;
-				t: Texture;
-			};
-			NameSign: Model & {
-				Thumbnail: Part & {
-					PlayerThumbnail: SurfaceGui & {
-						Frame: Frame & {
-							CanvasGroup: CanvasGroup & {
-								UICorner: UICorner;
-								image: ImageLabel;
-							};
-							bgin: ImageLabel;
-							PlayerThumbnail: LocalScript;
-							bgout: ImageLabel;
-						};
-					};
-				};
-				Container: Part & {
-					SurfaceGui: SurfaceGui & {
-						PlayerName: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						Title: TextLabel & {
-							UIStroke: UIStroke;
-						};
-						UIPadding: UIPadding;
-					};
-				};
-			};
-		};
+		GuiSpot: Part;
 	};
 }
