@@ -201,7 +201,6 @@ export default (world: World) => {
 
             // sets the start time to os.time
             progression.Time.StartTime = os.time();
-            print("Fixed start time for villager: ", villagerEntity, " with villager data: ", villagerData);
 
             // updates the villager component
             addComponent(villagerEntity as Entity, Villager, villagerComp);
