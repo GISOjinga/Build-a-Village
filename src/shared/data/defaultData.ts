@@ -9,6 +9,7 @@ const defaultData = {
     Tutorial: 0 as number | "Done",
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,
     PromoCodesRedeemed: [] as Array<string>,
+    ClaimedFreeRewardChest: false,
 }
 
 /**
