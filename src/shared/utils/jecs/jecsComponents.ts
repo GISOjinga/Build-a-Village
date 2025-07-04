@@ -256,6 +256,8 @@ export const ClientUiStates = component<PageStates>("ClientUiProducer", pageStat
 // counts down
 export const CountDown = component<number>("CountDown");
 export const DestroyAfterCounting = component<true | (() => void)>("DestroyAfterCounting");
+// track how many resources a player has collected in quick succession
+export const CollectStreak = component<{ count: number; lastTime: number }>("CollectStreak");
 
 /******************* Attachment *******************/
 // an attachment
