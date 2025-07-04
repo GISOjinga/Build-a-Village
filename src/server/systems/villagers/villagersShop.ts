@@ -8,7 +8,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { $line } from "rbxts-transformer-inline";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { getVillagersToRestock } from "./villagerAlgorithim";
-import { logTutorialStep, TutorialStep, logVillagerPurchase } from "../../utils/analytics";
+import { logTutorialStep, TutorialStep, logVillagerPurchase, logGameEvent, GameEvent } from "../../utils/analytics";
 import paths from "shared/utils/paths";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { deepCopy } from "@rbxts/object-utils";
@@ -138,6 +138,7 @@ export default (world: World) => {
 
                             // gives the player the produce
                             createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1);
+                            logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: playerToGift.UserId })
 
                             // notifys them both
                             routes.notify.sendTo({
@@ -308,10 +309,13 @@ export default (world: World) => {
                     // });
 
                     // loops through your produce tallys them up
+                    let earned = 0;
                     oldData.Produce.forEach((produceData) => {
                         const produceName = produceData.Name;
                         const variantMultiplier = (produceData.Variant === "Rainbow" ? 50 : produceData.Variant === "Gold" ? 10 : 1);
-                        oldData.Coins += math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier * produceData.Amount) + .5); // adds the coins from the produce
+                        const coins = math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier * produceData.Amount) + .5);
+                        oldData.Coins += coins;
+                        earned += coins;
                     });
 
                     // removes the villagers that arent spawned
@@ -330,6 +334,7 @@ export default (world: World) => {
 
                     return oldData;
                 });
+                logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
@@ -337,6 +342,7 @@ export default (world: World) => {
                 if (tool) {
                     const itemName = tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
                     const variant = tool.GetAttribute("ItemVariant") as ProduceVariant;
+                    let earned = 0;
 
                     // removes the item from the data
                     createEntity.updateData(playerEntity, (oldData) => {
@@ -352,7 +358,9 @@ export default (world: World) => {
                             printJecs($line, player.Name + " sold produce", itemName, "for", sellPrice || 0, "Coins");
                             if (produceIndex !== -1) {
                                 oldData.Produce[produceIndex].Amount -= 1; // reduces the amount of produce by 1
-                                oldData.Coins += math.floor(((sellPrice || 0) * cashMultiplier) + .5); // adds the coins from the produce
+                                const coins = math.floor(((sellPrice || 0) * cashMultiplier) + .5);
+                                oldData.Coins += coins; // adds the coins from the produce
+                                earned += coins;
                                 if (oldData.Produce[produceIndex].Amount === 0) {
                                     oldData.Produce.remove(produceIndex); // removes the produce if the amount is 0
                                 }
@@ -366,6 +374,7 @@ export default (world: World) => {
 
                         return oldData
                     })
+                    logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                 } else {
                     routes.npcDialogue.sendTo({
                         text: "You’re not holding anything to sell.",

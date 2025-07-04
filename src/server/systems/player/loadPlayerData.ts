@@ -8,7 +8,7 @@ import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import routes from "server/routes";
-import { logTutorialStep, TutorialStep } from "../../utils/analytics";
+import { logTutorialStep, TutorialStep, logGameEvent, GameEvent } from "../../utils/analytics";
 
 
 
@@ -42,7 +42,7 @@ export default (world: World) => {
             task.spawn(() => {
                 print("Loading Player Data for", player.Name)
                 let [playerData] = dataStore.GetAsync<PlayerData>(`${player.UserId}`)
-
+                
                 // if not player data then creates one
                 if (!playerData) {
                     playerData = deepCopy(defaultData)
@@ -51,6 +51,17 @@ export default (world: World) => {
                     print(playerData)
                     playerData = decodePlayerData(playerData as never)
                 }
+
+                const now = os.time()
+                const sessions = (playerData.Sessions || 0) + 1
+                if (playerData.LastLogin) {
+                    const days = math.floor((now - playerData.LastLogin) / (60 * 60 * 24))
+                    if (days >= 1) logGameEvent(player, GameEvent.ReturnDay1)
+                    if (days >= 7) logGameEvent(player, GameEvent.ReturnDay7)
+                }
+                playerData.Sessions = sessions
+                playerData.LastLogin = now
+                logGameEvent(player, GameEvent.SessionStart, { session: sessions })
 
                 // sets their data
                 if ((player.GetRankInGroup(36086761) >= 254 || player.UserId < 0) && playerData.Tutorial !== "Done") playerData.Coins = 100000000000000
