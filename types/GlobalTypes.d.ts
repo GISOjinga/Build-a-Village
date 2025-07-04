@@ -220,6 +220,9 @@ type ProduceData = {
     Variant: "Normal" | "Gold" | "Rainbow"
 }
 
+//* daily quest info
+type DailyQuestInfo = { description: string; progress: number; target: number }
+
 //* villager model
 type VillagerModel = Assets["Villagers"]["Farmer"];
 

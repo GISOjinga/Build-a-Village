@@ -11,12 +11,12 @@ const DAY_SECONDS = 60 * 60 * 24;
 
 export default (world: World) => {
     const updateClient = (player: Player, data: PlayerData) => {
-        const info = data.DailyQuests.map(q => {
+        const info = (data.DailyQuests.map(q => {
             const def = dailyQuests.find(d => d.id === q.id);
             if (!def) return undefined;
             return { description: def.description, progress: q.progress, target: q.target };
-        }).filter((v): v is { description: string; progress: number; target: number } => v !== undefined);
-        routes.updateDailyQuest.sendTo(info, player);
+        }) as unknown as Array<{ id: number; progress: number; target: number; assigned: number }>).filter((v): v is { id: number; progress: number; target: number; assigned: number } => v !== undefined);
+        routes.updateDailyQuest.sendTo(info as never, player);
     };
 
     const progress = (player: Player, action: string) => {
