@@ -7,6 +7,8 @@ const defaultData = {
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,
     Tutorial: 0 as number | "Done",
+    LastLogin: 0,
+    Sessions: 0,
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,
     PromoCodesRedeemed: [] as Array<string>,
     ClaimedFreeRewardChest: false,

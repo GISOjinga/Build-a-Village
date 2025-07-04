@@ -11,7 +11,7 @@ import { particlesToggle } from "shared/utils/functions/particlesFunctions";
 import { Added, Body, BodyHidden, Changed, NoBodyCollisions, ModelDebugger, Player, PlayerState, TargetEntity, Removed, Platform, Data } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { createInitialPlayerState } from "shared/utils/PlayerState";
-import { logTutorialStep, TutorialStep } from "../../utils/analytics";
+import { logTutorialStep, TutorialStep, logGameEvent, GameEvent } from "../../utils/analytics";
 
 
 // players and their shop page states
@@ -149,6 +149,12 @@ export default (world: World) => {
 
         if (shopName === "Buy" && data && data.Tutorial === 0) {
             logTutorialStep(player, TutorialStep.ShopOpened, "tutorial_shop_opened")
+        }
+
+        if (shopName === "Sell") {
+            logGameEvent(player, GameEvent.MerchantMenuOpened)
+        } else if (shopName === "Wall") {
+            logGameEvent(player, GameEvent.ArchitectMenuOpened)
         }
     })
 };
