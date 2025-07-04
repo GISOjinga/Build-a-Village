@@ -137,7 +137,7 @@ export default (world: World) => {
                             if (oldData.Produce[produceIndex].Amount <= 0) oldData.Produce = oldData.Produce.filter((p) => p.Name !== itemName);
 
                             // gives the player the produce
-                            createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1);
+                            createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1)
                             logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
@@ -335,6 +335,7 @@ export default (world: World) => {
 
                     return oldData;
                 });
+                logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
