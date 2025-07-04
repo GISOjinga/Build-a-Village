@@ -339,6 +339,7 @@ export const sharedRoutes = (() => {
                 Equipped: bool,
             }] as unknown as JingaNetType<WallInfo[]>,
             PromoCodesRedeemed: [str],
+            ClaimedFreeRewardChest: bool,
         }),
 
         // model debugger

@@ -29,6 +29,7 @@ import confirmationPrompt from "./systems/player/confirmationPrompt";
 import promoCodes from "./systems/promotions/promoCodes";
 import friendRequest from "./systems/player/friendRequest";
 import friendsBonus from "./systems/promotions/friendsBonus";
+import freeRewardChest from "./systems/promotions/freeRewardChest";
 import updateLeaderboard from "./systems/leaderboard/updateLeaderboard";
 
 
@@ -84,6 +85,7 @@ setupMatter([
     { system: friendRequest },
     { system: friendsBonus },
     { system: promoCodes },
+    { system: freeRewardChest },
 
     // robux store
     { system: robuxStore },
