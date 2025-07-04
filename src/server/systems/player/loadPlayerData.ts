@@ -61,6 +61,7 @@ export default (world: World) => {
                 }
                 playerData.Sessions = sessions
                 playerData.LastLogin = now
+
                 logGameEvent(player, GameEvent.SessionStart, { session: sessions })
 
                 // sets their data
