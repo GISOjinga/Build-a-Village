@@ -122,7 +122,6 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
         } : system);
         return acc
     }, new Array<SystemTable<[World]>>())
-    print(systems)
 
     // registers the world
     jabby.register({
