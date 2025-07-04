@@ -1,5 +1,4 @@
 import { copy } from "@rbxts/object-utils";
-import { createMotion } from "@rbxts/ripple";
 import { Workspace } from "@rbxts/services";
 
 // this will loop through all descendannts for particles and emit a certian amount
@@ -64,23 +63,23 @@ function updateParticlesKeypoints(percentile: number, property: "Size" | "Transp
     })
 }
 
-// particles tween to 0
-export function particlesTweenToZero(properties: ("Size" | "Transparency")[], particles: ParticleEmitter[], time: number) {
-    const originalSizeKeyPoints = properties.includes("Size") && getKeyPointsMapped(particles, "Size")
-    const originalTransparencyKeyPoints = properties.includes("Transparency") && getKeyPointsMapped(particles, "Transparency")
-    const fakeTween = createMotion(1, { start: true })
+// // particles tween to 0
+// export function particlesTweenToZero(properties: ("Size" | "Transparency")[], particles: ParticleEmitter[], time: number) {
+//     const originalSizeKeyPoints = properties.includes("Size") && getKeyPointsMapped(particles, "Size")
+//     const originalTransparencyKeyPoints = properties.includes("Transparency") && getKeyPointsMapped(particles, "Transparency")
+//     const fakeTween = createMotion(1, { start: true })
 
 
-    // for each step lerps each keypoint to 0
-    fakeTween.onStep((percentile) => {
-        // loops through all the particles and maps the original key points
-        if (originalSizeKeyPoints) updateParticlesKeypoints(percentile, "Size", originalSizeKeyPoints)
-        if (originalTransparencyKeyPoints) updateParticlesKeypoints(percentile, "Transparency", originalTransparencyKeyPoints)
-    })
+//     // for each step lerps each keypoint to 0
+//     fakeTween.onStep((percentile) => {
+//         // loops through all the particles and maps the original key points
+//         if (originalSizeKeyPoints) updateParticlesKeypoints(percentile, "Size", originalSizeKeyPoints)
+//         if (originalTransparencyKeyPoints) updateParticlesKeypoints(percentile, "Transparency", originalTransparencyKeyPoints)
+//     })
 
-    // when completed destroys itself
-    fakeTween.onComplete(() => fakeTween.destroy())
+//     // when completed destroys itself
+//     fakeTween.onComplete(() => fakeTween.destroy())
 
-    // plays the tween
-    fakeTween.tween(0, { time: time })
-}
+//     // plays the tween
+//     fakeTween.tween(0, { time: time })
+// }

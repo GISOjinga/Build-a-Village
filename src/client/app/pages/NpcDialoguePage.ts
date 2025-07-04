@@ -9,7 +9,7 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import useEffect from "../hooks/useEffect";
 import paths from "shared/utils/paths";
-import { createMotion } from "@rbxts/ripple";
+import { createTween } from "shared/utils/functions/tweenFunctions";
 
 
 
@@ -27,15 +27,16 @@ export default (dialoguePage: NpcDialogues) => {
         const sellTextLabel = dialoguePage.Sell.TextLabel;
         const wallTextLabel = dialoguePage.Wall.TextLabel;
         const npcDialogue = pageStates.npcDialogue();
-        const tween = newTrash.Add(createMotion(npcDialogue.target === "None" ? 1 : 0, { start: true }), "destroy")
+        const tween = newTrash.Add(createTween<number>(), "destroy")
         const textToArray = (npcDialogue.target === "None" ? buyTextLabel.Text : npcDialogue.text).split("");
+        const tweenInInfo = new TweenInfo(textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.02), Enum.EasingStyle.Linear, Enum.EasingDirection.InOut);
 
         // moves the intro text char by char
         dialoguePage.Enabled = true;
         buyTextLabel.Text = "";
         sellTextLabel.Text = "";
         wallTextLabel.Text = "";
-        tween.tween(npcDialogue.target === "None" ? 0 : 1, { time: textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.02), style: Enum.EasingStyle.Linear })
+        tween.Play(npcDialogue.target === "None" ? 1 : 0, npcDialogue.target === "None" ? 0 : 1, tweenInInfo)
 
         // when the intro text page is visible
         newTrash.Add(tween.onStep((progress) => {

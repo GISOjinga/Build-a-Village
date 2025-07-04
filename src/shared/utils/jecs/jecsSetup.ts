@@ -111,6 +111,19 @@ export const setupMatter = (systems: Array<SystemTable<[World]>> = [], tags: { [
     const startUpsOrdered = [Phases.PreStartup, Phases.Startup, Phases.PostStartup]
     if (RunService.IsServer()) jabby.broadcast_server()
 
+    systems = systems.reduce((acc, system) => {
+        const scriptToWatch = getInstanceByName(transformPath(debug.info(system.system, "s")[0]))
+        const systemName = scriptToWatch ? scriptToWatch.Name : "UnknownSystem"
+        const oldSystem = system.system
+        // print(systemName, scriptToWatch, transformPath(debug.info(system.system, "s")[0]))
+        acc.push(scriptToWatch ? {
+            ...system,
+            name: systemName,
+        } : system);
+        return acc
+    }, new Array<SystemTable<[World]>>())
+    print(systems)
+
     // registers the world
     jabby.register({
         name: "World " + (RunService.IsClient() ? "Client" : "Server"),

@@ -1,5 +1,4 @@
 import { copy } from "@rbxts/object-utils";
-import { createMotion } from "@rbxts/ripple";
 
 
 // loops through beams toggling their ennabledd
@@ -46,20 +45,20 @@ function updateBeamsKeypoints(percentile: number, property: "Transparency", orig
 }
 
 // beams tween to 0
-export function beamsTweenToZero(properties: ("Transparency")[], beams: Beam[], time: number) {
-    const originalTransparencyKeyPoints = properties.includes("Transparency") && getKeyPointsMapped(beams, "Transparency")
-    const fakeTween = createMotion(1, { start: true })
+// export function beamsTweenToZero(properties: ("Transparency")[], beams: Beam[], time: number) {
+//     const originalTransparencyKeyPoints = properties.includes("Transparency") && getKeyPointsMapped(beams, "Transparency")
+//     const fakeTween = createMotion(1, { start: true })
 
 
-    // for each step lerps each keypoint to 0
-    fakeTween.onStep((percentile) => {
-        // loops through all the beams and maps the original key points
-        if (originalTransparencyKeyPoints) updateBeamsKeypoints(percentile, "Transparency", originalTransparencyKeyPoints)
-    })
+//     // for each step lerps each keypoint to 0
+//     fakeTween.onStep((percentile) => {
+//         // loops through all the beams and maps the original key points
+//         if (originalTransparencyKeyPoints) updateBeamsKeypoints(percentile, "Transparency", originalTransparencyKeyPoints)
+//     })
 
-    // when completed destroys itself
-    fakeTween.onComplete(() => fakeTween.destroy())
+//     // when completed destroys itself
+//     fakeTween.onComplete(() => fakeTween.destroy())
 
-    // plays the tween
-    fakeTween.tween(0, { time: time })
-}
+//     // plays the tween
+//     fakeTween.tween(0, { time: time })
+// }

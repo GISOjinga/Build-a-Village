@@ -3,7 +3,6 @@ import { World } from "@rbxts/jecs";
 import paths from "shared/utils/paths";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { beamsTweenToZero } from "shared/utils/functions/beamsFunction";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
 

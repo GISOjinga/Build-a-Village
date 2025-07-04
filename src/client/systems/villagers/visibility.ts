@@ -1,4 +1,4 @@
-import { World } from "@rbxts/jecs";
+import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
 import { MarketplaceService, Players, Workspace } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
@@ -7,7 +7,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent, warnJecs, warnTS } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, ReplicatedComponent, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, ReplicatedComponent, systemQueue, TakeFromVillager, TargetEntity, Villager, VillagerAnimator, VillagerCooldown } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -154,6 +154,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
 
 export default (world: World) => {
     const camera = Workspace.Camera;
+    const delta = systemQueue.getDeltaTime()
     // when villager is added but not fully built then
     for (const [_, { villagerModel }] of world.query(Added(Villager))) Promise.try(() => {
         villagerModel.Destroying.Connect(() => {
@@ -208,10 +209,21 @@ export default (world: World) => {
         }
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
+    // loops through all villagers without cooldown
+    for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .1);
+
+    // loops through all villagers with cooldown and counts down the count down and remove it when it reaches 0
+    for (const [villagerEntity, cooldown] of world.query(VillagerCooldown)) {
+        if (cooldown > 0) {
+            addComponent(villagerEntity as Entity, VillagerCooldown, cooldown - delta);
+        } else {
+            removeComponent(villagerEntity as Entity, VillagerCooldown);
+        }
+    }
 
 
     // watches for changes
-    for (const [villagerClientEntity, villagerInfo, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager))) Promise.try(() => {
+    for (const [villagerClientEntity, villagerInfo, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager)).without(VillagerCooldown)) Promise.try(() => {
         const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
         const { villagerData, villagerModel } = villagerInfo;
         const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)

@@ -9,8 +9,8 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import useEffect from "../hooks/useEffect";
 import { addCommasEveryThreeDigits } from "shared/utils/functions/stringHelp";
-import { createMotion, tween } from "@rbxts/ripple";
 import paths from "shared/utils/paths";
+import { createTween } from "shared/utils/functions/tweenFunctions";
 
 
 
@@ -29,11 +29,12 @@ export default (pagePaths: PagePaths) => {
     trash.Add(useEffect((newTrash) => {
         const introText = pageStates.introText();
         const textToArray = introText.text.split("");
-        const tween = newTrash.Add(createMotion(0, { start: true }), "destroy")
+        const tweenInInfo = new TweenInfo(textToArray.size() * 0.01);
+        const tweenOutInfo = new TweenInfo(textToArray.size() * 0.01);
+        const tween = newTrash.Add(createTween<number>().Play(0, 1, tweenInInfo), "destroy")
 
         // moves the intro text char by char
         introTextPage.text.Text = "";
-        tween.tween(1, { time: textToArray.size() * 0.01, style: Enum.EasingStyle.Linear })
 
         // when the intro text page is visible
         newTrash.Add(tween.onStep((progress) => {
@@ -55,10 +56,10 @@ export default (pagePaths: PagePaths) => {
 
         // when the intro text page is visible
         const cleanUp = tween.onComplete(() => {
-            cleanUp()
+            cleanUp.Disconnect();
             // tweens to the goal
             newTrash.Add(task.delay(introText.duration, () => {
-                tween.tween(0, { time: textToArray.size() * 0.02, style: Enum.EasingStyle.Linear })
+                tween.Play(1, 0, tweenOutInfo)
                 newTrash.Add(() => pageStates.introText({ text: "", duration: 0 }))
                 newTrash.Add(tween.onComplete(() => pcall(() => newTrash.Destroy())))
             }));

@@ -13,10 +13,13 @@ import { Body, Changed, Data, HoverBoxAttachment, TargetEntity, Villager } from 
 // variables
 const player = Players.LocalPlayer
 const mouse = player.GetMouse()
+let goalLocation = Vector3.zero
 
 
 export default (world: World) => {
-    if (useThrottle(.01)) {
+    const hoverAttachment = world.get(HoverBoxAttachment, HoverBoxAttachment)!
+    if (useThrottle(.01) && pageStates.hoverInfo().visible) hoverAttachment.Position = hoverAttachment.Position.Lerp(goalLocation, 0.2);
+    if (useThrottle(.1)) {
         Promise.try(() => {
             const camera = Workspace.Camera;
             const clientEntity = getEntity.fromInstance(player);
@@ -24,7 +27,6 @@ export default (world: World) => {
             const playerData = clientEntity && world.get(clientEntity, Data);
             const platform = body && body.platform;
             const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
-            const hoverAttachment = world.get(HoverBoxAttachment, HoverBoxAttachment)!
             const target = platform && Tracer.ray(camera.CFrame.Position, !UserInputService.MouseEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 1000).useRaycastParams(rayParamsInclude([platform.Villagers])).run()
             const villagerPartHovered = villagers && target?.hit?.IsDescendantOf(villagers) && target.hit
             const villagerModel = villagerPartHovered && villagers?.GetChildren().find((child) => villagerPartHovered.IsDescendantOf(child)) as VillagerModel
@@ -47,7 +49,7 @@ export default (world: World) => {
 
             // when the mouse moves
             hoverAttachment.Name = "HoverBoxAttachment"
-            hoverAttachment.Position = (target?.hit && hoverAttachment.Position.Lerp(target.position, 0.2)) || hoverAttachment.Position
+            goalLocation = (target?.hit && target.position) || hoverAttachment.Position
 
             // when ever platform updates then
             if (useChange([platform]) && body && platform) hoverAttachment.Position = body.rootPart.Position
@@ -55,7 +57,11 @@ export default (world: World) => {
             // when the mouse hovers over a villager and sets the time till built
             // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
             // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
-            pageStates.queueInfo((totalRequireResources !== undefined && maxRequiredProduceAmount !== undefined && maxRequiredProduceAmount > totalRequireResources) ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
+            // when ever villager entity changes
+            if (useChange([villagerEntity, totalRequireResources, maxRequiredProduceAmount])) {
+                pageStates.queueInfo((totalRequireResources !== undefined && maxRequiredProduceAmount !== undefined && maxRequiredProduceAmount > totalRequireResources) ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
+            }
+
 
             if (villagerEntity && totalProduce === maxProduce) {
                 pageStates.hoverInfo({
@@ -80,7 +86,7 @@ export default (world: World) => {
                     visible: true,
                     info: `(${totalProduce}/${maxProduce}) ${produceName} in ${formatToMMSS(timeTillNextProduce)}.`,
                 })
-            } else if (!villagerEntity) {
+            } else if (!villagerEntity && pageStates.hoverInfo().visible) {
                 // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
                 pageStates.hoverInfo({
                     visible: false,
