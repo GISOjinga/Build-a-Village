@@ -55,7 +55,7 @@ export enum GameEvent {
     TutorialAbandoned = "tutorial_abandoned",
 }
 
-export function logGameEvent(player: Player | undefined, event: GameEvent, data?: unknown) {
-    printTS($line, `Logging event: ${event} for player: ${player?.Name ?? "Server"}`);
-    AnalyticsService.FireCustomEvent(player, event, data);
+export function logGameEvent(player: Player, event: GameEvent, data?: unknown) {
+    printTS($line, `Logging event: ${event} for player: ${player.Name}`);
+    AnalyticsService.LogCustomEvent(player, event, undefined, data);
 }
