@@ -209,16 +209,25 @@ export default (world: World) => {
     // watches for changes
     for (const [villagerClientEntity, villagerInfo, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager))) Promise.try(() => {
         const villagerEntity = world.get(villagerClientEntity, ReplicatedComponent);
+        const { villagerData, villagerModel } = villagerInfo;
+        const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
+        const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
+        const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
+        const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
 
         // if the villager is not being built and the camera is too far away then
-        if ((camera.CFrame.Position.sub(villagerInfo.villagerModel.GetPivot().Position)).Magnitude > 250) return;
+        // if the villager is not being built and the camera is too far away then
+        if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) {
+            sleepTrack?.Stop(.1);
+            productionTrack?.Stop(.1);
+            return
+        };
         // const oldChange = changedVillager.old
         // const newChange = changedVillager.new
         // const villagerInfo = newChange || oldChange;
 
         // if one of the changes
         if (villagerEntity) {
-            const { villagerData, villagerModel, playerEntity } = villagerInfo;
             const progress = villagerData.Progress
             const progression = progress.Progression
             const buildingTimes = progress.Building
@@ -232,15 +241,10 @@ export default (world: World) => {
             const requiredTimePerResource = progression.Time.RequiredTimePerResource
             const inProgressPercentile = totalTimeSinceLastResource / requiredTimePerResource
             const currentInProgressPhase = math.floor(math.max(1, maxInProgressPhases * inProgressPercentile));
-            const villagerAnimationFolder = paths.Assets.Animations.Villager.FindFirstChild(villagerData.Name)
-            const productionAnimation = villagerAnimationFolder?.FindFirstChild<Animation>("Production")
-            const productionTrack = productionAnimation && getAnimation(animator, productionAnimation)
-            const sleepTrack = getAnimation(animator, paths.Assets.Animations.Villager.Sleep)
             const requiredResource = progress.Required
             const forceSleep = (maxResources === totalResourcesSoFar) || (requiredResource && requiredResource.Amount < 1);
 
-            // if the villager is not being built and the camera is too far away then
-            if ((camera.CFrame.Position.sub(villagerModel.GetPivot().Position)).Magnitude > 250) return;
+
 
             // plays the idle animation
             if (productionTrack && sleepTrack) {
