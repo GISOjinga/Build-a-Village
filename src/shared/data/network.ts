@@ -322,6 +322,10 @@ export const sharedRoutes = (() => {
             Coins: uint32,
             LastLogin: uint32 as JingaNetType<number>,
             Sessions: uint32 as JingaNetType<number>,
+            DailyStreak: uint32 as JingaNetType<number>,
+            LastDailyReward: uint32 as JingaNetType<number>,
+            DailyQuests: [{ id: uint16, progress: uint16, target: uint16, assigned: uint32 }] as unknown as JingaNetType<Array<{ id: number; progress: number; target: number; assigned: number }>>,
+            QuestHistory: [uint16] as JingaNetType<number[]>,
             Villagers: [villagerStruct] as JingaNetType<VillagerData>[],
             Produce: [{
                 Name: str as JingaNetType<ProduceNames>,

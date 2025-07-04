@@ -6,7 +6,6 @@ import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunction
 import dailyQuests from "../../../shared/data/dailyQuests";
 import dailyRewards from "../../../shared/data/dailyRewards";
 import { PlayerData } from "../../../shared/data/defaultData";
-import type { ProduceNames } from "types/GlobalTypes";
 
 const DAY_SECONDS = 60 * 60 * 24;
 
@@ -16,7 +15,7 @@ export default (world: World) => {
             const def = dailyQuests.find(d => d.id === q.id);
             if (!def) return undefined;
             return { description: def.description, progress: q.progress, target: q.target };
-        }).filter(v => v !== undefined) as Array<{ description: string; progress: number; target: number }>;
+        }).filter((v): v is { description: string; progress: number; target: number } => v !== undefined);
         routes.updateDailyQuest.sendTo(info, player);
     };
 
@@ -84,7 +83,7 @@ export default (world: World) => {
                 }
                 old.DailyQuests = selected.map(q => ({ id: q.id, progress: 0, target: q.target, assigned: currentDay }));
                 selected.forEach(q => old.QuestHistory.push(q.id));
-                while (old.QuestHistory.size() > 7) old.QuestHistory.shift();
+                while (old.QuestHistory.size() > 21) old.QuestHistory.shift();
             }
             return old;
         });
