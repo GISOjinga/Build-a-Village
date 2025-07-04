@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent } from "shared/Plugin-Hook";
 import routes from "client/routes";
-import { getEntity, printJecs, warnJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, getEntity, printJecs, warnJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Changed, ReplicatedComponent, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
@@ -27,15 +27,29 @@ export default (world: World) => {
                 // for collecting
                 villagerModel.Station.Parts.Resources.GetChildren().forEach((model, index) => {
                     const proximityPromptPart = model.WaitForChild("ProximityPromptPart");
-                    const prompt = proximityPromptPart && (proximityPromptPart.FindFirstChild<ProximityPrompt>("ResourcesPrompt") || paths.Assets.ProximityPrompts.ResourcesPrompt.Clone());
+                    const prompt =
+                        proximityPromptPart &&
+                        (proximityPromptPart.FindFirstChild<ProximityPrompt>("ResourcesPrompt") ||
+                            paths.Assets.ProximityPrompts.ResourcesPrompt.Clone());
 
                     // set up
                     prompt.ActionText = owner ? "Collect" : "Steal";
+                    prompt.HoldDuration = 0;
+                    prompt.RequiresLineOfSight = false;
                     prompt.Parent = proximityPromptPart;
                     prompt.Enabled = model.GetAttribute("Ready") || false;
 
                     // when triggered
                     prompt.Triggered.Connect(() => {
+                        if (owner) {
+                            const resourceIndex = (tonumber(model.Name) || 0) - 1;
+                            if (resourceIndex > -1) {
+                                villagerComp.villagerData.Progress.Progression.Resources.remove(resourceIndex);
+                                model.SetAttribute("Ready", false);
+                                addComponent(clientVillagerEntity, Villager, { ...villagerComp });
+                                prompt.Enabled = false;
+                            }
+                        }
                         printJecs($line, `Collecting ${model.Name} from villager: `, villagerEntity);
                         routes.collectVillagerProduce.send({ villagerEntity, resourceModelName: model.Name as ProduceNames });
                     })
