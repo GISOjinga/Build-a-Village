@@ -41,3 +41,21 @@ export function logVillagerPurchase(player: Player, villager: VillagerNames) {
         AnalyticsService.LogFunnelStepEvent(player, "VillagerPurchase", session, step, villager);
     }
 }
+
+export enum GameEvent {
+    ArchitectMenuOpened = "architect_menu_opened",
+    MerchantMenuOpened = "merchant_menu_opened",
+    MerchantSale = "merchant_sale",
+    WallPurchased = "wall_purchased",
+    WallEquipped = "wall_equipped",
+    ItemGiftSent = "item_gift_sent",
+    SessionStart = "session_start",
+    ReturnDay1 = "return_day_1",
+    ReturnDay7 = "return_day_7",
+    TutorialAbandoned = "tutorial_abandoned",
+}
+
+export function logGameEvent(player: Player | undefined, event: GameEvent, data?: unknown) {
+    printTS($line, `Logging event: ${event} for player: ${player?.Name ?? "Server"}`);
+    AnalyticsService.FireCustomEvent(player, event, data);
+}

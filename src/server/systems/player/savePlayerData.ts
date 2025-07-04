@@ -8,6 +8,7 @@ import { dataStore, getPlayerData, setPlayerData } from "./extra/playersData";
 import { $line } from "rbxts-transformer-inline";
 import { printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { Villager } from "shared/utils/jecs/jecsComponents";
+import { logGameEvent, GameEvent } from "../../utils/analytics";
 
 
 print("Saving Player Data System Loaded")
@@ -36,7 +37,11 @@ export default (world: World) => {
             world.delete(entity)
         }
         print(playerData)
-        // if player data then set async
-        if (playerData) task.spawn(() => dataStore.SetAsync(`${player.UserId}`, encodePlayerData(playerData)))
+        if (playerData) {
+            if (playerData.Tutorial !== "Done") {
+                logGameEvent(player, GameEvent.TutorialAbandoned, { step: playerData.Tutorial })
+            }
+            task.spawn(() => dataStore.SetAsync(`${player.UserId}`, encodePlayerData(playerData)))
+        }
     }
 }
