@@ -9,7 +9,7 @@ import paths from "shared/utils/paths";
 task.spawn(() => ContentProvider.PreloadAsync(paths.Assets.Animations.GetDescendants().filter(asset => asset.IsA("Animation"))))
 
 // list of all animations
-export const savedAnimationTracks = new WeakMap<Animator, Map<Animation, AnimationTrack>>()
+export const savedAnimationTracks = new Map<Animator, Map<Animation, AnimationTrack>>()
 
 // to get the animation
 export function getAnimation(animator: Animator, animation: Animation): AnimationTrack | undefined {
@@ -54,6 +54,7 @@ export default (world: World) => {
             addComponent(entity, LoadingAnimations)
             addComponent(entity, VillagerAnimator, animator)
             savedAnimationTracks.set(animator, animations)
+            animator.Destroying.Once(() => savedAnimationTracks.delete(animator))
         }).catch((err) => warnJecs($line, "Error loading animations for villager: ", entity));
     }
 
@@ -81,6 +82,7 @@ export default (world: World) => {
             addComponent(entity, LoadingAnimations)
             addComponent(entity, LoadedAnimations)
             savedAnimationTracks.set(animator, animations)
+            animator.Destroying.Once(() => savedAnimationTracks.delete(animator))
         }).catch((err) => warnJecs($line, "Error loading animations for body: ", entity));
     }
 

@@ -6,7 +6,7 @@ import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { getAnimation } from "shared/systems/animator/loadAnimations";
 import { addComponent, createEntity, getEntity, printJecs, printTS, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
-import { ActiveVillagers, Added, Body, CanQuery, Changed, CollectStreak, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, TakeFromVillager, TargetEntity, Villager, VillagerAnimator } from "shared/utils/jecs/jecsComponents";
+import { ActiveVillagers, Added, Body, CanQuery, Changed, CollectStreak, Data, MaxedOut, ModelDebugger, Player, ProduceAll, Removed, systemQueue, TakeFromVillager, TargetEntity, Villager, VillagerAnimator, VillagerCooldown } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
@@ -22,6 +22,8 @@ const randomVariant = () => {
 
 
 export default (world: World) => {
+    const delta = systemQueue.getDeltaTime();
+
     // handle client requests
     useRoute(routes.collectVillagerProduce, ({ villagerEntity, resourceModelName }, playerWhoTriggered) => {
         const playerEntityWhoTriggered = getEntity.fromInstance(playerWhoTriggered);
@@ -207,8 +209,20 @@ export default (world: World) => {
         }
     }
 
+    // loops through all villagers without cooldown
+    for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .1);
+
+    // loops through all villagers with cooldown and counts down the count down and remove it when it reaches 0
+    for (const [villagerEntity, cooldown] of world.query(VillagerCooldown)) {
+        if (cooldown > 0) {
+            addComponent(villagerEntity as Entity, VillagerCooldown, cooldown - delta);
+        } else {
+            removeComponent(villagerEntity as Entity, VillagerCooldown);
+        }
+    }
+
     // takes the villager through its transitions
-    for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager)).without(MaxedOut)) {
+    for (const [villagerEntity, villagerComp, animator] of world.query(Villager, VillagerAnimator).with(CanQuery(Villager)).without(MaxedOut, VillagerCooldown)) {
         const playerData = world.get(villagerComp.playerEntity, Data);
         const { villagerData, villagerModel } = villagerComp;
         const requiredResource = villagerData.Progress.Required

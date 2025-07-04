@@ -131,6 +131,9 @@ export const Villager = component<{
     playerEntity: Entity,
 }>("Villager");
 
+// villager cooldown
+export const VillagerCooldown = component<number>("VillagerCooldown");
+
 // to produce all
 export const ProduceAll = component("ProduceAll");
 

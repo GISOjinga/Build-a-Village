@@ -31,7 +31,7 @@ import routes from "server/routes"
 
 
 // sets up a instance with a unique id path
-const registeredInstance = new WeakMap<Instance, { instance: Instance }>();
+const registeredInstance = new Map<Instance, { instance: Instance }>();
 
 export function setInstanceWithUniqueId(instance: Instance | undefined, uniqueIdPath: string[] = []): (string[]) | undefined {
     if (instance === game) return uniqueIdPath

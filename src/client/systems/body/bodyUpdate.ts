@@ -13,8 +13,7 @@ import paths from "shared/utils/paths";
 
 // variables
 const player = Players.LocalPlayer
-const giftingPrompts = new WeakMap<Player, ProximityPrompt>();
-const friendPrompts = new WeakMap<Player, ProximityPrompt>();
+const giftingPrompts = new Map<Player, ProximityPrompt>();
 
 export default (world: World) => {
     const kingIdle = paths.Assets.Animations.Shop.King;
@@ -87,6 +86,7 @@ export default (world: World) => {
         player?.SetAttribute("ClientId", clientEntity)
         if (player && player !== Players.LocalPlayer) {
             giftingPrompts.set(player, giftingPrompt)
+            player.Destroying.Once(() => giftingPrompts.delete(player))
             // friendPrompts.set(player, friendPrompt)
             giftingPrompt.Parent = body.rootPart
             // friendPrompt.Parent = body.rootPart

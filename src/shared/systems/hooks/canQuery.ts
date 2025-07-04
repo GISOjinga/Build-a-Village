@@ -6,7 +6,7 @@ import { Phases, Pending, pendingQuery, Villager } from "shared/utils/jecs/jecsC
 const defaultMax = 10
 
 const componentsMax = {
-    [Villager]: 5,
+    [Villager]: 2,
 }
 
 const queryData = new Map<Entity<unknown>, { queue: Entity[]; current: Entity[] }>()

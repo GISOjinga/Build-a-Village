@@ -31,7 +31,7 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 }
 
 type VillagerProgressState = { isBeingBuilt: boolean, hasMaxedResources: boolean, currentInProgressPhase: number, resources: Array<ProduceVariant>, produce: ProduceNames }
-const villageModelStates = new WeakMap<Instance, VillagerProgressState>();
+const villageModelStates = new Map<Instance, VillagerProgressState>();
 
 type CachedPartList = Instance[];
 type InProgressCache = { phase: number; parts: CachedPartList };
@@ -45,11 +45,11 @@ interface VillagerPartCache {
     resourceModels: { model: Model; parts: CachedPartList }[];
 }
 
-const villagerPartCaches = new WeakMap<VillagerModel, VillagerPartCache>();
+const villagerPartCaches = new Map<VillagerModel, VillagerPartCache>();
 
 type GroupVisibility = { visible: boolean; invis: number };
 type GroupVisibilityMap = Record<string, GroupVisibility>;
-const groupVisibilityCache = new WeakMap<VillagerModel, GroupVisibilityMap>();
+const groupVisibilityCache = new Map<VillagerModel, GroupVisibilityMap>();
 
 function cacheVillagerParts(villagerModel: VillagerModel): VillagerPartCache {
     let cache = villagerPartCaches.get(villagerModel);
@@ -156,6 +156,12 @@ export default (world: World) => {
     const camera = Workspace.Camera;
     // when villager is added but not fully built then
     for (const [_, { villagerModel }] of world.query(Added(Villager))) Promise.try(() => {
+        villagerModel.Destroying.Connect(() => {
+            villageModelStates.delete(villagerModel);
+            villagerPartCaches.delete(villagerModel);
+            groupVisibilityCache.delete(villagerModel);
+        })
+
         // loops through all the resource models and add their attachments
         villagerModel.Station.Parts.Resources.GetChildren<Model>().forEach((model) => {
             const resourcePartParticles = model.FindFirstChild<Part>("__ResourceParticles__") || new Instance("Part")

@@ -7,7 +7,7 @@ import { Changed, Data, Player, Removed, TargetEntity } from "shared/utils/jecs/
 
 
 // leader board instances
-const leaderStatsMapping = new WeakMap<Player, { Container: Folder, Coins: IntValue }>();
+const leaderStatsMapping = new Map<Player, { Container: Folder, Coins: IntValue }>();
 
 
 export default (world: World) => {

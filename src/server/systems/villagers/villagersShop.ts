@@ -38,7 +38,7 @@ const takeVillagerFromStock = (villagerName: VillagerNames, player: Player) => {
 }
 
 // a maping of a players stock
-const _playerStock = new WeakMap<Player, typeof ShopData.Villagers>();
+const _playerStock = new Map<Player, typeof ShopData.Villagers>();
 
 // to update stock
 function updatePlayersStock(updateFunc: (oldStock: Array<VillagerInfo>) => Array<VillagerInfo>, player: Player): void {
@@ -87,6 +87,11 @@ export default (world: World) => {
     for (const [_, player] of world.query(Added(Player))) {
         getPlayersStock(player);
         routes.updateRestockTime.sendTo(timeTillRestock, player);
+    }
+
+    // when player gets removed remove from stocks
+    for (const [_, player] of world.query(Removed(Player))) {
+        _playerStock.delete(player);
     }
 
 
