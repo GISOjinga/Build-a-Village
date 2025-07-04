@@ -10,6 +10,7 @@ import pageStates from "shared/utils/Animations/pageStates";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Changed, Data, GiftTo, Platform, PlatformOccupied, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+import { logGameEvent, GameEvent } from "../../utils/analytics";
 
 
 
@@ -60,6 +61,7 @@ export default (world: World) => {
                             Owned: true,
                             Equipped: true,
                         })
+                        logGameEvent(player, GameEvent.WallPurchased, { wall: wallWishingToBeBought.Name, currency: "Coins" })
                     } else {
                         // plays the purchase sound to the player
                         routes.playSound.sendTo({
@@ -103,6 +105,7 @@ export default (world: World) => {
                     });
                     return oldData;
                 });
+                logGameEvent(player, GameEvent.WallPurchased, { wall: wallWishingToBeBought.Name, currency: "Robux" })
             } else {
                 // plays the purchase sound to the player
                 routes.playSound.sendTo({
@@ -137,6 +140,7 @@ export default (world: World) => {
                     })
                     return oldData
                 })
+                logGameEvent(player, GameEvent.WallEquipped, { wall: wallToEquip.Name, equip: routeData.equip })
             }
         }
     })
