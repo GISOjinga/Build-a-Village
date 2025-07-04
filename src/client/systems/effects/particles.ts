@@ -15,13 +15,15 @@ const player = Players.LocalPlayer
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player)
 
-    // when player data changes and it sees that you collected a bew resource
+    // when data changes
     for (const [_, changedData] of world.query(Changed(Data))) {
-        const totalOldProduce = changedData.old?.Produce
-        const totalNewProduce = changedData.new?.Produce
+        const oldData = changedData.old
+        const newData = changedData.new
 
         // if body and total new produce is greeater than total old produce then
-        if (body && totalOldProduce && totalNewProduce) {
+        if (body && oldData && newData) {
+            const totalOldProduce = oldData.Produce
+            const totalNewProduce = newData.Produce
             const totalAmountOfNewProduce = totalNewProduce.reduce((acc, produce) => acc + produce.Amount, 0)
             const totalAmountOfOldProduce = totalOldProduce.reduce((acc, produce) => acc + produce.Amount, 0)
 
