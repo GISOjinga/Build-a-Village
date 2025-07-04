@@ -405,6 +405,8 @@ export const sharedRoutes = (() => {
 
         updateFriendsBonus: bool as JingaNetType<boolean>,
 
+        updateDailyQuest: unknown as JingaNetType<Array<{ description: string; progress: number; target: number }>>,
+
         sendFriendRequest: instance as JingaNetType<Player>,
 
         notify: {

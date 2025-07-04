@@ -42,6 +42,7 @@ import promotions from "./systems/ui/promotions";
 import tutorial from "./systems/tutorial/tutorial";
 import promptHandlers from "./systems/villagers/promptHandlers";
 import visibility from "./systems/villagers/visibility";
+import DailyQuestUI from "./app/DailyQuestUI";
 
 if (!game.IsLoaded()) game.Loaded.Wait()
 // variables for the ui
@@ -68,6 +69,7 @@ HoverBoxUI(hoverBoxUI)
 // sets up the npc dialogues
 npcDialogues.Parent = playerGui
 NpcDialogue(npcDialogues)
+DailyQuestUI()
 
 
 

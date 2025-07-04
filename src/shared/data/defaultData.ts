@@ -2,13 +2,17 @@ import wallsData from "./wallsData"
 import paths from "shared/utils/paths"
 
 const defaultData = {
-    Version: "0.0.0",
+    Version: "0.0.3",
     Coins: paths.Assets.Villagers.Farmer.GetAttribute<number>("Price") || 0,
     Villagers: [] as Array<VillagerData>,
     Produce: [] as Array<ProduceData>,
     Tutorial: 0 as number | "Done",
     LastLogin: 0,
     Sessions: 0,
+    DailyStreak: 0,
+    LastDailyReward: 0,
+    DailyQuests: [] as Array<{ id: number; progress: number; target: number; assigned: number }>,
+    QuestHistory: [] as Array<number>,
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,
     PromoCodesRedeemed: [] as Array<string>,
     ClaimedFreeRewardChest: false,
