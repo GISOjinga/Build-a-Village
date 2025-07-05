@@ -23,6 +23,7 @@ import progressVillagers from "./systems/villagers/progressVillagers";
 import placeVillagers from "./systems/villagers/placeVillagers";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
 import updateTools from "./systems/villagers/updateTools";
+import equipTool from "./systems/player/equipTool";
 import updateWalls from "./systems/walls/updateWalls";
 import robuxStore from "./systems/robuxStore/robuxStore";
 import confirmationPrompt from "./systems/player/confirmationPrompt";
@@ -101,6 +102,7 @@ setupMatter([
     { system: progressVillagers },
     { system: placeVillagers },
     { system: updateTools },
+    { system: equipTool },
 
     // walls
     { system: updateWalls },
