@@ -42,7 +42,6 @@ export default (world: World) => {
             const totalRequireResources = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Amount : undefined;
             const requiredProduceName = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Produce : undefined;
             const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
-            const maxRequiredProduceAmount = (progressionInfo && maxProduce && resources && resources.size() < maxProduce && progressionInfo.Required) ? (progressionInfo.Required.Max - resources.size()) : undefined
             const produceEndTime = produceStartTime && requiredProduceTime && produceStartTime + requiredProduceTime
             const timeTillNextProduce = progressionInfo && produceEndTime && produceEndTime - os.time() > 0 ? produceEndTime - os.time() : 0;
             const totalProduce = resources && resources.size();
@@ -58,8 +57,8 @@ export default (world: World) => {
             // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
             // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
             // when ever villager entity changes
-            if (useChange([villagerEntity, totalRequireResources, maxRequiredProduceAmount])) {
-                pageStates.queueInfo((totalRequireResources !== undefined && maxRequiredProduceAmount !== undefined && maxRequiredProduceAmount > totalRequireResources) ? `(${totalRequireResources}/${maxRequiredProduceAmount}) ${requiredProduceName} in queue` : "");
+            if (useChange([villagerEntity, totalRequireResources, maxProduce])) {
+                pageStates.queueInfo((totalRequireResources !== undefined && maxProduce !== undefined) ? `(${totalRequireResources}/${maxProduce}) ${requiredProduceName} in queue` : "");
             }
 
 

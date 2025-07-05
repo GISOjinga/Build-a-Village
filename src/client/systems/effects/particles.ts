@@ -6,6 +6,8 @@ import { particlesEmit } from "shared/utils/functions/particlesFunctions";
 import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data, Body } from "shared/utils/jecs/jecsComponents";
 import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import paths from "shared/utils/paths";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import routes from "client/routes";
 
 
 // variables
@@ -14,6 +16,27 @@ const player = Players.LocalPlayer
 // emits the particles
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player)
+
+    // listens for when the particle is called
+    useRoute(routes.playParticle, ({ particle: _particle, forceAmount, location }) => {
+        const particle = location ? _particle.Clone() : _particle
+
+        // if particle is an attachment with a location then clone and place
+        if (location && particle.IsA("Attachment")) {
+            particle.Parent = Workspace.Terrain
+
+            // places it
+            if (typeIs(location, "CFrame")) {
+                particle.CFrame = location
+            } else {
+                particle.Position = location
+            }
+
+            // emits it
+            particlesEmit(particle, forceAmount)
+            Debris.AddItem(particle, 10)
+        }
+    })
 
     // when data changes
     for (const [_, changedData] of world.query(Changed(Data))) {

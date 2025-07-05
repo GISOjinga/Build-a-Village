@@ -134,7 +134,9 @@ export default (world: World) => {
         // if platform and body then teleports the players rootpart to the platform spawn
         if (platform && body) {
             routes.togglePage.sendTo("None", player); // close sell menu if open
+            routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
             body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
+            routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
         }
     })
 
@@ -145,7 +147,11 @@ export default (world: World) => {
         const shopSpawn = paths.Map.Shops[shopName === "Buy" ? "King" : shopName === "Sell" ? "Merchant" : "Architect"].SpawnLocation
 
         // if platform and body then teleports the players rootpart to the platform spawn
-        if (body) body.rootPart.CFrame = shopSpawn.CFrame
+        if (body) {
+            routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
+            body.rootPart.CFrame = shopSpawn.CFrame
+            routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
+        }
 
         if (shopName === "Buy" && data && data.Tutorial === 0) {
             logTutorialStep(player, TutorialStep.ShopOpened, "tutorial_shop_opened")

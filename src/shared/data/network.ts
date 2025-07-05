@@ -31,7 +31,7 @@ type JingaNetType<T> =
     T extends string ? SerDes<string> :
     T extends number ? SerDes<number> :
     T extends boolean ? SerDes<boolean> :
-    T extends Instance ? SerDes<Instance> : // loose fallback
+    T extends Instance ? SerDes<T> : // loose fallback
     T;
 
 
@@ -307,7 +307,7 @@ export const sharedRoutes = (() => {
             animator: compInst as JingaNetType<Animator>,
             rootAttachment: compInst as JingaNetType<Attachment>,
             platform: optional(compInst as JingaNetType<BasePart>),
-        }),
+        }) as never,
 
         // villager
         Villager: componentRecord({
@@ -445,6 +445,13 @@ export const sharedRoutes = (() => {
             position: optional(vec3) as unknown as JingaNetType<Vector3 | undefined>,
             pitch: optional(float32) as JingaNetType<number | undefined>,
         } as JingaNetType<{ sound: Sound; position?: JingaNetType<Vector3 | undefined>; pitch?: number }>,
+
+        // to play a particle at a speific position
+        playParticle: {
+            particle: instance,
+            location: unknown,
+            forceAmount: optional(uint8),
+        } as JingaNetType<{ particle: BasePart | Attachment | ParticleEmitter; location?: Vector3 | CFrame | undefined, forceAmount?: number | undefined }>,
 
         shopGiftTo: instance as JingaNetType<Player>,
 
