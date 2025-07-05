@@ -1,10 +1,27 @@
 import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
+import { CollectionService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { PlayerData } from "shared/data/defaultData";
 import { printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, Changed, Data, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+
+const GOLD_TAG = "goldVariantTag";
+const RAINBOW_TAG = "rainbowVariantTag";
+
+function updateVariantTag(tool: Instance, variant: string | undefined) {
+    if (variant === "Gold") {
+        CollectionService.AddTag(tool, GOLD_TAG);
+        CollectionService.RemoveTag(tool, RAINBOW_TAG);
+    } else if (variant === "Rainbow") {
+        CollectionService.AddTag(tool, RAINBOW_TAG);
+        CollectionService.RemoveTag(tool, GOLD_TAG);
+    } else {
+        CollectionService.RemoveTag(tool, GOLD_TAG);
+        CollectionService.RemoveTag(tool, RAINBOW_TAG);
+    }
+}
 
 
 
@@ -39,6 +56,7 @@ export default (world: World) => {
                         const name = invTool.GetAttribute<string>("ItemName") || "";
                         const variant = invTool.GetAttribute<string>("ItemVariant") || "";
                         produceTools.set(`${name}|${variant}`, invTool);
+                        updateVariantTag(invTool, variant);
                     } else if (attrType === "DigTool") {
                         digTool = invTool;
                     }
@@ -85,6 +103,7 @@ export default (world: World) => {
                     const realTool = paths.Assets.Tools.Produce.FindFirstChild<Tool>(produceData.Name);
                     if (existing) {
                         existing.Name = `${produceData.Variant === 'Normal' ? produceData.Name : produceData.Variant + ' ' + produceData.Name} (${produceData.Amount})`;
+                        updateVariantTag(existing, produceData.Variant);
                     } else {
                         const tool = realTool ? realTool.Clone() : new Instance("Tool");
                         const variantParticles = paths.Assets.Particles.FindFirstChild(produceData.Variant)?.Clone();
@@ -97,6 +116,7 @@ export default (world: World) => {
                         if (variantParticles && partToplaceIn) variantParticles.Parent = partToplaceIn;
                         tool.Parent = backpack;
                         tool.Activated.Connect(() => {});
+                        updateVariantTag(tool, produceData.Variant);
                     }
                 });
                 produceTools.forEach((tool, key) => {
