@@ -1,6 +1,7 @@
 import { World } from "@rbxts/jecs";
 import routes from "server/routes";
-import { Data, Player, Added, TargetEntity, Body } from "shared/utils/jecs/jecsComponents";
+import { Data, Player, Added, TargetEntity, Body, Changed } from "shared/utils/jecs/jecsComponents";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { createEntity, getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { PlayerData } from "../../../shared/data/defaultData";
 import { $line } from "rbxts-transformer-inline";
@@ -38,13 +39,48 @@ const questChecks: { [id: number]: (d?: QuestDetails) => boolean } = {
     25: d => (d?.tier ?? 0) >= 2 && d?.filled === true,
 };
 
-export function progressDailyQuest(player: Player, action: string, details?: QuestDetails) {
+const countProduce = (data: PlayerData, name?: ProduceNames) => {
+    if (name) return data.Produce.filter(p => p.Name === name).reduce((a, b) => a + (b.Amount || 0), 0);
+    return data.Produce.reduce((a, b) => a + (b.Amount || 0), 0);
+};
+
+const countMutated = (data: PlayerData) => data.Produce.filter(p => p.Variant !== "Normal").reduce((a, b) => a + (b.Amount || 0), 0);
+
+const questTrackers: { [id: number]: (oldD: PlayerData, newD: PlayerData) => QuestDetails | undefined } = {
+    1: (o, n) => countProduce(n, "Wheat") > countProduce(o, "Wheat") ? { produce: "Wheat", villager: "Farmer" } : undefined,
+    2: (o, n) => countProduce(n, "Wheat") < countProduce(o, "Wheat") ? { produce: "Wheat", villager: "Baker" } : undefined,
+    3: (o, n) => countProduce(n, "Iron") > countProduce(o, "Iron") ? { produce: "Iron", villager: "Miner" } : undefined,
+    4: (o, n) => n.Coins > o.Coins && countProduce(n) < countProduce(o) ? {} : undefined,
+    5: () => undefined,
+    6: (o, n) => n.Villagers.filter(v => v.Progress.Building.TotalTime > 0).size() < o.Villagers.filter(v => v.Progress.Building.TotalTime > 0).size() ? {} : undefined,
+    7: (o, n) => n.Produce.some(p => p.Variant === "Rainbow") && !o.Produce.some(p => p.Variant === "Rainbow") ? { variant: "Rainbow" } : undefined,
+    8: (o, n) => countProduce(n) > countProduce(o) ? {} : undefined,
+    9: (o, n) => countProduce(o) > countProduce(n) ? { tier: 2 } : undefined,
+    10: (o, n) => countMutated(n) > countMutated(o) ? { variant: "Gold" } : undefined,
+    11: (o, n) => (o.Walls.find(w => w.Equipped)?.Name !== n.Walls.find(w => w.Equipped)?.Name) ? {} : undefined,
+    12: (o, n) => n.Walls.filter(w => w.Owned).size() >= 2 && n.Walls.filter(w => w.Owned).size() > o.Walls.filter(w => w.Owned).size() ? {} : undefined,
+    13: (o, n) => n.Walls.find(w => w.Equipped && w.Name === "Ironwood Fence") && !o.Walls.find(w => w.Equipped && w.Name === "Ironwood Fence") ? {} : undefined,
+    14: (o, n) => n.Walls.size() > o.Walls.size() ? {} : undefined,
+    15: (o, n) => n.Villagers.size() > o.Villagers.size() ? {} : undefined,
+    16: () => undefined,
+    17: () => undefined,
+    18: () => undefined,
+    19: (o, n) => countProduce(o) > countProduce(n) ? {} : undefined,
+    20: () => undefined,
+    21: (o, n) => countProduce(o) > countProduce(n) ? {} : undefined,
+    22: (o, n) => countProduce(n) > countProduce(o) ? {} : undefined,
+    23: () => undefined,
+    24: (o, n) => n.Coins > o.Coins && countProduce(o) > countProduce(n) ? { value: n.Coins - o.Coins } : undefined,
+    25: () => undefined,
+};
+
+function progressDailyQuest(player: Player, details?: QuestDetails) {
     const entity = getEntity.fromInstance(player);
     if (!entity) return;
     createEntity.updateData(entity, (old) => {
         for (const quest of old.DailyQuests) {
             const info = dailyQuestsData.find(q => q.id === quest.id);
-            if (!info || info.action !== action) continue;
+            if (!info) continue;
             const checker = questChecks[info.id];
             if (checker && !checker(details)) continue;
             if (quest.progress < quest.target) {
@@ -64,7 +100,7 @@ export function progressDailyQuest(player: Player, action: string, details?: Que
                 }
             }
         }
-        printJecs($line, `Progressing daily quests for ${player.Name}`, old.DailyQuests, action, details);
+        printJecs($line, `Progressing daily quests for ${player.Name}`, old.DailyQuests, details);
         updateClient(player, old);
         return old;
     });
@@ -101,4 +137,22 @@ export default (world: World) => {
             return old;
         });
     }
+
+    for (const [_, playerEntity, changed] of world.query(TargetEntity, Changed(Data))) {
+        const player = world.get(playerEntity, Player);
+        if (!player) continue;
+        const oldData = changed.old;
+        const newData = changed.new;
+        if (!oldData || !newData) continue;
+        for (const quest of newData.DailyQuests) {
+            const tracker = questTrackers[quest.id];
+            if (!tracker) continue;
+            const details = tracker(oldData, newData);
+            if (details) progressDailyQuest(player, details);
+        }
+    }
+
+    useRoute(routes.confirmSellOptions, (option, player) => {
+        if (option === "Option3") progressDailyQuest(player, {});
+    });
 };

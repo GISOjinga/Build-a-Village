@@ -12,7 +12,6 @@ import { logTutorialStep, TutorialStep, logVillagerPurchase, logGameEvent, GameE
 import paths from "shared/utils/paths";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { deepCopy } from "@rbxts/object-utils";
-import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 
 
 
@@ -144,7 +143,6 @@ export default (world: World) => {
 
                             // gives the player the produce
                             createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1)
-                            progressDailyQuest(playerGifting, "gift", { produce: itemName as ProduceNames })
                             logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
@@ -343,7 +341,6 @@ export default (world: World) => {
                     // prints the sell message
                     printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
-                    progressDailyQuest(player, "sell", { value: maxValue });
                     return oldData;
                 });
             } else if (option === "Option2") { // just sells the equipped tool
@@ -382,7 +379,6 @@ export default (world: World) => {
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
 
-                                progressDailyQuest(player, "sell", { value: math.floor(((sellPrice || 0) * cashMultiplier) + .5) })
                                 logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                             }
                         }
