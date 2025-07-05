@@ -2,7 +2,6 @@ import { Janitor } from "@rbxts/janitor";
 import { Players, UserInputService, RunService, StarterGui, Workspace } from "@rbxts/services";
 import routes from "client/routes";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
-import { InventoryUI } from "../ui/createInventoryPage";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import {
     hotbarTools,
@@ -73,7 +72,7 @@ export default (pagePaths: PagePaths) => {
             const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
             if (!dragged.slot) return;
             const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
-            const inventoryContainer = pagePaths.InventoryPage as unknown as InventoryUI | undefined;
+            const inventoryContainer = pagePaths.InventoryPage;
             const invFrame = inventoryContainer?.SlotsContainer as Frame | undefined;
             const invTarget = guiObjects.find((v: GuiObject) => invFrame && v.IsDescendantOf(invFrame) && v.IsA("Frame")) as Frame | undefined;
             if (invTarget && invFrame) {

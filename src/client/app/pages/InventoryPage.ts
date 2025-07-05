@@ -1,7 +1,6 @@
 import { Janitor } from "@rbxts/janitor";
 import { Players, TweenService, UserInputService } from "@rbxts/services";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
-import { InventoryUI } from "../ui/createInventoryPage";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
@@ -16,7 +15,7 @@ import {
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
-    const inventoryPage = pagePaths.InventoryPage as unknown as InventoryUI;
+    const inventoryPage = pagePaths.InventoryPage;
     const slotTemplate = inventoryPage.SlotsContainer.Sample as Frame;
     const slotsContainer = inventoryPage.SlotsContainer as Frame;
     const sortButtons = inventoryPage.SortButtons.GetChildren().filter((v: Instance): v is GuiButton => v.IsA("GuiButton")) as GuiButton[];

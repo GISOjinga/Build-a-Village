@@ -1,11 +1,5 @@
-export interface InventoryUI extends Frame {
-    SlotsContainer: Frame & {
-        Sample: Frame & {
-            ToolName: TextLabel;
-        };
-    };
-    SortButtons: Frame;
-}
+import { InventoryUI } from "shared/utils/Animations/pagePaths";
+
 
 export default function createInventoryPage(parent: ScreenGui): InventoryUI {
     const page = new Instance("Frame");

@@ -1834,14 +1834,25 @@ type Assets = Folder & {
 						WeldConstraint: WeldConstraint;
 					};
 				};
+				SFX: Model & {
+					Sleeping: Part & {
+						Weld: Weld;
+					};
+					InProduction: Part & {
+						Weld: Weld;
+					};
+					Impact: Part & {
+						Weld: Weld;
+					};
+				};
 				Particles: Model & {
 					Sleeping: Model;
-					InProgress: Model;
 					Impact: Model & {
 						Part: Part & {
 							Water: ParticleEmitter;
 						};
 					};
+					InProduction: Model;
 				};
 				Parts: Model & {
 					Resources: Model & {
@@ -2450,6 +2461,90 @@ type Assets = Folder & {
 			};
 			Viewports: Folder & {
 				mason: ViewportFrame;
+			};
+			Inventory: Frame & {
+				Hotbar: Frame & {
+					UIListLayout: UIListLayout;
+					SlotExample: ImageButton & {
+						UICorner: UICorner;
+						Key: TextLabel & {
+							UICorner: UICorner;
+							UIPadding: UIPadding;
+						};
+						UIAspectRatioConstraint: UIAspectRatioConstraint;
+						ToolName: TextLabel & {
+							UICorner: UICorner;
+							UIPadding: UIPadding;
+						};
+					};
+				};
+				Container: Frame & {
+					SortCategory: Frame & {
+						ByName: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+						ByRarity: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+						Amount: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+						UIListLayout: UIListLayout;
+						Produce: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+						Villagers: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+					};
+					UICorner: UICorner;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					TopBar: Frame & {
+						SearchBox: TextBox & {
+							UICorner: UICorner;
+						};
+						Title: TextLabel;
+						Close: TextButton & {
+							UICorner: UICorner;
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+					};
+					Grid: ScrollingFrame & {
+						ContainerFrame: Frame & {
+							UIGridLayout: UIGridLayout & {
+								UIAspectRatioConstraint: UIAspectRatioConstraint;
+							};
+							UIPadding: UIPadding;
+							ContainerExample: Frame & {
+								Clickable: TextButton & {
+									UICorner: UICorner;
+									UIPadding: UIPadding;
+								};
+							};
+						};
+						UICorner: UICorner;
+					};
+				};
 			};
 			DailyQuests: Frame & {
 				UIGradient: UIGradient;
