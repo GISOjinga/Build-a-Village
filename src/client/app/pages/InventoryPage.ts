@@ -74,7 +74,7 @@ export default (pagePaths: PagePaths) => {
     const refreshDisplay = () => {
         slotsContainer.GetChildren().forEach((c) => { if (c !== slotTemplate && c.IsA("Frame")) c.Destroy(); });
         applySort();
-        let tools = inventoryTools.slice();
+        let tools = [...inventoryTools];
         if (searchTerm.size() > 0) {
             const lower = searchTerm.lower();
             tools = tools.filter(t => t.Name.lower().find(lower) !== undefined);

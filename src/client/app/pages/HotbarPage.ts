@@ -66,7 +66,7 @@ export default (pagePaths: PagePaths) => {
             if (!dragged.slot) return;
             const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
             const inventoryContainer = pagePaths.InventoryPage;
-            const invFrame = inventoryContainer?.SlotsContainer as Frame | undefined;
+            const invFrame = inventoryContainer.Container
             const invTarget = guiObjects.find((v: GuiObject) => invFrame && v.IsDescendantOf(invFrame) && v.IsA("Frame")) as Frame | undefined;
             if (invTarget && invFrame) {
                 const toIndex = invTarget.GetAttribute("Index") as number;

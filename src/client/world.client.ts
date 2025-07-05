@@ -53,9 +53,8 @@ const gameUI = paths.Assets.UI.GameUI.Clone()
 const npcDialogues = paths.Assets.UI.NpcDialogues.Clone()
 
 // set up the UI
-const pages = pagePaths(gameUI)
 gameUI.Parent = playerGui
-GameUI(pages)
+GameUI(pagePaths(gameUI))
 
 // sets up dialogue sell
 dialogueSellUI.Parent = playerGui
