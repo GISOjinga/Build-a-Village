@@ -210,7 +210,7 @@ export default (world: World) => {
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
     // loops through all villagers without cooldown
-    for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .25);
+    for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .1);
 
     // loops through all villagers with cooldown and counts down the count down and remove it when it reaches 0
     for (const [villagerEntity, cooldown] of world.query(VillagerCooldown)) {

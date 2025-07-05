@@ -1,9 +1,9 @@
 import { World } from "@rbxts/jecs";
-import { useDestructor, useEvent, useThrottle } from "shared/Plugin-Hook";
+import { useDestructor, useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
 import { Debris, Players, Workspace } from "@rbxts/services";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { particlesEmit } from "shared/utils/functions/particlesFunctions";
-import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data } from "shared/utils/jecs/jecsComponents";
+import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data, Body } from "shared/utils/jecs/jecsComponents";
 import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import paths from "shared/utils/paths";
 
@@ -26,6 +26,19 @@ export default (world: World) => {
             const totalNewProduce = newData.Produce
             const totalAmountOfNewProduce = totalNewProduce.reduce((acc, produce) => acc + produce.Amount, 0)
             const totalAmountOfOldProduce = totalOldProduce.reduce((acc, produce) => acc + produce.Amount, 0)
+            const oldTutorial = oldData.Tutorial
+            const newTutorial = newData.Tutorial
+
+            // if old and new tutorial arent the same and new tutorial is done then do the surprise particles
+            if (oldTutorial !== newTutorial && newTutorial === "Done") {
+                const collectEffect = paths.Assets.Particles.Surprise.Clone()
+
+                // parents then places it at the body
+                collectEffect.Parent = Workspace.Terrain
+                collectEffect.CFrame = body.rootPart.CFrame
+                particlesEmit(collectEffect, 30)
+                Debris.AddItem(collectEffect, 5)
+            }
 
             // if it increased
             if (totalAmountOfNewProduce > totalAmountOfOldProduce) {
@@ -35,7 +48,7 @@ export default (world: World) => {
                 collectEffect.Parent = Workspace.Terrain
                 collectEffect.CFrame = body.rootPart.CFrame
                 particlesEmit(collectEffect)
-                Debris.AddItem(collectEffect, 10)
+                Debris.AddItem(collectEffect, 5)
             }
         }
     }

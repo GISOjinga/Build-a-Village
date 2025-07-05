@@ -2339,6 +2339,7 @@ type Assets = Folder & {
 		Collection: Attachment & {
 			Spark2: ParticleEmitter;
 		};
+		Surprise: Attachment;
 		Gold: Attachment & {
 			Glow: ParticleEmitter;
 			Star: ParticleEmitter;
