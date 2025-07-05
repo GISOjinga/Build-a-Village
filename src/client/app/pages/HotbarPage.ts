@@ -1,5 +1,5 @@
 import { Janitor } from "@rbxts/janitor";
-import { Players, UserInputService, RunService, StarterGui } from "@rbxts/services";
+import { Players, UserInputService, RunService, StarterGui, Workspace } from "@rbxts/services";
 import routes from "client/routes";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
@@ -36,7 +36,7 @@ export default (pagePaths: PagePaths) => {
     const dragged = { slot: undefined as TextButton | undefined, offset: new Vector2() };
 
     function getSlotCount() {
-        const width = workspace.CurrentCamera?.ViewportSize.X ?? 0;
+        const width = Workspace.CurrentCamera?.ViewportSize.X ?? 0;
         return width < 700 ? 3 : 5;
     }
 
@@ -69,15 +69,16 @@ export default (pagePaths: PagePaths) => {
         }));
 
         const finishDrag = (input: InputObject) => {
+            const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
             if (!dragged.slot) return;
-            const guiObjects = gameUI.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
+            const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
             const inventoryContainer = pagePaths.InventoryPage?.SlotsContainer as Frame | undefined;
-            const invTarget = guiObjects.find(v => inventoryContainer && v.IsDescendantOf(inventoryContainer) && v.IsA("Frame")) as Frame | undefined;
+            const invTarget = guiObjects.find((v: GuiObject) => inventoryContainer && v.IsDescendantOf(inventoryContainer) && v.IsA("Frame")) as Frame | undefined;
             if (invTarget && inventoryContainer) {
                 const toIndex = invTarget.GetAttribute("Index") as number;
                 moveHotbarToInv(index, toIndex ?? inventoryTools.size());
             } else {
-                const hotTarget = guiObjects.find(v => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
+                const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
                 if (hotTarget && hotTarget !== dragged.slot) {
                     const toIndex = hotTarget.GetAttribute("Index") as number;
                     swapHotbar(index, toIndex);

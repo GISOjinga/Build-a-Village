@@ -18,7 +18,7 @@ export default (pagePaths: PagePaths) => {
     const inventoryPage = pagePaths.InventoryPage;
     const slotTemplate = inventoryPage.SlotsContainer.Sample as Frame;
     const slotsContainer = inventoryPage.SlotsContainer as Frame;
-    const sortButtons = inventoryPage.SortButtons.GetChildren().filter((v) => v.IsA("GuiButton")) as GuiButton[];
+    const sortButtons = inventoryPage.SortButtons.GetChildren().filter((v: Instance): v is GuiButton => v.IsA("GuiButton")) as GuiButton[];
 
     const backpack = Players.LocalPlayer.FindFirstChild("Backpack") as Backpack | undefined;
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
@@ -34,7 +34,6 @@ export default (pagePaths: PagePaths) => {
         inventoryChanged.Fire();
     };
 
-    trash.Add(inventoryChanged.Connect(refreshDisplay));
 
     // display items
     const refreshDisplay = () => {
@@ -50,6 +49,8 @@ export default (pagePaths: PagePaths) => {
             setupDrag(slot, tool);
         });
     };
+
+    trash.Add(inventoryChanged.Connect(refreshDisplay));
 
     // drag setup
     const setupDrag = (slot: Frame, tool: Tool) => {
@@ -67,16 +68,17 @@ export default (pagePaths: PagePaths) => {
             TweenService.Create(dragged.slot, new TweenInfo(0.05), { Position: newPos }).Play();
         }));
         const endDrag = (input: InputObject) => {
+            const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
             if (!dragged.slot) return;
-            const guiObjects = inventoryPage.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
+            const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
             const hotbar = pagePaths.Page.FindFirstChild("Hotbar") as Frame | undefined;
-            const target = guiObjects.find((v) => v.IsDescendantOf(slotsContainer) && v.IsA("Frame")) as Frame | undefined;
+            const target = guiObjects.find((v: GuiObject) => v.IsDescendantOf(slotsContainer) && v.IsA("Frame")) as Frame | undefined;
             if (target && target !== dragged.slot) {
                 const fromIndex = slotsContainer.GetChildren().findIndex(c => c === dragged.slot);
                 const toIndex = target.GetAttribute("Index") as number;
                 if (fromIndex >= 0 && toIndex >= 0) swapInventory(fromIndex, toIndex);
             } else if (hotbar) {
-                const hotTarget = guiObjects.find((v) => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
+                const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
                 if (hotTarget) {
                     const fromIndex = slotsContainer.GetChildren().findIndex(c => c === dragged.slot);
                     const toIndex = hotTarget.GetAttribute("Index") as number;
@@ -98,19 +100,24 @@ export default (pagePaths: PagePaths) => {
     function applySort() {
         switch (activeSort) {
             case 0:
-                inventoryTools.sort((a, b) => a.Name < b.Name ? -1 : 1);
+                inventoryTools.sort((a, b) => a.Name < b.Name);
                 break;
             case 1:
-                inventoryTools.sort((a, b) => a.Name > b.Name ? -1 : 1);
+                inventoryTools.sort((a, b) => a.Name > b.Name);
                 break;
             case 2:
-                inventoryTools.sort((a, b) => a.CreationDate && b.CreationDate ? (a.CreationDate < b.CreationDate ? -1 : 1) : 0);
+                inventoryTools.sort((a, b) => a.Name.size() < b.Name.size());
                 break;
             case 3:
-                inventoryTools.sort((a, b) => a.ToolTip < b.ToolTip ? -1 : 1);
+                inventoryTools.sort((a, b) => a.Name.size() > b.Name.size());
                 break;
             case 4:
-                inventoryTools.reverse();
+                for (let i = 0; i < math.floor(inventoryTools.size() / 2); i++) {
+                    const j = inventoryTools.size() - 1 - i;
+                    const temp = inventoryTools[i];
+                    inventoryTools[i] = inventoryTools[j];
+                    inventoryTools[j] = temp;
+                }
                 break;
         }
     }
@@ -141,3 +148,4 @@ export default (pagePaths: PagePaths) => {
     reloadItems();
     return trash;
 };
+

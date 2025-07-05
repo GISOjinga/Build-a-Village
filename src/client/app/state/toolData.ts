@@ -6,6 +6,14 @@ export const hotbarTools: Tool[] = [];
 export const inventoryChanged = new Signal<() => void>();
 export const hotbarChanged = new Signal<() => void>();
 
+function splice<T>(arr: T[], start: number, deleteCount: number, ...items: T[]): T[] {
+    const removed: T[] = [];
+    for (let i = 0; i < deleteCount; i++) (removed as never[]).push(arr[start + i] as never);
+    for (let i = 0; i < deleteCount; i++) (arr as never[]).remove(start);
+    for (let i = items.size() - 1; i >= 0; i--) (arr as never[]).insert(start, items[i] as never);
+    return removed;
+}
+
 export function initialize(backpack: Backpack) {
     inventoryTools.clear();
     for (const child of backpack.GetChildren()) if (child.IsA("Tool")) inventoryTools.push(child);
@@ -22,28 +30,29 @@ export function setHotbarSize(size: number) {
 
 export function swapInventory(from: number, to: number) {
     if (from === to) return;
-    const [item] = inventoryTools.splice(from, 1);
-    inventoryTools.splice(to, 0, item);
+    const [item] = splice(inventoryTools, from, 1);
+    splice(inventoryTools, to, 0, item);
     inventoryChanged.Fire();
 }
 
 export function swapHotbar(from: number, to: number) {
     if (from === to) return;
-    const [item] = hotbarTools.splice(from, 1);
-    hotbarTools.splice(to, 0, item);
+    const [item] = splice(hotbarTools, from, 1);
+    splice(hotbarTools, to, 0, item);
     hotbarChanged.Fire();
 }
 
 export function moveInvToHotbar(invIndex: number, hotIndex: number) {
-    const [item] = inventoryTools.splice(invIndex, 1);
-    hotbarTools.splice(hotIndex, 0, item);
+    const [item] = splice(inventoryTools, invIndex, 1);
+    splice(hotbarTools, hotIndex, 0, item);
     inventoryChanged.Fire();
     hotbarChanged.Fire();
 }
 
 export function moveHotbarToInv(hotIndex: number, invIndex: number) {
-    const [item] = hotbarTools.splice(hotIndex, 1);
-    inventoryTools.splice(invIndex, 0, item);
+    const [item] = splice(hotbarTools, hotIndex, 1);
+    splice(inventoryTools, invIndex, 0, item);
     inventoryChanged.Fire();
     hotbarChanged.Fire();
 }
+
