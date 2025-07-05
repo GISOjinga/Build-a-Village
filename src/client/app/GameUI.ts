@@ -11,6 +11,8 @@ import IntroTextPage from "./pages/IntroTextPage";
 import PlacementPage from "./pages/PlacementPage";
 import PromoPage from "./pages/PromoPage";
 import InviteIncentivePage from "./pages/InviteIncentivePage";
+import InventoryPage from "./pages/InventoryPage";
+import HotbarPage from "./pages/HotbarPage";
 import routes from "client/routes";
 import pageStates from "shared/utils/Animations/pageStates";
 import ConfirmationPage from "./pages/ConfirmationPage";
@@ -27,6 +29,8 @@ export default (pagePaths: PagePaths) => {
                 GiftPage,
                 WallPage,
                 RobuxStorePage,
+                HotbarPage,
+                InventoryPage,
                 IntroTextPage,
                 PlacementPage,
                 ConfirmationPage,

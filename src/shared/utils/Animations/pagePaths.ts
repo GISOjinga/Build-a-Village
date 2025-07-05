@@ -4,6 +4,7 @@ const pagePaths = (page: GameUI) => {
         VillagersPage: page.Village,
         RobuxStore: page.RobuxStore,
         GiftPage: page.GiftList,
+        InventoryPage: page.Inventory,
         WallPage: page.Wall,
         PromoPage: page.PromoCode,
         IntroTextPage: page.Introtext,
