@@ -4,9 +4,9 @@ import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
 import routes from "client/routes";
 import { useChange, useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
-import { getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast } from "shared/utils/functions/rayFunctions";
-import { Added, Body, TargetEntity } from "shared/utils/jecs/jecsComponents";
+import { Added, Body, CanQuery, TargetEntity, WalkEffect } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 
 
@@ -58,6 +58,36 @@ export default (world: World) => {
     //         }
     //     }
     // })
+
+    // adds a walkeffect to body if without walkeffect
+    for (const [bodyEntity] of world.query(Body).without(WalkEffect)) addComponent(bodyEntity, WalkEffect, "Left")
+
+    // for each body
+    if (useThrottle(.1)) {
+        for (const [bodyEntity, { rootPart, humanoid, model }, selectedFootName] of world.query(Body, WalkEffect).with(CanQuery(Body))) {
+            const leftFoot = model.FindFirstChild<BasePart>("LeftFoot");
+            const rightFoot = model.FindFirstChild<BasePart>("RightFoot");
+
+            // if both feet then
+            if (leftFoot && rightFoot && humanoid.MoveDirection.Magnitude > 0) {
+                const selectedFoot = selectedFootName === "Left" ? leftFoot : rightFoot;
+                const footHeight = selectedFoot.Size.Y;
+                const footPosition = selectedFoot.Position;
+                const rayResults = Tracer.ray(footPosition, Vector3.yAxis, -((footHeight / 2) + 1)).useRaycastParams(Raycast.Include.Map).run();
+
+                // if it hit something then switch walk effect
+                if (rayResults.hit) {
+                    addComponent(bodyEntity, WalkEffect, selectedFootName === "Left" ? "Right" : "Left");
+                    createEntity.particle({
+                        particle: paths.Assets.Particles.WalkingEffects,
+                        color: new ColorSequence(rayResults.hit.Color),
+                        location: footPosition,
+                        forceAmount: math.random(10, 15)
+                    })
+                }
+            }
+        }
+    }
 
     // when a body is added, we add a proximity prompt to it
     for (const [_, clientEntity, body] of world.query(TargetEntity, Added(Body))) {

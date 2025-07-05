@@ -293,6 +293,17 @@ export const IncreaseParticlesSize = component<{
     delay: number,
 }>("IncreaseParticleSize");
 
+// to cast a particle
+export const CastParticle = component<{
+    particle: BasePart | Attachment | ParticleEmitter;
+    location?: Vector3 | CFrame | undefined,
+    color?: ColorSequence
+    forceAmount?: number | undefined
+}>("CastParticle");
+
+// walk effect
+export const WalkEffect = component<"Left" | "Right">("WalkEffect");
+
 
 export const componentsToReplicate = { Body, Villager, Data, ModelDebugger, ConfirmationPrompt };
 

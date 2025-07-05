@@ -1,11 +1,4 @@
 type SFXFolder = Folder & {
-	UI: Folder & {
-		singletype: Sound;
-		presssfx: Sound;
-		purchasepass: Sound;
-		hoversfx: Sound;
-		purchasefail: Sound;
-	};
 	GameMusic: Folder & {
 		SongC: Folder & {
 			Sound1: Sound;
@@ -29,5 +22,16 @@ type SFXFolder = Folder & {
 		SongF: Folder & {
 			Sound1: Sound;
 		};
+	};
+	UI: Folder & {
+		singletype: Sound;
+		presssfx: Sound;
+		purchasepass: Sound;
+		hoversfx: Sound;
+		purchasefail: Sound;
+	};
+	Effects: Folder & {
+		Bubble: Sound;
+		Teleport: Sound;
 	};
 }

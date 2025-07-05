@@ -13,8 +13,6 @@ import villagersProgressData from "shared/data/villagersProgressData";
 import routes from "server/routes";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
-
-
 // function to give random variant
 const randomVariant = () => {
     return math.random(1, 200) <= 1 ? "Rainbow" : math.random(1, 20) <= 1 ? "Gold" : "Normal"
@@ -34,6 +32,7 @@ export default (world: World) => {
 
         if (model && villagerInfo && playerEntityWhoTriggered && resourceIndex > -1) {
             const player = world.get(villagerInfo.playerEntity, Player);
+            const body = world.get(villagerInfo.playerEntity, Body);
             const variant = villagerInfo.villagerData.Progress.Progression.Resources[resourceIndex];
 
             if (variant) {
@@ -60,7 +59,8 @@ export default (world: World) => {
                     }
                     if (playerEntityWhoTriggered) addComponent(playerEntityWhoTriggered, CollectStreak, streak);
                     const pitch = math.clamp(1 + (streak.count - 1) * 0.1, 1, 2);
-                    routes.playSound.sendTo({ sound: paths.SFX.UI.purchasepass, position: undefined, pitch }, playerWhoTriggered);
+                    routes.playSound.sendTo({ sound: paths.SFX.Effects.Bubble, position: undefined, pitch }, playerWhoTriggered);
+                    routes.playParticle.sendToAll({ particle: variant === "Gold" ? paths.Assets.Particles.CollectionGold : variant === "Rainbow" ? paths.Assets.Particles.CollectionRainbow : paths.Assets.Particles.CollectionNormal, location: body?.rootPart.Position })
                     removeComponent(villagerEntity as Entity, MaxedOut);
                 } else {
                     printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);

@@ -2331,17 +2331,26 @@ type Assets = Folder & {
 		};
 	};
 	Particles: Part & {
+		WalkingEffects: Attachment & {
+			ParticleEmitter: ParticleEmitter;
+		};
+		CollectionRainbow: Attachment & {
+			Spark2: ParticleEmitter;
+		};
+		CollectionNormal: Attachment & {
+			Spark2: ParticleEmitter;
+		};
 		Gold: Attachment & {
 			Glow: ParticleEmitter;
 			Star: ParticleEmitter;
-		};
-		Collection: Attachment & {
-			Spark2: ParticleEmitter;
 		};
 		Rainbow: Attachment & {
 			Glare: ParticleEmitter;
 			Star: ParticleEmitter;
 			Glow: ParticleEmitter;
+		};
+		CollectionGold: Attachment & {
+			Spark2: ParticleEmitter;
 		};
 		Surprise: Attachment;
 		Poof: Attachment & {

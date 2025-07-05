@@ -106,7 +106,7 @@ function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts
         groupVisibilityCache.set(villagerModel, cache);
     }
     const current = cache[group];
-    if (!current || current.visible !== visible) {
+    if (!current || current.visible !== visible || current.invis !== invis) {
         // print("Count", group, current && current.visible, visible);
         parts.forEach((child) => toggleTransparency(child, visible, invis));
         cache[group] = { visible, invis: invis !== undefined ? invis : 1 };
@@ -119,7 +119,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
     if (!villageModelStates.has(villagerModel) || !deepEquals(oldState, newState)) {
         const parts = cacheVillagerParts(villagerModel);
 
-        if (!oldState) {
+        if (!oldState || newState.isBeingBuilt) {
             applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
             applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
             applyGroupVisibility(villagerModel, "npc", parts.npc, false);
@@ -132,6 +132,8 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
             applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false, .5);
             applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, false, .5);
 
+            // toggles the in progress parts
+            parts.inProgress.forEach(({ phase, parts: phaseParts }) => applyGroupVisibility(villagerModel, `inProgress_${phase}`, phaseParts, false));
         } else {
             applyGroupVisibility(villagerModel, "npc", parts.npc, true);
             applyGroupVisibility(villagerModel, "accessories", parts.accessories, true);
@@ -190,6 +192,10 @@ export default (world: World) => {
     const delta = systemQueue.getDeltaTime()
     // when villager is added but not fully built then
     for (const [_, { villagerModel }] of world.query(Added(Villager))) Promise.try(() => {
+        const location = villagerModel.GetPivot().Position;
+        createEntity.particle({ particle: paths.Assets.Particles.Poof, location: location, forceAmount: 50 })
+        villagerModel.Destroying.Connect(() => createEntity.particle({ particle: paths.Assets.Particles.Poof, location: location, forceAmount: 50 }))
+
         villagerModel.Destroying.Connect(() => {
             villageModelStates.delete(villagerModel);
             villagerPartCaches.delete(villagerModel);
@@ -326,6 +332,6 @@ export default (world: World) => {
                 produce: villagerData.Progress.Produce
             })
         }
-    }).catch((err) => warnTS($line, "Villager", "Error updating villager state", err));
+    }).catch((err) => warnJecs($line, "Villager", "Error updating villager state", err));
 
 }

@@ -110,6 +110,17 @@ function getUntakenNumber(villagersData: VillagerData[]): number {
 }
 
 export const createEntity = {
+    // particle
+    particle: (info:{ particle: BasePart | Attachment | ParticleEmitter; location?: Vector3 | CFrame | undefined, color?:ColorSequence, forceAmount?: number | undefined }) => {
+        const particleEntity = world.entity()
+
+        // sets the particle
+        addComponent(particleEntity, components.CastParticle, info)
+
+        // returns it
+        return particleEntity
+    },
+
     // confirmation prompt
     confirmationPrompt: (playerEntity: Entity, title: string, message:string, onConfirm: Callback, onDecline?: Callback) => {
         const player = world.get(playerEntity, components.Player)

@@ -3,8 +3,8 @@ import { useDestructor, useEvent, useMemo, useThrottle } from "shared/Plugin-Hoo
 import { Debris, Players, Workspace } from "@rbxts/services";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { particlesEmit } from "shared/utils/functions/particlesFunctions";
-import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data, Body } from "shared/utils/jecs/jecsComponents";
-import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data, Body, CastParticle, CanQuery } from "shared/utils/jecs/jecsComponents";
+import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import paths from "shared/utils/paths";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import routes from "client/routes";
@@ -13,17 +13,25 @@ import routes from "client/routes";
 // variables
 const player = Players.LocalPlayer
 
+
+
 // emits the particles
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player)
 
     // listens for when the particle is called
-    useRoute(routes.playParticle, ({ particle: _particle, forceAmount, location }) => {
+    useRoute(routes.playParticle, createEntity.particle)
+
+    // when cast particles are emitted
+    for (const [particleEntity, { particle: _particle, forceAmount, location, color }] of world.query(CastParticle).with(CanQuery(CastParticle))) {
         const particle = location ? _particle.Clone() : _particle
 
         // if particle is an attachment with a location then clone and place
         if (location && particle.IsA("Attachment")) {
             particle.Parent = Workspace.Terrain
+
+            // changes color
+            particle.GetDescendants().forEach(descendant => { if (descendant.IsA("ParticleEmitter") && color) { descendant.Color = color } })
 
             // places it
             if (typeIs(location, "CFrame")) {
@@ -36,7 +44,10 @@ export default (world: World) => {
             particlesEmit(particle, forceAmount)
             Debris.AddItem(particle, 10)
         }
-    })
+
+        // deletes the entity
+        world.delete(particleEntity)
+    }
 
     // when data changes
     for (const [_, changedData] of world.query(Changed(Data))) {
@@ -45,10 +56,6 @@ export default (world: World) => {
 
         // if body and total new produce is greeater than total old produce then
         if (body && oldData && newData) {
-            const totalOldProduce = oldData.Produce
-            const totalNewProduce = newData.Produce
-            const totalAmountOfNewProduce = totalNewProduce.reduce((acc, produce) => acc + produce.Amount, 0)
-            const totalAmountOfOldProduce = totalOldProduce.reduce((acc, produce) => acc + produce.Amount, 0)
             const oldTutorial = oldData.Tutorial
             const newTutorial = newData.Tutorial
 
@@ -60,17 +67,6 @@ export default (world: World) => {
                 collectEffect.Parent = Workspace.Terrain
                 collectEffect.CFrame = body.rootPart.CFrame
                 particlesEmit(collectEffect, 30)
-                Debris.AddItem(collectEffect, 5)
-            }
-
-            // if it increased
-            if (totalAmountOfNewProduce > totalAmountOfOldProduce) {
-                const collectEffect = paths.Assets.Particles.Collection.Clone()
-
-                // parents then places it at the body
-                collectEffect.Parent = Workspace.Terrain
-                collectEffect.CFrame = body.rootPart.CFrame
-                particlesEmit(collectEffect)
                 Debris.AddItem(collectEffect, 5)
             }
         }
