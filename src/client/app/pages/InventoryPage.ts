@@ -3,6 +3,7 @@ import { Players, TweenService, UserInputService } from "@rbxts/services";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
+import routes from "client/routes";
 import useEffect from "../hooks/useEffect";
 import {
     inventoryTools,
@@ -16,13 +17,27 @@ import {
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
     const inventoryPage = pagePaths.InventoryPage;
-    const slotTemplate = inventoryPage.SlotsContainer.Sample as Frame;
-    const slotsContainer = inventoryPage.SlotsContainer as Frame;
-    const sortButtons = inventoryPage.SortButtons.GetChildren().filter((v: Instance): v is GuiButton => v.IsA("GuiButton")) as GuiButton[];
+    const container = inventoryPage.Container;
+    const slotsContainer = container.Grid.ContainerFrame as Frame;
+    const slotTemplate = container.Grid.ContainerFrame.ContainerExample as Frame;
+    const searchBox = container.TopBar.SearchBox;
+    const sortFrame = container.SortCategory;
+    const sortButtons = [
+        sortFrame.ByName,
+        sortFrame.ByRarity,
+        sortFrame.Amount,
+        sortFrame.Produce,
+        sortFrame.Villagers,
+    ] as GuiButton[];
 
     const backpack = Players.LocalPlayer.FindFirstChild("Backpack") as Backpack | undefined;
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
     let activeSort = -1;
+    let searchTerm = "";
+    trash.Add(searchBox.GetPropertyChangedSignal("Text").Connect(() => {
+        searchTerm = searchBox.Text;
+        refreshDisplay();
+    }));
 
     const reloadItems = () => {
         if (!backpack) return;
@@ -38,13 +53,24 @@ export default (pagePaths: PagePaths) => {
     // display items
     const refreshDisplay = () => {
         slotsContainer.GetChildren().forEach((c) => { if (c !== slotTemplate && c.IsA("Frame")) c.Destroy(); });
-        inventoryTools.forEach((tool, index) => {
+        applySort();
+        let tools = inventoryTools.slice();
+        if (searchTerm.size() > 0) {
+            const lower = searchTerm.lower();
+            tools = tools.filter(t => t.Name.lower().find(lower) !== undefined);
+        }
+        tools.forEach((tool, index) => {
             const slot = slotTemplate.Clone();
             slot.Visible = true;
             slot.Name = `Slot${index}`;
             slot.SetAttribute("Index", index);
-            const label = slot.FindFirstChild("ToolName") as TextLabel | undefined;
-            if (label) label.Text = tool.Name;
+            const button = slot.FindFirstChild("Clickable") as TextButton | undefined;
+            if (button) {
+                button.Text = tool.Name;
+                trash.Add(UIUtilities.ButtonAction({ Button: button }, () => {
+                    routes.equipTool.send({ toolName: tool.Name });
+                }));
+            }
             slot.Parent = slotsContainer;
             setupDrag(slot, tool);
         });
@@ -54,7 +80,8 @@ export default (pagePaths: PagePaths) => {
 
     // drag setup
     const setupDrag = (slot: Frame, tool: Tool) => {
-        trash.Add(slot.InputBegan.Connect((input) => {
+        const button = slot.FindFirstChild("Clickable") as GuiButton | undefined || slot;
+        trash.Add(button.InputBegan.Connect((input) => {
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.UserInputType !== Enum.UserInputType.Touch) return;
             dragged.slot = slot;
             const absPos = input.Position;
@@ -100,16 +127,16 @@ export default (pagePaths: PagePaths) => {
     function applySort() {
         switch (activeSort) {
             case 0:
-                inventoryTools.sort((a, b) => a.Name < b.Name);
+                inventoryTools.sort((a, b) => a.Name < b.Name ? -1 : 1);
                 break;
             case 1:
-                inventoryTools.sort((a, b) => a.Name > b.Name);
+                inventoryTools.sort((a, b) => a.Name > b.Name ? -1 : 1);
                 break;
             case 2:
-                inventoryTools.sort((a, b) => a.Name.size() < b.Name.size());
+                inventoryTools.sort((a, b) => a.Name.size() - b.Name.size());
                 break;
             case 3:
-                inventoryTools.sort((a, b) => a.Name.size() > b.Name.size());
+                inventoryTools.sort((a, b) => b.Name.size() - a.Name.size());
                 break;
             case 4:
                 for (let i = 0; i < math.floor(inventoryTools.size() / 2); i++) {
@@ -139,7 +166,7 @@ export default (pagePaths: PagePaths) => {
     trash.Add(useEffect(() => {
         const open = pageStates.openPage();
         inventoryPage.Visible = open === "Inventory";
-        sortButtons.forEach(btn => btn.Visible = inventoryPage.Visible);
+        sortFrame.Visible = inventoryPage.Visible;
         if (open === "Inventory") reloadItems();
     }));
 
