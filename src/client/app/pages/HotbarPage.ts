@@ -69,8 +69,9 @@ export default (pagePaths: PagePaths) => {
         }));
 
         const finishDrag = (input: InputObject) => {
+            const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
             if (!dragged.slot) return;
-            const guiObjects = player.PlayerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
+            const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
             const inventoryContainer = pagePaths.InventoryPage?.SlotsContainer as Frame | undefined;
             const invTarget = guiObjects.find((v: GuiObject) => inventoryContainer && v.IsDescendantOf(inventoryContainer) && v.IsA("Frame")) as Frame | undefined;
             if (invTarget && inventoryContainer) {

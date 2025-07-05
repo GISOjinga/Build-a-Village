@@ -68,8 +68,9 @@ export default (pagePaths: PagePaths) => {
             TweenService.Create(dragged.slot, new TweenInfo(0.05), { Position: newPos }).Play();
         }));
         const endDrag = (input: InputObject) => {
+            const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
             if (!dragged.slot) return;
-            const guiObjects = Players.LocalPlayer.PlayerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
+            const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
             const hotbar = pagePaths.Page.FindFirstChild("Hotbar") as Frame | undefined;
             const target = guiObjects.find((v: GuiObject) => v.IsDescendantOf(slotsContainer) && v.IsA("Frame")) as Frame | undefined;
             if (target && target !== dragged.slot) {

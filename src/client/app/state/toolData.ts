@@ -8,9 +8,9 @@ export const hotbarChanged = new Signal<() => void>();
 
 function splice<T>(arr: T[], start: number, deleteCount: number, ...items: T[]): T[] {
     const removed: T[] = [];
-    for (let i = 0; i < deleteCount; i++) removed.push(arr[start + i]);
-    for (let i = 0; i < deleteCount; i++) arr.remove(start);
-    for (let i = items.size() - 1; i >= 0; i--) arr.insert(start, items[i]);
+    for (let i = 0; i < deleteCount; i++) (removed as never[]).push(arr[start + i] as never);
+    for (let i = 0; i < deleteCount; i++) (arr as never[]).remove(start);
+    for (let i = items.size() - 1; i >= 0; i--) (arr as never[]).insert(start, items[i] as never);
     return removed;
 }
 
