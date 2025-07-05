@@ -12,6 +12,7 @@ import { logTutorialStep, TutorialStep, logVillagerPurchase, logGameEvent, GameE
 import paths from "shared/utils/paths";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { deepCopy } from "@rbxts/object-utils";
+import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 
 
 
@@ -143,6 +144,7 @@ export default (world: World) => {
 
                             // gives the player the produce
                             createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1)
+                            progressDailyQuest(playerGifting, "gift")
                             logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
@@ -340,6 +342,7 @@ export default (world: World) => {
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
                     return oldData;
                 });
+                progressDailyQuest(player, "sell");
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
@@ -380,6 +383,7 @@ export default (world: World) => {
 
                         return oldData
                     })
+                    progressDailyQuest(player, "sell")
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                 } else {
                     routes.npcDialogue.sendTo({
