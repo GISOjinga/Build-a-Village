@@ -2331,18 +2331,21 @@ type Assets = Folder & {
 		};
 	};
 	Particles: Part & {
+		Gold: Attachment & {
+			Glow: ParticleEmitter;
+			Star: ParticleEmitter;
+		};
+		Collection: Attachment & {
+			Spark2: ParticleEmitter;
+		};
 		Rainbow: Attachment & {
 			Glare: ParticleEmitter;
 			Star: ParticleEmitter;
 			Glow: ParticleEmitter;
 		};
-		Collection: Attachment & {
-			Spark2: ParticleEmitter;
-		};
 		Surprise: Attachment;
-		Gold: Attachment & {
-			Glow: ParticleEmitter;
-			Star: ParticleEmitter;
+		Poof: Attachment & {
+			Frost: ParticleEmitter;
 		};
 	};
 	UI: Folder & {
