@@ -258,10 +258,7 @@ export default (world: World) => {
                     progression.Resources.push(randomVariant());
 
                     // takes away from required
-                    if (requiredResource) {
-                        print("TookAway")
-                        requiredResource.Amount -= 1
-                    }
+                    if (requiredResource) requiredResource.Amount -= 1
 
                     // updates the start time
                     progression.Time.StartTime = os.time() - math.max((totalTimeSinceLastResource - requiredTimePerResource), 0);
