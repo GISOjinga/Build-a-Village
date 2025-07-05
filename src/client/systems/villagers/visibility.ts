@@ -321,7 +321,7 @@ export default (world: World) => {
             updateVillagerState(villagerModel, {
                 isBeingBuilt,
                 hasMaxedResources,
-                currentInProgressPhase: hasMaxedResources ? 0 : currentInProgressPhase,
+                currentInProgressPhase: hasMaxedResources ? 1 : currentInProgressPhase,
                 resources: progression.Resources,
                 produce: villagerData.Progress.Produce
             })
