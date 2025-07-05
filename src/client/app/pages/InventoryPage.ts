@@ -4,6 +4,13 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
+import {
+    inventoryTools,
+    inventoryChanged,
+    moveInvToHotbar,
+    swapInventory,
+    hotbarTools,
+} from "../state/toolData";
 
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
@@ -15,26 +22,28 @@ export default (pagePaths: PagePaths) => {
 
     const backpack = Players.LocalPlayer.FindFirstChild("Backpack") as Backpack | undefined;
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
-    const items = new Array<Tool>();
+    let activeSort = -1;
 
-    // load current items
     const reloadItems = () => {
-        items.clear();
         if (!backpack) return;
+        inventoryTools.clear();
         backpack.GetChildren().forEach((child) => {
-            if (child.IsA("Tool")) items.push(child);
+            if (child.IsA("Tool")) inventoryTools.push(child);
         });
-        items.sort((a, b) => a.Name < b.Name ? -1 : 1);
-        refreshDisplay();
+        applySort();
+        inventoryChanged.Fire();
     };
+
+    trash.Add(inventoryChanged.Connect(refreshDisplay));
 
     // display items
     const refreshDisplay = () => {
         slotsContainer.GetChildren().forEach((c) => { if (c !== slotTemplate && c.IsA("Frame")) c.Destroy(); });
-        items.forEach((tool, index) => {
+        inventoryTools.forEach((tool, index) => {
             const slot = slotTemplate.Clone();
             slot.Visible = true;
             slot.Name = `Slot${index}`;
+            slot.SetAttribute("Index", index);
             const label = slot.FindFirstChild("ToolName") as TextLabel | undefined;
             if (label) label.Text = tool.Name;
             slot.Parent = slotsContainer;
@@ -60,20 +69,25 @@ export default (pagePaths: PagePaths) => {
         const endDrag = (input: InputObject) => {
             if (!dragged.slot) return;
             const guiObjects = inventoryPage.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
+            const hotbar = pagePaths.Page.FindFirstChild("Hotbar") as Frame | undefined;
             const target = guiObjects.find((v) => v.IsDescendantOf(slotsContainer) && v.IsA("Frame")) as Frame | undefined;
             if (target && target !== dragged.slot) {
-                const fromIndex = items.findIndex((t) => t.Name === (dragged.slot!.FindFirstChild("ToolName") as TextLabel).Text);
-                const toIndex = items.findIndex((_, i) => target.Name === `Slot${i}`);
-                if (fromIndex >= 0 && toIndex >= 0) {
-                    const [removed] = items.splice(fromIndex, 1);
-                    items.splice(toIndex, 0, removed);
+                const fromIndex = slotsContainer.GetChildren().findIndex(c => c === dragged.slot);
+                const toIndex = target.GetAttribute("Index") as number;
+                if (fromIndex >= 0 && toIndex >= 0) swapInventory(fromIndex, toIndex);
+            } else if (hotbar) {
+                const hotTarget = guiObjects.find((v) => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
+                if (hotTarget) {
+                    const fromIndex = slotsContainer.GetChildren().findIndex(c => c === dragged.slot);
+                    const toIndex = hotTarget.GetAttribute("Index") as number;
+                    moveInvToHotbar(fromIndex, toIndex ?? hotbarTools.size());
                 }
             }
             dragged.slot.Position = slotTemplate.Position;
             dragged.slot.Parent = slotsContainer;
             dragged.slot.ZIndex = slotTemplate.ZIndex;
             dragged.slot = undefined;
-            refreshDisplay();
+            inventoryChanged.Fire();
         };
         trash.Add(UserInputService.InputEnded.Connect((input) => {
             if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch) endDrag(input);
@@ -81,25 +95,36 @@ export default (pagePaths: PagePaths) => {
     };
 
     // sort buttons
+    function applySort() {
+        switch (activeSort) {
+            case 0:
+                inventoryTools.sort((a, b) => a.Name < b.Name ? -1 : 1);
+                break;
+            case 1:
+                inventoryTools.sort((a, b) => a.Name > b.Name ? -1 : 1);
+                break;
+            case 2:
+                inventoryTools.sort((a, b) => a.CreationDate && b.CreationDate ? (a.CreationDate < b.CreationDate ? -1 : 1) : 0);
+                break;
+            case 3:
+                inventoryTools.sort((a, b) => a.ToolTip < b.ToolTip ? -1 : 1);
+                break;
+            case 4:
+                inventoryTools.reverse();
+                break;
+        }
+    }
+
     sortButtons.forEach((button, index) => {
         trash.Add(UIUtilities.ButtonAction({ Button: button }, () => {
-            switch (index) {
-                case 0:
-                    items.sort((a, b) => a.Name < b.Name ? -1 : 1);
-                    break;
-                case 1:
-                    items.sort((a, b) => a.Name > b.Name ? -1 : 1);
-                    break;
-                case 2:
-                    items.sort((a, b) => a.CreationDate && b.CreationDate ? (a.CreationDate < b.CreationDate ? -1 : 1) : 0);
-                    break;
-                case 3:
-                    items.sort((a, b) => a.ToolTip < b.ToolTip ? -1 : 1);
-                    break;
-                default:
-                    items.reverse();
+            if (activeSort === index) {
+                activeSort = -1;
+                reloadItems();
+            } else {
+                activeSort = index;
+                applySort();
             }
-            refreshDisplay();
+            inventoryChanged.Fire();
         }));
     });
 
@@ -107,6 +132,7 @@ export default (pagePaths: PagePaths) => {
     trash.Add(useEffect(() => {
         const open = pageStates.openPage();
         inventoryPage.Visible = open === "Inventory";
+        sortButtons.forEach(btn => btn.Visible = inventoryPage.Visible);
         if (open === "Inventory") reloadItems();
     }));
 
