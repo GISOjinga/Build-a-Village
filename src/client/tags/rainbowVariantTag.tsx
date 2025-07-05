@@ -25,21 +25,17 @@ const RAINBOW_COLORS = [
 
 const rainbowTweens = new Map<Instance, Janitor>();
 
-function createLoop(part: BasePart, colors: readonly Color3[], janitor: Janitor) {
-    let index = 0;
-    const info = new TweenInfo(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut);
+function createLoop(part: BasePart, colors: readonly Color3[], trash: Janitor) {
     let rainbowColorsClone = [...RAINBOW_COLORS]
     part.Material = Enum.Material.Neon; // Set the material to Neon for better visibility
     const step = () => {
+        const info = new TweenInfo((math.random() * 2) + .5, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut);
         const nextIndex = math.floor(math.random() * rainbowColorsClone.size())
-        const tween = TweenService.Create(part, info, { Color: colors[nextIndex] });
+        const tween = trash.Add(TweenService.Create(part, info, { Color: colors[nextIndex] }));
         rainbowColorsClone.remove(nextIndex);
         if (rainbowColorsClone.size() === 0) rainbowColorsClone = [...RAINBOW_COLORS];
-        janitor.Add(tween);
-        const conn = tween.Completed.Connect(step);
-        janitor.Add(conn);
+        trash.Add(tween.Completed.Connect(step))
         tween.Play();
-        index = nextIndex;
     };
     part.Color = colors[0];
     part.SetAttribute("OriginalColor", part.GetAttribute("OriginalColor") || part.Color);
@@ -56,18 +52,18 @@ function startTweens(instance: Instance) {
 }
 
 function stopTweens(instance: Instance) {
+    const info = new TweenInfo(0.8, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut);
     const janitor = rainbowTweens.get(instance);
-    print(`Stopping rainbow tweens for ${instance}`, janitor);
     if (janitor) {
         janitor.Destroy();
         rainbowTweens.delete(instance);
         if (instance.IsA("BasePart")) {
-            instance.Color = instance.GetAttribute<Color3>("OriginalColor") || instance.Color;
+            TweenService.Create(instance, info, { Color: instance.GetAttribute<Color3>("OriginalColor") || instance.Color }).Play();
             instance.Material = Enum.Material.Plastic; // Reset material to default
         }
         instance.GetDescendants().forEach((desc) => {
             if (desc.IsA("BasePart")) {
-                desc.Color = desc.GetAttribute<Color3>("OriginalColor") || desc.Color
+                TweenService.Create(desc, info, { Color: desc.GetAttribute<Color3>("OriginalColor") || desc.Color }).Play();
                 desc.Material = Enum.Material.Plastic; // Reset material to default
             }
         })
