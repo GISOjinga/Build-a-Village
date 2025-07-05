@@ -8,6 +8,7 @@ import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 import { Added, Changed, Data, GiftTo, Platform, PlatformOccupied, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { logGameEvent, GameEvent } from "../../utils/analytics";
@@ -42,6 +43,7 @@ export default (world: World) => {
         if (playerEntity && wallWishingToBeBought && data) {
             // if you have enough money to buy the wall
             if (routeData.currency === "Coins") {
+                let purchased = false;
                 createEntity.updateData(playerEntity, (oldData) => {
                     // updates your cash if you have it
                     if (oldData.Coins >= wallWishingToBeBought.Price) {
@@ -61,6 +63,7 @@ export default (world: World) => {
                             Owned: true,
                             Equipped: true,
                         })
+                        purchased = true;
                         logGameEvent(player, GameEvent.WallPurchased, { wall: wallWishingToBeBought.Name, currency: "Coins" })
                     } else {
                         // plays the purchase sound to the player
@@ -71,6 +74,7 @@ export default (world: World) => {
                     }
                     return oldData
                 })
+                if (purchased) progressDailyQuest(player, "misc");
             } else if (routeData.currency === "Robux" && wallWishingToBeBought.GamePassId > 0) {
                 // prompts marpet place to buy the wall
                 MarketplaceService.PromptGamePassPurchase(player, wallWishingToBeBought.GamePassId);
@@ -129,11 +133,13 @@ export default (world: World) => {
             if (wallToEquip) {
                 printJecs($line, `Equipping wall ${wallToEquip.Name} to ${routeData.equip ? "equip" : "unequip"}`);
                 // updates your walls data
+                let changed = false;
                 createEntity.updateData(playerEntity, (oldData) => {
                     oldData.Walls.forEach((wall) => {
                         if (wall.Name === wallToEquip.Name) {
                             printJecs($line, `Setting wall ${wall.Name} equipped to ${routeData.equip}`);
                             wall.Equipped = routeData.equip;
+                            changed = routeData.equip;
                         } else {
                             wall.Equipped = false;
                         }
@@ -141,6 +147,7 @@ export default (world: World) => {
                     return oldData
                 })
                 logGameEvent(player, GameEvent.WallEquipped, { wall: wallToEquip.Name, equip: routeData.equip })
+                if (changed) progressDailyQuest(player, "misc")
             }
         }
     })
