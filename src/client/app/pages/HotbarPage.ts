@@ -20,20 +20,11 @@ export default (pagePaths: PagePaths) => {
     const backpack = player.WaitForChild("Backpack") as Backpack;
     initialize(backpack);
 
-    const hotbar = new Instance("Frame");
-    hotbar.Name = "Hotbar";
-    hotbar.AnchorPoint = new Vector2(0.5, 1);
-    hotbar.Position = UDim2.fromScale(0.5, 1);
-    hotbar.Size = UDim2.fromScale(0.5, 0.08);
-    hotbar.BackgroundTransparency = 1;
-    hotbar.Parent = gameUI;
+    const hotbar = pagePaths.InventoryPage.Hotbar;
+    const slotTemplate = hotbar.SlotExample;
+    slotTemplate.Visible = false;
 
-    const slotTemplate = new Instance("TextButton");
-    slotTemplate.BackgroundTransparency = 0.3;
-    slotTemplate.TextScaled = true;
-    slotTemplate.Size = UDim2.fromScale(0.2, 1);
-
-    const dragged = { slot: undefined as TextButton | undefined, offset: new Vector2() };
+    const dragged = { slot: undefined as ImageButton | undefined, offset: new Vector2() };
 
     function getSlotCount() {
         const width = Workspace.CurrentCamera?.ViewportSize.X ?? 0;
@@ -41,15 +32,17 @@ export default (pagePaths: PagePaths) => {
     }
 
     function renderSlots() {
-        hotbar.ClearAllChildren();
+        hotbar.GetChildren().forEach(c => { if (c !== slotTemplate && !c.IsA("UIListLayout")) c.Destroy(); });
         const slotCount = getSlotCount();
         setHotbarSize(slotCount);
         for (let i = 0; i < slotCount; i++) {
             const slot = slotTemplate.Clone();
+            slot.Visible = true;
             slot.Position = UDim2.fromScale(i / slotCount, 0);
             slot.Size = UDim2.fromScale(1 / slotCount, 1);
             const tool = hotbarTools[i];
-            slot.Text = tool ? tool.Name : "";
+            slot.ToolName.Text = tool ? tool.Name : "";
+            slot.Key.Text = `${i + 1}`;
             slot.SetAttribute("Index", i);
             slot.Parent = hotbar;
             trash.Add(UIUtilities.ButtonAction({ Button: slot }, () => {
@@ -59,7 +52,7 @@ export default (pagePaths: PagePaths) => {
         }
     }
 
-    function setupDrag(slot: TextButton, index: number) {
+    function setupDrag(slot: ImageButton, index: number) {
         trash.Add(slot.InputBegan.Connect((input) => {
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.UserInputType !== Enum.UserInputType.Touch) return;
             dragged.slot = slot;
@@ -79,7 +72,7 @@ export default (pagePaths: PagePaths) => {
                 const toIndex = invTarget.GetAttribute("Index") as number;
                 moveHotbarToInv(index, toIndex ?? inventoryTools.size());
             } else {
-                const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("TextButton")) as TextButton | undefined;
+                const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("ImageButton")) as ImageButton | undefined;
                 if (hotTarget && hotTarget !== dragged.slot) {
                     const toIndex = hotTarget.GetAttribute("Index") as number;
                     swapHotbar(index, toIndex);

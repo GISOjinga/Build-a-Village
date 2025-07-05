@@ -21,6 +21,7 @@ export default (pagePaths: PagePaths) => {
     const slotsContainer = container.Grid.ContainerFrame as Frame;
     const slotTemplate = container.Grid.ContainerFrame.ContainerExample as Frame;
     const searchBox = container.TopBar.SearchBox;
+    const closeButton = container.TopBar.Close;
     const sortFrame = container.SortCategory;
     const sortButtons = [
         sortFrame.ByName,
@@ -30,6 +31,11 @@ export default (pagePaths: PagePaths) => {
         sortFrame.Villagers,
     ] as GuiButton[];
 
+    const openPosition = inventoryPage.Position;
+    const closedPosition = UDim2.fromScale(openPosition.X.Scale, 1.5);
+    inventoryPage.Position = closedPosition;
+    inventoryPage.Visible = false;
+
     const backpack = Players.LocalPlayer.FindFirstChild("Backpack") as Backpack | undefined;
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
     let activeSort = -1;
@@ -37,6 +43,20 @@ export default (pagePaths: PagePaths) => {
     trash.Add(searchBox.GetPropertyChangedSignal("Text").Connect(() => {
         searchTerm = searchBox.Text;
         refreshDisplay();
+    }));
+
+    // close button hides the page
+    trash.Add(UIUtilities.ButtonAction({ Button: closeButton }, () => {
+        pageStates.openPage("None");
+    }));
+
+    // toggle inventory with backquote key
+    trash.Add(UserInputService.InputBegan.Connect((input, gp) => {
+        if (gp) return;
+        if (input.KeyCode === Enum.KeyCode.Backquote) {
+            const open = pageStates.openPage();
+            pageStates.openPage(open === "Inventory" ? "None" : "Inventory");
+        }
     }));
 
     const reloadItems = () => {
@@ -127,16 +147,16 @@ export default (pagePaths: PagePaths) => {
     function applySort() {
         switch (activeSort) {
             case 0:
-                inventoryTools.sort((a, b) => a.Name < b.Name ? -1 : 1);
+                inventoryTools.sort((a, b) => a.Name < b.Name);
                 break;
             case 1:
-                inventoryTools.sort((a, b) => a.Name > b.Name ? -1 : 1);
+                inventoryTools.sort((a, b) => a.Name > b.Name);
                 break;
             case 2:
-                inventoryTools.sort((a, b) => a.Name.size() - b.Name.size());
+                inventoryTools.sort((a, b) => a.Name.size() < b.Name.size());
                 break;
             case 3:
-                inventoryTools.sort((a, b) => b.Name.size() - a.Name.size());
+                inventoryTools.sort((a, b) => a.Name.size() > b.Name.size());
                 break;
             case 4:
                 for (let i = 0; i < math.floor(inventoryTools.size() / 2); i++) {
@@ -158,16 +178,22 @@ export default (pagePaths: PagePaths) => {
                 activeSort = index;
                 applySort();
             }
+            sortButtons.forEach((b, i) => b.BackgroundTransparency = activeSort === i ? 0.3 : 0.6);
             inventoryChanged.Fire();
         }));
     });
 
     // visibility
-    trash.Add(useEffect(() => {
+    trash.Add(useEffect((newTrash) => {
         const open = pageStates.openPage();
-        inventoryPage.Visible = open === "Inventory";
-        sortFrame.Visible = inventoryPage.Visible;
+        inventoryPage.Visible = true;
+        const goal = open === "Inventory" ? openPosition : closedPosition;
+        newTrash.Add(TweenService.Create(inventoryPage, new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position: goal,
+        })).Play();
+        sortFrame.Visible = open === "Inventory";
         if (open === "Inventory") reloadItems();
+        else newTrash.Add(task.delay(0.3, () => { inventoryPage.Visible = false; }));
     }));
 
     // initial state
