@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import { Tracer } from "@rbxts/tracer";
 import { $line } from "rbxts-transformer-inline";
 import routes from "client/routes";
-import { useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
+import { useChange, useEvent, useMemo, useThrottle } from "shared/Plugin-Hook";
 import { getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast } from "shared/utils/functions/rayFunctions";
 import { Added, Body, TargetEntity } from "shared/utils/jecs/jecsComponents";
@@ -27,6 +27,7 @@ export default (world: World) => {
     const architectIdleTrack = useMemo(() => architect.Humanoid.Animator.LoadAnimation(architectIdle), [architect]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
+    const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
 
     // makes sure animation is playing
     if (!kingIdleTrack.IsPlaying || !merchantIdleTrack.IsPlaying || !architectIdleTrack.IsPlaying) {
@@ -45,25 +46,8 @@ export default (world: World) => {
         body.humanoid.WalkSpeed = results.hit ? 16 : 25;
     }
 
-    // loops through all the gifting prompts watching
-    giftingPrompts.forEach((prompt, playerToGift) => {
-        const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
-
-        // toggiles the prompts visibility
-        prompt.Enabled = tooType === "Commodity";
-
-        // watches for the prompt to be activated
-        for (const [] of useEvent(prompt.Triggered, debug.traceback() + playerToGift.UserId)) {
-            // if the player is not the local player, we send a gift request
-            if (playerToGift !== Players.LocalPlayer && equippedTool) {
-                printJecs($line, "Gifting to player: ", playerToGift.Name, " with tool: ", equippedTool?.Name);
-                routes.giftToPlayer.send({
-                    playerToGift,
-                    produceTool: equippedTool
-                })
-            }
-        }
-    })
+    // when ever tooType changes
+    if (useChange([tooType])) giftingPrompts.forEach((prompt, playerToGift) => prompt.Enabled = tooType === "Commodity");
 
     // friendPrompts.forEach((prompt, otherPlayer) => {
     //     prompt.Enabled = true;
@@ -87,10 +71,18 @@ export default (world: World) => {
         if (player && player !== Players.LocalPlayer) {
             giftingPrompts.set(player, giftingPrompt)
             player.Destroying.Once(() => giftingPrompts.delete(player))
-            // friendPrompts.set(player, friendPrompt)
             giftingPrompt.Parent = body.rootPart
-            // friendPrompt.Parent = body.rootPart
-            // friendPrompt.ActionText = `Add ${player.Name} as a Friend?`;
+
+            giftingPrompt.Triggered.Connect(() => {
+                // if the player is not the local player, we send a gift request
+                if (player !== Players.LocalPlayer && equippedTool) {
+                    printJecs($line, "Gifting to player: ", player.Name, " with tool: ", equippedTool?.Name);
+                    routes.giftToPlayer.send({
+                        playerToGift: player,
+                        produceTool: equippedTool
+                    })
+                }
+            })
         }
     }
 }
