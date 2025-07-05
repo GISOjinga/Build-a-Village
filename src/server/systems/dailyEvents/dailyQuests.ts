@@ -38,9 +38,9 @@ const questChecks: { [id: number]: (d?: QuestDetails) => boolean } = {
     7: d => d?.variant === "Rainbow",
     9: d => (d?.tier ?? 0) >= 2,
     10: d => d?.variant !== undefined && d.variant !== "Normal",
-    21: d => (d?.tier ?? 0) === 1,
-    24: d => (d?.value ?? 0) > 300,
-    25: d => (d?.tier ?? 0) >= 2 && d?.filled === true,
+    20: d => (d?.tier ?? 0) === 1,
+    23: d => (d?.value ?? 0) > 300,
+    24: d => (d?.tier ?? 0) >= 2 && d?.filled === true,
 };
 
 const countProduce = (data: PlayerData, name?: ProduceNames) => {
@@ -64,14 +64,23 @@ const questTrackers: { [id: number]: (oldD: PlayerData, newD: PlayerData) => Que
     7: (o, n) => n.Produce.some(p => p.Variant === "Rainbow") && !o.Produce.some(p => p.Variant === "Rainbow") ? { variant: "Rainbow" } : undefined,
     8: (o, n) => countProduce(n) > countProduce(o) ? {} : undefined,
     9: (o, n) => {
-        for (const [index, newVillager] of pairs(n.Villagers)) {
-            const oldVillager = o.Villagers[index as number];
-            const reqNew = newVillager.Progress.Required;
-            const reqOld = oldVillager && oldVillager.Progress.Required;
-            if (reqNew && reqOld && reqNew.Amount > reqOld.Amount) return { tier: 2 };
+        const tier2Produce = new Set<ProduceNames>();
+        for (const villager of n.Villagers) {
+            const progress = villager.Progress;
+            if (progress.Required !== undefined || (progress as unknown as { Tier?: number }).Tier === 2) {
+                tier2Produce.add(progress.Produce);
+            }
         }
+
+        for (const produce of tier2Produce) {
+            const oldCount = o.Produce.filter(p => p.Name === produce).reduce((a, b) => a + (b.Amount || 0), 0);
+            const newCount = n.Produce.filter(p => p.Name === produce).reduce((a, b) => a + (b.Amount || 0), 0);
+            if (newCount > oldCount) return { tier: 2 };
+        }
+
         return undefined;
     },
+    // mutated variants include Gold or Rainbow items
     10: (o, n) => {
         const variants: ProduceVariant[] = ["Gold", "Rainbow"];
         for (const variant of variants) {
@@ -88,14 +97,13 @@ const questTrackers: { [id: number]: (oldD: PlayerData, newD: PlayerData) => Que
     15: (o, n) => n.Villagers.size() > o.Villagers.size() ? {} : undefined,
     16: () => undefined,
     17: () => undefined,
-    18: () => undefined,
-    19: (o, n) => countProduce(o) > countProduce(n) ? {} : undefined,
+    18: (o, n) => countProduce(o) > countProduce(n) ? {} : undefined,
+    19: () => undefined,
     20: () => undefined,
-    21: () => undefined,
-    22: (o, n) => countProduce(n) > countProduce(o) ? {} : undefined,
-    23: () => undefined,
-    24: (o, n) => n.Coins > o.Coins && countProduce(o) > countProduce(n) ? { value: n.Coins - o.Coins } : undefined,
-    25: (o, n) => {
+    21: (o, n) => countProduce(n) > countProduce(o) ? {} : undefined,
+    22: () => undefined,
+    23: (o, n) => n.Coins > o.Coins && countProduce(o) > countProduce(n) ? { value: n.Coins - o.Coins } : undefined,
+    24: (o, n) => {
         for (const [index, newVillager] of pairs(n.Villagers)) {
             const oldVillager = o.Villagers[index as number];
             const reqNew = newVillager.Progress.Required;
