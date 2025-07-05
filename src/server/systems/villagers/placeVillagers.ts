@@ -53,7 +53,7 @@ export default (world: World) => {
                 }
                 return oldData
             })
-            progressDailyQuest(player, "place")
+            progressDailyQuest(player, "place", { villager: villagerName })
         }
     })
 
@@ -81,7 +81,7 @@ export default (world: World) => {
                 printJecs($line, "Removed Relative Location from: ", villagerData);
                 return oldData
             })
-            progressDailyQuest(player, "dig")
+            progressDailyQuest(player, "dig", { villager: villager?.villagerData.Name })
         }
     })
 

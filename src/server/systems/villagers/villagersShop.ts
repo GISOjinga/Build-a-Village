@@ -144,7 +144,7 @@ export default (world: World) => {
 
                             // gives the player the produce
                             createEntity.insertProduce(playerToGiftToEntity, itemName as ProduceNames, itemVariant, 1)
-                            progressDailyQuest(playerGifting, "gift")
+                            progressDailyQuest(playerGifting, "gift", { produce: itemName as ProduceNames })
                             logGameEvent(playerGifting, GameEvent.ItemGiftSent, { item: itemName, variant: itemVariant, to: (playerToGift as Player).UserId })
 
                             // notifys them both
@@ -317,10 +317,13 @@ export default (world: World) => {
 
                     // loops through your produce tallys them up
                     let earned = 0;
+                    let maxValue = 0;
                     oldData.Produce.forEach((produceData) => {
                         const produceName = produceData.Name;
                         const variantMultiplier = (produceData.Variant === "Rainbow" ? 50 : produceData.Variant === "Gold" ? 10 : 1);
-                        const coins = math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier * produceData.Amount) + .5);
+                        const singleValue = math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier) + .5);
+                        const coins = singleValue * produceData.Amount;
+                        if (singleValue > maxValue) maxValue = singleValue;
                         oldData.Coins += coins;
                         earned += coins;
                     });
@@ -342,7 +345,7 @@ export default (world: World) => {
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
                     return oldData;
                 });
-                progressDailyQuest(player, "sell");
+                progressDailyQuest(player, "sell", { value: maxValue });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
@@ -383,7 +386,7 @@ export default (world: World) => {
 
                         return oldData
                     })
-                    progressDailyQuest(player, "sell")
+                    progressDailyQuest(player, "sell", { value: math.floor(((sellPrice || 0) * cashMultiplier) + .5) })
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                 } else {
                     routes.npcDialogue.sendTo({
