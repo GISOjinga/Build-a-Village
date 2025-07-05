@@ -1,6 +1,5 @@
 import { World } from "@rbxts/jecs";
 import routes from "server/routes";
-import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import { Data, Player, Added, TargetEntity, Body } from "shared/utils/jecs/jecsComponents";
 import { createEntity, getEntity, printJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { PlayerData } from "../../../shared/data/defaultData";
@@ -9,8 +8,7 @@ import dailyQuestsData from "shared/data/dailyQuestsData";
 
 const dayInSeconds = 60 * 60 * 24;
 
-export default (world: World) => {
-    const updateClient = (player: Player, data: PlayerData) => {
+const updateClient = (player: Player, data: PlayerData) => {
         const info = (data.DailyQuests.map(q => {
             const def = dailyQuestsData.find(d => d.id === q.id);
             if (!def) return undefined;
@@ -20,7 +18,7 @@ export default (world: World) => {
         routes.updateDailyQuest.sendTo(info as never, player);
     };
 
-    const progress = (player: Player, action: string) => {
+export function progressDailyQuest(player: Player, action: string) {
         const entity = getEntity.fromInstance(player);
         if (!entity) return;
         createEntity.updateData(entity, (old) => {
@@ -41,12 +39,7 @@ export default (world: World) => {
         });
     };
 
-    useRoute(routes.collectVillagerProduce, (_, player) => task.delay(.1, progress, player, "collect"));
-    useRoute(routes.placeVillager, (_, player) => task.delay(.1, progress, player, "place"));
-    useRoute(routes.digVillager, (_, player) => task.delay(.1, progress, player, "dig"));
-    useRoute(routes.supplyVillager, (_, player) => task.delay(.1, progress, player, "supply"));
-    useRoute(routes.confirmSellOptions, (_, player) => task.delay(.1, progress, player, "sell"));
-    useRoute(routes.giftToPlayer, (_, player) => task.delay(.1, progress, player, "gift"));
+export default (world: World) => {
 
     for (const [_, entity] of world.query(TargetEntity, Added(Body))) {
         const player = world.get(entity, Player);
