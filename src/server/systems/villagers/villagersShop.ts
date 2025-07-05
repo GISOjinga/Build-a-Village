@@ -343,9 +343,9 @@ export default (world: World) => {
                     // prints the sell message
                     printJecs($line, player.Name + " sold all items for", oldData.Coins, "Coins");
                     logGameEvent(player, GameEvent.MerchantSale, { mode: "all", coins: earned });
+                    progressDailyQuest(player, "sell", { value: maxValue });
                     return oldData;
                 });
-                progressDailyQuest(player, "sell", { value: maxValue });
             } else if (option === "Option2") { // just sells the equipped tool
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
 
@@ -381,13 +381,14 @@ export default (world: World) => {
                                     print("Set Donw")
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
+
+                                progressDailyQuest(player, "sell", { value: math.floor(((sellPrice || 0) * cashMultiplier) + .5) })
+                                logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                             }
                         }
 
                         return oldData
                     })
-                    progressDailyQuest(player, "sell", { value: math.floor(((sellPrice || 0) * cashMultiplier) + .5) })
-                    logGameEvent(player, GameEvent.MerchantSale, { mode: "single", item: itemName, coins: earned })
                 } else {
                     routes.npcDialogue.sendTo({
                         text: "You’re not holding anything to sell.",
