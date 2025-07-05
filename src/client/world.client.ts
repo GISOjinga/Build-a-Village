@@ -22,6 +22,7 @@ import exampleTag from "./tags/exampleTag";
 import paths from "shared/utils/paths";
 import GameUI from "client/app/GameUI";
 import pagePaths from "shared/utils/Animations/pagePaths";
+import createInventoryPage, { InventoryUI } from "./ui/createInventoryPage";
 import updateTools from "./systems/player/updateTools";
 import DialogueSellUI from "./app/DialogueSellUI";
 import HoverBoxUI from "./app/HoverBoxUI";
@@ -54,7 +55,12 @@ const npcDialogues = paths.Assets.UI.NpcDialogues.Clone()
 
 // set up the UI
 gameUI.Parent = playerGui
-GameUI(pagePaths(gameUI))
+// create inventory page dynamically before generating page paths
+const inventoryPage = createInventoryPage(gameUI)
+
+const pages = pagePaths(gameUI as GameUI & { Inventory: InventoryUI })
+pages.InventoryPage = inventoryPage
+GameUI(pages)
 
 // sets up dialogue sell
 dialogueSellUI.Parent = playerGui
