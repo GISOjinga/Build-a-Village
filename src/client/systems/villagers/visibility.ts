@@ -1,6 +1,6 @@
 import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
-import { MarketplaceService, Players, Workspace } from "@rbxts/services";
+import { MarketplaceService, Players, Workspace, CollectionService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent, useThrottle } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
@@ -9,6 +9,22 @@ import { addComponent, createEntity, getEntity, printJecs, printTS, removeCompon
 import { particlesEmit, particlesToggle } from "shared/utils/functions/particlesFunctions";
 import { ActiveVillagers, Added, Body, CanQuery, Changed, Data, MaxedOut, ModelDebugger, Player, ProduceAll, ReplicatedComponent, systemQueue, TakeFromVillager, TargetEntity, Villager, VillagerAnimator, VillagerCooldown } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+
+const GOLD_TAG = "goldVariantTag";
+const RAINBOW_TAG = "rainbowVariantTag";
+
+function updateVariantTag(instance: Instance, variant: string | undefined) {
+    if (variant === "Gold") {
+        CollectionService.AddTag(instance, GOLD_TAG);
+        CollectionService.RemoveTag(instance, RAINBOW_TAG);
+    } else if (variant === "Rainbow") {
+        CollectionService.AddTag(instance, RAINBOW_TAG);
+        CollectionService.RemoveTag(instance, GOLD_TAG);
+    } else {
+        CollectionService.RemoveTag(instance, GOLD_TAG);
+        CollectionService.RemoveTag(instance, RAINBOW_TAG);
+    }
+}
 
 
 
@@ -132,6 +148,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
                 resourceModel.SetAttribute("Ready", variant ? true : false);
                 resourceModel.SetAttribute("ProduceName", newState.produce);
                 resourceModel.SetAttribute("Variant", variant);
+                updateVariantTag(resourceModel, variant);
                 if (resourcePartParticles) particlesToggle(resourcePartParticles, false);
                 if (modelIndex > -1 && resourcePartParticles && variant) {
                     const particleAttachment = resourcePartParticles.FindFirstChild<ParticleEmitter>(variant);
