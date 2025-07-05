@@ -57,8 +57,8 @@ export default (world: World) => {
             // print(villagerEntity, timeTillFullyBuilt, timeTillNextProduce)
             // if (useChange([villagerEntity, timeTillFullyBuilt, timeTillNextProduce])) {
             // when ever villager entity changes
-            if (useChange([villagerEntity, totalRequireResources, maxProduce])) {
-                pageStates.queueInfo((totalRequireResources !== undefined && maxProduce !== undefined) ? `(${totalRequireResources}/${maxProduce}) ${requiredProduceName} in queue` : "");
+            if (useChange([villagerEntity, totalRequireResources, maxProduce, resources && resources.size()])) {
+                pageStates.queueInfo((totalRequireResources !== undefined && maxProduce !== undefined && resources) ? `(${totalRequireResources + resources.size()}/${maxProduce}) ${requiredProduceName} in queue` : ""); // 300
             }
 
 
