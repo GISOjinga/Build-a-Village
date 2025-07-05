@@ -8,7 +8,6 @@ import paths from "shared/utils/paths";
 import { deepCopy } from "@rbxts/object-utils";
 import villagersProgressData from "shared/data/villagersProgressData";
 import { $line } from "rbxts-transformer-inline";
-import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
 
 
@@ -53,7 +52,6 @@ export default (world: World) => {
                 }
                 return oldData
             })
-            progressDailyQuest(player, "place", { villager: villagerName })
         }
     })
 
@@ -81,7 +79,6 @@ export default (world: World) => {
                 printJecs($line, "Removed Relative Location from: ", villagerData);
                 return oldData
             })
-            progressDailyQuest(player, "dig", { villager: villager?.villagerData.Name })
         }
     })
 

@@ -8,7 +8,6 @@ import { useEvent } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import pageStates from "shared/utils/Animations/pageStates";
 import { addComponent, createEntity, getEntity, printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
-import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 import { Added, Changed, Data, GiftTo, Platform, PlatformOccupied, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
 import { logGameEvent, GameEvent } from "../../utils/analytics";
@@ -74,7 +73,9 @@ export default (world: World) => {
                     }
                     return oldData
                 })
-                if (purchased) progressDailyQuest(player, "misc");
+                if (purchased) {
+                    // quest progress handled in dailyQuests system
+                }
             } else if (routeData.currency === "Robux" && wallWishingToBeBought.GamePassId > 0) {
                 // prompts marpet place to buy the wall
                 MarketplaceService.PromptGamePassPurchase(player, wallWishingToBeBought.GamePassId);
@@ -147,7 +148,6 @@ export default (world: World) => {
                     return oldData
                 })
                 logGameEvent(player, GameEvent.WallEquipped, { wall: wallToEquip.Name, equip: routeData.equip })
-                if (changed) progressDailyQuest(player, "misc")
             }
         }
     })

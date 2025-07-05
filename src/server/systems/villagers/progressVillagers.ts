@@ -12,7 +12,6 @@ import ShopData from "./ShopData";
 import villagersProgressData from "shared/data/villagersProgressData";
 import routes from "server/routes";
 import { logTutorialStep, TutorialStep } from "../../utils/analytics";
-import { progressDailyQuest } from "../dailyEvents/dailyQuests";
 
 
 
@@ -44,7 +43,6 @@ export default (world: World) => {
                     addComponent(villagerEntity as Entity, Villager, { ...villagerInfo });
 
                     createEntity.insertProduce(playerEntityWhoTriggered, villagerInfo.villagerData.Progress.Produce, variant);
-                    progressDailyQuest(playerWhoTriggered, "collect", { produce: villagerInfo.villagerData.Progress.Produce, villager: villagerInfo.villagerData.Name, variant });
                     createEntity.updateData(playerEntityWhoTriggered, (oldData) => {
                         if (villagerInfo.villagerData.Name === "Farmer" && oldData.Tutorial === 2) {
                             oldData.Tutorial = 3;
@@ -109,7 +107,6 @@ export default (world: World) => {
                         if (produce.Amount <= 0) oldData.Produce.remove(produceIndex);
                         return oldData;
                     });
-                    progressDailyQuest(playerWhoTriggered, "supply", { produce: requiredResource.Produce, villager: villagerInfo.villagerData.Name });
                 }
             }
         }
@@ -179,7 +176,6 @@ export default (world: World) => {
                 // adds the produce to the data
                 printJecs($line, `${player.Name} took ${takeFromVillager.produceName} with varaint ${variant} from villager ${villagerEntity}`)
                 createEntity.insertProduce(playerEntity, produceName, variant)
-                progressDailyQuest(player, "collect", { produce: produceName, villager: villagerInfo.villagerData.Name, variant })
                 removeComponent(villagerEntity as Entity, MaxedOut);
 
                 // reduces the item by 1 
