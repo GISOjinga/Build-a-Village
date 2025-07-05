@@ -35,6 +35,8 @@ import updateWallsForSale from "./systems/ui/updateWallsForSale";
 import gameMusic from "./systems/sounds/gameMusic";
 import generalSounds from "./systems/sounds/generalSounds";
 import resourcePromptTag from "./tags/resourcePromptTag";
+import goldVariantTag from "./tags/goldVariantTag";
+import rainbowVariantTag from "./tags/rainbowVariantTag";
 import confirmationPrompt from "./systems/ui/confirmationPrompt";
 import promotions from "./systems/ui/promotions";
 import tutorial from "./systems/tutorial/tutorial";
@@ -135,6 +137,8 @@ const debug = setupMatter([
     // "Character": characterAdded,
     exampleTag,
     resourcePromptTag,
+    goldVariantTag,
+    rainbowVariantTag,
 })
 
 
