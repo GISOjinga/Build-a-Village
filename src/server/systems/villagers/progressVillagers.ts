@@ -117,14 +117,7 @@ export default (world: World) => {
 
     // when villager is added but not fully built then
     for (const [_, villagerEntity, { villagerData, villagerModel, playerEntity }] of world.query(TargetEntity, Added(Villager))) {
-        const player = world.get(playerEntity, Player)
-        const body = world.get(playerEntity, Body);
-        const buildingTimes = villagerData.Progress.Building
-        const timeTillFullyBuilt = (buildingTimes.StartTime + buildingTimes.TotalTime) - os.time();
         const hitBox = new Instance("Part")
-        const tier2ProximityPrompt = villagerModel.Station.Interaction.SupplyProduce.ProximityPrompt
-        const requiredResource = villagerData.Progress.Required
-        const produceName = villagerData.Progress.Produce
 
         // set up part
         hitBox.Transparency = 1;
@@ -265,7 +258,10 @@ export default (world: World) => {
                     progression.Resources.push(randomVariant());
 
                     // takes away from required
-                    if (requiredResource) requiredResource.Amount -= 1
+                    if (requiredResource) {
+                        print("TookAway")
+                        requiredResource.Amount -= 1
+                    }
 
                     // updates the start time
                     progression.Time.StartTime = os.time() - math.max((totalTimeSinceLastResource - requiredTimePerResource), 0);

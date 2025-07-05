@@ -1,6 +1,6 @@
 import { Entity, World } from "@rbxts/jecs";
 import { deepEquals } from "@rbxts/object-utils";
-import { MarketplaceService, Players, Workspace, CollectionService } from "@rbxts/services";
+import { MarketplaceService, Players, Workspace, CollectionService, TweenService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { useEvent, useThrottle } from "shared/Plugin-Hook";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
@@ -41,8 +41,15 @@ const toggleTransparency = (_instance: Instance, visible: boolean, customInvis: 
 
         // set up
         instance.SetAttribute("Transparency", trueTransparency);
+        // TweenService.Create(instance, new TweenInfo(.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Transparency: visible ? trueTransparency : customInvis }).Play();
         instance.Transparency = visible ? trueTransparency : customInvis;
-        if (instance.IsA("BasePart")) instance.CollisionGroup = visible ? "Default" : "NoCollision";
+
+        // instance.Transparency = visible ? trueTransparency : customInvis;
+        if (instance.IsA("BasePart")) {
+            instance.CollisionGroup = visible ? "Default" : "NoCollision";
+            instance.CanCollide = visible
+            instance.CanQuery = false
+        }
     }
 }
 
@@ -99,7 +106,8 @@ function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts
         groupVisibilityCache.set(villagerModel, cache);
     }
     const current = cache[group];
-    if (!current || current.visible !== visible || current.invis !== invis) {
+    if (!current || current.visible !== visible) {
+        // print("Count", group, current && current.visible, visible);
         parts.forEach((child) => toggleTransparency(child, visible, invis));
         cache[group] = { visible, invis: invis !== undefined ? invis : 1 };
     }
@@ -107,14 +115,16 @@ function applyGroupVisibility(villagerModel: VillagerModel, group: string, parts
 
 // change village model state
 function updateVillagerState(villagerModel: VillagerModel, newState: VillagerProgressState) {
-    if (!villageModelStates.has(villagerModel) || !deepEquals(villageModelStates.get(villagerModel)!, newState)) {
+    const oldState = villageModelStates.get(villagerModel)!
+    if (!villageModelStates.has(villagerModel) || !deepEquals(oldState, newState)) {
         const parts = cacheVillagerParts(villagerModel);
 
-        parts.inProgress.forEach((cache) => applyGroupVisibility(villagerModel, `inProgress_${cache.phase}`, cache.parts, false));
-        applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
-        applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
-        applyGroupVisibility(villagerModel, "npc", parts.npc, false);
-        applyGroupVisibility(villagerModel, "accessories", parts.accessories, false);
+        if (!oldState) {
+            applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
+            applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
+            applyGroupVisibility(villagerModel, "npc", parts.npc, false);
+            applyGroupVisibility(villagerModel, "accessories", parts.accessories, false);
+        }
 
         // if maxed then
         if (newState.isBeingBuilt) {
@@ -130,10 +140,16 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
             if (newState.hasMaxedResources) {
                 applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, true);
                 applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, true);
+                parts.inProgress.forEach((cache) => applyGroupVisibility(villagerModel, `inProgress_${cache.phase}`, cache.parts, false));
+                // print(newState.currentInProgressPhase)
             } else {
+                applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
+                applyGroupVisibility(villagerModel, "resourcesGroup", parts.resourcesGroup, true);
+
                 // toggles the in progress parts
                 parts.inProgress.forEach(({ phase, parts: phaseParts }) => {
                     const visible = phase <= newState.currentInProgressPhase;
+                    // print(phase, visible, newState.currentInProgressPhase)
                     applyGroupVisibility(villagerModel, `inProgress_${phase}`, phaseParts, visible);
                 });
             }
@@ -227,16 +243,16 @@ export default (world: World) => {
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager animator", err));
 
     // loops through all villagers without cooldown
-    for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .1);
+    // for (const [villagerEntity] of world.query(Villager).without(VillagerCooldown)) addComponent(villagerEntity as Entity, VillagerCooldown, .1);
 
-    // loops through all villagers with cooldown and counts down the count down and remove it when it reaches 0
-    for (const [villagerEntity, cooldown] of world.query(VillagerCooldown)) {
-        if (cooldown > 0) {
-            addComponent(villagerEntity as Entity, VillagerCooldown, cooldown - delta);
-        } else {
-            removeComponent(villagerEntity as Entity, VillagerCooldown);
-        }
-    }
+    // // loops through all villagers with cooldown and counts down the count down and remove it when it reaches 0
+    // for (const [villagerEntity, cooldown] of world.query(VillagerCooldown)) {
+    //     if (cooldown > 0) {
+    //         addComponent(villagerEntity as Entity, VillagerCooldown, cooldown - delta);
+    //     } else {
+    //         removeComponent(villagerEntity as Entity, VillagerCooldown);
+    //     }
+    // }
 
 
     // watches for changes
@@ -305,7 +321,7 @@ export default (world: World) => {
             updateVillagerState(villagerModel, {
                 isBeingBuilt,
                 hasMaxedResources,
-                currentInProgressPhase: hasMaxedResources ? 1 : currentInProgressPhase,
+                currentInProgressPhase: hasMaxedResources ? 0 : currentInProgressPhase,
                 resources: progression.Resources,
                 produce: villagerData.Progress.Produce
             })
