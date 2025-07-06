@@ -57,6 +57,11 @@ export default (world: World) => {
                     playerData = decodePlayerData(playerData as never)
                 }
 
+                if (playerData.LastDailyReward === undefined) playerData.LastDailyReward = 0
+                if (playerData.DailyStreak === undefined) playerData.DailyStreak = 0
+                if (!playerData.DailyQuests) playerData.DailyQuests = []
+                if (!playerData.QuestHistory) playerData.QuestHistory = []
+
                 const now = os.time()
                 const sessions = (playerData.Sessions || 0) + 1
                 if (playerData.LastLogin) {
