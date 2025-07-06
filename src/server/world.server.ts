@@ -26,6 +26,7 @@ import updateTools from "./systems/villagers/updateTools";
 import equipTool from "./systems/player/equipTool";
 import updateWalls from "./systems/walls/updateWalls";
 import robuxStore from "./systems/robuxStore/robuxStore";
+import sketchyGacha from "./systems/gacha/sketchyGacha";
 import confirmationPrompt from "./systems/player/confirmationPrompt";
 import promoCodes from "./systems/promotions/promoCodes";
 import friendRequest from "./systems/player/friendRequest";
@@ -100,6 +101,7 @@ setupMatter([
 
     // robux store
     { system: robuxStore },
+    { system: sketchyGacha },
 
     // villagers
     { system: villagersShop },
