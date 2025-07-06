@@ -20,6 +20,7 @@ export default (dialoguePage: NpcDialogues) => {
     const buyProximityPrompt = paths.Map.Shops.WaitForChild("King").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.King.Npc.HumanoidRootPart.ProximityPrompt;
     const sellProximityPrompt = paths.Map.Shops.WaitForChild("Merchant").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Merchant.Npc.HumanoidRootPart.ProximityPrompt;
     const wallProximityPrompt = paths.Map.Shops.WaitForChild("Architect").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Architect.Npc.HumanoidRootPart.ProximityPrompt;
+    const sketchyPrompt = paths.Map.Shops.WaitForChild("SketchyGuy").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.SketchyGuy.Npc.HumanoidRootPart.ProximityPrompt;
 
     // uses use effect to set the dialogue
     trash.Add(useEffect((newTrash) => {
@@ -28,7 +29,8 @@ export default (dialoguePage: NpcDialogues) => {
         const wallTextLabel = dialoguePage.Wall.TextLabel;
         const npcDialogue = pageStates.npcDialogue();
         const tween = newTrash.Add(createTween<number>(), "destroy")
-        const textToArray = (npcDialogue.target === "None" ? buyTextLabel.Text : npcDialogue.text).split("");
+        const baseText = npcDialogue.text !== "" ? npcDialogue.text : buyTextLabel.Text;
+        const textToArray = baseText.split("");
         const tweenInInfo = new TweenInfo(textToArray.size() * (npcDialogue.target === "None" ? 0.01 : 0.02), Enum.EasingStyle.Linear, Enum.EasingDirection.InOut);
 
         // moves the intro text char by char
@@ -144,6 +146,11 @@ export default (dialoguePage: NpcDialogues) => {
     // when the wall button is clicked
     trash.Add(paths.Map.Shops.Architect.Npc.HumanoidRootPart.ProximityPrompt.Triggered.Connect(() => {
         pageStates.npcDialogue({ target: "Wall", text: "Here are the walls for sale!" })
+    }))
+
+    // when the sketchy guy button is clicked
+    trash.Add(sketchyPrompt.Triggered.Connect(() => {
+        pageStates.npcDialogue({ target: "None", text: "Wanna test your luck?" })
     }))
 
     return trash
