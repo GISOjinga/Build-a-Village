@@ -22,26 +22,54 @@ export default (world: World) => {
     const king = paths.Map.Shops.King.Npc
     const merchant = paths.Map.Shops.Merchant.Npc
     const architect = paths.Map.Shops.Architect.Npc
-    const beekeeper = paths.Map.Villagers.Beekeeper.Npc
-    const witch = paths.Map.Villagers.Witch.Npc
-    const kingIdleTrack = useMemo(() => king.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(kingIdle), [king]);
-    const merchantIdleTrack = useMemo(() => merchant.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(merchantIdle), [merchant]);
-    const architectIdleTrack = useMemo(() => architect.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(architectIdle), [architect]);
-    const beekeeperIdleTrack = useMemo(() => beekeeper.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production), [beekeeper]);
-    const witchIdleTrack = useMemo(() => witch.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production), [witch]);
+    const beekeeper = paths.Map.Villagers.FindFirstChild("Beekeeper") as Model | undefined;
+    const witch = paths.Map.Villagers.FindFirstChild("Witch") as Model | undefined;
+
+    const kingIdleTrack = useMemo(() => {
+        const humanoid = king.FindFirstChildOfClass("Humanoid");
+        const animator = humanoid?.FindFirstChildOfClass("Animator");
+        return animator ? animator.LoadAnimation(kingIdle) : undefined;
+    }, [king]);
+
+    const merchantIdleTrack = useMemo(() => {
+        const humanoid = merchant.FindFirstChildOfClass("Humanoid");
+        const animator = humanoid?.FindFirstChildOfClass("Animator");
+        return animator ? animator.LoadAnimation(merchantIdle) : undefined;
+    }, [merchant]);
+
+    const architectIdleTrack = useMemo(() => {
+        const humanoid = architect.FindFirstChildOfClass("Humanoid");
+        const animator = humanoid?.FindFirstChildOfClass("Animator");
+        return animator ? animator.LoadAnimation(architectIdle) : undefined;
+    }, [architect]);
+
+    const beekeeperIdleTrack = useMemo(() => {
+        if (!beekeeper) return undefined;
+        const humanoid = beekeeper.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+        if (!humanoid) return undefined;
+        const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
+        if (!animator) return undefined;
+        return animator.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production);
+    }, [beekeeper]);
+
+    const witchIdleTrack = useMemo(() => {
+        if (!witch) return undefined;
+        const humanoid = witch.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+        if (!humanoid) return undefined;
+        const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
+        if (!animator) return undefined;
+        return animator.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production);
+    }, [witch]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
     const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
 
     // makes sure animation is playing
-    if (!kingIdleTrack.IsPlaying || !merchantIdleTrack.IsPlaying || !architectIdleTrack.IsPlaying || !beekeeperIdleTrack.IsPlaying || !witchIdleTrack.IsPlaying) {
-        printJecs($line, "Setting up animations for player: ", player.Name);
-        kingIdleTrack.Play();
-        merchantIdleTrack.Play();
-        architectIdleTrack.Play();
-        beekeeperIdleTrack.Play();
-        witchIdleTrack.Play();
-    }
+    if (!kingIdleTrack?.IsPlaying) kingIdleTrack?.Play();
+    if (!merchantIdleTrack?.IsPlaying) merchantIdleTrack?.Play();
+    if (!architectIdleTrack?.IsPlaying) architectIdleTrack?.Play();
+    if (!beekeeperIdleTrack?.IsPlaying) beekeeperIdleTrack?.Play();
+    if (!witchIdleTrack?.IsPlaying) witchIdleTrack?.Play();
 
     // casts a ray down if body and if standing on a platform floor then increase walkspeed on humanoid to 20 else 16 with tracer
     if (useThrottle(.1) && body) {
