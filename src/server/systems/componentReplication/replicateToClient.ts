@@ -18,7 +18,7 @@ import { Changed, componentsToReplicate, Phases, Player, TargetEntity, TargetRep
 import paths from "shared/utils/paths" // Module paths.
 import { Widgets } from "@rbxts/plasma" // UI Widgets for debugging and display.
 import { useEvent } from "shared/Plugin-Hook"
-import { createEntity, printJecs, printTS, warnTS } from "shared/utils/functions/jecsHelpFunctions"
+import { createEntity, printJecs, printTS, warnJecs, warnTS } from "shared/utils/functions/jecsHelpFunctions"
 import { isPointInView } from "shared/utils/functions/vector3Functions"
 import { defineCleanupCallback } from "@rbxts/hot-reloader"
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route"
@@ -142,7 +142,7 @@ export default {
                             route.sendToList({ serverEntity, data: payload as never } as never, players)
 
                         }).catch((err) => {
-                            warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
+                            warnJecs($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
                         })
                     }
                 }
