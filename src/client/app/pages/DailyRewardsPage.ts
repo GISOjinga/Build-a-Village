@@ -22,9 +22,7 @@ export default (pagePaths: PagePaths) => {
         });
         if (!reward) return;
         if (reward.type === "Villager" || reward.type === "Produce") {
-            const rendersFolder = reward.type === "Produce"
-                ? (paths.Assets.UI as unknown as { ProduceRenders: Folder }).ProduceRenders
-                : paths.Assets.UI.VillagerRenders;
+            const rendersFolder = paths.Assets.UI.AllRenders
             const viewport = rendersFolder.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
             if (viewport) {
                 viewport.Parent = slot;
