@@ -31,7 +31,7 @@ export default (pagePaths: PagePaths) => {
     let searchQuery = "";
     let currentSort: "Name" | "Rarity" | "Amount" | undefined;
     let filterCategory: "All" | "Produce" | "Villagers" = "All";
-    let activeButton: TextButton | undefined;
+    let activeButton: (typeof sortFrame.ByName) | undefined;
 
     // quick helper to refresh UI when data/state changes
     let slotsJanitor = new Janitor();
@@ -53,12 +53,6 @@ export default (pagePaths: PagePaths) => {
             inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Commodity");
         } else if (filterCategory === "Villagers") {
             inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Villager");
-        }
-
-        // apply search
-        if (searchQuery.size() > 0) {
-            const query = searchQuery.lower();
-            inventoryItems = inventoryItems.filter(t => t.Name.lower().find(query) !== undefined);
         }
 
         // apply sorting
@@ -83,6 +77,13 @@ export default (pagePaths: PagePaths) => {
                 if (aAmt === bAmt) return a.Name < b.Name;
                 return aAmt > bAmt; // largest first
             });
+        }
+
+        // apply search
+        if (searchQuery.size() > 0) {
+            print("Searching for: " + searchQuery, inventoryItems);
+            const query = searchQuery.lower();
+            inventoryItems = inventoryItems.filter(t => t.Name.lower().find(query)[0] !== undefined);
         }
 
         // clear old slots
@@ -121,6 +122,9 @@ export default (pagePaths: PagePaths) => {
         newTrash.Add(TweenService.Create(container, new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
             Position: open === "Inventory" ? openPosition : closedPosition,
         })).Play();
+
+        // if inventory open attribute is not the same to open then toggle it to open
+        Workspace.SetAttribute("BackpackOpen", open === "Inventory");
     }));
 
     // render slots whenever inventory data changes
@@ -139,7 +143,12 @@ export default (pagePaths: PagePaths) => {
 
     // toggles backback because of the workspace attrivute backpackopen
     Workspace.SetAttribute("BackpackOpen", false);
-    trash.Add(Workspace.GetAttributeChangedSignal("BackpackOpen").Connect(() => pageStates.openPage(Workspace.GetAttribute("BackpackOpen") ? "Inventory" : "None")));
+    trash.Add(Workspace.GetAttributeChangedSignal("BackpackOpen").Connect(() => {
+        const currentPage = pageStates.openPage();
+        const wantingToOpen = Workspace.GetAttribute("BackpackOpen")
+
+        if (currentPage === "Inventory" !== wantingToOpen) pageStates.openPage(wantingToOpen ? "Inventory" : "None");
+    }));
 
     // set up
     slotTemplate.Visible = false;
@@ -162,7 +171,8 @@ export default (pagePaths: PagePaths) => {
     // updates transparency based on which button is active
     function updateButtonTransparency() {
         sortButtons.forEach((btn) => {
-            btn.BackgroundTransparency = activeButton && btn !== activeButton ? 0.4 : 0;
+            trash.Add(TweenService.Create(btn, new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), { BackgroundTransparency: activeButton && btn !== activeButton ? 0.4 : 0 })).Play();
+            trash.Add(TweenService.Create(btn.UICorner, new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), { CornerRadius: new UDim(activeButton && btn !== activeButton ? 1 : .25, 0) })).Play();
         });
     }
 

@@ -5,7 +5,6 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
-import { useEvent } from "shared/Plugin-Hook";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
 
@@ -33,11 +32,10 @@ export default (pagePaths: PagePaths) => {
         const maxSlots = getSlotCount();
 
         // ensure array length matches slot count
-        while (hotBarTools.size() < maxSlots) hotBarTools.push(undefined);
-        while (hotBarTools.size() > maxSlots) hotBarTools.pop();
+        for (const [index] of pairs(hotBarTools)) if (index >= maxSlots) hotBarTools[index] = undefined; // remove tools beyond max slots
 
         // clear old slots
-        hotbar.GetChildren().forEach((c) => {
+        hotbar.GetChildren<typeof slotTemplate>().forEach((c) => {
             if (c.IsA("Frame") && c !== slotTemplate) c.Destroy();
         });
 
@@ -111,7 +109,8 @@ export default (pagePaths: PagePaths) => {
 
     // listens for changes done to inventoryTools and when something is added it inserts it into the hotbar 
     trash.Add(backpack.ChildAdded.Connect((tool) => {
-        if (pageStates.inventoryTools().find(t => t === tool) || !tool.IsA("Tool")) return; // if the tool is already in the inventory, return
+        if (!tool.IsA("Tool")) return; // if the tool is already in the inventory, return
+        for (const [_, child] of pairs(pageStates.hotBarTools())) if (child.IsA("Tool") && child === tool) return
 
         // if the tool is not a Tool, return
         pageStates.hotBarTools((oldTools) => {
@@ -143,16 +142,15 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // handle pressing number keys to equip corresponding hotbar slot
-    trash.Add(() => {
-        const keyCodes = [Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four, Enum.KeyCode.Five];
-        for (const [input] of useEvent(UserInputService.InputBegan)) {
-            const index = keyCodes.findIndex(k => k === input.KeyCode);
-            if (index !== -1) {
-                const tool = pageStates.hotBarTools()[index];
-                if (tool) routes.equipTool.send(tool);
-            }
+    const keyCodes = [Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four, Enum.KeyCode.Five];
+    trash.Add(UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        if (gameProcessed || !input.KeyCode) return; // ignore if game already processed or key is not in hotbar keys
+        const index = keyCodes.findIndex(k => k === input.KeyCode);
+        if (index !== -1) {
+            const tool = pageStates.hotBarTools()[index];
+            if (tool) routes.equipTool.send(tool);
         }
-    });
+    }));
 
 
 
