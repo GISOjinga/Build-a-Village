@@ -33,7 +33,12 @@ function migrateData(playerData: PlayerData): PlayerData {
 export default (world: World) => {
     useRoute(routes.jecsSetup, (_, player) => player.SetAttribute("JecsLoaded", true))
     Players.GetPlayers().forEach(player => {
-        if (!player.GetAttribute("JecsLoaded")) return;
+        if (!player.GetAttribute("JecsLoaded")) {
+            const FakePack = player.FindFirstChild("FakePack") || new Instance("Folder");
+            FakePack.Name = "FakePack";
+            FakePack.Parent = player
+            return
+        };
         if (!player.GetAttribute("DataLoaded")) {
             // sets it as loaded
             player.SetAttribute("DataLoaded", true)

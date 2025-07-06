@@ -1,172 +1,133 @@
 import { Janitor } from "@rbxts/janitor";
-import { Players, UserInputService, StarterGui, Workspace } from "@rbxts/services";
+import { Players, UserInputService, StarterGui, Workspace, TweenService } from "@rbxts/services";
 import routes from "client/routes";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
+import { printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { $line } from "rbxts-transformer-inline";
 
 export default (pagePaths: PagePaths) => {
     // hotbar UI references and drag state
     const trash = new Janitor();
-    const gameUI = pagePaths.Page;
     const player = Players.LocalPlayer;
-    const backpack = player.WaitForChild("Backpack") as Backpack;
+    const backpack = player.WaitForChild("FakePack") as Backpack;
     const hotbar = pagePaths.InventoryPage.Hotbar;
     const slotTemplate = hotbar.SlotExample;
+
+    // set up the hotbar
+    StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
     slotTemplate.Visible = false;
     hotbar.Visible = true;
-
-    const dragged = { slot: undefined as ImageButton | undefined, offset: new Vector2() };
-    let renderQueued = false;
-
-    /** Size of hotbar based on current viewport */
-    function setHotbarSize(size: number) {
-        pageStates.hotBarTools(old => old.slice(0, size));
-    }
-
-    /** Swap two tools inside the hotbar */
-    function swapHotbar(fromIndex: number, toIndex: number) {
-        if (fromIndex === toIndex) return;
-        pageStates.hotBarTools(old => {
-            const arr = [...old];
-            const [item] = arr.splice(fromIndex, 1);
-            arr.splice(toIndex, 0, item);
-            return arr;
-        });
-    }
-
-    /** Move a tool from the hotbar to the inventory */
-    function moveHotbarToInv(hotIndex: number, invIndex: number) {
-        const hot = [...pageStates.hotBarTools()];
-        const [item] = hot.splice(hotIndex, 1);
-        pageStates.hotBarTools(hot);
-        pageStates.inventoryTools(old => {
-            const arr = [...old];
-            arr.splice(invIndex, 0, item);
-            return arr;
-        });
-    }
 
     function getSlotCount() {
         const width = Workspace.CurrentCamera?.ViewportSize.X ?? 0;
         return width < 700 ? 3 : 5;
     }
 
-    function queueRenderSlots() {
-        if (renderQueued) return;
-        renderQueued = true;
-        task.defer(() => {
-            renderQueued = false;
-            renderSlots();
-        });
-    }
+    // re-render when tool arrays change
+    trash.Add(useEffect((newTrash) => {
+        const newInventoryTools = pageStates.inventoryTools()
+        const hotBarTools = newInventoryTools.filter((_, i) => i < getSlotCount())
+        const slots = new Array<typeof slotTemplate>()
 
-    function renderSlots() {
-        const hotBarTools = pageStates.hotBarTools()
-        const slotCount = getSlotCount();
-        // ONLY read hotbarTools, never modify them here
-        hotbar.GetChildren().forEach(c => {
-            if (c !== slotTemplate && !c.IsA("UIListLayout")) c.Destroy();
-        });
+        // render the slots
+        hotBarTools.forEach((tool, i) => {
+            const slot = newTrash.Add(slotTemplate.Clone());
 
-        for (let i = 0; i < hotBarTools.size(); i++) {
-            const slot = slotTemplate.Clone();
+            // set up the slot
+            slots.push(slot);
+            slot.Key.Text = tostring(i + 1)
             slot.Visible = true;
-            slot.Position = UDim2.fromScale(i / slotCount, 0);
-            slot.Size = UDim2.fromScale(1 / slotCount, 1);
-            const tool = hotBarTools[i];
-            slot.ToolName.Text = tool ? tool.Name : "";
-            slot.Key.Text = `${i + 1}`;
-            slot.SetAttribute("Index", i);
+            slot.Name = `Slot${i + 1}`;
+            slot.Image = tool.TextureId || ""; // Set the tool icon
+            slot.ToolName.Text = tool.Name || "Tool"; // Set the tool name
             slot.Parent = hotbar;
-            trash.Add(UIUtilities.ButtonAction({ Button: slot }, () => {
-                if (tool) routes.equipTool.send({ toolName: tool.Name });
+
+            // handle drag and drop
+            trash.Add(UIUtilities.ButtonAction({
+                Button: slot,
+                ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+                DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+            }, () => {
+                routes.equipTool.send(tool);
             }));
-            setupDrag(slot, i);
+
+            // when ever the tools parent changes to be under a character
+            tool.GetPropertyChangedSignal("Parent").Connect(() => {
+                const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
+                if (tool.Parent && tool.Parent.IsA("Model") && tool.Parent.FindFirstChild("Humanoid")) {
+                    // makes all the ui transparent 
+                    slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: s === slot ? 0 : .5 })).Play())
+                } else if (!player.Character?.FindFirstChildOfClass("Tool")) {
+                    slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: 0 })).Play())
+                }
+            });
+        })
+
+        // saves the hotbar tools
+        pageStates.hotBarTools(hotBarTools);
+
+    }));
+
+    // loop updating based on the size of the window if old size is not equal to new size then update the tools
+    trash.Add(() => {
+        let oldCount = getSlotCount()
+
+        while (true) {
+            const newCount = getSlotCount();
+            if (newCount !== oldCount) {
+                oldCount = newCount;
+                pageStates.hotBarTools((oldTools) => {
+                    // removes any tools that are beyond the new slot count
+                    for (let i = newCount; i < oldTools.size(); i++) {
+                        if (i > getSlotCount()) {
+                            oldTools[i] = undefined; // remove tool from hotbar
+                            return [...oldTools]; // return the updated array
+                        }
+                    }
+                    return oldTools
+                })
+            }
+            task.wait(1); // check every second
         }
-    }
+    })
 
-    function setupDrag(slot: ImageButton, index: number) {
-        trash.Add(slot.InputBegan.Connect((input) => {
-            if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.UserInputType !== Enum.UserInputType.Touch) return;
-            dragged.slot = slot;
-            dragged.offset = new Vector2(slot.AbsolutePosition.X - input.Position.X, slot.AbsolutePosition.Y - input.Position.Y);
-            slot.Parent = gameUI;
-            slot.ZIndex = 100;
-        }));
+    // listens for changes done to inventoryTools and when something is added it inserts it into the hotbar 
+    trash.Add(backpack.ChildAdded.Connect((tool) => {
+        if (pageStates.inventoryTools().find(t => t === tool) || !tool.IsA("Tool")) return; // if the tool is already in the inventory, return
 
-        const finishDrag = (input: InputObject) => {
-            const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
-            if (!dragged.slot) return;
-            const guiObjects = playerGui.GetGuiObjectsAtPosition(input.Position.X, input.Position.Y);
-            const inventoryContainer = pagePaths.InventoryPage;
-            const invFrame = inventoryContainer.Container;
-            const invTarget = guiObjects.find((v: GuiObject) => invFrame && v.IsDescendantOf(invFrame) && v.IsA("Frame")) as Frame | undefined;
-            if (invTarget && invFrame) {
-                const toIndex = invTarget.GetAttribute("Index") as number;
-                moveHotbarToInv(index, toIndex ?? pageStates.inventoryTools().size());
-            } else {
-                const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("ImageButton")) as ImageButton | undefined;
-                if (hotTarget && hotTarget !== dragged.slot) {
-                    const toIndex = hotTarget.GetAttribute("Index") as number;
-                    swapHotbar(index, toIndex);
+        // if the tool is not a Tool, return
+        pageStates.hotBarTools((oldTools) => {
+            // loops through all of old until it hits max slot count or until it finds and empty slot for the item to take
+            for (let i = 0; i < getSlotCount(); i++) {
+                if (oldTools[i] === undefined) {
+                    oldTools[i] = tool;
+                    break;
                 }
             }
-            dragged.slot.Parent = hotbar;
-            dragged.slot.ZIndex = slotTemplate.ZIndex;
-            dragged.slot = undefined;
-        };
 
-        trash.Add(UserInputService.InputChanged.Connect((input) => {
-            if (!dragged.slot || (input.UserInputType !== Enum.UserInputType.MouseMovement && input.UserInputType !== Enum.UserInputType.Touch)) return;
-            dragged.slot.Position = UDim2.fromOffset(input.Position.X + dragged.offset.X, input.Position.Y + dragged.offset.Y);
-        }));
+            return [...oldTools];
+        });
 
-        trash.Add(UserInputService.InputEnded.Connect((input) => {
-            if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch) finishDrag(input);
-        }));
-    }
+        // ensure the tool is not destroyed when the player removes it
+        tool.Destroying.Connect(() => {
+            pageStates.hotBarTools((oldTools) => {
+                // finds where the tool is and returns the table without that tool
+                for (let i = 0; i < getSlotCount(); i++) {
+                    if (oldTools[i] === tool) {
+                        oldTools[i] = undefined;
+                        return [...oldTools]
+                    }
+                }
 
-    trash.Add(backpack.ChildAdded.Connect(queueRenderSlots));
-    trash.Add(backpack.ChildRemoved.Connect(queueRenderSlots));
-
-    // re-render when tool arrays change
-    trash.Add(useEffect(() => {
-        pageStates.hotBarTools();
-        pageStates.inventoryTools();
-        queueRenderSlots();
-    }));
-
-    trash.Add(UserInputService.InputBegan.Connect((input, gp) => {
-        if (gp) return;
-        const slotCount = getSlotCount();
-        const index = input.KeyCode.Value - Enum.KeyCode.One.Value + 1;
-        if (index >= 1 && index <= slotCount) {
-            const tools = backpack.GetChildren().filter((c) => c.IsA("Tool")) as Tool[];
-            const tool = tools[index - 1];
-            if (tool) routes.equipTool.send({ toolName: tool.Name });
-        }
-    }));
+                return oldTools;
+            });
+        })
+    }))
 
 
-    StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-    // initialize inventory tools from backpack and keep them in sync
-    pageStates.inventoryTools(
-        [...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])]
-            .filter((v) => v.IsA("Tool"))
-            .filterUndefined(),
-    );
-    backpack.ChildAdded.Connect(() =>
-        pageStates.inventoryTools(
-            [...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])]
-                .filter((v) => v.IsA("Tool"))
-                .filterUndefined(),
-        ),
-    );
-    setHotbarSize(getSlotCount());
-    renderSlots();
-    queueRenderSlots();
     return trash;
 };

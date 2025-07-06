@@ -34,7 +34,7 @@ export default (world: World) => {
     const fixTools = (bodyEntity: Entity, dataChange: { new?: PlayerData, old?: PlayerData }) => {
         const data = dataChange.new
         const player = data && world.get(bodyEntity, Player)
-        const backpack = player && player.FindFirstChild("Backpack");
+        const backpack = player && player.FindFirstChild("FakePack");
 
         // if the player has a backpack and data is available then
         if (backpack && data && ((!dataChange.old || (!deepEquals(data.Villagers, dataChange.old?.Villagers || []) || !deepEquals(data.Produce, dataChange.old?.Produce || []))))) {
@@ -87,7 +87,7 @@ export default (world: World) => {
                         tool.SetAttribute("ItemName", villagerData.Name);
                         tool.SetAttribute("UniqueId", id);
                         tool.Parent = backpack;
-                        tool.Activated.Connect(() => {});
+                        tool.Activated.Connect(() => { });
                     }
                 });
                 villagerTools.forEach((tool, id) => {
@@ -115,7 +115,7 @@ export default (world: World) => {
                         tool.SetAttribute("ItemName", produceData.Name);
                         if (variantParticles && partToplaceIn) variantParticles.Parent = partToplaceIn;
                         tool.Parent = backpack;
-                        tool.Activated.Connect(() => {});
+                        tool.Activated.Connect(() => { });
                         updateVariantTag(tool, produceData.Variant);
                     }
                 });

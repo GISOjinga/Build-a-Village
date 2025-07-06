@@ -5,13 +5,19 @@ import { $line } from "rbxts-transformer-inline";
 import { printJecs } from "shared/utils/functions/jecsHelpFunctions";
 
 export default (world: World) => {
-    useRoute(routes.equipTool, ({ toolName }: { toolName: string }, player: Player) => {
-        const backpack = player.FindFirstChild("Backpack") as Backpack | undefined;
+    useRoute(routes.equipTool, (tool, player: Player) => {
+        const backpack = player.FindFirstChild("FakePack") as Backpack | undefined;
         const character = player.Character;
-        const tool = backpack?.FindFirstChild(toolName) as Tool | undefined;
-        if (tool && character) {
-            printJecs($line, `Equipping tool ${toolName} for`, player.Name);
-            tool.Parent = character;
+        const oldTool = character?.FindFirstChildOfClass("Tool")
+
+        if (tool && tool.Parent && character) {
+            printJecs($line, `Equipping tool ${tool.Name} for`, player.Name);
+            if (oldTool) {
+                oldTool.Parent = backpack
+                if (oldTool !== tool) tool.Parent = character;
+            } else {
+                tool.Parent = character;
+            }
         }
     });
 };

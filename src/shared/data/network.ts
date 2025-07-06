@@ -433,9 +433,7 @@ export const sharedRoutes = (() => {
             equip: bool,
         } as JingaNetType<{ wallName: string; equip: boolean }>,
 
-        equipTool: {
-            toolName: str,
-        } as JingaNetType<{ toolName: string }>,
+        equipTool: instance as JingaNetType<Tool>,
 
         togglePage: str as JingaNetType<ReturnType<typeof pageStates.openPage>>,
 

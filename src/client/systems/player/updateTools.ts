@@ -114,7 +114,7 @@ export default (world: World) => {
     const platform = body && body.platform;
     const platformFloor = platform?.FindFirstChild("Floor") as BasePart | undefined;
     const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
-    const backpack = player.FindFirstChild("Backpack");
+    const backpack = player.FindFirstChild("FakePack");
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
 
     // for palcing villagers
