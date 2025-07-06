@@ -126,15 +126,11 @@ export default (pagePaths: PagePaths) => {
 
                 if (hotbarIndex !== undefined) {
                     // if the hotbar index is valid, swap the tool with the one in the hotbar
-                    pageStates.hotBarTools(() => {
-                        const newItemTool = new Array() as typeof hotBarTools
-                        for (const [index, tool2] of pairs(hotBarTools)) {
-                            newItemTool[index - 1] = tool2 as never; // copy old hotbar
-                        }
-
-                        newItemTool[hotbarIndex] = tool
-                        print(newItemTool)
-                        return newItemTool;
+                    pageStates.hotBarTools((old) => {
+                        const newHotbar = { ...old };
+                        newHotbar[hotbarIndex] = tool;
+                        print(newHotbar);
+                        return newHotbar;
                     });
                 } else if (invIndex !== undefined && invIndex !== currentIndex) {
                     const newItemTool = inventoryTools[invIndex];

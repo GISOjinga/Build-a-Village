@@ -82,7 +82,7 @@ export default (pagePaths: PagePaths) => {
 
                 // drag event
                 newTrash.Add(useDrag(slot, slot, ({ position }) => {
-                    const hotbar = [...pageStates.hotBarTools()];
+                    const hotbar = { ...pageStates.hotBarTools() };
                     const currentIndex = i;
 
                     const hotbarSlots = slots as GuiObject[];
@@ -163,7 +163,7 @@ export default (pagePaths: PagePaths) => {
                 }
             }
 
-            return [...oldTools];
+            return { ...oldTools };
         });
 
         // ensure the tool is not destroyed when the player removes it
@@ -173,7 +173,7 @@ export default (pagePaths: PagePaths) => {
                 for (let i = 0; i < getSlotCount(); i++) {
                     if (oldTools[i] === tool) {
                         oldTools[i] = undefined;
-                        return [...oldTools]
+                        return { ...oldTools }
                     }
                 }
 
