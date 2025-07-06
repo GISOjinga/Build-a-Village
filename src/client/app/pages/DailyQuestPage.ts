@@ -18,7 +18,7 @@ export default (pagePaths: PagePaths) => {
     }));
 
     trash.Add(useEffect(() => {
-        questPage.Visible = pageStates.openPage() === "Quests";
+        // questPage.Visible = pageStates.openPage() === "Quests";
     }));
 
     return trash;
