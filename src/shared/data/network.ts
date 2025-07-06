@@ -468,6 +468,7 @@ export const sharedRoutes = (() => {
             type: str,
         } as JingaNetType<{ item: string; type: string }>,
 
+        claimDailyReward: nothing as JingaNetType<undefined>,
         finishSketchyRoll: nothing as JingaNetType<undefined>,
 
         getReplicatedComponents: nothing as JingaNetType<undefined>,

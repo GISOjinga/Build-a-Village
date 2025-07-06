@@ -17,6 +17,7 @@ import routes from "client/routes";
 import pageStates from "shared/utils/Animations/pageStates";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import DailyQuestPage from "./pages/DailyQuestPage";
+import DailyRewardsPage from "./pages/DailyRewardsPage";
 
 
 
@@ -36,7 +37,8 @@ export default (pagePaths: PagePaths) => {
                 ConfirmationPage,
                 PromoPage,
                 InviteIncentivePage,
-                DailyQuestPage
+                DailyQuestPage,
+                DailyRewardsPage
         ]
 
         // listen to page changes
