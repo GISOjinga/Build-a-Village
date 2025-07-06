@@ -7,6 +7,7 @@ import { Janitor } from "@rbxts/janitor";
 import { Players, ReplicatedStorage, TweenService, UserInputService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
 import { printTS, warnTS } from "../functions/jecsHelpFunctions";
+import { inputActivated } from "../functions/inputFunctions";
 
 
 // variables
@@ -130,6 +131,7 @@ namespace UIUtilities {
         trash.Add(
             button.MouseEnter.Connect(() => {
                 Promise.try(() => {
+                    if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (extraControls._hoverEffect && extraControls._enabled) {
                         extraControls._isHovering = true;
                         trashTween.Add(TweenService.Create(container, hoveringTweenInfo, { Size: expandedSize })).Play();
@@ -143,6 +145,7 @@ namespace UIUtilities {
             button.MouseLeave.Connect(() => {
                 Promise.try(() => {
                     if (!extraControls._enabled) return;
+                    if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (extraControls._hoverEffect || extraControls._isHovering) {
                         extraControls._isHovering = false;
                         trashTween.Add(TweenService.Create(container, hoveringTweenInfo, { Size: defaultSize })).Play();
@@ -166,15 +169,14 @@ namespace UIUtilities {
             })
         );
 
-        // Input ended -> expand back & onReleased
         trash.Add(
-            button.InputEnded.Connect((input) => {
-                print(input.UserInputType, input.KeyCode, input.UserInputState);
+            UserInputService.InputEnded.Connect((input) => {
                 Promise.try(() => {
+                    if (!down || !inputActivated(input)) return
+                    down = false;
                     if (!extraControls._enabled) return;
                     trashTween.Add(TweenService.Create(container, elasticTweenInfo, { Size: defaultSize })).Play();
-                    if (onReleased) onReleased(down);
-                    down = false;
+                    if (onReleased) onReleased(true);
                 }).catch(err => warnTS($line, err));
             })
         );

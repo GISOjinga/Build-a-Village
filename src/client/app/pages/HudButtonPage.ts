@@ -50,8 +50,8 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Shop.Size, sizeOffset),
         AccountForTouch: true,
-    }, () => {
-        pageStates.openPage("RobuxStore");
+    }, (complete) => {
+        if (complete) pageStates.openPage("RobuxStore");
     }))
 
     // binds the wall button to open the shop

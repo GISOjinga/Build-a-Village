@@ -66,8 +66,7 @@ export default (pagePaths: PagePaths) => {
                     }, () => {
                         if (pageStates.isDragging()) return
                         routes.equipTool.send(tool);
-                    },
-                    ),
+                    }),
                 );
 
                 // function to tell you if a position is within the absolute bounds of a GuiObject
