@@ -5,6 +5,7 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
+import { useEvent } from "shared/Plugin-Hook";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
 
@@ -28,46 +29,60 @@ export default (pagePaths: PagePaths) => {
 
     // re-render when tool arrays change
     trash.Add(useEffect((newTrash) => {
-        const newInventoryTools = pageStates.inventoryTools()
-        const hotBarTools = newInventoryTools.filter((_, i) => i < getSlotCount())
-        const slots = new Array<typeof slotTemplate>()
+        const hotBarTools = pageStates.hotBarTools();
+        const maxSlots = getSlotCount();
 
-        // render the slots
-        hotBarTools.forEach((tool, i) => {
+        // ensure array length matches slot count
+        while (hotBarTools.size() < maxSlots) hotBarTools.push(undefined);
+        while (hotBarTools.size() > maxSlots) hotBarTools.pop();
+
+        // clear old slots
+        hotbar.GetChildren().forEach((c) => {
+            if (c.IsA("Frame") && c !== slotTemplate) c.Destroy();
+        });
+
+        const slots = new Array<typeof slotTemplate>();
+        for (let i = 0; i < maxSlots; i++) {
+            const tool = hotBarTools[i];
             const slot = newTrash.Add(slotTemplate.Clone());
 
-            // set up the slot
             slots.push(slot);
-            slot.Key.Text = tostring(i + 1)
+            slot.Key.Text = tostring(i + 1);
+            slot.LayoutOrder = i;
             slot.Visible = true;
             slot.Name = `Slot${i + 1}`;
-            slot.Image = tool.TextureId || ""; // Set the tool icon
-            slot.ToolName.Text = tool.Name || "Tool"; // Set the tool name
+            slot.Image = tool ? tool.TextureId || "" : "";
+            slot.ToolName.Text = tool ? tool.Name : "";
             slot.Parent = hotbar;
 
             // handle drag and drop
-            trash.Add(UIUtilities.ButtonAction({
-                Button: slot,
-                ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
-                DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
-            }, () => {
-                routes.equipTool.send(tool);
-            }));
+            if (tool) {
+                trash.Add(
+                    UIUtilities.ButtonAction(
+                        {
+                            Button: slot,
+                            ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+                            DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+                        },
+                        () => {
+                            routes.equipTool.send(tool);
+                        },
+                    ),
+                );
 
-            // when ever the tools parent changes to be under a character
-            tool.GetPropertyChangedSignal("Parent").Connect(() => {
-                const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
-                if (tool.Parent && tool.Parent.IsA("Model") && tool.Parent.FindFirstChild("Humanoid")) {
-                    // makes all the ui transparent 
-                    slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: s === slot ? 0 : .5 })).Play())
-                } else if (!player.Character?.FindFirstChildOfClass("Tool")) {
-                    slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: 0 })).Play())
-                }
-            });
-        })
+                tool.GetPropertyChangedSignal("Parent").Connect(() => {
+                    const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
+                    if (tool.Parent && tool.Parent.IsA("Model") && tool.Parent.FindFirstChild("Humanoid")) {
+                        slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: s === slot ? 0 : 0.5 })).Play());
+                    } else if (!player.Character?.FindFirstChildOfClass("Tool")) {
+                        slots.forEach((s) => trash.Add(TweenService.Create(s, tweenInfo, { BackgroundTransparency: 0 })).Play());
+                    }
+                });
+            }
+        }
 
-        // saves the hotbar tools
-        pageStates.hotBarTools(hotBarTools);
+        // save back possibly modified array
+        pageStates.hotBarTools([...hotBarTools]);
 
     }));
 
@@ -126,6 +141,18 @@ export default (pagePaths: PagePaths) => {
             });
         })
     }))
+
+    // handle pressing number keys to equip corresponding hotbar slot
+    trash.Add(() => {
+        const keyCodes = [Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four, Enum.KeyCode.Five];
+        for (const [input] of useEvent(UserInputService.InputBegan)) {
+            const index = keyCodes.findIndex(k => k === input.KeyCode);
+            if (index !== -1) {
+                const tool = pageStates.hotBarTools()[index];
+                if (tool) routes.equipTool.send(tool);
+            }
+        }
+    });
 
 
 
