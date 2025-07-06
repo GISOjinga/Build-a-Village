@@ -26,14 +26,14 @@ export default (pagePaths: PagePaths) => {
     const sortButtons = [
         sortFrame.ByName,
         sortFrame.ByRarity,
-        sortFrame.Amount,
+        sortFrame.Mutations,
         sortFrame.Produce,
         sortFrame.Villagers,
     ] as typeof sortFrame.ByName[];
 
     // local state for filtering and sorting
     let searchQuery = "";
-    let currentSort: "Name" | "Rarity" | "Amount" | undefined;
+    let currentSort: "Name" | "Rarity" | "Mutations" | undefined;
     let filterCategory: "All" | "Produce" | "Villagers" = "All";
     let activeButton: (typeof sortFrame.ByName) | undefined;
 
@@ -65,17 +65,14 @@ export default (pagePaths: PagePaths) => {
                 if (rA === rB) return rarityOrder.findIndex((rarity) => rarity === a.Name) > rarityOrder.findIndex((rarity) => rarity === b.Name);
                 return rA < rB;
             });
-        } else if (currentSort === "Amount") {
+        } else if (currentSort === "Mutations") {
             const mutationOrder = ["Normal", "Gold", "Rainbow"]
-            const getAmount = (tool: Tool) => {
-                const match = string.match(tool.Name, "%(%(\d+)%)$") as LuaTuple<[string, string]> | undefined;
-                return match ? tonumber(match[1])! : 1;
-            };
+            const getMutation = (tool: Tool) => tool.GetAttribute<string>("Variant") || "Normal";
             inventoryItems.sort((a, b) => {
-                const aAmt = getAmount(a);
-                const bAmt = getAmount(b);
-                if (aAmt === bAmt) return a.Name < b.Name;
-                return aAmt > bAmt; // largest first
+                const rA = getMutation(a);
+                const rB = getMutation(b);
+                if (rA === rB) return mutationOrder.findIndex((variant) => variant === a.Name) > mutationOrder.findIndex((variant) => variant === b.Name);
+                return rA < rB;
             });
         }
 
@@ -189,7 +186,7 @@ export default (pagePaths: PagePaths) => {
     // placeholder icons for category buttons
     sortFrame.ByName.TextLabel.Text = "🔤 Name";
     sortFrame.ByRarity.TextLabel.Text = "⭐ Rarity";
-    sortFrame.Amount.TextLabel.Text = "📦 Amount";
+    sortFrame.Mutations.TextLabel.Text = "📦 Amount";
     sortFrame.Produce.TextLabel.Text = "🍎 Produce";
     sortFrame.Villagers.TextLabel.Text = "👥 Villagers";
 
@@ -224,9 +221,9 @@ export default (pagePaths: PagePaths) => {
             },
         },
         {
-            button: sortFrame.Amount,
+            button: sortFrame.Mutations,
             action: (wasActive: boolean) => {
-                currentSort = wasActive ? undefined : "Amount";
+                currentSort = wasActive ? undefined : "Mutations";
                 filterCategory = "All";
             },
         },

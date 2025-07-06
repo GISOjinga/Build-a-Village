@@ -2494,15 +2494,8 @@ type Assets = Folder & {
 							};
 							UIAspectRatioConstraint: UIAspectRatioConstraint;
 						};
-						Amount: ImageButton & {
-							UICorner: UICorner;
-							TextLabel: TextLabel & {
-								UIPadding: UIPadding;
-							};
-							UIAspectRatioConstraint: UIAspectRatioConstraint;
-						};
 						UIListLayout: UIListLayout;
-						Produce: ImageButton & {
+						Mutations: ImageButton & {
 							UICorner: UICorner;
 							TextLabel: TextLabel & {
 								UIPadding: UIPadding;
@@ -2510,6 +2503,13 @@ type Assets = Folder & {
 							UIAspectRatioConstraint: UIAspectRatioConstraint;
 						};
 						Villagers: ImageButton & {
+							UICorner: UICorner;
+							TextLabel: TextLabel & {
+								UIPadding: UIPadding;
+							};
+							UIAspectRatioConstraint: UIAspectRatioConstraint;
+						};
+						Produce: ImageButton & {
 							UICorner: UICorner;
 							TextLabel: TextLabel & {
 								UIPadding: UIPadding;
