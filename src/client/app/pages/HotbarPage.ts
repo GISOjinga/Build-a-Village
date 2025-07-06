@@ -64,7 +64,7 @@ export default (pagePaths: PagePaths) => {
                         ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
                         DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
                     }, () => {
-                        if (pageStates.isDragging()) return
+                        if (pageStates.isDragging() || pageStates.openPage() === "Inventory") return
                         routes.equipTool.send(tool);
                     }),
                 );
@@ -182,7 +182,7 @@ export default (pagePaths: PagePaths) => {
     // handle pressing number keys to equip corresponding hotbar slot
     const keyCodes = [Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four, Enum.KeyCode.Five];
     trash.Add(UserInputService.InputBegan.Connect((input, gameProcessed) => {
-        if (gameProcessed || !input.KeyCode) return; // ignore if game already processed or key is not in hotbar keys
+        if (gameProcessed || !input.KeyCode || pageStates.openPage() === "Inventory") return; // ignore if game already processed or key is not in hotbar keys
         const index = keyCodes.findIndex(k => k === input.KeyCode);
         if (index !== -1) {
             const tool = pageStates.hotBarTools()[index];

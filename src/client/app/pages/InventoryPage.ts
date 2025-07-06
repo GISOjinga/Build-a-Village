@@ -109,9 +109,6 @@ export default (pagePaths: PagePaths) => {
                 Button: slot.Clickable,
                 ExpandedSize: UIUtilities.MultiplyUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
                 DeExpandedSize: UIUtilities.DivideUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
-            }, () => {
-                if (pageStates.isDragging()) return
-                routes.equipTool.send(tool);
             }));
 
             // drag handling
