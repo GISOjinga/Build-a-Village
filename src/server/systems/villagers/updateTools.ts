@@ -6,6 +6,7 @@ import { PlayerData } from "shared/data/defaultData";
 import { printJecs, printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { Added, Body, Changed, Data, Player, Removed, TargetEntity } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+import ShopData from "./ShopData";
 
 const GOLD_TAG = "goldVariantTag";
 const RAINBOW_TAG = "rainbowVariantTag";
@@ -76,6 +77,7 @@ export default (world: World) => {
                 // sync villager tools
                 const validVillagers = new Set<number>();
                 data.Villagers.forEach((villagerData) => {
+                    const villagerInfo = ShopData.Villagers.find((v) => v.Name === villagerData.Name);
                     if (villagerData.RelativeLocation) return;
                     const id = villagerData.UniqueId;
                     validVillagers.add(id);
@@ -85,6 +87,7 @@ export default (world: World) => {
                         tool.Name = villagerData.Name;
                         tool.SetAttribute("ItemType", "Villager");
                         tool.SetAttribute("ItemName", villagerData.Name);
+                        tool.SetAttribute("Rarity", villagerInfo?.Rarity || "Common");
                         tool.SetAttribute("UniqueId", id);
                         tool.Parent = backpack;
                         tool.Activated.Connect(() => { });

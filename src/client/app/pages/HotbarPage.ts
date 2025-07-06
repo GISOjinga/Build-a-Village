@@ -70,6 +70,14 @@ export default (pagePaths: PagePaths) => {
                     ),
                 );
 
+                // function to tell you if a position is within the absolute bounds of a GuiObject
+                const isWithinBounds = (guiObject: GuiObject, position: Vector2) => {
+                    const absolutePosition = guiObject.AbsolutePosition;
+                    const absoluteSize = guiObject.AbsoluteSize.div(2); // half size for center point
+                    return position.X >= absolutePosition.X && position.X <= absolutePosition.X + absoluteSize.X &&
+                        position.Y >= absolutePosition.Y && position.Y <= absolutePosition.Y + absoluteSize.Y;
+                };
+
                 // drag event
                 newTrash.Add(useDrag(slot, slot, ({ position }) => {
                     const hotbar = [...pageStates.hotBarTools()];
@@ -77,6 +85,7 @@ export default (pagePaths: PagePaths) => {
 
                     const hotbarSlots = slots as GuiObject[];
                     const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
+                    const withinInventoryGrid = pagePaths.InventoryPage.Container.Grid.Visible && isWithinBounds(pagePaths.InventoryPage.Container, position);
                     const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => (c.IsA("GuiObject") && c.Visible)) as GuiObject[];
                     const inventoryIndex = slotIndexAtPosition(inventorySlots, position);
 
@@ -84,7 +93,6 @@ export default (pagePaths: PagePaths) => {
                         const inventory = pageStates.inventoryTools()
                         const indexInInventory = inventory.findIndex((t) => t === tool);
                         const targetTool = inventory[inventoryIndex];
-                        printTS($line, `Moving tool from hotbar index ${tool} to inventory index ${targetTool}`);
                         hotbar[currentIndex] = targetTool;
                         inventory[inventoryIndex] = tool;
                         inventory[indexInInventory] = targetTool; // swap tools in inventory
@@ -96,6 +104,10 @@ export default (pagePaths: PagePaths) => {
                         hotbar[hotbarIndex] = tool;
                         hotbar[currentIndex] = temp;
                         pageStates.hotBarTools(hotbar);
+                    } else if (withinInventoryGrid) { // removes it from hot bar
+                        hotbar[currentIndex] = undefined; // remove tool from hotbar
+                        pageStates.hotBarTools(hotbar);
+                        return;
                     }
                 }));
 

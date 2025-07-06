@@ -83,7 +83,6 @@ export default function useDrag(clickable: GuiButton, container: GuiObject, onDr
 
     // Listen for input start
     trash.Add(clickable.InputBegan.Connect((input) => {
-        printTS($line, `Input began: ${input.UserInputType} on ${container.Name}`);
         if (dragging) return;
         beginDrag(input);
     }));
@@ -100,7 +99,6 @@ export default function useDrag(clickable: GuiButton, container: GuiObject, onDr
     // Cancel drag if page closes
     trash.Add(useEffect(() => {
         if (dragging && pageStates.openPage() !== "Inventory") {
-            printTS($line, "Inventory closed mid-drag — cancelling");
             stopDrag();
         }
     }),

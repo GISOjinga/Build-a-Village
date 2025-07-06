@@ -62,17 +62,17 @@ export default (pagePaths: PagePaths) => {
             inventoryItems.sort((a, b) => {
                 const rA = getRarity(a);
                 const rB = getRarity(b);
-                if (rA === rB) return rarityOrder.findIndex((rarity) => rarity === a.Name) > rarityOrder.findIndex((rarity) => rarity === b.Name);
-                return rA < rB;
+                if (rA === rB) return a.Name > b.Name;
+                return rarityOrder.findIndex((rarity) => rarity === rA) > rarityOrder.findIndex((rarity) => rarity === rB);
             });
         } else if (currentSort === "Mutations") {
             const mutationOrder = ["Normal", "Gold", "Rainbow"]
-            const getMutation = (tool: Tool) => tool.GetAttribute<string>("Variant") || "Normal";
+            const getMutation = (tool: Tool) => tool.GetAttribute<string>("ItemVariant") || "Normal";
             inventoryItems.sort((a, b) => {
                 const rA = getMutation(a);
                 const rB = getMutation(b);
-                if (rA === rB) return mutationOrder.findIndex((variant) => variant === a.Name) > mutationOrder.findIndex((variant) => variant === b.Name);
-                return rA < rB;
+                if (rA === rB) return a.Name > b.Name;
+                return mutationOrder.findIndex((variant) => variant === rA) > mutationOrder.findIndex((variant) => variant === rB);
             });
         }
 
@@ -116,7 +116,6 @@ export default (pagePaths: PagePaths) => {
 
             // drag handling
             slotsJanitor.Add(useDrag(slot.Clickable, slot, ({ position }) => {
-                printTS($line, `Dragging tool ${tool.Name} at position ${position}`);
                 const inventoryTools = [...pageStates.inventoryTools()];
                 const currentIndex = inventoryTools.findIndex(t => t === tool);
 
@@ -128,7 +127,6 @@ export default (pagePaths: PagePaths) => {
                     const hotbar = [...pageStates.hotBarTools()]
 
                     // if the hotbar index is valid, swap the tool with the one in the hotbar
-                    print(hotbarIndex, hotbar[hotbarIndex])
                     hotbar[hotbarIndex] = tool;
                     pageStates.hotBarTools(hotbar);
                 } else if (invIndex !== undefined && invIndex !== currentIndex) {
@@ -186,7 +184,7 @@ export default (pagePaths: PagePaths) => {
     // placeholder icons for category buttons
     sortFrame.ByName.TextLabel.Text = "🔤 Name";
     sortFrame.ByRarity.TextLabel.Text = "⭐ Rarity";
-    sortFrame.Mutations.TextLabel.Text = "📦 Amount";
+    sortFrame.Mutations.TextLabel.Text = "📦 Mutations";
     sortFrame.Produce.TextLabel.Text = "🍎 Produce";
     sortFrame.Villagers.TextLabel.Text = "👥 Villagers";
 
