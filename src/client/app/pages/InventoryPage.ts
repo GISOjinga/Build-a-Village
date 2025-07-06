@@ -27,6 +27,90 @@ export default (pagePaths: PagePaths) => {
         sortFrame.Villagers,
     ] as typeof sortFrame.ByName[];
 
+    // local state for filtering and sorting
+    let searchQuery = "";
+    let currentSort: "Name" | "Rarity" | "Amount" | undefined;
+    let filterCategory: "All" | "Produce" | "Villagers" = "All";
+    let activeButton: TextButton | undefined;
+
+    // quick helper to refresh UI when data/state changes
+    let slotsJanitor = new Janitor();
+    function renderSlots() {
+        slotsJanitor.Destroy();
+        slotsJanitor = new Janitor();
+
+        let inventoryItems = [...pageStates.inventoryTools()];
+        const hotBarTools = pageStates.hotBarTools();
+
+        // remove tools already in the hotbar
+        for (const [, tool] of pairs(hotBarTools)) {
+            const index = inventoryItems.findIndex(t => t === tool);
+            if (index !== -1) inventoryItems.remove(index);
+        }
+
+        // apply filter for category
+        if (filterCategory === "Produce") {
+            inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Commodity");
+        } else if (filterCategory === "Villagers") {
+            inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Villager");
+        }
+
+        // apply search
+        if (searchQuery.size() > 0) {
+            const query = searchQuery.lower();
+            inventoryItems = inventoryItems.filter(t => t.Name.lower().find(query) !== undefined);
+        }
+
+        // apply sorting
+        if (currentSort === "Name") {
+            inventoryItems.sort((a, b) => a.Name < b.Name);
+        } else if (currentSort === "Rarity") {
+            const getRarity = (tool: Tool) => tool.GetAttribute<string>("Rarity") || "Common";
+            inventoryItems.sort((a, b) => {
+                const rA = getRarity(a);
+                const rB = getRarity(b);
+                if (rA === rB) return a.Name < b.Name;
+                return rA < rB;
+            });
+        } else if (currentSort === "Amount") {
+            const getAmount = (tool: Tool) => {
+                const match = string.match(tool.Name, "%(%(\d+)%)$") as LuaTuple<[string, string]> | undefined;
+                return match ? tonumber(match[1])! : 1;
+            };
+            inventoryItems.sort((a, b) => {
+                const aAmt = getAmount(a);
+                const bAmt = getAmount(b);
+                if (aAmt === bAmt) return a.Name < b.Name;
+                return aAmt > bAmt; // largest first
+            });
+        }
+
+        // clear old slots
+        slotsContainer.GetChildren().forEach(child => {
+            if (child.IsA("Frame") && child !== slotTemplate) child.Destroy();
+        });
+
+        // render each slot
+        inventoryItems.forEach((tool, i) => {
+            const slot = slotsJanitor.Add(slotTemplate.Clone());
+
+            slot.Visible = true;
+            slot.Name = `Slot${i + 1}`;
+            slot.LayoutOrder = i;
+            slot.Clickable.Text = tool.Name;
+            slot.Parent = slotsContainer;
+
+            // equip on click
+            slotsJanitor.Add(UIUtilities.ButtonAction({
+                Button: slot.Clickable,
+                ExpandedSize: UIUtilities.MultiplyUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
+                DeExpandedSize: UIUtilities.DivideUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
+            }, () => {
+                routes.equipTool.send(tool);
+            }));
+        });
+    }
+
 
 
     // visibility
@@ -39,36 +123,9 @@ export default (pagePaths: PagePaths) => {
         })).Play();
     }));
 
-    // loads in the slots
-    trash.Add(useEffect((newTrash) => {
-        const realInventoryItems = [...pageStates.inventoryTools()];
-        const hotBarTools = pageStates.hotBarTools();
-
-        // loops through hotBarTools tools and removes it from realInventoryItems
-        for (const [_, tool] of pairs(hotBarTools)) {
-            const index = realInventoryItems.findIndex(t => t === tool);
-            if (index !== -1) realInventoryItems.remove(index);
-        }
-
-        // for all the real inventory items it adds a slot template and sets the name
-        realInventoryItems.forEach((tool, i) => {
-            const slot = newTrash.Add(slotTemplate.Clone());
-
-            // set up the slot
-            slot.Visible = true;
-            slot.Name = `Slot${i + 1}`;
-            slot.Clickable.Text = tool.Name
-            slot.Parent = slotsContainer;
-
-            // binds the action to equip the tool
-            trash.Add(UIUtilities.ButtonAction({
-                Button: slot.Clickable,
-                ExpandedSize: UIUtilities.MultiplyUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
-                DeExpandedSize: UIUtilities.DivideUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
-            }, () => {
-
-            }));
-        })
+    // render slots whenever inventory data changes
+    trash.Add(useEffect(() => {
+        renderSlots();
     }));
 
     // close button hides the page
@@ -88,6 +145,94 @@ export default (pagePaths: PagePaths) => {
     slotTemplate.Visible = false;
     container.Position = closedPosition;
     container.Visible = true;
+
+    // placeholder icons for category buttons
+    sortFrame.ByName.TextLabel.Text = "🔤 Name";
+    sortFrame.ByRarity.TextLabel.Text = "⭐ Rarity";
+    sortFrame.Amount.TextLabel.Text = "📦 Amount";
+    sortFrame.Produce.TextLabel.Text = "🍎 Produce";
+    sortFrame.Villagers.TextLabel.Text = "👥 Villagers";
+
+    // respond to search box input
+    trash.Add(searchBox.GetPropertyChangedSignal("Text").Connect(() => {
+        searchQuery = searchBox.Text;
+        renderSlots();
+    }));
+
+    // updates transparency based on which button is active
+    function updateButtonTransparency() {
+        sortButtons.forEach((btn) => {
+            btn.BackgroundTransparency = activeButton && btn !== activeButton ? 0.4 : 0;
+        });
+    }
+
+    // setup sort/filter button actions
+    const buttonInfo = [
+        {
+            button: sortFrame.ByName,
+            action: (wasActive: boolean) => {
+                currentSort = wasActive ? undefined : "Name";
+                filterCategory = "All";
+            },
+        },
+        {
+            button: sortFrame.ByRarity,
+            action: (wasActive: boolean) => {
+                currentSort = wasActive ? undefined : "Rarity";
+                filterCategory = "All";
+            },
+        },
+        {
+            button: sortFrame.Amount,
+            action: (wasActive: boolean) => {
+                currentSort = wasActive ? undefined : "Amount";
+                filterCategory = "All";
+            },
+        },
+        {
+            button: sortFrame.Produce,
+            action: (wasActive: boolean) => {
+                if (wasActive) {
+                    filterCategory = "All";
+                } else {
+                    filterCategory = "Produce";
+                    currentSort = undefined;
+                }
+            },
+        },
+        {
+            button: sortFrame.Villagers,
+            action: (wasActive: boolean) => {
+                if (wasActive) {
+                    filterCategory = "All";
+                } else {
+                    filterCategory = "Villagers";
+                    currentSort = undefined;
+                }
+            },
+        },
+    ];
+
+    buttonInfo.forEach(({ button, action }) => {
+        trash.Add(
+            UIUtilities.ButtonAction(
+                {
+                    Button: button,
+                    ExpandedSize: UIUtilities.MultiplyUdim2(button.Size, UDim2.fromScale(1.05, 1.05)),
+                    DeExpandedSize: UIUtilities.DivideUdim2(button.Size, UDim2.fromScale(1.05, 1.05)),
+                },
+                () => {
+                    const wasActive = activeButton === button;
+                    activeButton = wasActive ? undefined : button;
+                    action(wasActive);
+                    updateButtonTransparency();
+                    renderSlots();
+                },
+            ),
+        );
+    });
+
+    updateButtonTransparency();
 
 
     // when a tool is added, update the inventory tools
