@@ -140,6 +140,9 @@ export const ProduceAll = component("ProduceAll");
 // sets leaving
 export const Leaving = component("Leaving");
 
+// result of a sketchy guy roll
+export const GachaResult = component<{ item: string; type: string }>("GachaResult");
+
 /*************** Physics ***************/
 
 // body turner rotating
