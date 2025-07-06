@@ -8,6 +8,7 @@ import useEffect from "../hooks/useEffect";
 
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
+    // container setup and shared references
     const trash = new Janitor();
     const container = pagePaths.InventoryPage.Container;
     const slotsContainer = container.Grid.ContainerFrame as Frame;
@@ -32,6 +33,29 @@ export default (pagePaths: PagePaths) => {
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
     let activeSort = -1;
     let searchTerm = "";
+
+    /** Swap two tools inside the inventory list */
+    function swapInventory(fromIndex: number, toIndex: number) {
+        if (fromIndex === toIndex) return;
+        pageStates.inventoryTools(old => {
+            const arr = [...old];
+            const [item] = arr.splice(fromIndex, 1);
+            arr.splice(toIndex, 0, item);
+            return arr;
+        });
+    }
+
+    /** Move a tool from the inventory list to the hotbar */
+    function moveInvToHotbar(invIndex: number, hotIndex: number) {
+        const inv = [...pageStates.inventoryTools()];
+        const [item] = inv.splice(invIndex, 1);
+        pageStates.inventoryTools(inv);
+        pageStates.hotBarTools(old => {
+            const arr = [...old];
+            arr.splice(hotIndex, 0, item);
+            return arr;
+        });
+    }
     trash.Add(searchBox.GetPropertyChangedSignal("Text").Connect(() => {
         searchTerm = searchBox.Text;
         refreshDisplay();
@@ -51,14 +75,12 @@ export default (pagePaths: PagePaths) => {
         }
     }));
 
+    // refreshes the arrays stored in page state from the player's backpack
     const reloadItems = () => {
         if (!backpack) return;
-        inventoryTools.clear();
-        backpack.GetChildren().forEach((child) => {
-            if (child.IsA("Tool")) inventoryTools.push(child);
-        });
+        const tools = backpack.GetChildren().filter((child) => child.IsA("Tool")) as Tool[];
+        pageStates.inventoryTools(tools);
         applySort();
-        inventoryChanged.Fire();
     };
 
 
@@ -66,7 +88,7 @@ export default (pagePaths: PagePaths) => {
     const refreshDisplay = () => {
         slotsContainer.GetChildren().forEach((c) => { if (c !== slotTemplate && c.IsA("Frame")) c.Destroy(); });
         applySort();
-        let tools = [...inventoryTools];
+        let tools = [...pageStates.inventoryTools()];
         if (searchTerm.size() > 0) {
             const lower = searchTerm.lower();
             tools = tools.filter(t => t.Name.lower().find(lower) !== undefined);
@@ -88,7 +110,12 @@ export default (pagePaths: PagePaths) => {
         });
     };
 
-    trash.Add(inventoryChanged.Connect(refreshDisplay));
+
+    // refresh whenever the inventory list updates
+    trash.Add(useEffect(() => {
+        pageStates.inventoryTools();
+        refreshDisplay();
+    }));
 
     // drag setup
     const setupDrag = (slot: Frame, tool: Tool) => {
@@ -121,14 +148,13 @@ export default (pagePaths: PagePaths) => {
                 if (hotTarget) {
                     const fromIndex = slotsContainer.GetChildren().findIndex(c => c === dragged.slot);
                     const toIndex = hotTarget.GetAttribute("Index") as number;
-                    moveInvToHotbar(fromIndex, toIndex ?? hotbarTools.size());
+                    moveInvToHotbar(fromIndex, toIndex ?? pageStates.hotBarTools().size());
                 }
             }
             dragged.slot.Position = slotTemplate.Position;
             dragged.slot.Parent = slotsContainer;
             dragged.slot.ZIndex = slotTemplate.ZIndex;
             dragged.slot = undefined;
-            inventoryChanged.Fire();
         };
         trash.Add(UserInputService.InputEnded.Connect((input) => {
             if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch) endDrag(input);
@@ -136,29 +162,34 @@ export default (pagePaths: PagePaths) => {
     };
 
     // sort buttons
+    // sorts the inventory array in page state based on the active sort index
     function applySort() {
-        switch (activeSort) {
-            case 0:
-                inventoryTools.sort((a, b) => a.Name < b.Name);
-                break;
-            case 1:
-                inventoryTools.sort((a, b) => a.Name > b.Name);
-                break;
-            case 2:
-                inventoryTools.sort((a, b) => a.Name.size() < b.Name.size());
-                break;
-            case 3:
-                inventoryTools.sort((a, b) => a.Name.size() > b.Name.size());
-                break;
-            case 4:
-                for (let i = 0; i < math.floor(inventoryTools.size() / 2); i++) {
-                    const j = inventoryTools.size() - 1 - i;
-                    const temp = inventoryTools[i];
-                    inventoryTools[i] = inventoryTools[j];
-                    inventoryTools[j] = temp;
-                }
-                break;
-        }
+        pageStates.inventoryTools((old) => {
+            const arr = [...old];
+            switch (activeSort) {
+                case 0:
+                    arr.sort((a: Tool, b: Tool) => (a.Name < b.Name ? -1 : 1));
+                    break;
+                case 1:
+                    arr.sort((a: Tool, b: Tool) => (a.Name > b.Name ? -1 : 1));
+                    break;
+                case 2:
+                    arr.sort((a: Tool, b: Tool) => a.Name.size() - b.Name.size());
+                    break;
+                case 3:
+                    arr.sort((a: Tool, b: Tool) => b.Name.size() - a.Name.size());
+                    break;
+                case 4:
+                    for (let i = 0; i < math.floor(arr.size() / 2); i++) {
+                        const j = arr.size() - 1 - i;
+                        const temp = arr[i];
+                        arr[i] = arr[j];
+                        arr[j] = temp;
+                    }
+                    break;
+            }
+            return arr;
+        });
     }
 
     sortButtons.forEach((button, index) => {
@@ -179,7 +210,6 @@ export default (pagePaths: PagePaths) => {
                     CornerRadius: new UDim((activeSort === i || activeSort === -1) ? .2 : 1, 0)
                 })).Play();
             });
-            inventoryChanged.Fire();
         }));
     });
 

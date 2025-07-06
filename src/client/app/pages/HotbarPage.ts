@@ -4,8 +4,10 @@ import routes from "client/routes";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
+import useEffect from "../hooks/useEffect";
 
 export default (pagePaths: PagePaths) => {
+    // hotbar UI references and drag state
     const trash = new Janitor();
     const gameUI = pagePaths.Page;
     const player = Players.LocalPlayer;
@@ -17,6 +19,34 @@ export default (pagePaths: PagePaths) => {
 
     const dragged = { slot: undefined as ImageButton | undefined, offset: new Vector2() };
     let renderQueued = false;
+
+    /** Size of hotbar based on current viewport */
+    function setHotbarSize(size: number) {
+        pageStates.hotBarTools(old => old.slice(0, size));
+    }
+
+    /** Swap two tools inside the hotbar */
+    function swapHotbar(fromIndex: number, toIndex: number) {
+        if (fromIndex === toIndex) return;
+        pageStates.hotBarTools(old => {
+            const arr = [...old];
+            const [item] = arr.splice(fromIndex, 1);
+            arr.splice(toIndex, 0, item);
+            return arr;
+        });
+    }
+
+    /** Move a tool from the hotbar to the inventory */
+    function moveHotbarToInv(hotIndex: number, invIndex: number) {
+        const hot = [...pageStates.hotBarTools()];
+        const [item] = hot.splice(hotIndex, 1);
+        pageStates.hotBarTools(hot);
+        pageStates.inventoryTools(old => {
+            const arr = [...old];
+            arr.splice(invIndex, 0, item);
+            return arr;
+        });
+    }
 
     function getSlotCount() {
         const width = Workspace.CurrentCamera?.ViewportSize.X ?? 0;
@@ -75,7 +105,7 @@ export default (pagePaths: PagePaths) => {
             const invTarget = guiObjects.find((v: GuiObject) => invFrame && v.IsDescendantOf(invFrame) && v.IsA("Frame")) as Frame | undefined;
             if (invTarget && invFrame) {
                 const toIndex = invTarget.GetAttribute("Index") as number;
-                moveHotbarToInv(index, toIndex ?? inventoryTools.size());
+                moveHotbarToInv(index, toIndex ?? pageStates.inventoryTools().size());
             } else {
                 const hotTarget = guiObjects.find((v: GuiObject) => v.IsDescendantOf(hotbar) && v.IsA("ImageButton")) as ImageButton | undefined;
                 if (hotTarget && hotTarget !== dragged.slot) {
@@ -100,8 +130,13 @@ export default (pagePaths: PagePaths) => {
 
     trash.Add(backpack.ChildAdded.Connect(queueRenderSlots));
     trash.Add(backpack.ChildRemoved.Connect(queueRenderSlots));
-    trash.Add(hotbarChanged.Connect(queueRenderSlots));
-    trash.Add(inventoryChanged.Connect(queueRenderSlots));
+
+    // re-render when tool arrays change
+    trash.Add(useEffect(() => {
+        pageStates.hotBarTools();
+        pageStates.inventoryTools();
+        queueRenderSlots();
+    }));
 
     trash.Add(UserInputService.InputBegan.Connect((input, gp) => {
         if (gp) return;
@@ -117,10 +152,21 @@ export default (pagePaths: PagePaths) => {
 
     StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-    pageStates.inventoryTools([...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])].filter((v) => v.IsA("Tool")).filterUndefined())
-    backpack.ChildAdded.Connect(() => pageStates.inventoryTools([...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])].filter((v) => v.IsA("Tool")).filterUndefined()))
+    // initialize inventory tools from backpack and keep them in sync
+    pageStates.inventoryTools(
+        [...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])]
+            .filter((v) => v.IsA("Tool"))
+            .filterUndefined(),
+    );
+    backpack.ChildAdded.Connect(() =>
+        pageStates.inventoryTools(
+            [...backpack.GetChildren(), ...(player.Character?.GetChildren() || [])]
+                .filter((v) => v.IsA("Tool"))
+                .filterUndefined(),
+        ),
+    );
     setHotbarSize(getSlotCount());
-    renderSlots(); // Now this won’t loop
-    queueRenderSlots()
+    renderSlots();
+    queueRenderSlots();
     return trash;
 };
