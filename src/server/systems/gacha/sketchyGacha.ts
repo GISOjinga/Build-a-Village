@@ -12,20 +12,12 @@ import wallsData from "shared/data/wallsData";
 const PRODUCT_ID = 3326181974;
 
 function rollItem(data: PlayerData): GachaItem {
-    const rng = new Random();
     const available = gachaItems.filter(item => {
-        if (item.Type === "Villager") return !data.Villagers.some(v => v.Name === item.Name);
         if (item.Type === "Wall") return !data.Walls.some(w => w.Name === item.Name && w.Owned);
         return true;
     });
-    let total = 0;
-    available.forEach(i => total += i.Weight);
-    let pick = rng.NextNumber(0, total);
-    for (const item of available) {
-        pick -= item.Weight;
-        if (pick <= 0) return item;
-    }
-    return available[0];
+    const chosen = available[math.random(0, available.size() - 1)]
+    return math.random(1, chosen.Weight) === 1 ? chosen : rollItem(data); // Ensure we always return a valid item
 }
 
 export default (world: World) => {

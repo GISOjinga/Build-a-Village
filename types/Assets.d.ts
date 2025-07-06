@@ -2420,12 +2420,57 @@ type Assets = Folder & {
 					UIStroke: UIStroke;
 				};
 			};
-			InviteIncentive: Frame & {
-				InviteIncentive: TextLabel & {
-					UIStroke: UIStroke;
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					InviteIncentiveSuccess: LocalScript;
+			DailyQuestsTab: Frame & {
+				UIGradient: UIGradient;
+				Quest1: TextButton & {
+					text: TextLabel & {
+						UIStrokeText: UIStroke;
+					};
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
 				};
+				Quest3: TextButton & {
+					text: TextLabel & {
+						UIStrokeText: UIStroke;
+					};
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+				};
+				UICorner: UICorner;
+				Quest2: TextButton & {
+					text: TextLabel & {
+						UIStrokeText: UIStroke;
+					};
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+				};
+			};
+			ConfirmationPrompt: Frame & {
+				message: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Decline: TextButton & {
+					bg: ImageLabel;
+					TextLabel: TextLabel & {
+						UIStrokeText: UIStroke;
+					};
+					UIStrokeBG: UIStroke;
+				};
+				title: TextLabel & {
+					UIStroke: UIStroke;
+				};
+				Accept: TextButton & {
+					bg: ImageLabel;
+					TextLabel: TextLabel & {
+						UIStrokeText: UIStroke;
+					};
+					UIStrokeBG: UIStroke;
+				};
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				UIStroke: UIStroke;
+				bg: ImageLabel;
 			};
 			GiftList: Frame & {
 				Header: TextLabel & {
@@ -2461,6 +2506,54 @@ type Assets = Folder & {
 			};
 			Viewports: Folder & {
 				mason: ViewportFrame;
+			};
+			DailyRewards: Frame & {
+				Prize1: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				Close: TextButton & {
+					UIStrokeBG: UIStroke;
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+				};
+				Prize4: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				ClaimButton: TextButton & {
+					UIStrokeText: UIStroke;
+					bg: ImageLabel;
+					UIStrokeBG: UIStroke;
+				};
+				bg: ImageLabel;
+				["bg header"]: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				Prize3: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				Prize5: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				TimeTillNext: TextButton & {
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+					UIPadding: UIPadding;
+					UIStrokeBG: UIStroke;
+				};
+				UIStroke: UIStroke;
+				Prize2: ImageLabel & {
+					UIStroke: UIStroke;
+				};
+				TextLabel: TextLabel & {
+					UIStroke: UIStroke;
+				};
+			};
+			InviteIncentive: Frame & {
+				InviteIncentive: TextLabel & {
+					UIStroke: UIStroke;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					InviteIncentiveSuccess: LocalScript;
+				};
 			};
 			Inventory: Frame & {
 				Hotbar: Frame & {
@@ -2546,45 +2639,12 @@ type Assets = Folder & {
 					};
 				};
 			};
-			DailyQuests: Frame & {
-				UIGradient: UIGradient;
-				Quest1: TextButton & {
-					UIStrokeText: UIStroke;
-				};
-				Quest3: TextButton & {
-					UIStrokeText: UIStroke;
-				};
-				UICorner: UICorner;
-				Quest2: TextButton & {
-					UIStrokeText: UIStroke;
-				};
-			};
-			ConfirmationPrompt: Frame & {
-				message: TextLabel & {
+			Introtext: Frame & {
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				text: TextLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					UIStroke: UIStroke;
 				};
-				Decline: TextButton & {
-					bg: ImageLabel;
-					TextLabel: TextLabel & {
-						UIStrokeText: UIStroke;
-					};
-					UIStrokeBG: UIStroke;
-				};
-				title: TextLabel & {
-					UIStroke: UIStroke;
-				};
-				Accept: TextButton & {
-					bg: ImageLabel;
-					TextLabel: TextLabel & {
-						UIStrokeText: UIStroke;
-					};
-					UIStrokeBG: UIStroke;
-				};
-				["bg header"]: ImageLabel & {
-					UIStroke: UIStroke;
-				};
-				UIStroke: UIStroke;
-				bg: ImageLabel;
 			};
 			PlaceFrame: Frame & {
 				Placetext: TextButton & {
@@ -2601,13 +2661,6 @@ type Assets = Folder & {
 					UIStrokeBG: UIStroke;
 					bg: ImageLabel;
 					UIStrokeText: UIStroke;
-				};
-			};
-			Introtext: Frame & {
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				text: TextLabel & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
-					UIStroke: UIStroke;
 				};
 			};
 			RobuxStore: Frame & {
@@ -3000,16 +3053,30 @@ type Assets = Folder & {
 					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					UIStrokeText: UIStroke;
 				};
+				Sell: TextButton & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					UIStrokeBG: UIStroke;
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+				};
+				DailyRewards: TextButton & {
+					UIPadding: UIPadding;
+					UIStrokeBG: UIStroke;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					bg: ImageLabel;
+					UIStrokeText: UIStroke;
+				};
 				Village: TextButton & {
 					UIStrokeBG: UIStroke;
 					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					bg: ImageLabel;
 					UIStrokeText: UIStroke;
 				};
-				Sell: TextButton & {
-					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				Quests: TextButton & {
+					UIPadding: UIPadding;
 					UIStrokeBG: UIStroke;
 					bg: ImageLabel;
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
 					UIStrokeText: UIStroke;
 				};
 				Buy: TextButton & {

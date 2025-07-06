@@ -1,6 +1,7 @@
 import { World } from "@rbxts/jecs";
 import { Players, RunService } from "@rbxts/services";
 import routes from "client/routes";
+import gachaItems from "shared/data/gachaItems";
 
 export default (world: World) => {
     const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui");
@@ -11,17 +12,14 @@ export default (world: World) => {
     const label = new Instance("TextLabel");
     label.Size = UDim2.fromScale(0.3, 0.1);
     label.Position = UDim2.fromScale(0.35, 0.45);
-    label.BackgroundColor3 = Color3.fromRGB(0,0,0);
-    label.TextColor3 = Color3.fromRGB(255,255,255);
+    label.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+    label.TextColor3 = Color3.fromRGB(255, 255, 255);
     label.TextScaled = true;
     label.Parent = gui;
     gui.Parent = playerGui;
 
     routes.startSketchyRoll.listen(({ item }) => {
         gui.Enabled = true;
-        const names = new Array<string>();
-        for (let i = 0; i < 99; i++) names.push(`??? ${i}`);
-        names.push(item);
         let index = 0;
         const start = tick();
         const conn = RunService.Heartbeat.Connect(() => {
@@ -34,9 +32,9 @@ export default (world: World) => {
                 });
             } else {
                 const t = math.floor(elapsed / 5 * 100);
-                if (t !== index && t < names.size()) {
+                if (t !== index) {
                     index = t;
-                    label.Text = names[index];
+                    label.Text = gachaItems[math.floor(math.random() * gachaItems.size())].Name;
                 }
             }
         });
