@@ -4,23 +4,19 @@ import { useEvent } from "shared/Plugin-Hook";
 import routes from "server/routes";
 
 const MESSAGES = [
-    "Please hit like on the game to support us.",
+    "Please hit like on the game to support us. We really appreciate it! :)",
     "Check out the link to the community to get updates. It's in the game description!",
+    "Have a bug or suggestion? Join our Discord server and let us know!",
+    "Join our Discord server for more updates and community events!",
     "Tell your friends to come join!",
+    "If you get teleported/migrated please be patient, we're activly adding a bunch of fun updates!",
 ];
 
-function startReminders(player: Player) {
-    task.spawn(() => {
-        let index = 0;
-        while (player.Parent) {
-            routes.notify.sendTo({ text: MESSAGES[index], duration: 5 }, player);
-            index = (index + 1) % MESSAGES.size();
-            task.wait(math.random(240, 360));
-        }
-    });
-}
 
-export default (world: World) => {
-    Players.GetPlayers().forEach(startReminders);
-    for (const [player] of useEvent(Players.PlayerAdded)) startReminders(player);
+let totalTime = os.time() + math.random(60 * 3, 60 * 6);
+export default () => {
+    if (totalTime < os.time()) {
+        routes.notify.sendToAll({ text: MESSAGES[math.floor(math.random() * MESSAGES.size())], duration: 5 });
+        totalTime = os.time() + math.random(60 * 3, 60 * 6);
+    }
 };
