@@ -468,6 +468,8 @@ export const sharedRoutes = (() => {
             type: str,
         } as JingaNetType<{ item: string; type: string }>,
 
+        finishSketchyRoll: nothing as JingaNetType<undefined>,
+
         getReplicatedComponents: nothing as JingaNetType<undefined>,
 
         deleteReplicatedEntity: entity as unknown as Entity,

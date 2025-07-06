@@ -22,19 +22,25 @@ export default (world: World) => {
     const king = paths.Map.Shops.King.Npc
     const merchant = paths.Map.Shops.Merchant.Npc
     const architect = paths.Map.Shops.Architect.Npc
+    const beekeeper = paths.Map.Villagers.Beekeeper.Npc
+    const witch = paths.Map.Villagers.Witch.Npc
     const kingIdleTrack = useMemo(() => king.Humanoid.Animator.LoadAnimation(kingIdle), [king]);
     const merchantIdleTrack = useMemo(() => merchant.Humanoid.Animator.LoadAnimation(merchantIdle), [merchant]);
     const architectIdleTrack = useMemo(() => architect.Humanoid.Animator.LoadAnimation(architectIdle), [architect]);
+    const beekeeperIdleTrack = useMemo(() => beekeeper.Humanoid.Animator.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production), [beekeeper]);
+    const witchIdleTrack = useMemo(() => witch.Humanoid.Animator.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production), [witch]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
     const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
 
     // makes sure animation is playing
-    if (!kingIdleTrack.IsPlaying || !merchantIdleTrack.IsPlaying || !architectIdleTrack.IsPlaying) {
+    if (!kingIdleTrack.IsPlaying || !merchantIdleTrack.IsPlaying || !architectIdleTrack.IsPlaying || !beekeeperIdleTrack.IsPlaying || !witchIdleTrack.IsPlaying) {
         printJecs($line, "Setting up animations for player: ", player.Name);
         kingIdleTrack.Play();
         merchantIdleTrack.Play();
         architectIdleTrack.Play();
+        beekeeperIdleTrack.Play();
+        witchIdleTrack.Play();
     }
 
     // casts a ray down if body and if standing on a platform floor then increase walkspeed on humanoid to 20 else 16 with tracer
