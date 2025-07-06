@@ -463,6 +463,11 @@ export const sharedRoutes = (() => {
             purchase: str,
         } as JingaNetType<{ purchase: keyof typeof robuxStoreData }>,
 
+        startSketchyRoll: {
+            item: str,
+            type: str,
+        } as JingaNetType<{ item: string; type: string }>,
+
         getReplicatedComponents: nothing as JingaNetType<undefined>,
 
         deleteReplicatedEntity: entity as unknown as Entity,

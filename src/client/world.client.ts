@@ -34,6 +34,7 @@ import NpcDialogue from "./app/NpcDialogue";
 import updateWallsForSale from "./systems/ui/updateWallsForSale";
 import gameMusic from "./systems/sounds/gameMusic";
 import generalSounds from "./systems/sounds/generalSounds";
+import sketchyRoll from "./systems/gacha/sketchyRoll";
 import resourcePromptTag from "./tags/resourcePromptTag";
 import goldVariantTag from "./tags/goldVariantTag";
 import rainbowVariantTag from "./tags/rainbowVariantTag";
@@ -120,6 +121,7 @@ const debug = setupMatter([
     // sounds
     { system: gameMusic },
     { system: generalSounds },
+    { system: sketchyRoll },
 
     // ui
     { system: hoverBoxUpdate },
