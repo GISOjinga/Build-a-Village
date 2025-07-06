@@ -34,6 +34,8 @@ import freeRewardChest from "./systems/promotions/freeRewardChest";
 import updateLeaderboard from "./systems/leaderboard/updateLeaderboard";
 import dailyQuests from "./systems/dailyEvents/dailyQuests";
 import dailyRewards from "./systems/dailyEvents/dailyRewards";
+import villageBadges from "./systems/badges/villageBadges";
+import supportReminders from "./systems/notifications/supportReminders";
 
 
 
@@ -93,6 +95,8 @@ setupMatter([
     { system: friendsBonus },
     { system: promoCodes },
     { system: freeRewardChest },
+    { system: villageBadges },
+    { system: supportReminders },
 
     // robux store
     { system: robuxStore },
