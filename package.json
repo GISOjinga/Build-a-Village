@@ -26,7 +26,6 @@
   "dependencies": {
     "@flamework/core": "^1.2.4",
     "@rbxts/bezier": "^0.2.0",
-    "@rbxts/bytenet-fixed": "^1.1.4",
     "@rbxts/camera-shaker": "^1.0.8",
     "@rbxts/centurion": "^1.0.1",
     "@rbxts/centurion-ui": "^1.0.2",

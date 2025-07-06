@@ -1,4 +1,3 @@
-import ByteNet from "@rbxts/bytenet-fixed";
 import { Entity, pair, World } from "@rbxts/jecs";
 import { useMemo } from "@rbxts/react";
 import { Debris, Players, Workspace } from "@rbxts/services";

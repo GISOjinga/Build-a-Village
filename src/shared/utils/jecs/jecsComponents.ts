@@ -8,7 +8,6 @@ import { Janitor } from "@rbxts/janitor";
 import { Phase, Scheduler } from "@rbxts/planck";
 import { HotReloader } from "@rbxts/hot-reloader";
 import { ReplicatedStorage, RunService, ServerScriptService, Workspace } from "@rbxts/services";
-import { ByteNetType, packet } from "@rbxts/bytenet-fixed";
 import { PlayerState as PlayerStateType } from "../PlayerState";
 import pageStates, { PageStates } from "../Animations/pageStates";
 
@@ -49,8 +48,6 @@ export const TargetReplication = component<{ [key in typeof componentsToReplicat
 export const Platform = component<PlatformExample>("Platform");
 export const PlatformOccupied = component<Entity>("PlatformOccupied");
 
-// a hook to watch for a route to be called
-export const RouteEntities = new Map<packet<ByteNetType<unknown>>, Entity>()
 
 /*************** game settinngs ***************/
 

@@ -1,4 +1,3 @@
-import { ByteNetType, packet } from "@rbxts/bytenet-fixed"
 import { Janitor } from "@rbxts/janitor"
 import { Delete, Entity, Name, OnAdd, OnRemove, OnChange, Pair, pair, Wildcard, World } from "@rbxts/jecs"
 import Object from "@rbxts/object-utils"
