@@ -6,7 +6,21 @@ const pageStates = {
     placementRotationOffset: atom(0),
     placeVillager: atom(false),
     digVillager: atom(false),
-    openPage: atom("None") as Atom<"Placement" | "Dig" | "Wall" | "Gift" | "Buy" | "RobuxStore" | "Promo" | "Sell" | "Inventory" | "DailyRewards" | "None">,
+    openPage: atom("None") as Atom<
+        | "Placement"
+        | "Dig"
+        | "Wall"
+        | "Gift"
+        | "Buy"
+        | "RobuxStore"
+        | "Promo"
+        | "Sell"
+        | "Inventory"
+        | "DailyRewards"
+        | "Quests"
+        | "Rolls"
+        | "None"
+    >,
     confirmPrompt: atom({ title: "", message: "" }),
     productToGift: atom(undefined as number | undefined),
     villagersShop: atom(new Array<VillagerInfo>()),
@@ -27,7 +41,7 @@ const pageStates = {
     } as Record<number, Tool | undefined>),
     isDragging: atom(false),
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
-    npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "None", text: "" }),
+    npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "Rolls" | "None", text: "" }),
     coins: atom(0),
     friendsBonus: atom(false),
     dailyRewardStreak: atom(0),

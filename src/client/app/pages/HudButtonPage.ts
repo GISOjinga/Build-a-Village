@@ -72,6 +72,15 @@ export default (pagePaths: PagePaths) => {
         pageStates.openPage("DailyRewards")
     }))
 
+    // quests button
+    trash.Add(UIUtilities.ButtonAction({
+        Button: pagePaths.HUD.Quests,
+        ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
+        DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
+    }, () => {
+        pageStates.openPage(pageStates.openPage() === "Quests" ? "None" : "Quests")
+    }))
+
     // updates your coins
     trash.Add(useEffect((newTrash) => {
         const newPrice = pageStates.coins()
