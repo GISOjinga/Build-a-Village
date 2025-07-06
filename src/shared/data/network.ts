@@ -421,7 +421,7 @@ export const sharedRoutes = (() => {
         npcDialogue: {
             target: str,
             text: str,
-        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "None"; text: string }>,
+        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "SketchyGuy" | "None"; text: string }>,
 
         buyWall: {
             wallName: str,
