@@ -33,6 +33,8 @@ export default (pagePaths: PagePaths) => {
         const hotBarTools = pageStates.hotBarTools();
         const maxSlots = getSlotCount();
 
+        print("Changed", hotBarTools)
+
         // ensure array length matches slot count
         for (const [index] of pairs(hotBarTools)) if (index >= maxSlots) hotBarTools[index] = undefined; // remove tools beyond max slots
 
@@ -73,7 +75,7 @@ export default (pagePaths: PagePaths) => {
                 // function to tell you if a position is within the absolute bounds of a GuiObject
                 const isWithinBounds = (guiObject: GuiObject, position: Vector2) => {
                     const absolutePosition = guiObject.AbsolutePosition;
-                    const absoluteSize = guiObject.AbsoluteSize.div(2); // half size for center point
+                    const absoluteSize = guiObject.AbsoluteSize; // half size for center point
                     return position.X >= absolutePosition.X && position.X <= absolutePosition.X + absoluteSize.X &&
                         position.Y >= absolutePosition.Y && position.Y <= absolutePosition.Y + absoluteSize.Y;
                 };
@@ -121,33 +123,29 @@ export default (pagePaths: PagePaths) => {
                 });
             }
         }
-
-        // save back possibly modified array
-        pageStates.hotBarTools([...hotBarTools]);
-
     }));
 
     // loop updating based on the size of the window if old size is not equal to new size then update the tools
     trash.Add(() => {
         let oldCount = getSlotCount()
 
-        while (true) {
-            const newCount = getSlotCount();
-            if (newCount !== oldCount) {
-                oldCount = newCount;
-                pageStates.hotBarTools((oldTools) => {
-                    // removes any tools that are beyond the new slot count
-                    for (let i = newCount; i < oldTools.size(); i++) {
-                        if (i > getSlotCount()) {
-                            oldTools[i] = undefined; // remove tool from hotbar
-                            return [...oldTools]; // return the updated array
-                        }
-                    }
-                    return oldTools
-                })
-            }
-            task.wait(1); // check every second
-        }
+        // while (true) {
+        //     const newCount = getSlotCount();
+        //     if (newCount !== oldCount) {
+        //         oldCount = newCount;
+        //         pageStates.hotBarTools((oldTools) => {
+        //             // removes any tools that are beyond the new slot count
+        //             for (let i = newCount; i < oldTools.size(); i++) {
+        //                 if (i > getSlotCount()) {
+        //                     oldTools[i] = undefined; // remove tool from hotbar
+        //                     return [...oldTools]; // return the updated array
+        //                 }
+        //             }
+        //             return oldTools
+        //         })
+        //     }
+        //     task.wait(1); // check every second
+        // }
     })
 
     // listens for changes done to inventoryTools and when something is added it inserts it into the hotbar 

@@ -43,23 +43,25 @@ export default (pagePaths: PagePaths) => {
         slotsJanitor.Destroy();
         slotsJanitor = new Janitor();
 
-        let inventoryItems = [...pageStates.inventoryTools()];
+        const realInventoryItems = pageStates.inventoryTools()
+        let inventoryItemsAppearences = [...realInventoryItems]
         const hotBarTools = pageStates.hotBarTools();
+        print(hotBarTools)
 
         // apply filter for category
         if (filterCategory === "Produce") {
-            inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Commodity");
+            inventoryItemsAppearences = inventoryItemsAppearences.filter(t => t.GetAttribute("ItemType") === "Commodity");
         } else if (filterCategory === "Villagers") {
-            inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Villager");
+            inventoryItemsAppearences = inventoryItemsAppearences.filter(t => t.GetAttribute("ItemType") === "Villager");
         }
 
         // apply sorting
         if (currentSort === "Name") {
-            inventoryItems.sort((a, b) => a.Name < b.Name);
+            inventoryItemsAppearences.sort((a, b) => a.Name < b.Name);
         } else if (currentSort === "Rarity") {
             const rarityOrder = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]
             const getRarity = (tool: Tool) => tool.GetAttribute<string>("Rarity") || "Common";
-            inventoryItems.sort((a, b) => {
+            inventoryItemsAppearences.sort((a, b) => {
                 const rA = getRarity(a);
                 const rB = getRarity(b);
                 if (rA === rB) return a.Name > b.Name;
@@ -68,7 +70,7 @@ export default (pagePaths: PagePaths) => {
         } else if (currentSort === "Mutations") {
             const mutationOrder = ["Normal", "Gold", "Rainbow"]
             const getMutation = (tool: Tool) => tool.GetAttribute<string>("ItemVariant") || "Normal";
-            inventoryItems.sort((a, b) => {
+            inventoryItemsAppearences.sort((a, b) => {
                 const rA = getMutation(a);
                 const rB = getMutation(b);
                 if (rA === rB) return a.Name > b.Name;
@@ -79,7 +81,7 @@ export default (pagePaths: PagePaths) => {
         // apply search
         if (searchQuery.size() > 0) {
             const query = searchQuery.lower();
-            inventoryItems = inventoryItems.filter(t => t.Name.lower().find(query)[0] !== undefined);
+            inventoryItemsAppearences = inventoryItemsAppearences.filter(t => t.Name.lower().find(query)[0] !== undefined);
         }
 
         // clear old slots
@@ -90,10 +92,9 @@ export default (pagePaths: PagePaths) => {
         const slotFrames = new Array<typeof slotTemplate>();
 
         // render each slot
-        inventoryItems.forEach((tool, inventoryIndex) => {
+        realInventoryItems.forEach((tool, inventoryIndex) => {
             // remove tools already in the hotbar
             for (const [_, tool2] of pairs(hotBarTools)) if (tool2 === tool) return
-
             const slot = slotsJanitor.Add(slotTemplate.Clone());
             slotFrames.push(slot);
 
@@ -124,15 +125,22 @@ export default (pagePaths: PagePaths) => {
                 const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
 
                 if (hotbarIndex !== undefined) {
-                    const hotbar = [...pageStates.hotBarTools()]
-
                     // if the hotbar index is valid, swap the tool with the one in the hotbar
-                    hotbar[hotbarIndex] = tool;
-                    pageStates.hotBarTools(hotbar);
+                    pageStates.hotBarTools(() => {
+                        const newItemTool = new Array() as typeof hotBarTools
+                        for (const [index, tool2] of pairs(hotBarTools)) {
+                            newItemTool[index - 1] = tool2 as never; // copy old hotbar
+                        }
+
+                        newItemTool[hotbarIndex] = tool
+                        print(newItemTool)
+                        return newItemTool;
+                    });
                 } else if (invIndex !== undefined && invIndex !== currentIndex) {
-                    inventoryTools.remove(currentIndex);
+                    const newItemTool = inventoryTools[invIndex];
+                    inventoryTools.insert(inventoryIndex, newItemTool);
                     inventoryTools.insert(invIndex, tool);
-                    pageStates.inventoryTools(inventoryTools);
+                    pageStates.inventoryTools([...inventoryTools]);
                 }
             }));
         });

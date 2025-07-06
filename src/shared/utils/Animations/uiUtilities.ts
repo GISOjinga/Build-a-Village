@@ -6,7 +6,7 @@
 import { Janitor } from "@rbxts/janitor";
 import { Players, ReplicatedStorage, TweenService, UserInputService } from "@rbxts/services";
 import { $line } from "rbxts-transformer-inline";
-import { warnTS } from "../functions/jecsHelpFunctions";
+import { printTS, warnTS } from "../functions/jecsHelpFunctions";
 
 
 // variables
@@ -93,7 +93,7 @@ namespace UIUtilities {
     //----------------------------------------------------------------------------------
     export function ButtonAction(
         buttonEffects: ButtonEffects,
-        onReleased?: () => void,
+        onReleased?: (completeAction: boolean) => void,
         onHeld?: () => void
     ): ButtonActionControls {
         const trash = new Janitor();
@@ -152,16 +152,16 @@ namespace UIUtilities {
         );
 
         // Input began -> de-expand & onHeld
+        let down = false
         trash.Add(
-            button.InputBegan.Connect((input) => {
+            button.MouseButton1Down.Connect((input) => {
                 Promise.try(() => {
                     if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (!extraControls._enabled) return;
-                    if (IsInputActivated(input)) {
-                        container.Size = defaultSize;
-                        trashTween.Add(TweenService.Create(container, hoveringTweenInfo, { Size: deExpandedSize })).Play();
-                        if (onHeld) onHeld();
-                    }
+                    container.Size = defaultSize;
+                    trashTween.Add(TweenService.Create(container, hoveringTweenInfo, { Size: deExpandedSize })).Play();
+                    down = true;
+                    if (onHeld) onHeld();
                 }).catch(err => warnTS($line, err));
             })
         );
@@ -169,13 +169,12 @@ namespace UIUtilities {
         // Input ended -> expand back & onReleased
         trash.Add(
             button.InputEnded.Connect((input) => {
+                print(input.UserInputType, input.KeyCode, input.UserInputState);
                 Promise.try(() => {
-                    if (buttonEffects.AccountForTouch && IsUsingTouchPadToWalk()) return
                     if (!extraControls._enabled) return;
-                    if (IsInputActivated(input)) {
-                        trashTween.Add(TweenService.Create(container, elasticTweenInfo, { Size: defaultSize })).Play();
-                        if (onReleased) onReleased();
-                    }
+                    trashTween.Add(TweenService.Create(container, elasticTweenInfo, { Size: defaultSize })).Play();
+                    if (onReleased) onReleased(down);
+                    down = false;
                 }).catch(err => warnTS($line, err));
             })
         );

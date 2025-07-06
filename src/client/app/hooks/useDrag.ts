@@ -9,24 +9,20 @@ import useEffect from "./useEffect";
 
 export interface DragResult {
     position: Vector2;
-    input: InputObject;
 }
 
 export default function useDrag(clickable: GuiButton, container: GuiObject, onDrop: (result: DragResult) => void): Janitor {
     const trash = new Janitor();
     const mouse = Players.LocalPlayer.GetMouse();
     let dragging = false;
-    let dragInput: InputObject | undefined;
     let dragClone: GuiObject | undefined;
     let dragConnection: RBXScriptConnection | undefined;
 
     // Begin drag logic
-    const beginDrag = (input: InputObject) => {
+    const beginDrag = () => {
         if (pageStates.openPage() !== "Inventory") return;
-        if (!UIUtilities.IsInputActivated(input)) return;
 
         dragging = true;
-        dragInput = input;
 
         container.Visible = false;
         container.ZIndex += 1000;
@@ -47,7 +43,7 @@ export default function useDrag(clickable: GuiButton, container: GuiObject, onDr
         // Smooth drag movement
         pageStates.isDragging(true);
         dragConnection = trash.Add(RunService.RenderStepped.Connect(() => {
-            if (!dragging || !dragClone || !dragInput) return;
+            if (!dragging || !dragClone) return;
             const size = dragClone.AbsoluteSize.div(2);
             dragClone.Position = UDim2.fromOffset(mouse.X - size.X, mouse.Y - size.Y);
             dragClone.Size = UDim2.fromOffset(container.AbsoluteSize.X, container.AbsoluteSize.Y);
@@ -82,17 +78,18 @@ export default function useDrag(clickable: GuiButton, container: GuiObject, onDr
     };
 
     // Listen for input start
-    trash.Add(clickable.InputBegan.Connect((input) => {
-        if (dragging) return;
-        beginDrag(input);
-    }));
+    UIUtilities.ButtonAction({
+        Button: clickable,
+    }, () => { }, () => {
+        if (dragging || pageStates.openPage() !== "Inventory") return;
+        beginDrag();
+    })
 
-    // Listen for drag release
     trash.Add(UserInputService.InputEnded.Connect((input) => {
-        if (!dragging || input !== dragInput) return;
+        if (!dragging || !UIUtilities.IsInputActivated(input)) return;
 
         const dropPos = new Vector2(input.Position.X, input.Position.Y);
-        onDrop({ position: dropPos, input });
+        onDrop({ position: dropPos });
         stopDrag();
     }));
 
