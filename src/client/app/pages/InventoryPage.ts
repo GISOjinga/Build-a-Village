@@ -81,7 +81,6 @@ export default (pagePaths: PagePaths) => {
 
         // apply search
         if (searchQuery.size() > 0) {
-            print("Searching for: " + searchQuery, inventoryItems);
             const query = searchQuery.lower();
             inventoryItems = inventoryItems.filter(t => t.Name.lower().find(query)[0] !== undefined);
         }
