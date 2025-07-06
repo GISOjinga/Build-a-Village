@@ -22,13 +22,13 @@ export default (pagePaths: PagePaths) => {
         });
         if (!reward) return;
         if (reward.type === "Villager") {
-            const viewport = paths.Assets.villagerviewports.Villager.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
+            const viewport = paths.Assets.UI.VillagerRenders.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
             if (viewport) {
                 viewport.Parent = slot;
                 viewport.Visible = true;
             }
         } else if (reward.type === "Produce") {
-            const viewport = paths.Assets.villagerviewports.Produce.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
+            const viewport = paths.Assets.UI.VillagerRenders.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
             if (viewport) {
                 viewport.Parent = slot;
                 viewport.Visible = true;
