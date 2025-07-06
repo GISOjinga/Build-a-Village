@@ -77,7 +77,7 @@ export default (pagePaths: PagePaths) => {
 
                     const hotbarSlots = slots as GuiObject[];
                     const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
-                    const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => c.IsA("GuiObject") && c.Name.match(/^Slot/)) as GuiObject[];
+                    const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => c.IsA("GuiObject")) as GuiObject[];
                     const inventoryIndex = slotIndexAtPosition(inventorySlots, position);
 
                     if (inventoryIndex !== undefined) {

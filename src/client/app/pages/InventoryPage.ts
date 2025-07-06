@@ -115,12 +115,13 @@ export default (pagePaths: PagePaths) => {
             }));
 
             // drag handling
+            print(slot)
             slotsJanitor.Add(useDrag(slot, ({ position }) => {
                 const inventoryTools = [...pageStates.inventoryTools()];
                 const currentIndex = inventoryTools.findIndex(t => t === tool);
 
                 const invIndex = slotIndexAtPosition(slotFrames, position);
-                const hotbarSlots = pagePaths.InventoryPage.Hotbar.GetChildren().filter((c) => c.IsA("GuiObject") && c.Name.match(/^Slot/)) as GuiObject[];
+                const hotbarSlots = pagePaths.InventoryPage.Hotbar.GetChildren().filter((c) => c.IsA("GuiObject")) as GuiObject[];
                 const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
 
                 if (hotbarIndex !== undefined) {
