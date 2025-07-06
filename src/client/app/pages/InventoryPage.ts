@@ -1,23 +1,15 @@
 import { Janitor } from "@rbxts/janitor";
-import { Players, TweenService, UserInputService } from "@rbxts/services";
+import { Players, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import routes from "client/routes";
 import useEffect from "../hooks/useEffect";
-import {
-    inventoryTools,
-    inventoryChanged,
-    moveInvToHotbar,
-    swapInventory,
-    hotbarTools,
-} from "../state/toolData";
 
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
     const trash = new Janitor();
-    const inventoryPage = pagePaths.InventoryPage;
-    const container = inventoryPage.Container;
+    const container = pagePaths.InventoryPage.Container;
     const slotsContainer = container.Grid.ContainerFrame as Frame;
     const slotTemplate = container.Grid.ContainerFrame.ContainerExample as Frame;
     const searchBox = container.TopBar.SearchBox;
@@ -29,12 +21,12 @@ export default (pagePaths: PagePaths) => {
         sortFrame.Amount,
         sortFrame.Produce,
         sortFrame.Villagers,
-    ] as GuiButton[];
+    ] as typeof sortFrame.ByName[];
 
-    const openPosition = inventoryPage.Position;
-    const closedPosition = UDim2.fromScale(openPosition.X.Scale, 1.5);
-    inventoryPage.Position = closedPosition;
-    inventoryPage.Visible = false;
+    const openPosition = container.Position;
+    const closedPosition = UDim2.fromScale(openPosition.X.Scale, 3.5);
+    container.Position = closedPosition;
+    container.Visible = true;
 
     const backpack = Players.LocalPlayer.FindFirstChild("Backpack") as Backpack | undefined;
     const dragged = { slot: undefined as Frame | undefined, offset: new Vector2() };
@@ -106,7 +98,7 @@ export default (pagePaths: PagePaths) => {
             dragged.slot = slot;
             const absPos = input.Position;
             dragged.offset = new Vector2(slot.AbsolutePosition.X - absPos.X, slot.AbsolutePosition.Y - absPos.Y);
-            slot.Parent = inventoryPage;
+            slot.Parent = container;
             slot.ZIndex = 100;
         }));
         trash.Add(UserInputService.InputChanged.Connect((input) => {
@@ -178,7 +170,15 @@ export default (pagePaths: PagePaths) => {
                 activeSort = index;
                 applySort();
             }
-            sortButtons.forEach((b, i) => b.BackgroundTransparency = activeSort === i ? 0.3 : 0.6);
+
+            sortButtons.forEach((b, i) => {
+                trash.Add(TweenService.Create(b, new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+                    BackgroundTransparency: (activeSort === i || activeSort === -1) ? 0 : 0.2
+                })).Play();
+                trash.Add(TweenService.Create(b.UICorner, new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
+                    CornerRadius: new UDim((activeSort === i || activeSort === -1) ? .2 : 1, 0)
+                })).Play();
+            });
             inventoryChanged.Fire();
         }));
     });
@@ -186,15 +186,17 @@ export default (pagePaths: PagePaths) => {
     // visibility
     trash.Add(useEffect((newTrash) => {
         const open = pageStates.openPage();
-        inventoryPage.Visible = true;
         const goal = open === "Inventory" ? openPosition : closedPosition;
-        newTrash.Add(TweenService.Create(inventoryPage, new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        newTrash.Add(TweenService.Create(container, new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
             Position: goal,
         })).Play();
         sortFrame.Visible = open === "Inventory";
         if (open === "Inventory") reloadItems();
-        else newTrash.Add(task.delay(0.3, () => { inventoryPage.Visible = false; }));
     }));
+
+    // toggles backback because of the workspace attrivute backpackopen
+    Workspace.SetAttribute("BackpackOpen", false);
+    trash.Add(Workspace.GetAttributeChangedSignal("BackpackOpen").Connect(() => pageStates.openPage(Workspace.GetAttribute("BackpackOpen") ? "Inventory" : "None")));
 
     // initial state
     slotTemplate.Visible = false;
