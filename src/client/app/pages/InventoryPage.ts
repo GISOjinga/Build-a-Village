@@ -5,6 +5,8 @@ import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import routes from "client/routes";
 import useEffect from "../hooks/useEffect";
+import useDrag from "../hooks/useDrag";
+import { slotIndexAtPosition } from "../hooks/slotUtils";
 
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
@@ -90,9 +92,12 @@ export default (pagePaths: PagePaths) => {
             if (child.IsA("Frame") && child !== slotTemplate) child.Destroy();
         });
 
+        const slotFrames = new Array<typeof slotTemplate>();
+
         // render each slot
         inventoryItems.forEach((tool, i) => {
             const slot = slotsJanitor.Add(slotTemplate.Clone());
+            slotFrames.push(slot);
 
             slot.Visible = true;
             slot.Name = `Slot${i + 1}`;
@@ -107,6 +112,33 @@ export default (pagePaths: PagePaths) => {
                 DeExpandedSize: UIUtilities.DivideUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
             }, () => {
                 routes.equipTool.send(tool);
+            }));
+
+            // drag handling
+            slotsJanitor.Add(useDrag(slot, ({ position }) => {
+                const inventoryTools = [...pageStates.inventoryTools()];
+                const currentIndex = inventoryTools.findIndex(t => t === tool);
+
+                const invIndex = slotIndexAtPosition(slotFrames, position);
+                const hotbarSlots = pagePaths.InventoryPage.Hotbar.GetChildren().filter((c) => c.IsA("GuiObject") && c.Name.match(/^Slot/)) as GuiObject[];
+                const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
+
+                if (hotbarIndex !== undefined) {
+                    const hotbar = [...pageStates.hotBarTools()];
+                    const swapped = hotbar[hotbarIndex];
+                    hotbar[hotbarIndex] = tool;
+                    if (swapped) inventoryTools[currentIndex] = swapped;
+                    else inventoryTools.remove(currentIndex);
+                    pageStates.hotBarTools(hotbar);
+                    pageStates.inventoryTools(inventoryTools);
+                    return;
+                }
+
+                if (invIndex !== undefined && invIndex !== currentIndex) {
+                    inventoryTools.remove(currentIndex);
+                    inventoryTools.insert(invIndex, tool);
+                    pageStates.inventoryTools(inventoryTools);
+                }
             }));
         });
     }

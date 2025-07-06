@@ -5,6 +5,8 @@ import { PagePaths } from "shared/utils/Animations/pagePaths";
 import UIUtilities from "shared/utils/Animations/uiUtilities";
 import pageStates from "shared/utils/Animations/pageStates";
 import useEffect from "../hooks/useEffect";
+import useDrag from "../hooks/useDrag";
+import { slotIndexAtPosition } from "../hooks/slotUtils";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
 
@@ -67,6 +69,34 @@ export default (pagePaths: PagePaths) => {
                         },
                     ),
                 );
+
+                // drag event
+                newTrash.Add(useDrag(slot, ({ position }) => {
+                    const hotbar = [...pageStates.hotBarTools()];
+                    const currentIndex = i;
+
+                    const hotbarSlots = slots as GuiObject[];
+                    const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
+                    const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => c.IsA("GuiObject") && c.Name.match(/^Slot/)) as GuiObject[];
+                    const inventoryIndex = slotIndexAtPosition(inventorySlots, position);
+
+                    if (inventoryIndex !== undefined) {
+                        const inventory = [...pageStates.inventoryTools()];
+                        const targetTool = inventory[inventoryIndex];
+                        inventory[inventoryIndex] = tool;
+                        hotbar[currentIndex] = targetTool;
+                        pageStates.inventoryTools(inventory);
+                        pageStates.hotBarTools(hotbar);
+                        return;
+                    }
+
+                    if (hotbarIndex !== undefined && hotbarIndex !== currentIndex) {
+                        const temp = hotbar[hotbarIndex];
+                        hotbar[hotbarIndex] = tool;
+                        hotbar[currentIndex] = temp;
+                        pageStates.hotBarTools(hotbar);
+                    }
+                }));
 
                 tool.GetPropertyChangedSignal("Parent").Connect(() => {
                     const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
