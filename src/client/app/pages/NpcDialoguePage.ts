@@ -72,7 +72,8 @@ export default (dialoguePage: NpcDialogues) => {
         newTrash.Add(tween.onComplete(() => {
             newTrash.Add(task.delay(1, () => {
                 newTrash.Destroy()
-                pageStates.openPage(npcDialogue.target)
+                if (npcDialogue.target !== "SketchyGuy")
+                    pageStates.openPage(npcDialogue.target as any)
 
                 // if target is none then hide
                 if (npcDialogue.target === "None") {
@@ -114,6 +115,14 @@ export default (dialoguePage: NpcDialogues) => {
             dialoguePage.Wall.Visible = true;
             dialoguePage.Buy.Visible = false;
             dialoguePage.Sell.Visible = false;
+        } else if (npcDialogue.target === "SketchyGuy") {
+            dialoguePage.Adornee = paths.Map.Shops.SketchyGuy.Npc.Head
+            buyProximityPrompt.Enabled = false;
+            sellProximityPrompt.Enabled = false;
+            wallProximityPrompt.Enabled = false;
+            dialoguePage.Buy.Visible = true;
+            dialoguePage.Sell.Visible = false;
+            dialoguePage.Wall.Visible = false;
         } else if (npcDialogue.target === "None") {
             buyProximityPrompt.Enabled = true;
             sellProximityPrompt.Enabled = true;
@@ -130,7 +139,7 @@ export default (dialoguePage: NpcDialogues) => {
 
     // watches for route calls
     trash.Add(routes.npcDialogue.listen((newDialogue) =>
-        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "None"; text: string })
+        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "SketchyGuy" | "None"; text: string })
     ));
 
     // when the buy button is clicked
@@ -150,7 +159,7 @@ export default (dialoguePage: NpcDialogues) => {
 
     // when the sketchy guy button is clicked
     trash.Add(sketchyPrompt.Triggered.Connect(() => {
-        pageStates.npcDialogue({ target: "Rolls", text: "Wanna test your luck?" })
+        pageStates.npcDialogue({ target: "SketchyGuy", text: "Wanna test your luck?" })
     }))
 
     return trash

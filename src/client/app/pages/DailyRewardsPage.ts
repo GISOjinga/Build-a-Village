@@ -66,8 +66,10 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(rewardsPage.ClaimButton.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(rewardsPage.ClaimButton.Size, sizeOffset),
     }, () => {
-        pageStates.openPage("None");
         routes.claimDailyReward.send();
+        rewardsPage.ClaimButton.Visible = false;
+        rewardsPage.TimeTillNext.Visible = true;
+        refresh();
     }));
 
     trash.Add(useEffect(() => {

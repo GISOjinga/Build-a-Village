@@ -41,7 +41,7 @@ const pageStates = {
     } as Record<number, Tool | undefined>),
     isDragging: atom(false),
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
-    npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "Rolls" | "None", text: "" }),
+    npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "Rolls" | "SketchyGuy" | "None", text: "" }),
     coins: atom(0),
     friendsBonus: atom(false),
     dailyRewardStreak: atom(0),
