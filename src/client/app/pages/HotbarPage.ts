@@ -54,6 +54,7 @@ export default (pagePaths: PagePaths) => {
             slot.Name = `Slot${i + 1}`;
             slot.Image = tool ? tool.TextureId || "" : "";
             slot.ToolName.Text = tool ? tool.Name : "";
+            if (tool) trash.Add(tool.GetPropertyChangedSignal("Name").Connect(() => slot.ToolName.Text = tool.Name));
             slot.Parent = hotbar;
 
             // handle drag and drop

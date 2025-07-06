@@ -102,6 +102,7 @@ export default (pagePaths: PagePaths) => {
             slot.Name = `Slot${inventoryIndex + 1}`;
             slot.LayoutOrder = inventoryIndex;
             slot.Clickable.Text = tool.Name;
+            if (tool) trash.Add(tool.GetPropertyChangedSignal("Name").Connect(() => slot.Clickable.Text = tool.Name));
             slot.Parent = slotsContainer;
 
             // equip on click

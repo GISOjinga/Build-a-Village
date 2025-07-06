@@ -111,13 +111,13 @@ export default (world: World) => {
     useRoute(routes.giftToPlayer, ({ playerToGift, produceTool }, playerGifting) => {
         const playerEntity = getEntity.fromInstance(playerGifting);
         const playerToGiftToEntity = getEntity.fromInstance(playerToGift as Player);
+        const toolFoundUnderPlayer = playerGifting.Character?.FindFirstChildOfClass("Tool")
         const tooType = produceTool?.GetAttribute<ToolType>("ItemType")
         const itemName = produceTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
         const itemVariant = produceTool?.GetAttribute<ProduceVariant>("ItemVariant");
 
         // if data then
-        if (playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Commodity")) {
-
+        if (toolFoundUnderPlayer === produceTool && playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Commodity")) {
             // adds a confirmation prompt to the player to gift to
             createEntity.confirmationPrompt(playerToGiftToEntity, "Gift From " + `[${playerGifting.Name}]`, itemName + `[${itemVariant}]`, () => {
                 // updates playerGifting data

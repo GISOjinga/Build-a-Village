@@ -90,25 +90,29 @@ export default (world: World) => {
     }
 
     // when a body is added, we add a proximity prompt to it
-    for (const [_, clientEntity, body] of world.query(TargetEntity, Added(Body))) {
+    for (const [_, clientEntity, body2] of world.query(TargetEntity, Added(Body))) {
         const giftingPrompt = paths.Assets.ProximityPrompts.GiftingProximityPrompt.Clone();
         // const friendPrompt = paths.Assets.ProximityPrompts.AddFriend.Clone();
-        const player = body && Players.GetPlayerFromCharacter(body.model)
+        const player2 = body2 && Players.GetPlayerFromCharacter(body2.model)
 
         // when added it sets the client id property
-        body?.model.SetAttribute("ClientId", clientEntity)
-        player?.SetAttribute("ClientId", clientEntity)
-        if (player && player !== Players.LocalPlayer) {
-            giftingPrompts.set(player, giftingPrompt)
-            player.Destroying.Once(() => giftingPrompts.delete(player))
-            giftingPrompt.Parent = body.rootPart
+        body2?.model.SetAttribute("ClientId", clientEntity)
+        player2?.SetAttribute("ClientId", clientEntity)
+        if (player2 && player2 !== Players.LocalPlayer) {
+            giftingPrompts.set(player2, giftingPrompt)
+            player2.Destroying.Once(() => giftingPrompts.delete(player2))
+            giftingPrompt.Parent = body2.rootPart
+            giftingPrompt.Enabled = tooType === "Commodity"
 
             giftingPrompt.Triggered.Connect(() => {
+                const body = getEntity.bodyFromPlayer(player);
+                const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
+
                 // if the player is not the local player, we send a gift request
-                if (player !== Players.LocalPlayer && equippedTool) {
-                    printJecs($line, "Gifting to player: ", player.Name, " with tool: ", equippedTool?.Name);
+                if (player !== player2 && equippedTool) {
+                    printJecs($line, "Gifting to player: ", player2.Name, " with tool: ", equippedTool?.Name);
                     routes.giftToPlayer.send({
-                        playerToGift: player,
+                        playerToGift: player2,
                         produceTool: equippedTool
                     })
                 }

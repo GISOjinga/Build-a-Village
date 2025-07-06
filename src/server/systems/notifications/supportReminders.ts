@@ -13,10 +13,10 @@ const MESSAGES = [
 ];
 
 
-let totalTime = os.time() + math.random(60 * 3, 60 * 6);
+let totalTime = os.time() + math.random(60 * 6, 60 * 10);
 export default () => {
     if (totalTime < os.time()) {
         routes.notify.sendToAll({ text: MESSAGES[math.floor(math.random() * MESSAGES.size())], duration: 5 });
-        totalTime = os.time() + math.random(60 * 3, 60 * 6);
+        totalTime = os.time() + math.random(60 * 6, 60 * 10);
     }
 };
