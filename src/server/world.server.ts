@@ -19,6 +19,7 @@ import append from "shared/systems/hooks/append";
 import pending from "shared/systems/hooks/canQuery";
 import platform from "./systems/builds/platform";
 import villagersShop from "./systems/villagers/villagersShop";
+import villagerProducts from "./systems/villagers/villagerProducts";
 import progressVillagers from "./systems/villagers/progressVillagers";
 import placeVillagers from "./systems/villagers/placeVillagers";
 import debuggerHook from "shared/systems/hooks/debuggerHook";
@@ -107,6 +108,7 @@ setupMatter([
     { system: villagersShop },
     { system: progressVillagers },
     { system: placeVillagers },
+    { system: villagerProducts },
     { system: updateTools },
     { system: equipTool },
 

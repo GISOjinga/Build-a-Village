@@ -1,11 +1,11 @@
-import { World } from "@rbxts/jecs";
+import { World, Entity } from "@rbxts/jecs";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { useEvent } from "shared/Plugin-Hook";
-import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { createEntity, getEntity, addComponent, removeComponent } from "shared/utils/functions/jecsHelpFunctions";
 import paths from "shared/utils/paths";
 import routes from "server/routes";
 import gachaItems, { GachaItem } from "shared/data/gachaItems";
-import { Data } from "shared/utils/jecs/jecsComponents";
+import { Data, GachaResult, Leaving, Player, TargetEntity, Added } from "shared/utils/jecs/jecsComponents";
 import { PlayerData } from "shared/data/defaultData";
 import wallsData from "shared/data/wallsData";
 
@@ -35,12 +35,30 @@ export default (world: World) => {
         if (!player || !entity || !data) continue;
 
         const result = rollItem(data);
-        if (result.Type === "Villager") {
-            createEntity.inventoryVillager(entity, result.Name as VillagerNames);
-        } else if (result.Type === "Produce") {
-            createEntity.insertProduce(entity, result.Name as ProduceNames, "Normal", 1);
-        } else if (result.Type === "Wall") {
-            const wallInfo = wallsData.find(w => w.Name === result.Name);
+        addComponent(entity, GachaResult, { item: result.Name, type: result.Type });
+        routes.startSketchyRoll.sendTo({ item: result.Name, type: result.Type }, player);
+    }
+
+    routes.finishSketchyRoll.listen((_, player) => {
+        const entity = getEntity.fromInstance(player);
+        if (!entity) return;
+        const result = world.get(entity, GachaResult);
+        if (!result) return;
+        giveReward(entity, result);
+        removeComponent(entity, GachaResult);
+    });
+
+    function giveReward(entity: Entity, result: { item: string; type: string }) {
+        const data = world.get(entity, Data);
+        const player = world.get(entity, Player);
+        if (!data || !player) return;
+
+        if (result.type === "Villager") {
+            createEntity.inventoryVillager(entity, result.item as VillagerNames);
+        } else if (result.type === "Produce") {
+            createEntity.insertProduce(entity, result.item as ProduceNames, "Normal", 1);
+        } else if (result.type === "Wall") {
+            const wallInfo = wallsData.find(w => w.Name === result.item);
             if (wallInfo) {
                 createEntity.updateData(entity, old => {
                     old.Walls.push({ ...wallInfo, Owned: true, Equipped: false });
@@ -48,7 +66,14 @@ export default (world: World) => {
                 });
             }
         }
+        routes.notify.sendTo({ text: `You received ${result.item}!`, duration: 5 }, player);
+    }
 
-        routes.startSketchyRoll.sendTo({ item: result.Name, type: result.Type }, player);
+    for (const [entity] of world.query(TargetEntity, Added(Leaving))) {
+        const result = world.get(entity, GachaResult);
+        if (result) {
+            giveReward(entity, result);
+            removeComponent(entity, GachaResult);
+        }
     }
 };
