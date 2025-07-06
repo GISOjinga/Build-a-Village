@@ -421,7 +421,7 @@ export const sharedRoutes = (() => {
         npcDialogue: {
             target: str,
             text: str,
-        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "None"; text: string }>,
+        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "Sketchy" | "None"; text: string }>,
 
         buyWall: {
             wallName: str,
@@ -467,6 +467,8 @@ export const sharedRoutes = (() => {
             item: str,
             type: str,
         } as JingaNetType<{ item: string; type: string }>,
+
+        buyAutoSkipRoll: nothing as JingaNetType<undefined>,
 
         getReplicatedComponents: nothing as JingaNetType<undefined>,
 

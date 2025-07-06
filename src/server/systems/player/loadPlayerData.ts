@@ -3,6 +3,8 @@ import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import { Players } from "@rbxts/services";
 import paths from "shared/utils/paths";
 import defaultData, { decodePlayerData, PlayerData } from "../../../shared/data/defaultData";
+import { MarketplaceService } from "@rbxts/services";
+import { AUTO_SKIP_PASS_ID } from "../gacha/sketchyGacha";
 import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, setPlayerData } from "./extra/playersData";
 import migrations from "./extra/migrations";
@@ -55,6 +57,10 @@ export default (world: World) => {
                 } else {
                     print(playerData)
                     playerData = decodePlayerData(playerData as never)
+                }
+
+                if (MarketplaceService.UserOwnsGamePassAsync(player.UserId, AUTO_SKIP_PASS_ID)) {
+                    playerData.AutoSkipRoll = true;
                 }
 
                 const now = os.time()

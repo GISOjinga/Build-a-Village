@@ -10,8 +10,8 @@ export default (pagePaths: PagePaths) => {
     trash.Add(routes.updateDailyQuest.listen((info) => {
         for (let i = 0; i < 3; i++) {
             const questInfo = info[i];
-            const label = questPage["Quest" + (i + 1) as "Quest1"];
-            label.Text = questInfo ? `${questInfo.description} (${questInfo.progress}/${questInfo.target})` : "";
+            const button = questPage["Quest" + (i + 1) as "Quest1"];
+            button.text.Text = questInfo ? `${questInfo.description} (${questInfo.progress}/${questInfo.target})` : "";
         }
     }));
 

@@ -141,7 +141,7 @@ export const ProduceAll = component("ProduceAll");
 export const Leaving = component("Leaving");
 
 // result of a sketchy guy roll
-export const GachaResult = component<{ item: string; type: string }>("GachaResult");
+export const GachaResult = component<{ item: string; type: string; startTime: number }>("GachaResult");
 
 /*************** Physics ***************/
 

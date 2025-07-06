@@ -20,12 +20,18 @@ export default (dialoguePage: NpcDialogues) => {
     const buyProximityPrompt = paths.Map.Shops.WaitForChild("King").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.King.Npc.HumanoidRootPart.ProximityPrompt;
     const sellProximityPrompt = paths.Map.Shops.WaitForChild("Merchant").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Merchant.Npc.HumanoidRootPart.ProximityPrompt;
     const wallProximityPrompt = paths.Map.Shops.WaitForChild("Architect").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Architect.Npc.HumanoidRootPart.ProximityPrompt;
+    const sketchyProximityPrompt = paths.Map.Shops.WaitForChild("SketchyGuy").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.SketchyGuy.Npc.HumanoidRootPart.ProximityPrompt;
+
+    const sketchyFrame = dialoguePage.Buy.Clone();
+    sketchyFrame.Name = "Sketchy";
+    sketchyFrame.Parent = dialoguePage;
 
     // uses use effect to set the dialogue
     trash.Add(useEffect((newTrash) => {
         const buyTextLabel = dialoguePage.Buy.TextLabel;
         const sellTextLabel = dialoguePage.Sell.TextLabel;
         const wallTextLabel = dialoguePage.Wall.TextLabel;
+        const sketchyTextLabel = sketchyFrame.TextLabel;
         const npcDialogue = pageStates.npcDialogue();
         const tween = newTrash.Add(createTween<number>(), "destroy")
         const textToArray = (npcDialogue.target === "None" ? buyTextLabel.Text : npcDialogue.text).split("");
@@ -62,21 +68,25 @@ export default (dialoguePage: NpcDialogues) => {
             buyTextLabel.Text = (full ?? "")
             sellTextLabel.Text = (full ?? "")
             wallTextLabel.Text = (full ?? "")
+            sketchyTextLabel.Text = (full ?? "")
             dialoguePage.Buy.UIGradient.Transparency = transparency
             dialoguePage.Sell.UIGradient.Transparency = transparency
             dialoguePage.Wall.UIGradient.Transparency = transparency
+            sketchyFrame.UIGradient.Transparency = transparency
         }))
 
         newTrash.Add(tween.onComplete(() => {
             newTrash.Add(task.delay(1, () => {
                 newTrash.Destroy()
-                pageStates.openPage(npcDialogue.target)
+                const page = npcDialogue.target === "Sketchy" ? "None" : npcDialogue.target
+                pageStates.openPage(page)
 
                 // if target is none then hide
                 if (npcDialogue.target === "None") {
                     dialoguePage.Sell.Visible = false;
                     dialoguePage.Buy.Visible = false;
                     dialoguePage.Wall.Visible = false;
+                    sketchyFrame.Visible = false;
                 }
             }))
         }))
@@ -93,29 +103,46 @@ export default (dialoguePage: NpcDialogues) => {
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Buy.Visible = true;
             dialoguePage.Sell.Visible = false;
             dialoguePage.Wall.Visible = false;
+            sketchyFrame.Visible = false;
         } else if (npcDialogue.target === "Sell") {
             dialoguePage.Adornee = paths.Map.Shops.Merchant.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Sell.Visible = true;
             dialoguePage.Buy.Visible = false;
             dialoguePage.Wall.Visible = false;
+            sketchyFrame.Visible = false;
         } else if (npcDialogue.target === "Wall") {
             dialoguePage.Adornee = paths.Map.Shops.Architect.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Wall.Visible = true;
             dialoguePage.Buy.Visible = false;
             dialoguePage.Sell.Visible = false;
+            sketchyFrame.Visible = false;
+        } else if (npcDialogue.target === "Sketchy") {
+            dialoguePage.Adornee = paths.Map.Shops.SketchyGuy.Npc.Head
+            buyProximityPrompt.Enabled = false;
+            sellProximityPrompt.Enabled = false;
+            wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
+            sketchyFrame.Visible = true;
+            dialoguePage.Buy.Visible = false;
+            dialoguePage.Sell.Visible = false;
+            dialoguePage.Wall.Visible = false;
         } else if (npcDialogue.target === "None") {
             buyProximityPrompt.Enabled = true;
             sellProximityPrompt.Enabled = true;
             wallProximityPrompt.Enabled = true;
+            sketchyProximityPrompt.Enabled = true;
         }
     }))
 
@@ -128,7 +155,7 @@ export default (dialoguePage: NpcDialogues) => {
 
     // watches for route calls
     trash.Add(routes.npcDialogue.listen((newDialogue) =>
-        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "None"; text: string })
+        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "Sketchy" | "None"; text: string })
     ));
 
     // when the buy button is clicked
@@ -144,6 +171,10 @@ export default (dialoguePage: NpcDialogues) => {
     // when the wall button is clicked
     trash.Add(paths.Map.Shops.Architect.Npc.HumanoidRootPart.ProximityPrompt.Triggered.Connect(() => {
         pageStates.npcDialogue({ target: "Wall", text: "Here are the walls for sale!" })
+    }))
+
+    trash.Add(sketchyProximityPrompt.Triggered.Connect(() => {
+        pageStates.npcDialogue({ target: "Sketchy", text: "Wanna test your luck?" })
     }))
 
     return trash

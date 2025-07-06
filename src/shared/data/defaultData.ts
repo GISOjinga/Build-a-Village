@@ -16,6 +16,7 @@ const defaultData = {
     Walls: [{ ...wallsData[0], Owned: true, Equipped: true }] as Array<WallInfo>,
     PromoCodesRedeemed: [] as Array<string>,
     ClaimedFreeRewardChest: false,
+    AutoSkipRoll: false,
 }
 
 /**
