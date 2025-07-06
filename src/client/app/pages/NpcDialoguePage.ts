@@ -150,7 +150,7 @@ export default (dialoguePage: NpcDialogues) => {
 
     // when the sketchy guy button is clicked
     trash.Add(sketchyPrompt.Triggered.Connect(() => {
-        pageStates.npcDialogue({ target: "None", text: "Wanna test your luck?" })
+        pageStates.npcDialogue({ target: "Rolls", text: "Wanna test your luck?" })
     }))
 
     return trash

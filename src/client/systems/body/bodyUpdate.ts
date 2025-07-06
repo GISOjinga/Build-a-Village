@@ -24,11 +24,11 @@ export default (world: World) => {
     const architect = paths.Map.Shops.Architect.Npc
     const beekeeper = paths.Map.Villagers.Beekeeper.Npc
     const witch = paths.Map.Villagers.Witch.Npc
-    const kingIdleTrack = useMemo(() => king.Humanoid.Animator.LoadAnimation(kingIdle), [king]);
-    const merchantIdleTrack = useMemo(() => merchant.Humanoid.Animator.LoadAnimation(merchantIdle), [merchant]);
-    const architectIdleTrack = useMemo(() => architect.Humanoid.Animator.LoadAnimation(architectIdle), [architect]);
-    const beekeeperIdleTrack = useMemo(() => beekeeper.Humanoid.Animator.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production), [beekeeper]);
-    const witchIdleTrack = useMemo(() => witch.Humanoid.Animator.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production), [witch]);
+    const kingIdleTrack = useMemo(() => king.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(kingIdle), [king]);
+    const merchantIdleTrack = useMemo(() => merchant.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(merchantIdle), [merchant]);
+    const architectIdleTrack = useMemo(() => architect.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(architectIdle), [architect]);
+    const beekeeperIdleTrack = useMemo(() => beekeeper.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production), [beekeeper]);
+    const witchIdleTrack = useMemo(() => witch.Humanoid.FindFirstChildOfClass("Animator")!.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production), [witch]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
     const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
