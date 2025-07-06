@@ -33,8 +33,6 @@ export default (pagePaths: PagePaths) => {
         const hotBarTools = pageStates.hotBarTools();
         const maxSlots = getSlotCount();
 
-        print("Changed", hotBarTools)
-
         // ensure array length matches slot count
         for (const [index] of pairs(hotBarTools)) if (index >= maxSlots) hotBarTools[index] = undefined; // remove tools beyond max slots
 

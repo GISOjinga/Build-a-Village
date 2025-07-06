@@ -129,7 +129,6 @@ export default (pagePaths: PagePaths) => {
                     pageStates.hotBarTools((old) => {
                         const newHotbar = { ...old };
                         newHotbar[hotbarIndex] = tool;
-                        print(newHotbar);
                         return newHotbar;
                     });
                 } else if (invIndex !== undefined && invIndex !== currentIndex) {
