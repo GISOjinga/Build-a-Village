@@ -46,7 +46,6 @@ export default (pagePaths: PagePaths) => {
         const realInventoryItems = pageStates.inventoryTools()
         let inventoryItemsAppearences = [...realInventoryItems]
         const hotBarTools = pageStates.hotBarTools();
-        print(hotBarTools)
 
         // apply filter for category
         if (filterCategory === "Produce") {
