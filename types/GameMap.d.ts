@@ -1,5 +1,4 @@
 type GameMap = Folder & {
-	Paths: Model;
 	Floor: Part;
 	Platforms: Folder & {
 		Platform3: Folder & {
@@ -62,6 +61,124 @@ type GameMap = Folder & {
 			};
 		};
 		Platform6: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform8: Folder & {
+			Earth: Model;
+			Fences: Model & {
+				["Evil Wall"]: Model;
+				["Castle Wall"]: Model;
+				["Log Palisade"]: Model;
+				["Wooden Fence"]: Model;
+				["Stone Wall"]: Model;
+				["Ironwood Fence"]: Model;
+			};
+			Floor: Part;
+			Villagers: Folder;
+			BuySign: Model & {
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						Price: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						SubTitle: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+						None: TextLabel & {
+							UIStroke: UIStroke;
+						};
+					};
+				};
+			};
+			SpawnLocation: SpawnLocation & {
+				Texture: Texture;
+				t: Texture;
+			};
+			NameSign: Model & {
+				Thumbnail: Part & {
+					PlayerThumbnail: SurfaceGui & {
+						Frame: Frame & {
+							CanvasGroup: CanvasGroup & {
+								UICorner: UICorner;
+								image: ImageLabel;
+							};
+							bgin: ImageLabel;
+							PlayerThumbnail: Script;
+							bgout: ImageLabel;
+						};
+					};
+				};
+				Container: Part & {
+					SurfaceGui: SurfaceGui & {
+						PlayerName: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						Title: TextLabel & {
+							UIStroke: UIStroke;
+						};
+						UIPadding: UIPadding;
+					};
+				};
+			};
+		};
+		Platform7: Folder & {
 			Earth: Model;
 			Fences: Model & {
 				["Evil Wall"]: Model;
@@ -358,90 +475,6 @@ type GameMap = Folder & {
 		};
 	};
 	Shops: Folder & {
-		Extra: Folder;
-		King: Model & {
-			SpawnLocation: SpawnLocation;
-			Accessories: Model & {
-				Crown: Model & {
-					["Grid.001"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-				};
-				Throne: Model & {
-					["Cube.007"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					Cube: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.008"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.003"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.004"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.001"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-					["Cube.002"]: MeshPart & {
-						Weld: ManualWeld;
-					};
-				};
-			};
-			Npc: Model & {
-				["Left Leg"]: Part & {
-					LeftFootAttachment: Attachment;
-				};
-				Humanoid: Humanoid & {
-					Animator: Animator;
-					HumanoidDescription: HumanoidDescription;
-				};
-				["Right Leg"]: Part & {
-					RightFootAttachment: Attachment;
-				};
-				Head: Part & {
-					HatAttachment: Attachment;
-					FaceFrontAttachment: Attachment;
-					HairAttachment: Attachment;
-					face: Decal;
-					Mesh: SpecialMesh;
-					FaceCenterAttachment: Attachment;
-				};
-				Torso: Part & {
-					RightCollarAttachment: Attachment;
-					WaistCenterAttachment: Attachment;
-					BodyBackAttachment: Attachment;
-					Neck: Motor6D;
-					LeftCollarAttachment: Attachment;
-					["Left Hip"]: Motor6D;
-					roblox: Decal;
-					["Right Hip"]: Motor6D;
-					["Left Shoulder"]: Motor6D;
-					["Right Shoulder"]: Motor6D;
-					BodyFrontAttachment: Attachment;
-					WaistBackAttachment: Attachment;
-					WaistFrontAttachment: Attachment;
-					NeckAttachment: Attachment;
-				};
-				HumanoidRootPart: Part & {
-					ProximityPrompt: ProximityPrompt;
-					RootJoint: Motor6D;
-					RootAttachment: Attachment;
-				};
-				["Right Arm"]: Part & {
-					RightShoulderAttachment: Attachment;
-					RightGripAttachment: Attachment;
-				};
-				["Left Arm"]: Part & {
-					LeftGripAttachment: Attachment;
-					LeftShoulderAttachment: Attachment;
-				};
-				["Body Colors"]: BodyColors;
-			};
-		};
 		Merchant: Model & {
 			Npc: Model & {
 				["Left Leg"]: Part & {
@@ -602,6 +635,149 @@ type GameMap = Folder & {
 				};
 				["Body Colors"]: BodyColors;
 			};
+		};
+		Extra: Folder;
+		King: Model & {
+			SpawnLocation: SpawnLocation;
+			Accessories: Model & {
+				Crown: Model & {
+					["Grid.001"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+				};
+				Throne: Model & {
+					["Cube.007"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					Cube: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.008"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.003"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.004"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.001"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.002"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+				};
+			};
+			Npc: Model & {
+				["Left Leg"]: Part & {
+					LeftFootAttachment: Attachment;
+				};
+				Humanoid: Humanoid & {
+					Animator: Animator;
+					HumanoidDescription: HumanoidDescription;
+				};
+				["Right Leg"]: Part & {
+					RightFootAttachment: Attachment;
+				};
+				Head: Part & {
+					HatAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					LeftCollarAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					roblox: Decal;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					BodyFrontAttachment: Attachment;
+					WaistBackAttachment: Attachment;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
+					RootJoint: Motor6D;
+					RootAttachment: Attachment;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+					RightGripAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftGripAttachment: Attachment;
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+		};
+		SketchyGuy: Model & {
+			Npc: Model & {
+				["Left Leg"]: Part & {
+					LeftFootAttachment: Attachment;
+				};
+				Humanoid: Humanoid & {
+					Animator: Animator;
+					HumanoidDescription: HumanoidDescription;
+				};
+				["Right Leg"]: Part & {
+					RightFootAttachment: Attachment;
+				};
+				Head: Part & {
+					HatAttachment: Attachment;
+					HeadWeld: Weld;
+					FaceFrontAttachment: Attachment;
+					HairAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					RightCollarAttachment: Attachment;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					LeftCollarAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					roblox: Decal;
+					["Right Hip"]: Motor6D;
+					["Left Shoulder"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					BodyFrontAttachment: Attachment;
+					WaistBackAttachment: Attachment;
+					WaistFrontAttachment: Attachment;
+					NeckAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
+					RootJoint: Motor6D;
+					RootAttachment: Attachment;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+					RightGripAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftGripAttachment: Attachment;
+					LeftShoulderAttachment: Attachment;
+				};
+				DarkKnightHood: Hat & {
+					Handle: Part & {
+						Mesh: SpecialMesh;
+					};
+				};
+				["Body Colors"]: BodyColors;
+			};
+			SpawnLocation: SpawnLocation;
 		};
 	};
 	FreeRewardChest: Folder & {
