@@ -4,9 +4,10 @@ export function slotIndexAtPosition(slots: GuiObject[], pos: Vector2): number | 
     slots.forEach((slot, i) => {
         const center = slot.AbsolutePosition.add(slot.AbsoluteSize.div(2));
         const dist = center.sub(pos).Magnitude;
-        if (dist < bestDist) {
+
+        if (dist < bestDist && dist < ((slot.AbsoluteSize.X + slot.AbsoluteSize.Y) / 4)) {
             bestDist = dist;
-            bestIndex = i;
+            bestIndex = slot.GetAttribute("SlotIndex") as number | undefined;
         }
     });
     return bestIndex;

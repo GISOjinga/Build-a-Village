@@ -47,6 +47,7 @@ export default (pagePaths: PagePaths) => {
             const slot = newTrash.Add(slotTemplate.Clone());
 
             slots.push(slot);
+            slot.SetAttribute("SlotIndex", i); // set slot index for later reference
             slot.Key.Text = tostring(i + 1);
             slot.LayoutOrder = i;
             slot.Visible = true;
@@ -58,39 +59,39 @@ export default (pagePaths: PagePaths) => {
             // handle drag and drop
             if (tool) {
                 trash.Add(
-                    UIUtilities.ButtonAction(
-                        {
-                            Button: slot,
-                            ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
-                            DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
-                        },
-                        () => {
-                            routes.equipTool.send(tool);
-                        },
+                    UIUtilities.ButtonAction({
+                        Button: slot,
+                        ExpandedSize: UIUtilities.MultiplyUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+                        DeExpandedSize: UIUtilities.DivideUdim2(slot.Size, UDim2.fromScale(1.1, 1.1)),
+                    }, () => {
+                        if (pageStates.isDragging()) return
+                        routes.equipTool.send(tool);
+                    },
                     ),
                 );
 
                 // drag event
-                newTrash.Add(useDrag(slot, ({ position }) => {
+                newTrash.Add(useDrag(slot, slot, ({ position }) => {
                     const hotbar = [...pageStates.hotBarTools()];
                     const currentIndex = i;
 
                     const hotbarSlots = slots as GuiObject[];
                     const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
-                    const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => c.IsA("GuiObject")) as GuiObject[];
+                    const inventorySlots = pagePaths.InventoryPage.Container.Grid.ContainerFrame.GetChildren().filter((c) => (c.IsA("GuiObject") && c.Visible)) as GuiObject[];
                     const inventoryIndex = slotIndexAtPosition(inventorySlots, position);
 
                     if (inventoryIndex !== undefined) {
-                        const inventory = [...pageStates.inventoryTools()];
+                        const inventory = pageStates.inventoryTools()
+                        const indexInInventory = inventory.findIndex((t) => t === tool);
                         const targetTool = inventory[inventoryIndex];
-                        inventory[inventoryIndex] = tool;
+                        printTS($line, `Moving tool from hotbar index ${tool} to inventory index ${targetTool}`);
                         hotbar[currentIndex] = targetTool;
+                        inventory[inventoryIndex] = tool;
+                        inventory[indexInInventory] = targetTool; // swap tools in inventory
                         pageStates.inventoryTools(inventory);
                         pageStates.hotBarTools(hotbar);
                         return;
-                    }
-
-                    if (hotbarIndex !== undefined && hotbarIndex !== currentIndex) {
+                    } else if (hotbarIndex !== undefined && hotbarIndex !== currentIndex) {
                         const temp = hotbar[hotbarIndex];
                         hotbar[hotbarIndex] = tool;
                         hotbar[currentIndex] = temp;

@@ -7,6 +7,8 @@ import routes from "client/routes";
 import useEffect from "../hooks/useEffect";
 import useDrag from "../hooks/useDrag";
 import { slotIndexAtPosition } from "../hooks/slotUtils";
+import { printTS } from "shared/utils/functions/jecsHelpFunctions";
+import { $line } from "rbxts-transformer-inline";
 
 // simple inventory page with drag and drop and sorting buttons
 export default (pagePaths: PagePaths) => {
@@ -44,12 +46,6 @@ export default (pagePaths: PagePaths) => {
         let inventoryItems = [...pageStates.inventoryTools()];
         const hotBarTools = pageStates.hotBarTools();
 
-        // remove tools already in the hotbar
-        for (const [, tool] of pairs(hotBarTools)) {
-            const index = inventoryItems.findIndex(t => t === tool);
-            if (index !== -1) inventoryItems.remove(index);
-        }
-
         // apply filter for category
         if (filterCategory === "Produce") {
             inventoryItems = inventoryItems.filter(t => t.GetAttribute("ItemType") === "Commodity");
@@ -61,14 +57,16 @@ export default (pagePaths: PagePaths) => {
         if (currentSort === "Name") {
             inventoryItems.sort((a, b) => a.Name < b.Name);
         } else if (currentSort === "Rarity") {
+            const rarityOrder = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]
             const getRarity = (tool: Tool) => tool.GetAttribute<string>("Rarity") || "Common";
             inventoryItems.sort((a, b) => {
                 const rA = getRarity(a);
                 const rB = getRarity(b);
-                if (rA === rB) return a.Name < b.Name;
+                if (rA === rB) return rarityOrder.findIndex((rarity) => rarity === a.Name) > rarityOrder.findIndex((rarity) => rarity === b.Name);
                 return rA < rB;
             });
         } else if (currentSort === "Amount") {
+            const mutationOrder = ["Normal", "Gold", "Rainbow"]
             const getAmount = (tool: Tool) => {
                 const match = string.match(tool.Name, "%(%(\d+)%)$") as LuaTuple<[string, string]> | undefined;
                 return match ? tonumber(match[1])! : 1;
@@ -95,13 +93,17 @@ export default (pagePaths: PagePaths) => {
         const slotFrames = new Array<typeof slotTemplate>();
 
         // render each slot
-        inventoryItems.forEach((tool, i) => {
+        inventoryItems.forEach((tool, inventoryIndex) => {
+            // remove tools already in the hotbar
+            for (const [_, tool2] of pairs(hotBarTools)) if (tool2 === tool) return
+
             const slot = slotsJanitor.Add(slotTemplate.Clone());
             slotFrames.push(slot);
 
+            slot.SetAttribute("SlotIndex", inventoryIndex); // set slot index for later reference
             slot.Visible = true;
-            slot.Name = `Slot${i + 1}`;
-            slot.LayoutOrder = i;
+            slot.Name = `Slot${inventoryIndex + 1}`;
+            slot.LayoutOrder = inventoryIndex;
             slot.Clickable.Text = tool.Name;
             slot.Parent = slotsContainer;
 
@@ -111,31 +113,28 @@ export default (pagePaths: PagePaths) => {
                 ExpandedSize: UIUtilities.MultiplyUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
                 DeExpandedSize: UIUtilities.DivideUdim2(slot.Clickable.Size, UDim2.fromScale(1.1, 1.1)),
             }, () => {
+                if (pageStates.isDragging()) return
                 routes.equipTool.send(tool);
             }));
 
             // drag handling
-            print(slot)
-            slotsJanitor.Add(useDrag(slot, ({ position }) => {
+            slotsJanitor.Add(useDrag(slot.Clickable, slot, ({ position }) => {
+                printTS($line, `Dragging tool ${tool.Name} at position ${position}`);
                 const inventoryTools = [...pageStates.inventoryTools()];
                 const currentIndex = inventoryTools.findIndex(t => t === tool);
 
                 const invIndex = slotIndexAtPosition(slotFrames, position);
-                const hotbarSlots = pagePaths.InventoryPage.Hotbar.GetChildren().filter((c) => c.IsA("GuiObject")) as GuiObject[];
+                const hotbarSlots = pagePaths.InventoryPage.Hotbar.GetChildren().filter((c) => (c.IsA("GuiObject") && c.Visible)) as GuiObject[];
                 const hotbarIndex = slotIndexAtPosition(hotbarSlots, position);
 
                 if (hotbarIndex !== undefined) {
-                    const hotbar = [...pageStates.hotBarTools()];
-                    const swapped = hotbar[hotbarIndex];
-                    hotbar[hotbarIndex] = tool;
-                    if (swapped) inventoryTools[currentIndex] = swapped;
-                    else inventoryTools.remove(currentIndex);
-                    pageStates.hotBarTools(hotbar);
-                    pageStates.inventoryTools(inventoryTools);
-                    return;
-                }
+                    const hotbar = [...pageStates.hotBarTools()]
 
-                if (invIndex !== undefined && invIndex !== currentIndex) {
+                    // if the hotbar index is valid, swap the tool with the one in the hotbar
+                    print(hotbarIndex, hotbar[hotbarIndex])
+                    hotbar[hotbarIndex] = tool;
+                    pageStates.hotBarTools(hotbar);
+                } else if (invIndex !== undefined && invIndex !== currentIndex) {
                     inventoryTools.remove(currentIndex);
                     inventoryTools.insert(invIndex, tool);
                     pageStates.inventoryTools(inventoryTools);

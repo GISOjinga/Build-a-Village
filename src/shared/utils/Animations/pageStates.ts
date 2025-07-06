@@ -18,6 +18,7 @@ const pageStates = {
     queueInfo: atom(""),
     inventoryTools: atom(new Array<Tool>()),
     hotBarTools: atom(new Array<Tool | undefined>()),
+    isDragging: atom(false),
     introText: atom({ text: "Welcome to the game!", duration: 2 }),
     npcDialogue: atom({ target: "None" as "Buy" | "Sell" | "Wall" | "None", text: "" }),
     coins: atom(0),
