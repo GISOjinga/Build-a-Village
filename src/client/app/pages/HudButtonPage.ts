@@ -63,6 +63,15 @@ export default (pagePaths: PagePaths) => {
         routes.teleportToShop.send("Wall")
     }))
 
+    // daily rewards button
+    trash.Add(UIUtilities.ButtonAction({
+        Button: pagePaths.HUD.DailyRewards,
+        ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.DailyRewards.Size, sizeOffset),
+        DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.DailyRewards.Size, sizeOffset),
+    }, () => {
+        pageStates.openPage("DailyRewards")
+    }))
+
     // updates your coins
     trash.Add(useEffect((newTrash) => {
         const newPrice = pageStates.coins()

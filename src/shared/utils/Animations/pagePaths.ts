@@ -11,7 +11,8 @@ const pagePaths = (page: GameUI) => {
         IntroTextPage: page.Introtext,
         PlacementPage: page.PlaceFrame,
         ConfirmPage: page.ConfirmationPrompt,
-        QuestPage: page.DailyQuests,
+        QuestPage: page.DailyQuestsTab,
+        DailyRewardsPage: page.DailyRewards,
         Page: page,
     };
 }
