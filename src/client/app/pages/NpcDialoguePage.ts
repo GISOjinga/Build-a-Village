@@ -115,7 +115,7 @@ export default (dialoguePage: NpcDialogues) => {
             dialoguePage.Wall.Visible = true;
             dialoguePage.Buy.Visible = false;
             dialoguePage.Sell.Visible = false;
-        } else if (npcDialogue.target === "SketchyGuy") {
+        } else if (npcDialogue.target === "SketchyGuy" || npcDialogue.target === "Rolls") {
             dialoguePage.Adornee = paths.Map.Shops.SketchyGuy.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;

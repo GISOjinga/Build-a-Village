@@ -21,14 +21,11 @@ export default (pagePaths: PagePaths) => {
             if (c.IsA("ViewportFrame")) c.Destroy();
         });
         if (!reward) return;
-        if (reward.type === "Villager") {
-            const viewport = paths.Assets.UI.VillagerRenders.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
-            if (viewport) {
-                viewport.Parent = slot;
-                viewport.Visible = true;
-            }
-        } else if (reward.type === "Produce") {
-            const viewport = paths.Assets.UI.VillagerRenders.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
+        if (reward.type === "Villager" || reward.type === "Produce") {
+            const rendersFolder = reward.type === "Produce"
+                ? (paths.Assets.UI as unknown as { ProduceRenders: Folder }).ProduceRenders
+                : paths.Assets.UI.VillagerRenders;
+            const viewport = rendersFolder.FindFirstChild(reward.name)?.Clone() as ViewportFrame | undefined;
             if (viewport) {
                 viewport.Parent = slot;
                 viewport.Visible = true;
@@ -70,6 +67,7 @@ export default (pagePaths: PagePaths) => {
         rewardsPage.ClaimButton.Visible = false;
         rewardsPage.TimeTillNext.Visible = true;
         refresh();
+        pageStates.openPage("None");
     }));
 
     trash.Add(useEffect(() => {
