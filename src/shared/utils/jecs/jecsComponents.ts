@@ -137,6 +137,9 @@ export const VillagerCooldown = component<number>("VillagerCooldown");
 // to produce all
 export const ProduceAll = component("ProduceAll");
 
+// sets leaving
+export const Leaving = component("Leaving");
+
 /*************** Physics ***************/
 
 // body turner rotating

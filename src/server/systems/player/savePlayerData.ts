@@ -6,9 +6,10 @@ import defaultData, { decodePlayerData, encodePlayerData, PlayerData } from "../
 import { deepCopy } from "@rbxts/object-utils";
 import { dataStore, getPlayerData, setPlayerData } from "./extra/playersData";
 import { $line } from "rbxts-transformer-inline";
-import { printJecs } from "shared/utils/functions/jecsHelpFunctions";
-import { Villager } from "shared/utils/jecs/jecsComponents";
+import { addComponent, printJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { Leaving, Villager } from "shared/utils/jecs/jecsComponents";
 import { logGameEvent, GameEvent } from "../../utils/analytics";
+import { appendJecs } from "shared/systems/hooks/append";
 
 
 print("Saving Player Data System Loaded")
@@ -20,10 +21,9 @@ export default (world: World) => {
         const playerData = getPlayerData(player)
         const entity = player.GetAttribute<Entity>("ServerId");
 
-        // gets the entity
-        printJecs($line, "Destroying Player Entity: ", entity)
-        // if entity exists then destroy it
+        // if entity then adds a leaving component
         if (entity && playerData) {
+            addComponent(entity, Leaving)
             // when ever a villager updates it also updates that players data
             for (const [_, newData] of world.query(Villager)) {
                 const playerEntity = newData.playerEntity;
@@ -33,13 +33,19 @@ export default (world: World) => {
                     if (indexOfVillager !== -1) playerData.Villagers[indexOfVillager] = newData.villagerData;
                 }
             }
+        }
 
-            world.delete(entity)
-        }
-        print(playerData)
-        if (playerData) {
-            if (playerData.Tutorial !== "Done") logGameEvent(player, GameEvent.TutorialAbandoned, { step: playerData.Tutorial })
-            task.spawn(() => dataStore.SetAsync(`${player.UserId}`, encodePlayerData(playerData)))
-        }
+        appendJecs(() => {
+            // gets the entity
+            printJecs($line, "Destroying Player Entity: ", entity)
+
+            // if entity exists then destroy it
+            if (entity) world.delete(entity)
+            print(playerData)
+            if (playerData) {
+                if (playerData.Tutorial !== "Done") logGameEvent(player, GameEvent.TutorialAbandoned, { step: playerData.Tutorial })
+                task.spawn(() => dataStore.SetAsync(`${player.UserId}`, encodePlayerData(playerData)))
+            }
+        });
     }
 }
