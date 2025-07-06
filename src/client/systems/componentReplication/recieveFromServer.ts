@@ -118,7 +118,7 @@ export default {
                         world.set(clientEntity, component, newData as never)
                     }
                 } else {
-                    warnTS($line, `Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
+                    warnJecs($line, `Failed to replicate ${componentName} for ${serverEntity}: ${newData}. Some parts arent fully replicated will try again.`)
                     appendJecs(() => replicate({ serverEntity, data: newData }))
                 }
             }

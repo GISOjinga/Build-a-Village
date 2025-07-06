@@ -135,11 +135,11 @@ export default {
                         // Wrap in Promise.try for robust error handling
                         Promise.try(() => {
                             // Use our serializer for ANY data shape
-                            // const payload = serializeForReplication(changed.new)
+                            const payload = serializeForReplication(changed.new)
 
                             // send the serialized payload to all target players
                             // printTS($line, `Replicating ${componentName} for entity ${serverEntity} to players: ${players.map((p) => p.Name).join(", ")}`)
-                            route.sendToList({ serverEntity, data: changed.new as never } as never, players)
+                            route.sendToList({ serverEntity, data: payload as never } as never, players)
 
                         }).catch((err) => {
                             warnTS($line, `Replication error for ${componentName} at line ${$line}: ${tostring(err)}`)
