@@ -39,5 +39,4 @@ function awardBadges(player: Player) {
 
 export default (world: World) => {
     Players.GetPlayers().forEach(awardBadges);
-    for (const [player] of useEvent(Players.PlayerAdded)) awardBadges(player);
 };
