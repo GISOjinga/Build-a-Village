@@ -226,7 +226,10 @@ export default (world: World) => {
             particlesToggle(goldAttachment, false);
             particlesToggle(rainbowAttachment, false);
         })
-        cacheVillagerParts(villagerModel);
+        villagerModel.Station.Parts.Resources.DescendantAdded.Connect(() => {
+            villagerPartCaches.delete(villagerModel);
+            cacheVillagerParts(villagerModel);
+        })
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager model particles", err));
 
     // when vilalger animator gets added

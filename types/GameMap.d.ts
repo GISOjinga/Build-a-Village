@@ -474,6 +474,168 @@ type GameMap = Folder & {
 			};
 		};
 	};
+	Villagers: Folder & {
+		Beekeeper: Model & {
+			Accessories: Model & {
+				Smoker: Model & {
+					Particle: Model & {
+						Particle: Part & {
+							Weld: ManualWeld;
+							TBD: ParticleEmitter;
+						};
+					};
+				};
+				Hat: Model;
+			};
+			Npc: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+			Station: Model & {
+				Interaction: Model & {
+					SupplyProduce: Part & {
+						ProximityPrompt: ProximityPrompt;
+						Weld: ManualWeld;
+					};
+				};
+				Particles: Model & {
+					Particle: Part & {
+						Weld: ManualWeld;
+					};
+				};
+				Parts: Model & {
+					ProgressFull: Model & {
+						["1"]: Model;
+					};
+					Resources: Model & {
+						["1"]: Model;
+						["3"]: Model;
+						["2"]: Model;
+					};
+					InProgress: Model & {
+						["1"]: Model;
+						["3"]: Model;
+						["2"]: Model;
+					};
+					StationParts: Model;
+				};
+			};
+		};
+		Witch: Model & {
+			Accessories: Model & {
+				Orb: Model & {
+					Icosphere: MeshPart & {
+						Weld: ManualWeld;
+						Attachment: Attachment & {
+							Glare: ParticleEmitter;
+							Star: ParticleEmitter;
+							Glow: ParticleEmitter;
+						};
+					};
+				};
+				Hat: Model & {
+					Grid: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.011"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+				};
+				Staff: Model & {
+					["Cube.007"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.008"]: MeshPart & {
+						Weld: ManualWeld;
+					};
+					["Cube.009"]: MeshPart & {
+						Weld: ManualWeld;
+						Attachment: Attachment & {
+							Glare: ParticleEmitter;
+							Star: ParticleEmitter;
+							Glow: ParticleEmitter;
+						};
+					};
+				};
+			};
+			Npc: Model & {
+				["Left Leg"]: Part;
+				Humanoid: Humanoid;
+				["Right Leg"]: Part;
+				Head: Part & {
+					HatAttachment: Attachment;
+					HairAttachment: Attachment;
+					FaceFrontAttachment: Attachment;
+					face: Decal;
+					Mesh: SpecialMesh;
+					FaceCenterAttachment: Attachment;
+				};
+				Torso: Part & {
+					["Left Shoulder"]: Motor6D;
+					WaistCenterAttachment: Attachment;
+					BodyBackAttachment: Attachment;
+					Neck: Motor6D;
+					["Right Hip"]: Motor6D;
+					WaistBackAttachment: Attachment;
+					roblox: Decal;
+					LeftCollarAttachment: Attachment;
+					NeckAttachment: Attachment;
+					RightCollarAttachment: Attachment;
+					BodyFrontAttachment: Attachment;
+					["Left Hip"]: Motor6D;
+					["Right Shoulder"]: Motor6D;
+					WaistFrontAttachment: Attachment;
+				};
+				HumanoidRootPart: Part & {
+					ProximityPrompt: ProximityPrompt;
+					RootJoint: Motor6D;
+				};
+				["Right Arm"]: Part & {
+					RightShoulderAttachment: Attachment;
+				};
+				["Left Arm"]: Part & {
+					LeftShoulderAttachment: Attachment;
+				};
+				["Body Colors"]: BodyColors;
+			};
+		};
+	};
 	Shops: Folder & {
 		Merchant: Model & {
 			Npc: Model & {
@@ -775,7 +937,6 @@ type GameMap = Folder & {
 						Mesh: SpecialMesh;
 					};
 				};
-				["Body Colors"]: BodyColors;
 			};
 			SpawnLocation: SpawnLocation;
 		};
