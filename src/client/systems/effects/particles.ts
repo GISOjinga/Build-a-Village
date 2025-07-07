@@ -3,7 +3,7 @@ import { useDestructor, useEvent, useMemo, useThrottle } from "shared/Plugin-Hoo
 import { Debris, Players, Workspace } from "@rbxts/services";
 import { camshake } from "shared/utils/functions/camShakeFunctions";
 import { particlesEmit } from "shared/utils/functions/particlesFunctions";
-import { CountDown, EmitParticles, systemQueue, Changed, IncreaseParticlesSize, Added, Data, Body, CastParticle, CanQuery } from "shared/utils/jecs/jecsComponents";
+import { CountDown, EmitParticles, systemQueue, IncreaseParticlesSize, Added, Body, CastParticle, CanQuery } from "shared/utils/jecs/jecsComponents";
 import { createEntity, getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import paths from "shared/utils/paths";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
@@ -12,12 +12,30 @@ import routes from "client/routes";
 
 // variables
 const player = Players.LocalPlayer
+let lastTutorialState: "Done" | number = "Done";
 
 
 
 // emits the particles
 export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player)
+
+    // Listen for tutorial progress updates to trigger completion effects
+    useRoute(routes.updateTutorialProgress, (tutorial) => {
+        const oldTutorial = lastTutorialState;
+        lastTutorialState = tutorial;
+        
+        // if old and new tutorial aren't the same and new tutorial is done then do the surprise particles
+        if (oldTutorial !== tutorial && tutorial === "Done" && body) {
+            const collectEffect = paths.Assets.Particles.Surprise.Clone()
+
+            // parents then places it at the body
+            collectEffect.Parent = Workspace.Terrain
+            collectEffect.CFrame = body.rootPart.CFrame
+            particlesEmit(collectEffect, 30)
+            Debris.AddItem(collectEffect, 5)
+        }
+    });
 
     // listens for when the particle is called
     useRoute(routes.playParticle, (data) => createEntity.particle({
@@ -53,28 +71,7 @@ export default (world: World) => {
         world.delete(particleEntity)
     }
 
-    // when data changes
-    for (const [_, changedData] of world.query(Changed(Data))) {
-        const oldData = changedData.old
-        const newData = changedData.new
 
-        // if body and total new produce is greeater than total old produce then
-        if (body && oldData && newData) {
-            const oldTutorial = oldData.Tutorial
-            const newTutorial = newData.Tutorial
-
-            // if old and new tutorial arent the same and new tutorial is done then do the surprise particles
-            if (oldTutorial !== newTutorial && newTutorial === "Done") {
-                const collectEffect = paths.Assets.Particles.Surprise.Clone()
-
-                // parents then places it at the body
-                collectEffect.Parent = Workspace.Terrain
-                collectEffect.CFrame = body.rootPart.CFrame
-                particlesEmit(collectEffect, 30)
-                Debris.AddItem(collectEffect, 5)
-            }
-        }
-    }
 
     // increases the size of particles
     for (const [emitEntity, emitParticle] of world.query(IncreaseParticlesSize).without(CountDown)) {

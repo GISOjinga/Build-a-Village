@@ -7,16 +7,23 @@ import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity, printTS, warnJecs } from "shared/utils/functions/jecsHelpFunctions";
 import { rayParamsInclude } from "shared/utils/functions/rayFunctions";
 import { formatToHHMMSS, formatToMMSS } from "shared/utils/functions/stringHelp";
-import { Body, Changed, Data, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { Body, Changed, HoverBoxAttachment, TargetEntity, Villager } from "shared/utils/jecs/jecsComponents";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import routes from "client/routes";
 
 
 // variables
 const player = Players.LocalPlayer
 const mouse = player.GetMouse()
 let goalLocation = Vector3.zero
+let tutorialState: "Done" | number = "Done";
 
 
 export default (world: World) => {
+    // Listen for tutorial progress updates
+    useRoute(routes.updateTutorialProgress, (tutorial) => {
+        tutorialState = tutorial;
+    });
     const hoverAttachment = world.get(HoverBoxAttachment, HoverBoxAttachment)!
     if (useThrottle(.01) && pageStates.hoverInfo().visible) hoverAttachment.Position = hoverAttachment.Position.Lerp(goalLocation, 0.2);
     if (useThrottle(.1)) {
@@ -24,7 +31,6 @@ export default (world: World) => {
             const camera = Workspace.Camera;
             const clientEntity = getEntity.fromInstance(player);
             const body = clientEntity && world.get(clientEntity, Body);
-            const playerData = clientEntity && world.get(clientEntity, Data);
             const platform = body && body.platform;
             const villagers = platform?.FindFirstChild("Villagers") as Folder | undefined;
             const target = platform && Tracer.ray(camera.CFrame.Position, !UserInputService.MouseEnabled ? camera.CFrame.LookVector : mouse.Hit.LookVector, 1000).useRaycastParams(rayParamsInclude([platform.Villagers])).run()
@@ -38,7 +44,7 @@ export default (world: World) => {
             const progressionInfo = villagerInfo && villagerInfo.villagerData.Progress
             const resources = villagerInfo && villagerInfo.villagerData.Progress.Progression.Resources
             const produceStartTime = progressionInfo && progressionInfo.Progression.Time.StartTime;
-            const requiredProduceTime = progressionInfo && ((playerData?.Tutorial === 2 && villagerInfo.villagerData.Name === "Farmer") ? 5 : progressionInfo.Progression.Time.RequiredTimePerResource);
+            const requiredProduceTime = progressionInfo && ((tutorialState === 2 && villagerInfo.villagerData.Name === "Farmer") ? 5 : progressionInfo.Progression.Time.RequiredTimePerResource);
             const totalRequireResources = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Amount : undefined;
             const requiredProduceName = (progressionInfo && progressionInfo.Required) ? progressionInfo.Required.Produce : undefined;
             const maxProduce = villagerModel && villagerModel.Station.Parts.Resources.GetChildren().size()//107658992263405
@@ -86,7 +92,7 @@ export default (world: World) => {
                     info: `(${totalProduce}/${maxProduce}) ${produceName} in ${formatToMMSS(timeTillNextProduce)}.`,
                 })
             } else if (!villagerEntity && pageStates.hoverInfo().visible) {
-                // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), playerData, villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
+                // print($line, "No villager hovered over1.", body, 3, platform?.Name, clientEntity, body, player.GetAttribute("ServerId"), villagers, villagerModel, target?.hit, villagerPartHovered, villagers && target?.hit?.IsDescendantOf(villagers));
                 pageStates.hoverInfo({
                     visible: false,
                     info: "",

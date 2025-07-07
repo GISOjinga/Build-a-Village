@@ -313,37 +313,7 @@ export const sharedRoutes = (() => {
             villagerData: villagerStruct as WrapJNetType<VillagerData>,
         }),
 
-        // data
-        Data: componentRecord({
-            Version: str as WrapJNetType<string>,
-            Coins: uint32,
-            LastLogin: uint32 as WrapJNetType<number>,
-            Sessions: uint32 as WrapJNetType<number>,
-            DailyStreak: uint32 as WrapJNetType<number>,
-            LastDailyReward: uint32 as WrapJNetType<number>,
-            DailyQuests: [{ id: uint16, progress: uint16, target: uint16, assigned: uint32 }] as unknown as WrapJNetType<Array<{ id: number; progress: number; target: number; assigned: number }>>,
-            QuestHistory: [uint16] as WrapJNetType<number[]>,
-            Villagers: [villagerStruct] as WrapJNetType<VillagerData>[],
-            Produce: [{
-                Name: str as WrapJNetType<ProduceNames>,
-                Amount: unknown as WrapJNetType<number>,
-                Variant: str as WrapJNetType<ProduceVariant>,
-            }] as unknown as WrapJNetType<ProduceData[]>,
-            Tutorial: unknown as WrapJNetType<"Done" | number>,
-            Walls: [{
-                Name: str as WrapJNetType<WallNames>,
-                Description: str,
-                Image: str,
-                Price: unknown as WrapJNetType<number>,
-                GamePassId: unknown as WrapJNetType<number>,
-                CashMultiplier: unknown as WrapJNetType<number>,
-                Rarity: str as WrapJNetType<WallRarity>,
-                Owned: bool,
-                Equipped: bool,
-            }] as unknown as WrapJNetType<WallInfo[]>,
-            PromoCodesRedeemed: [str],
-            ClaimedFreeRewardChest: bool,
-        }),
+
 
         // model debugger
         ModelDebugger: componentRecord(compInst as WrapJNetType<Model | BasePart>),
@@ -471,6 +441,23 @@ export const sharedRoutes = (() => {
         getReplicatedComponents: nothing as WrapJNetType<undefined>,
 
         deleteReplicatedEntity: entity as unknown as Entity,
+
+        // PlayerData routes for client access
+        updatePlayerCoins: uint32 as WrapJNetType<number>,
+        updateDailyStreak: uint32 as WrapJNetType<number>,
+        updateLastDailyReward: uint32 as WrapJNetType<number>,
+        updateTutorialProgress: unknown as WrapJNetType<"Done" | number>,
+        updatePlayerWalls: [{
+            Name: str as WrapJNetType<WallNames>,
+            Description: str,
+            Image: str,
+            Price: unknown as WrapJNetType<number>,
+            GamePassId: unknown as WrapJNetType<number>,
+            CashMultiplier: unknown as WrapJNetType<number>,
+            Rarity: str as WrapJNetType<WallRarity>,
+            Owned: bool,
+            Equipped: bool,
+        }] as unknown as WrapJNetType<WallInfo[]>,
     }
 
 

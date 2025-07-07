@@ -8,15 +8,39 @@ import { useMemo, useEvent, useThrottle } from "shared/Plugin-Hook";
 import routes from "server/routes";
 import Net from "@rbxts/yetanothernet";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
-import { createEntity, setEntity } from "shared/utils/functions/jecsHelpFunctions";
+import { createEntity } from "shared/utils/functions/jecsHelpFunctions";
 
 // function to call when data changes
 const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>, newData: Partial<PlayerData>, oldData: PlayerData, entity: Entity) => void>([
-    // sends leveling data
-    // ["LevelingData", (character, newData, oldData) => {
-    //     const player = Players.GetPlayerFromCharacter(character);
-    //     if (player) routes.sendLevelData.sendTo(newData.LevelingData || oldData.LevelingData, player);
-    // }],
+    // sends coin updates to client
+    ["Coins", (character, newData, oldData) => {
+        const player = Players.GetPlayerFromCharacter(character);
+        if (player && newData.Coins !== undefined) routes.updatePlayerCoins.sendTo(newData.Coins, player);
+    }],
+    
+    // sends daily streak updates to client
+    ["DailyStreak", (character, newData, oldData) => {
+        const player = Players.GetPlayerFromCharacter(character);
+        if (player && newData.DailyStreak !== undefined) routes.updateDailyStreak.sendTo(newData.DailyStreak, player);
+    }],
+    
+    // sends daily reward day updates to client
+    ["LastDailyReward", (character, newData, oldData) => {
+        const player = Players.GetPlayerFromCharacter(character);
+        if (player && newData.LastDailyReward !== undefined) routes.updateLastDailyReward.sendTo(newData.LastDailyReward, player);
+    }],
+    
+    // sends tutorial progress updates to client
+    ["Tutorial", (character, newData, oldData) => {
+        const player = Players.GetPlayerFromCharacter(character);
+        if (player && newData.Tutorial !== undefined) routes.updateTutorialProgress.sendTo(newData.Tutorial, player);
+    }],
+    
+    // sends walls updates to client
+    ["Walls", (character, newData, oldData) => {
+        const player = Players.GetPlayerFromCharacter(character);
+        if (player && newData.Walls !== undefined) routes.updatePlayerWalls.sendTo(newData.Walls, player);
+    }],
 ]);
 
 // updates data
@@ -67,14 +91,21 @@ export default (world: World) => {
             const playerData = getPlayerData(player);
 
             if (playerData) {
-                setEntity.addTargetForReplication(bodyEntity, player, Data);
+                // Send initial player data to client via network routes
+                routes.updatePlayerCoins.sendTo(playerData.Coins, player);
+                routes.updateDailyStreak.sendTo(playerData.DailyStreak, player);
+                routes.updateLastDailyReward.sendTo(playerData.LastDailyReward, player);
+                routes.updateTutorialProgress.sendTo(playerData.Tutorial, player);
+                routes.updatePlayerWalls.sendTo(playerData.Walls, player);
+                
+                // Set the Data component on server but don't replicate it
                 world.set(bodyEntity, Data, playerData);
                 world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity, updateAll: true });
             } else {
                 warn(`No player data found for ${player.Name}`);
             }
         } else {
-            setEntity.addTargetForReplication(bodyEntity, [], Data);
+            // For non-player entities, just set default data without replication
             world.set(bodyEntity, Data, deepCopy(defaultData));
             world.set(world.entity(), UpdateData, { updateFunction: () => defaultData, bodyEntity, updateAll: true });
         }

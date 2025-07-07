@@ -78,6 +78,7 @@ export default (pagePaths: PagePaths) => {
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
     }, () => {
+        printTS($line, `Opening Quests Page`);
         pageStates.openPage("Quests")
     }))
 

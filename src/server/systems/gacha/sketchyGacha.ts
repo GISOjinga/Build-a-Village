@@ -9,6 +9,7 @@ import { Data, GachaResult, Leaving, Player, TargetEntity, Added } from "shared/
 import { PlayerData } from "shared/data/defaultData";
 import wallsData from "shared/data/wallsData";
 import { $line } from "rbxts-transformer-inline";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 
 const PRODUCT_ID = 3326181974;
 
@@ -60,7 +61,7 @@ export default (world: World) => {
         routes.startSketchyRoll.sendTo({ item: result.Name, type: result.Type }, player);
     }
 
-    routes.finishSketchyRoll.listen((_, player) => {
+    useRoute(routes.finishSketchyRoll, (_, player) => {
         const entity = getEntity.fromInstance(player);
         if (!entity) return;
         const result = world.get(entity, GachaResult);

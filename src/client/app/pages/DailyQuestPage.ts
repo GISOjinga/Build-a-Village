@@ -33,14 +33,12 @@ export default (pagePaths: PagePaths) => {
 
                 // Set up reward frame - for now showing coins as reward
                 // You can expand this based on actual reward data structure
-                questFrame.ItemRecievedFrame.Visible = true;
+                questFrame.ItemRecievedFrame.Visible = false;
                 questFrame.ItemRecievedFrame.TotalOfItem.Text = questInfo.reward.type === "Coins" ? tostring(questInfo.reward.amount)! : "1"; // Example reward amount
 
                 // Add reward image if available
-                const rewardImage = questFrame.ItemRecievedFrame.FindFirstChild("ImageLabel") as ImageLabel;
-                if (rewardImage) {
-                    rewardImage.Image = paths.Assets.UI.GameUI.Coin.Image; // Example reward image
-                }
+                const rewardImage = paths.Assets.UI.AllRenders.FindFirstChild(questInfo.reward.type === "Coins" ? "Coin" : questInfo.reward.name);
+                if (rewardImage) rewardImage.Parent = questFrame.ItemRecievedFrame
             } else {
                 // Hide quest if no data
                 questFrame.Content.Text = "";

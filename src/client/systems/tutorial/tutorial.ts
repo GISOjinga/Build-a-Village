@@ -7,12 +7,15 @@ import { useMemo } from "shared/Plugin-Hook";
 import pageStates from "shared/utils/Animations/pageStates";
 import { getEntity } from "shared/utils/functions/jecsHelpFunctions";
 import { Raycast } from "shared/utils/functions/rayFunctions";
-import { Body, Data, ActiveVillagers, Villager, Changed, ReplicatedComponent } from "shared/utils/jecs/jecsComponents";
+import { Body, ActiveVillagers, Villager, ReplicatedComponent } from "shared/utils/jecs/jecsComponents";
 import paths from "shared/utils/paths";
+import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import routes from "client/routes";
 
 const player = Players.LocalPlayer;
 const trash = new Janitor();
 const arrow = trash.Add(paths.Assets.Tutorial.ArrowTutorial.Clone())
+let currentTutorialStage: PlayerData["Tutorial"] = "Done";
 let lastStage: PlayerData["Tutorial"] | undefined;
 
 trash.LinkToInstance(script, true);
@@ -27,41 +30,16 @@ function updateMessage(stage: PlayerData["Tutorial"], force: boolean = false) {
 }
 
 export default (world: World) => {
-    const bodyEntity = getEntity.fromInstance(player);
-    const serverEntity = player.GetAttribute<Entity>("ServerId");
-    if (!bodyEntity || !serverEntity) return;
-
-    const body = world.get(bodyEntity, Body);
-    const data = world.get(bodyEntity, Data);
-    if (!body || !data) return;
-
-    const computeTarget = (): BasePart | Model | undefined => {
-        if (data.Tutorial === 0) return paths.Map.Shops.King.Npc.HumanoidRootPart;
-        if (data.Tutorial === 1) return body.platform?.Floor;
-        if (data.Tutorial === 2) {
-            for (const [_, __, villagerInfo] of world.query(ReplicatedComponent, Villager)) {
-                if (villagerInfo.playerEntity === serverEntity && villagerInfo.villagerData.Name === "Farmer") return villagerInfo.villagerModel.PrimaryPart ?? villagerInfo.villagerModel;
-            }
-        }
-        if (data.Tutorial === 3) return paths.Map.Shops.Merchant.Npc.HumanoidRootPart;
-        return undefined;
-    };
-
-    const target = computeTarget();
-    updateMessage(data.Tutorial);
-
-    // when data changes
-    for (const [_, changed] of world.query(Changed(Data))) {
-        const newData = changed.new
-        const oldData = changed.old
-
+    // Listen for tutorial progress updates
+    useRoute(routes.updateTutorialProgress, (tutorial) => {
+        const oldStage = currentTutorialStage;
+        currentTutorialStage = tutorial;
+        
         // if the tutorial stage has changed
-        if (newData?.Tutorial !== oldData?.Tutorial) {
-            const currentStage = newData?.Tutorial || 0;
-
+        if (tutorial !== oldStage) {
             // if stage was 3 then changed to done then
-            if (currentStage === "Done") {
-                if (oldData?.Tutorial === 3) {
+            if (tutorial === "Done") {
+                if (oldStage === 3) {
                     pageStates.introText({ text: "Well done! +50 Coins.", duration: 5 });
                 } else {
                     pageStates.introText({ text: "", duration: 5 });
@@ -69,10 +47,32 @@ export default (world: World) => {
                 arrow.Parent = ReplicatedStorage;
                 return;
             } else {
-                updateMessage(currentStage, true);
+                updateMessage(tutorial, true);
             }
         }
-    }
+    });
+
+    const bodyEntity = getEntity.fromInstance(player);
+    const serverEntity = player.GetAttribute<Entity>("ServerId");
+    if (!bodyEntity || !serverEntity) return;
+
+    const body = world.get(bodyEntity, Body);
+    if (!body) return;
+
+    const computeTarget = (): BasePart | Model | undefined => {
+        if (currentTutorialStage === 0) return paths.Map.Shops.King.Npc.HumanoidRootPart;
+        if (currentTutorialStage === 1) return body.platform?.Floor;
+        if (currentTutorialStage === 2) {
+            for (const [_, __, villagerInfo] of world.query(ReplicatedComponent, Villager)) {
+                if (villagerInfo.playerEntity === serverEntity && villagerInfo.villagerData.Name === "Farmer") return villagerInfo.villagerModel.PrimaryPart ?? villagerInfo.villagerModel;
+            }
+        }
+        if (currentTutorialStage === 3) return paths.Map.Shops.Merchant.Npc.HumanoidRootPart;
+        return undefined;
+    };
+
+    const target = computeTarget();
+    updateMessage(currentTutorialStage);
 
     if (target) {
         const targetCFrame = target.GetPivot()

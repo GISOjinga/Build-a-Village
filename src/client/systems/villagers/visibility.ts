@@ -118,7 +118,7 @@ function updateVillagerState(villagerModel: VillagerModel, newState: VillagerPro
     const oldState = villageModelStates.get(villagerModel)!
     if (!villageModelStates.has(villagerModel) || !deepEquals(oldState, newState)) {
         const parts = cacheVillagerParts(villagerModel);
-
+        // print("Update")
         if (!oldState || newState.isBeingBuilt) {
             applyGroupVisibility(villagerModel, "progressFull", parts.progressFull, false);
             applyGroupVisibility(villagerModel, "stationParts", parts.stationParts, false);
@@ -226,10 +226,7 @@ export default (world: World) => {
             particlesToggle(goldAttachment, false);
             particlesToggle(rainbowAttachment, false);
         })
-        villagerModel.Station.Parts.Resources.DescendantAdded.Connect(() => {
-            villagerPartCaches.delete(villagerModel);
-            cacheVillagerParts(villagerModel);
-        })
+        cacheVillagerParts(villagerModel);
     }).catch((err) => warnJecs($line, "Villager", "Error setting up villager model particles", err));
 
     // when vilalger animator gets added

@@ -308,7 +308,7 @@ export const CastParticle = component<{
 export const WalkEffect = component<"Left" | "Right">("WalkEffect");
 
 
-export const componentsToReplicate = { Body, Villager, Data, ModelDebugger, ConfirmationPrompt };
+export const componentsToReplicate = { Body, Villager, ModelDebugger, ConfirmationPrompt };
 
 
 // list of phases in order

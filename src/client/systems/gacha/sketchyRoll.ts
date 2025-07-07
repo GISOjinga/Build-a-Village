@@ -30,37 +30,37 @@ export default (world: World) => {
     //     MarketplaceService.PromptGamePassPurchase(Players.LocalPlayer, GAMEPASS_ID);
     // });
 
-    routes.startSketchyRoll.listen(({ item }) => {
-        // gui.Enabled = true;
-        // label.Text = "";
-        // let index = 0;
-        // const owns = MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, GAMEPASS_ID);
-        // skipButton.Visible = !owns;
-        // const finish = () => {
-        //     label.Text = item;
-        //     routes.finishSketchyRoll.send(undefined);
-        //     skipButton.Visible = false;
-        //     task.delay(2, () => gui.Enabled = false);
-        // };
+    // routes.startSketchyRoll.listen(({ item }) => {
+    //     // gui.Enabled = true;
+    //     // label.Text = "";
+    //     // let index = 0;
+    //     // const owns = MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, GAMEPASS_ID);
+    //     // skipButton.Visible = !owns;
+    //     // const finish = () => {
+    //     //     label.Text = item;
+    //     //     routes.finishSketchyRoll.send(undefined);
+    //     //     skipButton.Visible = false;
+    //     //     task.delay(2, () => gui.Enabled = false);
+    //     // };
 
-        // if (owns) {
-        //     finish();
-        //     return;
-        // }
+    //     // if (owns) {
+    //     //     finish();
+    //     //     return;
+    //     // }
 
-        // const start = tick();
-        // const conn = RunService.Heartbeat.Connect(() => {
-        //     const elapsed = tick() - start;
-        //     if (elapsed >= 5) {
-        //         conn.Disconnect();
-        //         finish();
-        //     } else {
-        //         const t = math.floor(elapsed / 5 * 100);
-        //         if (t !== index) {
-        //             index = t;
-        //             label.Text = gachaItems[math.floor(math.random() * gachaItems.size())].Name;
-        //         }
-        //     }
-        // });
-    });
+    //     // const start = tick();
+    //     // const conn = RunService.Heartbeat.Connect(() => {
+    //     //     const elapsed = tick() - start;
+    //     //     if (elapsed >= 5) {
+    //     //         conn.Disconnect();
+    //     //         finish();
+    //     //     } else {
+    //     //         const t = math.floor(elapsed / 5 * 100);
+    //     //         if (t !== index) {
+    //     //             index = t;
+    //     //             label.Text = gachaItems[math.floor(math.random() * gachaItems.size())].Name;
+    //     //         }
+    //     //     }
+    //     // });
+    // });
 };
