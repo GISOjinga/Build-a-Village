@@ -20,12 +20,13 @@ export default (dialoguePage: NpcDialogues) => {
     const buyProximityPrompt = paths.Map.Shops.WaitForChild("King").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.King.Npc.HumanoidRootPart.ProximityPrompt;
     const sellProximityPrompt = paths.Map.Shops.WaitForChild("Merchant").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Merchant.Npc.HumanoidRootPart.ProximityPrompt;
     const wallProximityPrompt = paths.Map.Shops.WaitForChild("Architect").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.Architect.Npc.HumanoidRootPart.ProximityPrompt;
-    const sketchyPrompt = paths.Map.Shops.WaitForChild("SketchyGuy").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.SketchyGuy.Npc.HumanoidRootPart.ProximityPrompt;
+    const sketchyProximityPrompt = paths.Map.Shops.WaitForChild("SketchyGuy").WaitForChild("Npc").WaitForChild("HumanoidRootPart").WaitForChild("ProximityPrompt") as typeof paths.Map.Shops.SketchyGuy.Npc.HumanoidRootPart.ProximityPrompt;
 
     // uses use effect to set the dialogue
     trash.Add(useEffect((newTrash) => {
         const buyTextLabel = dialoguePage.Buy.TextLabel;
         const sellTextLabel = dialoguePage.Sell.TextLabel;
+        const rollsTextLabel = dialoguePage.Rolls.TextLabel;
         const wallTextLabel = dialoguePage.Wall.TextLabel;
         const npcDialogue = pageStates.npcDialogue();
         const tween = newTrash.Add(createTween<number>(), "destroy")
@@ -38,6 +39,7 @@ export default (dialoguePage: NpcDialogues) => {
         buyTextLabel.Text = "";
         sellTextLabel.Text = "";
         wallTextLabel.Text = "";
+        rollsTextLabel.Text = "";
         tween.Play(npcDialogue.target === "None" ? 1 : 0, npcDialogue.target === "None" ? 0 : 1, tweenInInfo)
 
         // when the intro text page is visible
@@ -64,22 +66,26 @@ export default (dialoguePage: NpcDialogues) => {
             buyTextLabel.Text = (full ?? "")
             sellTextLabel.Text = (full ?? "")
             wallTextLabel.Text = (full ?? "")
+            rollsTextLabel.Text = (full ?? "")
             dialoguePage.Buy.UIGradient.Transparency = transparency
             dialoguePage.Sell.UIGradient.Transparency = transparency
             dialoguePage.Wall.UIGradient.Transparency = transparency
+            dialoguePage.Rolls.UIGradient.Transparency = transparency
         }))
 
         newTrash.Add(tween.onComplete(() => {
             newTrash.Add(task.delay(1, () => {
                 newTrash.Destroy()
-                if (npcDialogue.target !== "SketchyGuy")
-                    pageStates.openPage(npcDialogue.target as any)
+                if (npcDialogue.target !== "None") {
+                    pageStates.openPage(npcDialogue.target as any);
+                }
 
                 // if target is none then hide
                 if (npcDialogue.target === "None") {
                     dialoguePage.Sell.Visible = false;
                     dialoguePage.Buy.Visible = false;
                     dialoguePage.Wall.Visible = false;
+                    dialoguePage.Rolls.Visible = false;
                 }
             }))
         }))
@@ -96,34 +102,43 @@ export default (dialoguePage: NpcDialogues) => {
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Buy.Visible = true;
             dialoguePage.Sell.Visible = false;
+            dialoguePage.Rolls.Visible = false;
             dialoguePage.Wall.Visible = false;
         } else if (npcDialogue.target === "Sell") {
             dialoguePage.Adornee = paths.Map.Shops.Merchant.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Sell.Visible = true;
             dialoguePage.Buy.Visible = false;
+            dialoguePage.Rolls.Visible = false;
             dialoguePage.Wall.Visible = false;
         } else if (npcDialogue.target === "Wall") {
             dialoguePage.Adornee = paths.Map.Shops.Architect.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
+            sketchyProximityPrompt.Enabled = false;
             dialoguePage.Wall.Visible = true;
             dialoguePage.Buy.Visible = false;
+            dialoguePage.Rolls.Visible = false;
             dialoguePage.Sell.Visible = false;
-        } else if (npcDialogue.target === "SketchyGuy" || npcDialogue.target === "Rolls") {
+        } else if (npcDialogue.target === "Rolls") {
             dialoguePage.Adornee = paths.Map.Shops.SketchyGuy.Npc.Head
             buyProximityPrompt.Enabled = false;
             sellProximityPrompt.Enabled = false;
             wallProximityPrompt.Enabled = false;
-            dialoguePage.Buy.Visible = true;
+            sketchyProximityPrompt.Enabled = false;
+            dialoguePage.Buy.Visible = false;
             dialoguePage.Sell.Visible = false;
             dialoguePage.Wall.Visible = false;
+            dialoguePage.Rolls.Visible = true;
         } else if (npcDialogue.target === "None") {
+            sketchyProximityPrompt.Enabled = true;
             buyProximityPrompt.Enabled = true;
             sellProximityPrompt.Enabled = true;
             wallProximityPrompt.Enabled = true;
@@ -131,15 +146,15 @@ export default (dialoguePage: NpcDialogues) => {
     }))
 
     // when open page changes then removed the npc dialogue
-    let oldPage: string = "None";
+    let oldPage: ReturnType<typeof pageStates.openPage> = "None";
     trash.Add(effect(() => {
-        if (oldPage === "Sell" || oldPage === "Buy" || oldPage === "Wall") pageStates.npcDialogue({ target: "None", text: "" })
+        if (oldPage === "Sell" || oldPage === "Buy" || oldPage === "Wall" || oldPage === "Rolls") pageStates.npcDialogue({ target: "None", text: "" })
         oldPage = pageStates.openPage();
     }))
 
     // watches for route calls
     trash.Add(routes.npcDialogue.listen((newDialogue) =>
-        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "SketchyGuy" | "None"; text: string })
+        pageStates.npcDialogue(newDialogue as { target: "Buy" | "Sell" | "Wall" | "Rolls" | "None"; text: string })
     ));
 
     // when the buy button is clicked
@@ -158,8 +173,8 @@ export default (dialoguePage: NpcDialogues) => {
     }))
 
     // when the sketchy guy button is clicked
-    trash.Add(sketchyPrompt.Triggered.Connect(() => {
-        pageStates.npcDialogue({ target: "SketchyGuy", text: "Wanna test your luck?" })
+    trash.Add(sketchyProximityPrompt.Triggered.Connect(() => {
+        pageStates.npcDialogue({ target: "Rolls", text: "Wanna test your luck?" })
     }))
 
     return trash

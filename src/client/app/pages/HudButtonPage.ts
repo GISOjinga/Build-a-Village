@@ -64,7 +64,6 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // daily rewards button
-    pagePaths.HUD.DailyRewards.Visible = false
     trash.Add(UIUtilities.ButtonAction({
         Button: pagePaths.HUD.DailyRewards,
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.DailyRewards.Size, sizeOffset),
@@ -74,31 +73,30 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // quests button
-    pagePaths.HUD.Quests.Visible = false
     trash.Add(UIUtilities.ButtonAction({
         Button: pagePaths.HUD.Quests,
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
         DeExpandedSize: UIUtilities.DivideUdim2(pagePaths.HUD.Quests.Size, sizeOffset),
     }, () => {
-        pageStates.openPage(pageStates.openPage() === "Quests" ? "None" : "Quests")
+        pageStates.openPage("Quests")
     }))
 
     // updates your coins
     trash.Add(useEffect((newTrash) => {
         const newPrice = pageStates.coins()
-        const [oldPriceString] = pagePaths.Page.Playercash.Text.gsub("%$", "")
+        const [oldPriceString] = pagePaths.Page.Coin.Playercash.Text.gsub("%$", "")
         let oldPrice = tonumber(oldPriceString) || 0;
 
         // tweens the price
-        pagePaths.Page.Playercash.SetAttribute("Coins", newPrice);
+        pagePaths.Page.Coin.Playercash.SetAttribute("Coins", newPrice);
         newTrash.Add(task.spawn(() => {
             while (oldPrice !== newPrice) {
                 const directionToNewPrice = newPrice - oldPrice > 0 ? 1 : -1;
                 oldPrice += math.floor(directionToNewPrice * math.max(1, math.abs(newPrice - oldPrice) / 10));
-                pagePaths.Page.Playercash.Text = `$${oldPrice}`;
+                pagePaths.Page.Coin.Playercash.Text = `$${oldPrice}`;
                 task.wait(0.01);
             }
-            pagePaths.Page.Playercash.Text = `$${newPrice}`;
+            pagePaths.Page.Coin.Playercash.Text = `$${newPrice}`;
         }))
     }));
 

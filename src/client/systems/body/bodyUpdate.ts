@@ -25,51 +25,51 @@ export default (world: World) => {
     const beekeeper = paths.Map.Villagers.FindFirstChild("Beekeeper") as Model | undefined;
     const witch = paths.Map.Villagers.FindFirstChild("Witch") as Model | undefined;
 
-    const kingIdleTrack = useMemo(() => {
-        const humanoid = king.FindFirstChildOfClass("Humanoid");
-        const animator = humanoid?.FindFirstChildOfClass("Animator");
-        return animator ? animator.LoadAnimation(kingIdle) : undefined;
-    }, [king]);
+    // const kingIdleTrack = useMemo(() => {
+    //     const humanoid = king.FindFirstChildOfClass("Humanoid");
+    //     const animator = humanoid?.FindFirstChildOfClass("Animator");
+    //     return animator ? animator.LoadAnimation(kingIdle) : undefined;
+    // }, [king]);
 
-    const merchantIdleTrack = useMemo(() => {
-        const humanoid = merchant.FindFirstChildOfClass("Humanoid");
-        const animator = humanoid?.FindFirstChildOfClass("Animator");
-        return animator ? animator.LoadAnimation(merchantIdle) : undefined;
-    }, [merchant]);
+    // const merchantIdleTrack = useMemo(() => {
+    //     const humanoid = merchant.FindFirstChildOfClass("Humanoid");
+    //     const animator = humanoid?.FindFirstChildOfClass("Animator");
+    //     return animator ? animator.LoadAnimation(merchantIdle) : undefined;
+    // }, [merchant]);
 
-    const architectIdleTrack = useMemo(() => {
-        const humanoid = architect.FindFirstChildOfClass("Humanoid");
-        const animator = humanoid?.FindFirstChildOfClass("Animator");
-        return animator ? animator.LoadAnimation(architectIdle) : undefined;
-    }, [architect]);
+    // const architectIdleTrack = useMemo(() => {
+    //     const humanoid = architect.FindFirstChildOfClass("Humanoid");
+    //     const animator = humanoid?.FindFirstChildOfClass("Animator");
+    //     return animator ? animator.LoadAnimation(architectIdle) : undefined;
+    // }, [architect]);
 
-    const beekeeperIdleTrack = useMemo(() => {
-        if (!beekeeper) return undefined;
-        const humanoid = beekeeper.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
-        if (!humanoid) return undefined;
-        const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
-        if (!animator) return undefined;
-        return animator.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production);
-    }, [beekeeper]);
+    // const beekeeperIdleTrack = useMemo(() => {
+    //     if (!beekeeper) return undefined;
+    //     const humanoid = beekeeper.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+    //     if (!humanoid) return undefined;
+    //     const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
+    //     if (!animator) return undefined;
+    //     return animator.LoadAnimation(paths.Assets.Animations.Villager.Beekeeper.Production);
+    // }, [beekeeper]);
 
-    const witchIdleTrack = useMemo(() => {
-        if (!witch) return undefined;
-        const humanoid = witch.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
-        if (!humanoid) return undefined;
-        const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
-        if (!animator) return undefined;
-        return animator.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production);
-    }, [witch]);
+    // const witchIdleTrack = useMemo(() => {
+    //     if (!witch) return undefined;
+    //     const humanoid = witch.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+    //     if (!humanoid) return undefined;
+    //     const animator = humanoid.FindFirstChildOfClass("Animator") as Animator | undefined;
+    //     if (!animator) return undefined;
+    //     return animator.LoadAnimation(paths.Assets.Animations.Villager.Witch.Production);
+    // }, [witch]);
     const body = getEntity.bodyFromPlayer(player);
     const equippedTool = body && body.model.FindFirstChildOfClass("Tool");
     const tooType = equippedTool?.GetAttribute<ToolType>("ItemType")
 
     // makes sure animation is playing
-    if (!kingIdleTrack?.IsPlaying) kingIdleTrack?.Play();
-    if (!merchantIdleTrack?.IsPlaying) merchantIdleTrack?.Play();
-    if (!architectIdleTrack?.IsPlaying) architectIdleTrack?.Play();
-    if (!beekeeperIdleTrack?.IsPlaying) beekeeperIdleTrack?.Play();
-    if (!witchIdleTrack?.IsPlaying) witchIdleTrack?.Play();
+    // if (!kingIdleTrack?.IsPlaying) kingIdleTrack?.Play();
+    // if (!merchantIdleTrack?.IsPlaying) merchantIdleTrack?.Play();
+    // if (!architectIdleTrack?.IsPlaying) architectIdleTrack?.Play();
+    // if (!beekeeperIdleTrack?.IsPlaying) beekeeperIdleTrack?.Play();
+    // if (!witchIdleTrack?.IsPlaying) witchIdleTrack?.Play();
 
     // casts a ray down if body and if standing on a platform floor then increase walkspeed on humanoid to 20 else 16 with tracer
     if (useThrottle(.1) && body) {

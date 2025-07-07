@@ -489,7 +489,9 @@ type GameMap = Folder & {
 			};
 			Npc: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
@@ -596,7 +598,9 @@ type GameMap = Folder & {
 			};
 			Npc: Model & {
 				["Left Leg"]: Part;
-				Humanoid: Humanoid;
+				Humanoid: Humanoid & {
+					Animator: Animator;
+				};
 				["Right Leg"]: Part;
 				Head: Part & {
 					HatAttachment: Attachment;
@@ -932,6 +936,10 @@ type GameMap = Folder & {
 					LeftGripAttachment: Attachment;
 					LeftShoulderAttachment: Attachment;
 				};
+				Animate: Script & {
+					Animation1: Animation;
+				};
+				AnimSaves: ObjectValue;
 				DarkKnightHood: Hat & {
 					Handle: Part & {
 						Mesh: SpecialMesh;

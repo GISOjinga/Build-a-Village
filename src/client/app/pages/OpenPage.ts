@@ -21,7 +21,9 @@ export default (pagePaths: PagePaths) => {
         RobuxStore: pagePaths.RobuxStore.Position,
         Promo: pagePaths.PromoPage.Position,
         DailyRewards: pagePaths.DailyRewardsPage.Position,
+        DailyQuests: pagePaths.DailyQuestsPage.Position,
     }
+    print(pagePaths.DailyQuestsPage.Position)
     const pageNameToInstance = {
         Gift: pagePaths.GiftPage,
         Wall: pagePaths.WallPage,
@@ -29,6 +31,7 @@ export default (pagePaths: PagePaths) => {
         RobuxStore: pagePaths.RobuxStore,
         Promo: pagePaths.PromoPage,
         DailyRewards: pagePaths.DailyRewardsPage,
+        DailyQuests: pagePaths.DailyQuestsPage,
     }
 
     // loops through all the page paths
@@ -60,10 +63,11 @@ export default (pagePaths: PagePaths) => {
             const closePosition = pageName === "Gift" ? UDim2.fromScale(originalPositions.Gift.X.Scale, 2)
                 : pageName === "Buy" ? UDim2.fromScale(originalPositions.Buy.X.Scale, -2)
                     : pageName === "DailyRewards" ? UDim2.fromScale(originalPositions.DailyRewards.X.Scale, -2)
-                        : pageName === "RobuxStore" ? UDim2.fromScale(-2 * robuxStoreDirection, originalPositions.RobuxStore.Y.Scale)
-                            : pageName === "Wall" ? UDim2.fromScale(-2 * wallDirection, originalPositions.Wall.Y.Scale)
-                                : pageName === "Promo" ? UDim2.fromScale(originalPositions.Promo.X.Scale, 2)
-                                    : UDim2.fromScale(.5, -2);
+                        : pageName === "DailyQuests" ? UDim2.fromScale(originalPositions.DailyQuests.X.Scale, -2)
+                            : pageName === "RobuxStore" ? UDim2.fromScale(-2 * robuxStoreDirection, originalPositions.RobuxStore.Y.Scale)
+                                : pageName === "Wall" ? UDim2.fromScale(-2 * wallDirection, originalPositions.Wall.Y.Scale)
+                                    : pageName === "Promo" ? UDim2.fromScale(originalPositions.Promo.X.Scale, 2)
+                                        : UDim2.fromScale(.5, -2);
 
             // sets the position of the page
             page.Visible = true;

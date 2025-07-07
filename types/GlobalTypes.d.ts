@@ -221,7 +221,19 @@ type ProduceData = {
 }
 
 //* daily quest info
-type DailyQuestInfo = { description: string; progress: number; target: number }
+type DailyQuestReward =
+    | { type: "Coins"; amount: number }
+    | { type: "Villager"; name: VillagerNames }
+    | { type: "Produce"; name: ProduceNames };
+
+type DailyQuestInfo = {
+    id: number;
+    description: string;
+    target: number;
+    action: "collect" | "place" | "dig" | "supply" | "sell" | "gift" | "misc";
+    reward: DailyQuestReward;
+    progress: number;
+};
 
 //* villager model
 type VillagerModel = Assets["Villagers"]["Farmer"];

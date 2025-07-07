@@ -8,7 +8,7 @@ import ShopData from "../villagers/ShopData";
 import { MarketplaceService, Players } from "@rbxts/services";
 import { PlayerData } from "../../../shared/data/defaultData";
 import { $line } from "rbxts-transformer-inline";
-import dailyQuestsData, { DailyQuestReward } from "shared/data/dailyQuestsData";
+import dailyQuestsData from "shared/data/dailyQuestsData";
 
 const dayInSeconds = 60 * 60 * 24;
 

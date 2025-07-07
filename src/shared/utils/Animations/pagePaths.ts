@@ -11,8 +11,10 @@ const pagePaths = (page: GameUI) => {
         IntroTextPage: page.Introtext,
         PlacementPage: page.PlaceFrame,
         ConfirmPage: page.ConfirmationPrompt,
-        QuestPage: page.DailyQuestsTab,
+        DailyQuestsTabsPage: page.DailyQuestsTab,
+        DailyQuestsPage: page.DailyQuests,
         DailyRewardsPage: page.DailyRewards,
+        RollsPage: page, // Using main page as placeholder since no dedicated roll UI exists
         Page: page,
     };
 }

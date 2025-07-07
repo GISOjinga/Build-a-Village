@@ -1,15 +1,4 @@
-export type DailyQuestReward =
-    | { type: "Coins"; amount: number }
-    | { type: "Villager"; name: VillagerNames }
-    | { type: "Produce"; name: ProduceNames };
 
-export type DailyQuestInfo = {
-    id: number;
-    description: string;
-    target: number;
-    action: "collect" | "place" | "dig" | "supply" | "sell" | "gift" | "misc";
-    reward: DailyQuestReward;
-};
 
 export default [
     { id: 1, description: "Collect 3 wheat from a Farmer", target: 3, action: "misc", reward: { type: "Coins", amount: 50 } },

@@ -90,6 +90,7 @@ export default (world: World) => {
         routes.notify.sendTo({ text: `You received ${result.item}!`, duration: 5 }, player);
     }
 
+    // Handle player leaving during roll - immediately give them their reward
     for (const [entity] of world.query(TargetEntity, Added(Leaving))) {
         const result = world.get(entity, GachaResult);
         if (result) {
