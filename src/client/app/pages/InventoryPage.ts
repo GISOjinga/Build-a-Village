@@ -180,6 +180,7 @@ export default (pagePaths: PagePaths) => {
     slotTemplate.Visible = false;
     container.Position = closedPosition;
     container.Visible = true;
+    pagePaths.InventoryPage.Visible = true;
 
     // placeholder icons for category buttons
     sortFrame.ByName.TextLabel.Text = "🔤 Name";

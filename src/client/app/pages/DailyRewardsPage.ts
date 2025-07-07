@@ -13,9 +13,9 @@ export default (pagePaths: PagePaths) => {
     const rewardsPage = pagePaths.DailyRewardsPage;
     const dayInSeconds = 60 * 60 * 24;
     const sizeOffset = UDim2.fromScale(1.05, 1.05);
-
     const rewardSlots = [rewardsPage.Prize1, rewardsPage.Prize2, rewardsPage.Prize3, rewardsPage.Prize4, rewardsPage.Prize5];
 
+    rewardsPage.Visible = true;
     function fillSlot(slot: ImageLabel, reward?: DailyRewardItem) {
         slot.GetChildren().forEach(c => {
             if (c.IsA("ViewportFrame")) c.Destroy();
@@ -74,7 +74,9 @@ export default (pagePaths: PagePaths) => {
 
     trash.Add(task.spawn(() => {
         while (true) {
-            if (pageStates.openPage() === "DailyRewards") refresh();
+            const lastDay = pageStates.lastDailyRewardDay();
+            const timeLeft = (lastDay + 1) * dayInSeconds - os.time();
+            rewardsPage.TimeTillNext.Text = formatToHHMMSS(timeLeft);
             task.wait(1);
         }
     }));

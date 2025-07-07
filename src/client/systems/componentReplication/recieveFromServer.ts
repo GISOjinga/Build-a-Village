@@ -129,7 +129,7 @@ export default {
 
         // when the deleteReplicatedEntity is called
         useRoute(routes.deleteReplicatedEntity, (serverEntity) => {
-            const clientEntity = getEntity.replicatedFromServerEntity(serverEntity)
+            const clientEntity = getEntity.replicatedFromServerEntity(serverEntity as never as Entity)
 
             // if client entity then remove
             if (clientEntity) world.delete(clientEntity)

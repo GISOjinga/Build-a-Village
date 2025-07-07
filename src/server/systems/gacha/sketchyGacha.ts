@@ -8,16 +8,37 @@ import gachaItems, { GachaItem } from "shared/data/gachaItems";
 import { Data, GachaResult, Leaving, Player, TargetEntity, Added } from "shared/utils/jecs/jecsComponents";
 import { PlayerData } from "shared/data/defaultData";
 import wallsData from "shared/data/wallsData";
+import { $line } from "rbxts-transformer-inline";
 
 const PRODUCT_ID = 3326181974;
 
 function rollItem(data: PlayerData): GachaItem {
+    // Filter out already owned walls
     const available = gachaItems.filter(item => {
-        if (item.Type === "Wall") return !data.Walls.some(w => w.Name === item.Name && w.Owned);
+        if (item.Type === "Wall") {
+            return !data.Walls.some(w => w.Name === item.Name && w.Owned);
+        }
         return true;
     });
-    const chosen = available[math.random(0, available.size() - 1)]
-    return math.random(1, chosen.Weight) === 1 ? chosen : rollItem(data); // Ensure we always return a valid item
+
+    // Compute total weight
+    const totalWeight = available.reduce((sum, item) => sum + item.Weight, 0);
+
+    // Get a random number between 1 and totalWeight
+    const roll = math.random() * totalWeight;
+
+    // Find the item whose cumulative weight contains the roll
+    let cumulative = 0;
+    for (const item of available) {
+        cumulative += item.Weight;
+        if (roll <= cumulative) {
+            return item;
+        }
+    }
+
+    // Fallback (should never happen if weights are correct)
+    // warn(`[${$line}] Fallback in rollItem() - returning last item.`);
+    return rollItem(data); // Retry to ensure we get a valid item
 }
 
 export default (world: World) => {

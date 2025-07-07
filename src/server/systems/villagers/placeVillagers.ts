@@ -30,7 +30,7 @@ export default (world: World) => {
         const modelHeight = villagerModel?.GetAttribute<number>("Height") || 3.3
         const platform = body && body.platform;
         const floorYPosition = platform && platform.Floor.Position.Y - (platform.Floor.Size.Y / 2)
-        const location = floorYPosition && new CFrame(_location.X, floorYPosition + modelHeight, _location.Z).mul(_location.Rotation)
+        const location = floorYPosition && new CFrame((_location as CFrame).X, floorYPosition + modelHeight, (_location as CFrame).Z).mul((_location as CFrame).Rotation)
 
         // if entity exists and tool exists then
         if (location && entity !== undefined && uniqueId !== undefined && villagerModel && platform && tool && villagerName && itemType === "Villager" && !isVillagersOverlapping(platform.Villagers.GetChildren(), villagerModel, location)) {

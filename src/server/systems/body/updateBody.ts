@@ -134,10 +134,10 @@ export default (world: World) => {
         if (platform && body) {
             routes.togglePage.sendTo("None", player); // close sell menu if open
             routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
-            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position });
+            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position as never });
             body.rootPart.CFrame = platform.SpawnLocation.CFrame.add(Vector3.yAxis.mul(5))
             routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
-            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position });
+            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position as never });
         }
     })
 
@@ -150,10 +150,10 @@ export default (world: World) => {
         // if platform and body then teleports the players rootpart to the platform spawn
         if (body) {
             routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
-            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position });
+            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position as never });
             body.rootPart.CFrame = shopSpawn.CFrame
             routes.playParticle.sendToAll({ particle: paths.Assets.Particles.Poof, location: body.rootPart.Position, forceAmount: 30 })
-            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position });
+            routes.playSound.sendToAll({ sound: paths.SFX.Effects.Teleport, position: body.rootPart.Position as never });
         }
 
         if (shopName === "Buy" && data && data.Tutorial === 0) {

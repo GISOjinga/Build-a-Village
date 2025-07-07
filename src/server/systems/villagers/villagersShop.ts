@@ -112,9 +112,9 @@ export default (world: World) => {
         const playerEntity = getEntity.fromInstance(playerGifting);
         const playerToGiftToEntity = getEntity.fromInstance(playerToGift as Player);
         const toolFoundUnderPlayer = playerGifting.Character?.FindFirstChildOfClass("Tool")
-        const tooType = produceTool?.GetAttribute<ToolType>("ItemType")
-        const itemName = produceTool?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
-        const itemVariant = produceTool?.GetAttribute<ProduceVariant>("ItemVariant");
+        const tooType = (produceTool as Tool)?.GetAttribute<ToolType>("ItemType")
+        const itemName = (produceTool as Tool)?.GetAttribute<VillagerNames | ProduceNames>("ItemName");
+        const itemVariant = (produceTool as Tool)?.GetAttribute<ProduceVariant>("ItemVariant");
 
         // if data then
         if (toolFoundUnderPlayer === produceTool && playerEntity && itemVariant && playerToGiftToEntity && (tooType === "Commodity")) {
@@ -348,8 +348,8 @@ export default (world: World) => {
 
                 // if the tool is a villager then sells it
                 if (tool) {
-                    const itemName = tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
-                    const variant = tool.GetAttribute("ItemVariant") as ProduceVariant;
+                    const itemName = (tool as Tool).GetAttribute("ItemName") as VillagerNames | ProduceNames;
+                    const variant = (tool as Tool).GetAttribute("ItemVariant") as ProduceVariant;
                     let earned = 0;
 
                     // removes the item from the data
@@ -393,9 +393,9 @@ export default (world: World) => {
                 }
             } else if (option === "Option3") { // tells you with routes.notify how much this tool your holding cost
                 const tool = body.model.FindFirstChildOfClass("Tool") as Tool;
-                const itemName = tool && tool.GetAttribute("ItemName") as VillagerNames | ProduceNames;
-                const isVillager = tool && tool.GetAttribute("UniqueId") as boolean;
-                const variant = tool && tool.GetAttribute("ItemVariant") as ProduceVariant;
+                const itemName = tool && (tool as Tool).GetAttribute("ItemName") as VillagerNames | ProduceNames;
+                const isVillager = tool && (tool as Tool).GetAttribute("UniqueId") as boolean;
+                const variant = tool && (tool as Tool).GetAttribute("ItemVariant") as ProduceVariant;
 
                 // if the tool is a villager then tells you how much it costs
                 if (tool && itemName && !isVillager) {

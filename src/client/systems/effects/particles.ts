@@ -20,7 +20,11 @@ export default (world: World) => {
     const body = getEntity.bodyFromPlayer(player)
 
     // listens for when the particle is called
-    useRoute(routes.playParticle, createEntity.particle)
+    useRoute(routes.playParticle, (data) => createEntity.particle({
+        particle: data.particle as never as BasePart | Attachment | ParticleEmitter,
+        location: data.location as Vector3 | CFrame | undefined,
+        forceAmount: data.forceAmount
+    }))
 
     // when cast particles are emitted
     for (const [particleEntity, { particle: _particle, forceAmount, location, color }] of world.query(CastParticle).with(CanQuery(CastParticle))) {

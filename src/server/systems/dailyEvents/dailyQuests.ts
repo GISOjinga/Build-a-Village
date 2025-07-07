@@ -216,7 +216,7 @@ export default (world: World) => {
     useRoute(routes.giftToPlayer, ({ produceTool }, player) => {
         if (!produceTool) return;
         progressDailyQuest(player, {});
-        const itemName = produceTool.GetAttribute<ProduceNames>("ItemName");
+        const itemName = (produceTool as never as Tool).GetAttribute<ProduceNames>("ItemName");
         const entity = getEntity.fromInstance(player);
         const data = entity && world.get(entity, Data);
         if (itemName && data) {

@@ -18,12 +18,12 @@ export default (world: World) => {
     // when ever sounds is called to play
     useRoute(routes.playSound, (data) => {
         const soundPosition = data.position
-        const sound = data.sound.Clone() as Sound
+        const sound = (data.sound as Sound).Clone() as Sound
         const goalParent = soundPosition ? new Instance("Attachment", Workspace.Terrain) : SoundService
 
         // if the sound has a position, it will create an attachment in the terrain
         if (soundPosition && goalParent.IsA("Attachment")) {
-            goalParent.Position = soundPosition
+            goalParent.Position = soundPosition as never as Vector3
             goalParent.Name = "SoundAttachment"
             sound.Destroying.Connect(() => goalParent.Destroy())
         }

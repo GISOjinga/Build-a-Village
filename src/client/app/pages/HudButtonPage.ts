@@ -64,6 +64,7 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // daily rewards button
+    pagePaths.HUD.DailyRewards.Visible = false
     trash.Add(UIUtilities.ButtonAction({
         Button: pagePaths.HUD.DailyRewards,
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.DailyRewards.Size, sizeOffset),
@@ -73,6 +74,7 @@ export default (pagePaths: PagePaths) => {
     }))
 
     // quests button
+    pagePaths.HUD.Quests.Visible = false
     trash.Add(UIUtilities.ButtonAction({
         Button: pagePaths.HUD.Quests,
         ExpandedSize: UIUtilities.MultiplyUdim2(pagePaths.HUD.Quests.Size, sizeOffset),

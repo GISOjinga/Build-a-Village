@@ -21,63 +21,60 @@ const jingaRemote = ReplicatedStorage.FindFirstChild<RemoteEvent>("JingaRemotes"
         })());
 
 
-type JingaNetType<T> =
+// Wrap T by applying SerDes to primitives and recursing into objects/arrays/maps
+type WrapJNetType<T> =
     T extends (...args: any[]) => any ? T :
-    T extends Array<infer U> ? JingaNetType<U>[] :
-    T extends Record<string, unknown> ? { [K in keyof T]: JingaNetType<T[K]> } :
-    T extends CFrame ? SerDes<CFrame> :
-    T extends Vector3 ? SerDes<Vector3> :
-    T extends Vector2 ? SerDes<Vector2> :
-    T extends string ? SerDes<string> :
-    T extends number ? SerDes<number> :
-    T extends boolean ? SerDes<boolean> :
-    T extends Instance ? SerDes<T> : // loose fallback
+    T extends Array<infer U> ? WrapJNetType<U>[] :
+    T extends Map<infer K, infer V> ? Map<K, WrapJNetType<V>> :
+    T extends object ? { [K in keyof T]: WrapJNetType<T[K]> } :
+    SerDes<T>;
+
+// Recover the original type from its wrapped form
+type UnwrapJNetType<T> =
+    T extends SerDes<infer U> ? U :
+    T extends Array<infer U> ? UnwrapJNetType<U>[] :
+    T extends Map<infer K, infer V> ? Map<K, UnwrapJNetType<V>> :
+    T extends object ? { [K in keyof T]: UnwrapJNetType<T[K]> } :
     T;
 
 
 // === Primitive Types === //
-const optional = <V extends AnySerDesType>(schema: V) => ({ ___JingaNetOptional: true, value: schema }) as never as JingaNetType<V | undefined>;
-type Optional<T> = { ___JingaNetOptional: true, value: JingaNetType<T | undefined> };
-export const int8 = Squash.int(1) as JingaNetType<number>;
-export const int16 = Squash.int(2) as JingaNetType<number>;
-export const int32 = Squash.int(4) as JingaNetType<number>;
-export const uint8 = Squash.uint(1) as JingaNetType<number>;
-export const uint16 = Squash.uint(2) as JingaNetType<number>;
-export const uint32 = Squash.uint(4) as JingaNetType<number>;
-export const float32 = Squash.number(4) as JingaNetType<number>;
-export const float64 = Squash.number(8) as JingaNetType<number>;
-export const str = Squash.string() as JingaNetType<string>;
-export const bool = Squash.boolean() as unknown as JingaNetType<boolean>;
-export const cframe = Squash.CFrame(Squash.number(8)) as unknown as JingaNetType<CFrame>;
-export const vec3 = Squash.Vector3(Squash.number(8)) as unknown as JingaNetType<Vector3>;
-export const vec2 = Squash.Vector2(Squash.number(8)) as unknown as JingaNetType<Vector2>;
+const optional = <V extends AnySerDesType>(schema: V) => ({ ___JingaNetOptional: true, value: schema }) as never as WrapJNetType<V | undefined>;
+type Optional<T> = { ___JingaNetOptional: true, value: WrapJNetType<T | undefined> };
+export const int8 = Squash.int(1) as WrapJNetType<number>;
+export const int16 = Squash.int(2) as WrapJNetType<number>;
+export const int32 = Squash.int(4) as WrapJNetType<number>;
+export const uint8 = Squash.uint(1) as WrapJNetType<number>;
+export const uint16 = Squash.uint(2) as WrapJNetType<number>;
+export const uint32 = Squash.uint(4) as WrapJNetType<number>;
+export const float32 = Squash.number(4) as WrapJNetType<number>;
+export const float64 = Squash.number(8) as WrapJNetType<number>;
+export const str = Squash.string() as WrapJNetType<string>;
+export const bool = Squash.boolean() as unknown as WrapJNetType<boolean>;
+export const cframe = Squash.CFrame(Squash.number(8)) as unknown as WrapJNetType<CFrame>;
+export const vec3 = Squash.Vector3(Squash.number(8)) as unknown as WrapJNetType<Vector3>;
+export const vec2 = Squash.Vector2(Squash.number(8)) as unknown as WrapJNetType<Vector2>;
 export const nothing = {
     ser(this: void): void { },
     des(this: void): void { },
-} as unknown as JingaNetType<undefined>;
+} as unknown as WrapJNetType<undefined>;
 export const unknown = {
     ser(this: void, idk: unknown) { return idk },
     des(this: void, idk: unknown) { return idk },
-} as unknown as JingaNetType<unknown>;
-export const entity = unknown as unknown as JingaNetType<Entity>;
-export const instance = unknown as JingaNetType<Instances[keyof Instances]>;
+} as unknown as WrapJNetType<unknown>;
+export const entity = unknown as unknown as WrapJNetType<Entity>;
+export const instance = unknown as unknown as WrapJNetType<Instances[keyof Instances]>;
 export const compInst = {
     __ByteNetInstancePath: [str],
-} as unknown as JingaNetType<Instances[keyof Instances]>;
+} as unknown as WrapJNetType<Instances[keyof Instances]>;
 
 
 
 export type ClientRoute<T extends Network<any>> = Pick<T, "send" | "listen" | "wait">;
 export type ServerRoute<T extends Network<any>> = Pick<T, "listen" | "sendTo" | "sendToAll" | "sendToAllExcept" | "sendToList" | "wait">;
-type UnwrapJingaNetType<T> =
-    T extends SerDes<infer U> ? U :
-    T extends OptionalSerDes<infer U> ? UnwrapJingaNetType<U> | undefined :
-    T extends Array<infer U> ? Array<UnwrapJingaNetType<U>> :
-    T extends Record<string, unknown> ? { [K in keyof T]: UnwrapJingaNetType<T[K]> } :
-    T;
 
 // === Remote Type Wrapper (fixed) === //
-export class Network<J extends JingaNetType<any>> {
+export class Network<J extends WrapJNetType<any>> {
     constructor(
         private readonly name: string,
         private readonly schema: J,
@@ -85,7 +82,7 @@ export class Network<J extends JingaNetType<any>> {
     ) { }
 
 
-    public listen(callback: (data: UnwrapJingaNetType<J>, player: Player) => void) {
+    public listen(callback: (data: UnwrapJNetType<J>, player: Player) => void) {
         if (RunService.IsClient()) {
             // Client side, listen to the server event
             return jingaRemote.OnClientEvent.Connect((name: unknown, returnedBuffer: unknown) => {
@@ -111,7 +108,7 @@ export class Network<J extends JingaNetType<any>> {
  * Recursively serialize `data` according to `this.packet` schema.
  * Handles primitives, tables, arrays, and optional values.
  */
-    private deepSerialize(fullData: UnwrapJingaNetType<J>) {
+    private deepSerialize(fullData: UnwrapJNetType<J>) {
         const grandSchema = this.schema as SerDes<unknown> | undefined;
 
         function isPlainArraySchema(schema: unknown): schema is Array<unknown> {
@@ -172,7 +169,7 @@ export class Network<J extends JingaNetType<any>> {
  * Reconstruct data from a serialized structure (buffers or nested objects).
  * Traverses the schema and applies deserialization per field.
  */
-    private deepDeserialize(serialized: unknown): UnwrapJingaNetType<J> {
+    private deepDeserialize(serialized: unknown): UnwrapJNetType<J> {
         const schema = this.schema as unknown;
 
         function isPlainArraySchema(schema: unknown): schema is Array<unknown> {
@@ -225,31 +222,31 @@ export class Network<J extends JingaNetType<any>> {
             return undefined;
         }
 
-        return deserialize(schema, serialized) as UnwrapJingaNetType<J>;
+        return deserialize(schema, serialized) as UnwrapJNetType<J>;
     }
 
 
 
-    public sendToAll(data: UnwrapJingaNetType<J>) {
+    public sendToAll(data: UnwrapJNetType<J>) {
         jingaRemote.FireAllClients(this.name, this.deepSerialize(data));
     }
 
-    public sendToAllExcept(data: UnwrapJingaNetType<J>, exception: Player) {
+    public sendToAllExcept(data: UnwrapJNetType<J>, exception: Player) {
         Players.GetPlayers().forEach((player) => {
             if (player !== exception) jingaRemote.FireClient(player, this.name, this.deepSerialize(data));
         })
     }
 
-    public sendTo(data: UnwrapJingaNetType<J>, player: Player) {
+    public sendTo(data: UnwrapJNetType<J>, player: Player) {
         jingaRemote.FireClient(player, this.name, this.deepSerialize(data));
     }
 
-    public sendToList(data: UnwrapJingaNetType<J>, players: Player[]) {
+    public sendToList(data: UnwrapJNetType<J>, players: Player[]) {
         // print(this.name, "GOT THE DATA", data, Squash.tobuffer(this.cursor), Squash.frombuffer(Squash.tobuffer(this.cursor)), this.packet.des)
         players.forEach((player) => jingaRemote.FireClient(player, this.name, this.deepSerialize(data)));
     }
 
-    public wait(): UnwrapJingaNetType<J> {
+    public wait(): UnwrapJNetType<J> {
         do {
             const [name, returnedBuffer] = jingaRemote.OnClientEvent.Wait() as unknown as [string, buffer];
 
@@ -258,7 +255,7 @@ export class Network<J extends JingaNetType<any>> {
         } while (true)
     }
 
-    public send(data: UnwrapJingaNetType<J> = undefined as UnwrapJingaNetType<J>) {
+    public send(data: UnwrapJNetType<J> = undefined as UnwrapJNetType<J>) {
         jingaRemote.FireServer(this.name, this.deepSerialize(data));
     }
 }
@@ -268,114 +265,114 @@ export class Network<J extends JingaNetType<any>> {
 
 export const sharedRoutes = (() => {
     const componentRecord = <T>(data: T) => ({
-        serverEntity: entity as JingaNetType<Entity>,
+        serverEntity: entity as WrapJNetType<Entity>,
         data: optional(data as never) as unknown as Optional<T>,
     })
 
     const villagerStruct = {
-        Name: str as JingaNetType<VillagerNames>,
-        UniqueId: uint16 as JingaNetType<number>,
-        RelativeLocation: unknown as unknown as JingaNetType<CFrame | undefined>,
+        Name: str as WrapJNetType<VillagerNames>,
+        UniqueId: uint16 as WrapJNetType<number>,
+        RelativeLocation: unknown as unknown as WrapJNetType<CFrame | undefined>,
         Progress: {
-            Produce: str as JingaNetType<ProduceNames>,
+            Produce: str as WrapJNetType<ProduceNames>,
             Required: optional({
-                Produce: str as JingaNetType<ProduceNames>,
-                Amount: uint8 as JingaNetType<number>,
-                Max: uint8 as JingaNetType<number>,
+                Produce: str as WrapJNetType<ProduceNames>,
+                Amount: uint8 as WrapJNetType<number>,
+                Max: uint8 as WrapJNetType<number>,
             } as never) as never,
             Progression: {
                 Time: {
                     RequiredTimePerResource: uint16,
-                    StartTime: uint32 as JingaNetType<number>,
+                    StartTime: uint32 as WrapJNetType<number>,
                 },
-                Resources: [str as JingaNetType<ProduceVariant>] as unknown as JingaNetType<ProduceVariant[]>,
+                Resources: [str as WrapJNetType<ProduceVariant>] as unknown as WrapJNetType<ProduceVariant[]>,
             },
             Building: {
-                StartTime: uint32 as JingaNetType<number>,
-                TotalTime: uint16 as JingaNetType<number>,
+                StartTime: uint32 as WrapJNetType<number>,
+                TotalTime: uint16 as WrapJNetType<number>,
             },
         },
-    } as JingaNetType<VillagerData>
+    } as WrapJNetType<VillagerData>
 
 
     const componentRoutes = {
         Body: componentRecord({
-            model: compInst as JingaNetType<Model>,
-            head: compInst as JingaNetType<BasePart>,
-            humanoid: compInst as JingaNetType<Humanoid>,
-            rootPart: compInst as JingaNetType<BasePart>,
-            animator: compInst as JingaNetType<Animator>,
-            rootAttachment: compInst as JingaNetType<Attachment>,
-            platform: optional(compInst as JingaNetType<BasePart>),
+            model: compInst as never as WrapJNetType<Model>,
+            head: compInst as never as WrapJNetType<BasePart>,
+            humanoid: compInst as never as WrapJNetType<Humanoid>,
+            rootPart: compInst as never as WrapJNetType<BasePart>,
+            animator: compInst as never as WrapJNetType<Animator>,
+            rootAttachment: compInst as never as WrapJNetType<Attachment>,
+            platform: optional(compInst as never) as WrapJNetType<BasePart | undefined>,
         }) as never,
 
         // villager
         Villager: componentRecord({
-            villagerModel: compInst as JingaNetType<VillagerModel>,
+            villagerModel: compInst as WrapJNetType<VillagerModel>,
             playerEntity: entity,
-            villagerData: villagerStruct as JingaNetType<VillagerData>,
+            villagerData: villagerStruct as WrapJNetType<VillagerData>,
         }),
 
         // data
         Data: componentRecord({
-            Version: str as JingaNetType<string>,
+            Version: str as WrapJNetType<string>,
             Coins: uint32,
-            LastLogin: uint32 as JingaNetType<number>,
-            Sessions: uint32 as JingaNetType<number>,
-            DailyStreak: uint32 as JingaNetType<number>,
-            LastDailyReward: uint32 as JingaNetType<number>,
-            DailyQuests: [{ id: uint16, progress: uint16, target: uint16, assigned: uint32 }] as unknown as JingaNetType<Array<{ id: number; progress: number; target: number; assigned: number }>>,
-            QuestHistory: [uint16] as JingaNetType<number[]>,
-            Villagers: [villagerStruct] as JingaNetType<VillagerData>[],
+            LastLogin: uint32 as WrapJNetType<number>,
+            Sessions: uint32 as WrapJNetType<number>,
+            DailyStreak: uint32 as WrapJNetType<number>,
+            LastDailyReward: uint32 as WrapJNetType<number>,
+            DailyQuests: [{ id: uint16, progress: uint16, target: uint16, assigned: uint32 }] as unknown as WrapJNetType<Array<{ id: number; progress: number; target: number; assigned: number }>>,
+            QuestHistory: [uint16] as WrapJNetType<number[]>,
+            Villagers: [villagerStruct] as WrapJNetType<VillagerData>[],
             Produce: [{
-                Name: str as JingaNetType<ProduceNames>,
-                Amount: unknown as JingaNetType<number>,
-                Variant: str as JingaNetType<ProduceVariant>,
-            }] as unknown as JingaNetType<ProduceData[]>,
-            Tutorial: unknown as JingaNetType<"Done" | number>,
+                Name: str as WrapJNetType<ProduceNames>,
+                Amount: unknown as WrapJNetType<number>,
+                Variant: str as WrapJNetType<ProduceVariant>,
+            }] as unknown as WrapJNetType<ProduceData[]>,
+            Tutorial: unknown as WrapJNetType<"Done" | number>,
             Walls: [{
-                Name: str as JingaNetType<WallNames>,
+                Name: str as WrapJNetType<WallNames>,
                 Description: str,
                 Image: str,
-                Price: unknown as JingaNetType<number>,
-                GamePassId: unknown as JingaNetType<number>,
-                CashMultiplier: unknown as JingaNetType<number>,
-                Rarity: str as JingaNetType<WallRarity>,
+                Price: unknown as WrapJNetType<number>,
+                GamePassId: unknown as WrapJNetType<number>,
+                CashMultiplier: unknown as WrapJNetType<number>,
+                Rarity: str as WrapJNetType<WallRarity>,
                 Owned: bool,
                 Equipped: bool,
-            }] as unknown as JingaNetType<WallInfo[]>,
+            }] as unknown as WrapJNetType<WallInfo[]>,
             PromoCodesRedeemed: [str],
             ClaimedFreeRewardChest: bool,
         }),
 
         // model debugger
-        ModelDebugger: componentRecord(compInst as JingaNetType<Model | BasePart>),
+        ModelDebugger: componentRecord(compInst as WrapJNetType<Model | BasePart>),
 
         // confirmation prompt
         ConfirmationPrompt: componentRecord({
             title: str,
             message: str,
-            confirmation: optional(bool) as unknown as JingaNetType<boolean | undefined>,
-            onConfirm: unknown as JingaNetType<() => void>,
+            confirmation: optional(bool) as unknown as WrapJNetType<boolean | undefined>,
+            onConfirm: unknown as unknown as WrapJNetType<() => void>,
             onDecline: undefined,
         }),
     } satisfies {
         [k in keyof typeof componentsToReplicate]: {
-            serverEntity: JingaNetType<Entity>;
-            data: Optional<JingaNetType<ComponentValue<MappedComponents[k]>>>
+            serverEntity: WrapJNetType<Entity>;
+            data: Optional<WrapJNetType<ComponentValue<MappedComponents[k]>>>
         };
     };
 
     // real routes
     const realRoutes = {
-        jecsSetup: nothing as JingaNetType<undefined>,
+        jecsSetup: nothing as WrapJNetType<undefined>,
 
         buyVillager: {
             villagerIndex: int16,
             currency: str,
-        } as JingaNetType<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
+        } as WrapJNetType<{ villagerIndex: number; currency: "Coins" | "Robux" }>,
 
-        placeVillager: unknown as JingaNetType<CFrame>,
+        placeVillager: unknown as unknown as WrapJNetType<CFrame>,
 
         digVillager: entity,
 
@@ -384,94 +381,94 @@ export const sharedRoutes = (() => {
         collectVillagerProduce: {
             villagerEntity: entity,
             resourceModelName: str,
-        } as JingaNetType<{ villagerEntity: Entity; resourceModelName: ProduceNames }>,
+        } as WrapJNetType<{ villagerEntity: Entity; resourceModelName: ProduceNames }>,
 
-        teleportToVillage: nothing as JingaNetType<undefined>,
+        teleportToVillage: nothing as WrapJNetType<undefined>,
 
-        teleportToShop: str as JingaNetType<"Buy" | "Sell" | "Wall">,
+        teleportToShop: str as WrapJNetType<"Buy" | "Sell" | "Wall">,
 
         updateRestockTime: uint32,
 
-        updateVillagersShop: unknown as JingaNetType<Array<VillagerInfo>>,
+        updateVillagersShop: unknown as unknown as WrapJNetType<Array<VillagerInfo>>,
 
-        redeemPromo: str as JingaNetType<string>,
+        redeemPromo: str as WrapJNetType<string>,
 
         promoResult: {
             success: bool,
             message: str,
-        } as JingaNetType<{ success: boolean; message: string }>,
+        } as WrapJNetType<{ success: boolean; message: string }>,
 
-        confirmSellOptions: str as JingaNetType<"Option1" | "Option2" | "Option3" | "Option4">,
+        confirmSellOptions: str as WrapJNetType<"Option1" | "Option2" | "Option3" | "Option4">,
 
         toggleSellMenuOpen: bool,
 
         confirmPrompt: bool,
 
-        updateFriendsBonus: bool as JingaNetType<boolean>,
+        updateFriendsBonus: bool as WrapJNetType<boolean>,
 
-        updateDailyQuest: unknown as JingaNetType<Array<DailyQuestInfo>>,
+        updateDailyQuest: unknown as unknown as WrapJNetType<Array<DailyQuestInfo>>,
 
-        sendFriendRequest: instance as JingaNetType<Player>,
+        sendFriendRequest: instance as WrapJNetType<Player>,
 
         notify: {
             text: str,
             duration: uint8,
-        } as JingaNetType<{ text: string; duration: number }>,
+        } as WrapJNetType<{ text: string; duration: number }>,
 
         npcDialogue: {
             target: str,
             text: str,
-        } as JingaNetType<{ target: "Buy" | "Sell" | "Wall" | "SketchyGuy" | "None"; text: string }>,
+        } as WrapJNetType<{ target: "Buy" | "Sell" | "Wall" | "SketchyGuy" | "None"; text: string }>,
 
         buyWall: {
             wallName: str,
             currency: str,
-        } as JingaNetType<{ wallName: string; currency: "Coins" | "Robux" }>,
+        } as WrapJNetType<{ wallName: string; currency: "Coins" | "Robux" }>,
 
         equipWall: {
             wallName: str,
             equip: bool,
-        } as JingaNetType<{ wallName: string; equip: boolean }>,
+        } as WrapJNetType<{ wallName: string; equip: boolean }>,
 
-        equipTool: instance as JingaNetType<Tool>,
+        equipTool: instance as WrapJNetType<Tool>,
 
-        togglePage: str as JingaNetType<ReturnType<typeof pageStates.openPage>>,
+        togglePage: str as WrapJNetType<ReturnType<typeof pageStates.openPage>>,
 
         giftToPlayer: {
             playerToGift: instance,
             produceTool: instance,
-        } as JingaNetType<{ playerToGift: Player; produceTool: Tool }>,
+        } as WrapJNetType<{ playerToGift: Player; produceTool: Tool }>,
 
         playSound: {
-            sound: instance as JingaNetType<Sound>,
-            position: optional(vec3) as unknown as JingaNetType<Vector3 | undefined>,
-            pitch: optional(float32) as JingaNetType<number | undefined>,
-        } as JingaNetType<{ sound: Sound; position?: JingaNetType<Vector3 | undefined>; pitch?: number }>,
+            sound: instance as WrapJNetType<Sound>,
+            position: optional(vec3 as never) as WrapJNetType<Vector3 | undefined>,
+            pitch: optional(float32) as WrapJNetType<number | undefined>,
+        } as WrapJNetType<{ sound: Sound; position?: WrapJNetType<Vector3 | undefined>; pitch?: number }>,
 
         // to play a particle at a speific position
         playParticle: {
             particle: instance,
             location: unknown,
             forceAmount: optional(uint8),
-        } as JingaNetType<{ particle: BasePart | Attachment | ParticleEmitter; location?: Vector3 | CFrame | undefined, forceAmount?: number | undefined }>,
+        } as WrapJNetType<{ particle: BasePart | Attachment | ParticleEmitter; location?: Vector3 | CFrame | undefined, forceAmount?: number | undefined }>,
 
-        shopGiftTo: instance as JingaNetType<Player>,
+        shopGiftTo: instance as WrapJNetType<Player>,
 
-        updateRobuxStore: unknown as JingaNetType<typeof robuxStoreData>,
+        updateRobuxStore: unknown as unknown as WrapJNetType<typeof robuxStoreData>,
 
         buyRobuxPack: {
             purchase: str,
-        } as JingaNetType<{ purchase: keyof typeof robuxStoreData }>,
+        } as WrapJNetType<{ purchase: keyof typeof robuxStoreData }>,
 
         startSketchyRoll: {
             item: str,
             type: str,
-        } as JingaNetType<{ item: string; type: string }>,
+        } as WrapJNetType<{ item: string; type: string }>,
 
-        claimDailyReward: nothing as JingaNetType<undefined>,
-        finishSketchyRoll: nothing as JingaNetType<undefined>,
+        claimDailyReward: nothing as WrapJNetType<undefined>,
+        finishSketchyRoll: nothing as WrapJNetType<undefined>,
 
-        getReplicatedComponents: nothing as JingaNetType<undefined>,
+        getReplicatedComponents: nothing as WrapJNetType<undefined>,
 
         deleteReplicatedEntity: entity as unknown as Entity,
     }
@@ -480,8 +477,8 @@ export const sharedRoutes = (() => {
     // transforms the routes into a network component
     const routes = {} as { [K in keyof typeof realRoutes]: Network<typeof realRoutes[K]> } & { [K in keyof typeof componentRoutes]: Network<typeof componentRoutes[K]> };
 
-    for (const [name, packet] of pairs(realRoutes)) routes[name] = new Network(name as string, packet as JingaNetType<any>, "reliable") as any;
-    for (const [name, packet] of pairs(componentRoutes)) routes[name] = new Network(name as string, packet as JingaNetType<any>, "reliable") as any;
+    for (const [name, packet] of pairs(realRoutes)) routes[name] = new Network(name as string, packet as WrapJNetType<any>, "reliable") as any;
+    for (const [name, packet] of pairs(componentRoutes)) routes[name] = new Network(name as string, packet as WrapJNetType<any>, "reliable") as any;
 
     return routes;
 })()
