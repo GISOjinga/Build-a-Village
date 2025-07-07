@@ -10,6 +10,7 @@ const MESSAGES = [
     "Join our Discord server for more updates and community events!",
     "Tell your friends to come join!",
     "If you get teleported/migrated please be patient, we're activly adding a bunch of fun updates!",
+    "There's a weird sketchy guy under the tree go try your luck!"
 ];
 
 
