@@ -102,6 +102,7 @@ function serializeForReplication(data: unknown): unknown {
  * Damage Status Effects System Entry Point.
  *****************************************************************************************/
 export default {
+    name: script.Name,
     phase: Phases.First,
     system: (world) => {
 

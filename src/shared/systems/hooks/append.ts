@@ -13,6 +13,7 @@ export const appendJecs = (callback: Callback) => waitingList.push(callback)
 
 // for change
 export default {
+    name: script.Name,
     phase: Phases.AppendHook,
     system: (world) => {
         // call all append group waiting since last cycle

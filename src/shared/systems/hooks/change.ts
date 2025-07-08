@@ -72,6 +72,7 @@ function createChangeSave(world: World, target: Entity, comp: Entity, oldValue?:
 
 // for change
 export default {
+    name: script.Name,
     phase: Phases.ChangeHook,
     system: (world) => {
         // disconnects all the components
@@ -105,7 +106,7 @@ export default {
         // for all changed query
         changedQuery.forEach((comp) => {
             world.set(comp, OnChange, (entity, comp, newValue) => {
-                const pairing = pair(entity, comp)
+                const pairing = pair(entity, comp as Entity)
                 const oldValue = previousValue.get(pairing)
 
                 // if (hasChanged({ old: oldValue, new: newValue })) {
@@ -113,7 +114,7 @@ export default {
                 previousValue.set(pairing, typeIs(newValue, "table") ? deepCopy(newValue) : newValue)
 
                 // calls it
-                createChangeSave(world, entity, comp, oldValue, newValue)
+                createChangeSave(world, entity, comp as Entity, oldValue, newValue)
                 // }
             })
         })

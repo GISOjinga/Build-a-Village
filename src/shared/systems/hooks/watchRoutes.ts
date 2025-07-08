@@ -16,6 +16,7 @@ export const routesData = new Map<Network<any>, (unknown[])[]>()
 
 // for change
 export default {
+    name: script.Name,
     phase: Phases.PreStartup,
     system: (world) => {
         // connected routes

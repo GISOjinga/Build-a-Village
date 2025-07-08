@@ -1,4 +1,4 @@
-import { Entity, Name, Pair, pair, Wildcard, world as CreateWorld, World } from "@rbxts/jecs";
+import { Entity, Name, Pair, pair, Wildcard, World } from "@rbxts/jecs";
 import { Widgets } from "@rbxts/plasma";
 import { number } from "@rbxts/react/src/prop-types";
 import Signal from "@rbxts/signal"; import { PlayerData } from "shared/data/defaultData";
@@ -12,9 +12,7 @@ import { PlayerState as PlayerStateType } from "../PlayerState";
 import pageStates, { PageStates } from "../Animations/pageStates";
 
 
-
-// variables
-export const world = CreateWorld()
+export const world = new World()
 export const systemQueue = new Scheduler(world)
 export const hotReloader = new HotReloader()
 world.set(Name, Name, "Name")

@@ -99,6 +99,14 @@ export default {
     phase: Phases.First,
     system: (world) => {
 
+        // when the deleteReplicatedEntity is called
+        useRoute(routes.deleteReplicatedEntity, (serverEntity) => {
+            const clientEntity = getEntity.replicatedFromServerEntity(serverEntity as never as Entity)
+
+            // if client entity then remove
+            if (clientEntity) world.delete(clientEntity)
+        })
+
         // loops through each
         for (const [componentName, component] of pairs(componentsToReplicate)) {
 
@@ -126,14 +134,6 @@ export default {
             // when ever data gets updated it updates the server entity
             useRoute(routes[componentName], replicate as never)
         }
-
-        // when the deleteReplicatedEntity is called
-        useRoute(routes.deleteReplicatedEntity, (serverEntity) => {
-            const clientEntity = getEntity.replicatedFromServerEntity(serverEntity as never as Entity)
-
-            // if client entity then remove
-            if (clientEntity) world.delete(clientEntity)
-        })
 
 
         // request to get it all

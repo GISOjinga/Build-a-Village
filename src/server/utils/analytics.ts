@@ -53,6 +53,7 @@ export enum GameEvent {
     ReturnDay1 = "return_day_1",
     ReturnDay7 = "return_day_7",
     TutorialAbandoned = "tutorial_abandoned",
+    OpenedSketchyGacha = "opened_sketchy_gacha",
 }
 
 

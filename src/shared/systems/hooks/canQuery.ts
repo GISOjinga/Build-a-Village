@@ -12,6 +12,7 @@ const componentsMax = {
 const queryData = new Map<Entity<unknown>, { queue: Entity[]; current: Entity[] }>()
 
 export default {
+    name: script.Name,
     phase: Phases.First,
     system: (world: World) => {
         pendingQuery.forEach((component) => {

@@ -11,6 +11,7 @@ import wallsData from "shared/data/wallsData";
 import { $line } from "rbxts-transformer-inline";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import ShopData from "../villagers/ShopData";
+import { GameEvent, logGameEvent } from "server/utils/analytics";
 
 const PRODUCT_ID = 3326181974;
 function rollItem(data: PlayerData): GachaItem {
@@ -35,6 +36,7 @@ export default (world: World) => {
 
     for (const [player] of useEvent(prompt.Triggered)) {
         MarketplaceService.PromptProductPurchase(player, PRODUCT_ID);
+        logGameEvent(player, GameEvent.OpenedSketchyGacha)
     }
 
     for (const [userId, productId, wasPurchased] of useEvent(MarketplaceService.PromptProductPurchaseFinished)) {

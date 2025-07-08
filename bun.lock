@@ -51,7 +51,7 @@
         "eslint-plugin-roblox-ts": "^0.0.36",
         "prettier": "^3.3.3",
         "roblox-ts": "^3.0.0-dev-38fb327",
-        "typescript": "^5.5.4",
+        "typescript": "5.5.3",
       },
     },
   },

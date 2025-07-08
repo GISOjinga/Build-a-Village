@@ -202,7 +202,6 @@ export const createEntity = {
             }
 
             // returns the updated datap
-            print(oldData)
             return oldData;
         })
     },

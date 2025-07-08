@@ -9,6 +9,7 @@ import { Added, addedQuery, Changed, changedQuery, Debug, Phases, Removed, remov
 
 // for change
 export default {
+    name: script.Name,
     phase: Phases.DebuggerHook,
     system: (world) => {
         // goes through all the debuggers
