@@ -167,6 +167,7 @@ return function()
 
 				-- get the component we need to set
 				local ok, entity_to_set = pcall(get_component, ctype_name, map_components)
+				local old = world:get(entity, entity_to_set)
 
 				if not ok then
 					warn("attempted to set", ctype_name, "to", value)
@@ -185,7 +186,7 @@ return function()
 				local ok, data = pcall(
 					lon.compile,
 					result,
-					{tag = TAG}
+					{ tag = TAG, old = old }
 				)
 
 				if not ok then
@@ -197,9 +198,9 @@ return function()
 				if data == nil then
 					world:remove(entity, entity_to_set)
 				elseif data == TAG then
-					-- tag is handled separately, as its still just "nil"
-					-- the difference is that entities used as tags arent allowed to store data
-					world:set(entity, entity_to_set)
+					-- trying to use world:set with a tag will result in an error,
+					-- even if the data is nil, so instead we use world:add
+					world:add(entity, entity_to_set)
 				else
 					world:set(entity, entity_to_set, data)
 				end
