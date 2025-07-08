@@ -17,25 +17,25 @@ const funcToCallOnUpdate = new Map<keyof PlayerData, (character: Character<R15>,
         const player = Players.GetPlayerFromCharacter(character);
         if (player && newData.Coins !== undefined) routes.updatePlayerCoins.sendTo(newData.Coins, player);
     }],
-    
+
     // sends daily streak updates to client
     ["DailyStreak", (character, newData, oldData) => {
         const player = Players.GetPlayerFromCharacter(character);
         if (player && newData.DailyStreak !== undefined) routes.updateDailyStreak.sendTo(newData.DailyStreak, player);
     }],
-    
+
     // sends daily reward day updates to client
     ["LastDailyReward", (character, newData, oldData) => {
         const player = Players.GetPlayerFromCharacter(character);
         if (player && newData.LastDailyReward !== undefined) routes.updateLastDailyReward.sendTo(newData.LastDailyReward, player);
     }],
-    
+
     // sends tutorial progress updates to client
     ["Tutorial", (character, newData, oldData) => {
         const player = Players.GetPlayerFromCharacter(character);
         if (player && newData.Tutorial !== undefined) routes.updateTutorialProgress.sendTo(newData.Tutorial, player);
     }],
-    
+
     // sends walls updates to client
     ["Walls", (character, newData, oldData) => {
         const player = Players.GetPlayerFromCharacter(character);
@@ -55,11 +55,10 @@ export default (world: World) => {
 
         // remove the update entity
         world.delete(updateEntity);
-
         if (body && oldData) {
             const { model } = body;
             const player = Players.GetPlayerFromCharacter(model);
-            const updatedData = updateFunction(oldData);
+            const updatedData = updateFunction(deepCopy(oldData));
             const changedIndexes = new Array<keyof PlayerData>();
 
             // Update the Data component.
@@ -97,7 +96,7 @@ export default (world: World) => {
                 routes.updateLastDailyReward.sendTo(playerData.LastDailyReward, player);
                 routes.updateTutorialProgress.sendTo(playerData.Tutorial, player);
                 routes.updatePlayerWalls.sendTo(playerData.Walls, player);
-                
+
                 // Set the Data component on server but don't replicate it
                 world.set(bodyEntity, Data, playerData);
                 world.set(world.entity(), UpdateData, { updateFunction: () => playerData, bodyEntity, updateAll: true });

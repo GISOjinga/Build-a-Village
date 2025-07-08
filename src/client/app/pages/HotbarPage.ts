@@ -9,6 +9,7 @@ import useDrag from "../hooks/useDrag";
 import { slotIndexAtPosition } from "../hooks/slotUtils";
 import { printTS } from "shared/utils/functions/jecsHelpFunctions";
 import { $line } from "rbxts-transformer-inline";
+import Object from "@rbxts/object-utils";
 
 export default (pagePaths: PagePaths) => {
     // hotbar UI references and drag state
@@ -27,6 +28,21 @@ export default (pagePaths: PagePaths) => {
         const width = Workspace.CurrentCamera?.ViewportSize.X ?? 0;
         return width < 700 ? 3 : 5;
     }
+
+    // loop updating based on the size of the window if old size is not equal to new size then update the tools
+    trash.Add(useEffect(() => {
+        const inventoryTools = pageStates.inventoryTools();
+        pageStates.hotBarTools((oldTools) => {
+            const inventoryTools = Object.values(pageStates.inventoryTools())
+            // finds where the tool is and returns the table without that tool
+            for (let i = 0; i < getSlotCount(); i++) {
+                const toolHotbar = oldTools[i]
+                if (!inventoryTools.find((tool) => tool === toolHotbar)) oldTools[i] = undefined;
+            }
+
+            return { ...oldTools };
+        });
+    }))
 
     // re-render when tool arrays change
     trash.Add(useEffect((newTrash) => {
@@ -123,29 +139,6 @@ export default (pagePaths: PagePaths) => {
         }
     }));
 
-    // loop updating based on the size of the window if old size is not equal to new size then update the tools
-    trash.Add(() => {
-        let oldCount = getSlotCount()
-
-        // while (true) {
-        //     const newCount = getSlotCount();
-        //     if (newCount !== oldCount) {
-        //         oldCount = newCount;
-        //         pageStates.hotBarTools((oldTools) => {
-        //             // removes any tools that are beyond the new slot count
-        //             for (let i = newCount; i < oldTools.size(); i++) {
-        //                 if (i > getSlotCount()) {
-        //                     oldTools[i] = undefined; // remove tool from hotbar
-        //                     return [...oldTools]; // return the updated array
-        //                 }
-        //             }
-        //             return oldTools
-        //         })
-        //     }
-        //     task.wait(1); // check every second
-        // }
-    })
-
     // listens for changes done to inventoryTools and when something is added it inserts it into the hotbar 
     trash.Add(backpack.ChildAdded.Connect((tool) => {
         if (!tool.IsA("Tool")) return; // if the tool is already in the inventory, return
@@ -163,21 +156,6 @@ export default (pagePaths: PagePaths) => {
 
             return { ...oldTools };
         });
-
-        // ensure the tool is not destroyed when the player removes it
-        tool.Destroying.Connect(() => {
-            pageStates.hotBarTools((oldTools) => {
-                // finds where the tool is and returns the table without that tool
-                for (let i = 0; i < getSlotCount(); i++) {
-                    if (oldTools[i] === tool) {
-                        oldTools[i] = undefined;
-                        return { ...oldTools }
-                    }
-                }
-
-                return oldTools;
-            });
-        })
     }))
 
     // handle pressing number keys to equip corresponding hotbar slot

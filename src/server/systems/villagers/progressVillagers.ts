@@ -30,6 +30,7 @@ export default (world: World) => {
         const resourceIndex = ((model && tonumber(resourceModelName)) || 0) - 1;
         // const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
 
+        printJecs($line, `Collecting ${resourceModelName} from villager: `, villagerEntity, "by player", playerWhoTriggered.Name);
         if (model && villagerInfo && playerEntityWhoTriggered && resourceIndex > -1) {
             const player = world.get(villagerInfo.playerEntity, Player);
             const body = world.get(villagerInfo.playerEntity, Body);
@@ -63,7 +64,7 @@ export default (world: World) => {
                     routes.playParticle.sendToAll({ particle: variant === "Gold" ? paths.Assets.Particles.CollectionGold : variant === "Rainbow" ? paths.Assets.Particles.CollectionRainbow : paths.Assets.Particles.CollectionNormal, location: body?.rootPart.Position })
                     removeComponent(villagerEntity as Entity, MaxedOut);
                 } else {
-                    printTS($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);
+                    printJecs($line, `Player ${playerWhoTriggered.Name} tried to take villager resource but was not the owner of the villager`);
                     addComponent(playerEntityWhoTriggered, TakeFromVillager, { villagerEntityToStealFrom: villagerEntity as Entity, resourceModelName: model.Name, produceName: villagerInfo.villagerData.Progress.Produce, variant });
                     MarketplaceService.PromptProductPurchase(playerWhoTriggered, 3315996934);
                 }

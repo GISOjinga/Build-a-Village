@@ -281,15 +281,33 @@ export default (pagePaths: PagePaths) => {
             oldTools.push(tool as Tool);
             return [...oldTools];
         });
+    }))
 
-        // ensure the tool is not destroyed when the player removes it
-        tool.Destroying.Connect(() => {
-            pageStates.inventoryTools((oldTools) => {
-                const indexOfTool = oldTools.findIndex(t => t === tool);
-                oldTools.remove(indexOfTool);
-                return [...oldTools];
-            });
-        })
+    // constant loop for tools
+    trash.Add(task.spawn(() => {
+        while (true) {
+            const allTools = pageStates.inventoryTools();
+
+            // loops through all the tools and if one is missing updates tool without that tool
+            // print(allTools)
+            for (let i = 0; i < allTools.size(); i++) {
+                const tool = allTools[i];
+                if (tool && !tool.Parent) {
+                    pageStates.inventoryTools((oldTools) => {
+                        for (let i = 0; i < oldTools.size(); i++) {
+                            const tool = oldTools[i];
+                            if (tool && !tool.Parent) {
+                                oldTools.remove(i);
+                                i--
+                            }
+                        }
+                        return [...oldTools];
+                    })
+                    break
+                }
+            }
+            task.wait(.1); // update every second
+        }
     }))
     return trash;
 };
