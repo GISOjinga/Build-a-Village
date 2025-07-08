@@ -9,6 +9,8 @@ import migrations from "./extra/migrations";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
 import routes from "server/routes";
 import { logTutorialStep, TutorialStep, logGameEvent, GameEvent } from "../../utils/analytics";
+import { printJecs } from "shared/utils/functions/jecsHelpFunctions";
+import { $line } from "rbxts-transformer-inline";
 
 
 
@@ -76,8 +78,9 @@ export default (world: World) => {
 
                 // sets their data
                 // if ((player.GetRankInGroup(36086761) >= 254 || player.UserId < 0) && playerData.Tutorial !== "Done") playerData.Coins = 1000
-                setPlayerData(player, migrateData(playerData))
-                print("Player Data Loaded for", player.Name)
+                const migrated = migrateData(playerData)
+                printJecs($line, player.Name, "Migrated", migrated)
+                setPlayerData(player, migrated)
             })
         }
     });

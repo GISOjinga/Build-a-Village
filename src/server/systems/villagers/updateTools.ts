@@ -99,6 +99,7 @@ export default (world: World) => {
 
                 // sync produce tools
                 const validProduce = new Set<string>();
+                printJecs($line, data.Produce, produceTools)
                 data.Produce.forEach((produceData) => {
                     const key = `${produceData.Name}|${produceData.Variant}`;
                     validProduce.add(key);

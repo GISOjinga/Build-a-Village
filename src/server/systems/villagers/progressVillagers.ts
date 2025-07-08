@@ -30,12 +30,12 @@ export default (world: World) => {
         const resourceIndex = ((model && tonumber(resourceModelName)) || 0) - 1;
         // const resourceProximityPrompt = model?.FindFirstChild("ProximityPromptPart")?.FindFirstChild<ProximityPrompt>("ResourcesPrompt");
 
-        printJecs($line, `Collecting ${resourceModelName} from villager: `, villagerEntity, "by player", playerWhoTriggered.Name);
+        printJecs($line, `Collecting ${resourceModelName} from villager: `, villagerEntity, "by player", playerWhoTriggered.Name, resourceIndex);
         if (model && villagerInfo && playerEntityWhoTriggered && resourceIndex > -1) {
             const player = world.get(villagerInfo.playerEntity, Player);
             const body = world.get(villagerInfo.playerEntity, Body);
             const variant = villagerInfo.villagerData.Progress.Progression.Resources[resourceIndex];
-
+            printJecs($line, variant)
             if (variant) {
                 if (playerWhoTriggered === player) {
                     villagerInfo.villagerData.Progress.Progression.Resources.remove(resourceIndex);

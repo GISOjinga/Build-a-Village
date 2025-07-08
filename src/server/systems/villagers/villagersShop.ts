@@ -301,10 +301,10 @@ export default (world: World) => {
                 // sells all your items in your inventory
                 createEntity.updateData(playerEntity, (oldData) => {
                     // if you have enough
-                    if ((oldData.Produce.size()) < 1) routes.npcDialogue.sendTo({
-                        text: "You’re not holding anything to sell.",
-                        target: "Sell",
-                    }, player);
+                    // if ((oldData.Produce.size()) < 1) routes.npcDialogue.sendTo({
+                    //     text: "You’re not holding anything to sell.",
+                    //     target: "Sell",
+                    // }, player);
 
                     // loops through your villagers tallys them up
                     // oldData.Villagers.forEach((villagerData) => {
@@ -322,6 +322,7 @@ export default (world: World) => {
                         const singleValue = math.floor(((ShopData.SellPrice[produceName] || 0) * cashMultiplier * variantMultiplier) + .5);
                         const coins = singleValue * produceData.Amount;
                         if (singleValue > maxValue) maxValue = singleValue;
+                        printJecs($line, coins, variantMultiplier, cashMultiplier, ShopData.SellPrice[produceName], produceName)
                         oldData.Coins += coins;
                         earned += coins;
                     });
@@ -334,7 +335,7 @@ export default (world: World) => {
                     if (oldData.Tutorial === 3 && soldWheat) {
                         oldData.Coins += 25;
                         oldData.Tutorial = "Done";
-                        print("Set Done")
+                        printJecs($line, "Set Done")
                         logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                     }
 
@@ -375,7 +376,7 @@ export default (world: World) => {
                                 if (itemName === "Wheat" && oldData.Tutorial === 3) {
                                     oldData.Coins += 25;
                                     oldData.Tutorial = "Done";
-                                    print("Set Donw")
+                                    printJecs($line, "Set Donw")
                                     logTutorialStep(player, TutorialStep.WheatSold, "tutorial_wheat_sold")
                                 }
 
