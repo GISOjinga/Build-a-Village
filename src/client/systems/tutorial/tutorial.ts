@@ -22,10 +22,10 @@ trash.LinkToInstance(script, true);
 
 function updateMessage(stage: PlayerData["Tutorial"], force: boolean = false) {
     if (pageStates.introText().text === "" || force) {
-        if (stage === 0) pageStates.introText({ text: "Welcome to Grow a Village! Let’s get started by visiting the King and buying a Farmer.", duration: 10000000 });
-        else if (stage === 1) pageStates.introText({ text: "Great! Return to your plot and place your new Farmer.", duration: 10000000 });
+        if (stage === 0) pageStates.introText({ text: "Welcome to Grow a Village! Let’s get started by visiting the King and buying a Farmer by clicking the buy button!", duration: 10000000 });
+        else if (stage === 1) pageStates.introText({ text: "Great! Return to your plot and place your new farmer by clicking the Village button", duration: 10000000 });
         else if (stage === 2) pageStates.introText({ text: "Wait for the Farmer to produce Wheat, then collect it.", duration: 10000000 });
-        else if (stage === 3) pageStates.introText({ text: "Head over to the Merchant to sell the Wheat.", duration: 10000000 });
+        else if (stage === 3) pageStates.introText({ text: "Head over to the Merchant to sell the wheat by clicking sell.", duration: 10000000 });
     }
 }
 
@@ -34,7 +34,7 @@ export default (world: World) => {
     useRoute(routes.updateTutorialProgress, (tutorial) => {
         const oldStage = currentTutorialStage;
         currentTutorialStage = tutorial;
-        
+
         // if the tutorial stage has changed
         if (tutorial !== oldStage) {
             // if stage was 3 then changed to done then

@@ -10,9 +10,9 @@ import { PlayerData } from "shared/data/defaultData";
 import wallsData from "shared/data/wallsData";
 import { $line } from "rbxts-transformer-inline";
 import { useRoute } from "shared/Plugin-Hook/hooks/use-route";
+import ShopData from "../villagers/ShopData";
 
 const PRODUCT_ID = 3326181974;
-
 function rollItem(data: PlayerData): GachaItem {
     // Filter out already owned walls
     const available = gachaItems.filter(item => {
@@ -23,23 +23,11 @@ function rollItem(data: PlayerData): GachaItem {
     });
 
     // Compute total weight
-    const totalWeight = available.reduce((sum, item) => sum + item.Weight, 0);
-
-    // Get a random number between 1 and totalWeight
-    const roll = math.random() * totalWeight;
-
-    // Find the item whose cumulative weight contains the roll
-    let cumulative = 0;
-    for (const item of available) {
-        cumulative += item.Weight;
-        if (roll <= cumulative) {
-            return item;
-        }
-    }
+    const chosen1 = available[math.random(0, available.size() - 1)];
 
     // Fallback (should never happen if weights are correct)
     // warn(`[${$line}] Fallback in rollItem() - returning last item.`);
-    return rollItem(data); // Retry to ensure we get a valid item
+    return math.random(1, chosen1.Weight) === 1 ? chosen1 : rollItem(data);
 }
 
 export default (world: World) => {
@@ -61,15 +49,6 @@ export default (world: World) => {
         routes.startSketchyRoll.sendTo({ item: result.Name, type: result.Type }, player);
     }
 
-    useRoute(routes.finishSketchyRoll, (_, player) => {
-        const entity = getEntity.fromInstance(player);
-        if (!entity) return;
-        const result = world.get(entity, GachaResult);
-        if (!result) return;
-        giveReward(entity, result);
-        removeComponent(entity, GachaResult);
-    });
-
     function giveReward(entity: Entity, result: { item: string; type: string }) {
         const data = world.get(entity, Data);
         const player = world.get(entity, Player);
@@ -90,6 +69,15 @@ export default (world: World) => {
         }
         routes.notify.sendTo({ text: `You received ${result.item}!`, duration: 5 }, player);
     }
+
+    useRoute(routes.finishSketchyRoll, (_, player) => {
+        const entity = getEntity.fromInstance(player);
+        if (!entity) return;
+        const result = world.get(entity, GachaResult);
+        if (!result) return;
+        giveReward(entity, result);
+        removeComponent(entity, GachaResult);
+    });
 
     // Handle player leaving during roll - immediately give them their reward
     for (const [entity] of world.query(TargetEntity, Added(Leaving))) {
